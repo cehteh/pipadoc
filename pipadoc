@@ -1,0 +1,265 @@
+#!/bin/bash
+#
+#TIT pipadoc - Documentation extractor
+#TIT =================================
+#TIT Christian Thaeter <ct@pipapo.org>
+#TIT
+#LIC Copyright (C) 2002, Pipapo Project, Christian Thaeter
+#LIC               2008, Christian Thaeter <ct@pipapo.org>
+#LIC
+#LIC This program is free software; you can redistribute it and/or modify
+#LIC it under the terms of the GNU General Public License as published by
+#LIC the Free Software Foundation; either version 2, or (at your option)
+#LIC any later version.
+#LIC
+#LIC This program is distributed in the hope that it will be useful,
+#LIC but WITHOUT ANY WARRANTY; without even the implied warranty of
+#LIC MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#LIC GNU General Public License for more details.
+#LIC
+#LIC You should have received a copy of the GNU General Public License
+#LIC along with this program; if not, contact Christian Thaeter <ct@pipapo.org>.
+#LIC
+
+#INT Embedding documentation in program source files often yields the problem that the
+#INT structure of a program is most often not the optimal structure for the associated documentation.
+#INT Still there are good reasons to maintain documentation together with the source right at the code
+#INT which defines the documented functionality. Pipadoc addresses this problem by extracting
+#INT special comments out of a source file and let one define rules how to bring the
+#INT documentation into proper order.
+#INT
+#INT Pipadoc only extracts and reorders the text from it special comments, it never ever looks at the
+#INT sourcecode or the text it extracts.
+#INT
+#INT This is somewhat similar to ``Literate Programming'' but it puts the emphasis back to the code.
+#INT There is no need to extract the source from a literate source and in contrast to ``Literate Programming''
+#INT the order of source and text is defined by the programmer and programming language constraints.
+#INT
+#INT Pipadoc is programming language and documentation system agnostinc, all it requires is that
+#INT the programming language has some line comments or block comments where one places doc statements
+#INT on each block line then (see xref:c-example[Example for C]).
+#INT
+#BAS [[BAS]]
+#BAS Basic concepts
+#BAS --------------
+#BAS
+#BAS NOTE: The following description uses the xref:ENV[default] settings for all examples.
+#BAS
+#BAS .Special Comments
+#BAS Pipadoc special comments are the configured (default) line comment characters immediately followed
+#BAS by one or two _documentation_ characters, maybe followed by some alphanumeric text which will be
+#BAS used as sorting key.
+#BAS ----
+#BAS //_ This is a local ordered comment
+#BAS //__ This is a global ordered comment
+#BAS //_a This is a local ordered comment with the sort key *a*
+#BAS //__Z This is a global ordered comment with the sort key *Z*
+#BAS ----
+#BAS When the sort key is omitted then `5` is choosen as default key.
+#BAS
+#SUB [[SUB]]
+#SUB .Substitutions
+#SUB One can define simple text substitutions to yield documentation comments as above by
+#SUB using a substitution statement instead a sort key:
+#SUB ----
+#SUB //_=foo=_a=  Replace all //foo with //_a in _this_ sourcefile
+#SUB //__=bar=__Z=  Replace all //bar with //__Z in _all_ sourcefiles
+#SUB ----
+#SUB anything following a substitution statement on a line gets ignored and can be use to document
+#SUB the purpose of the substitution. Note how substitutions include the _documentation_ special
+#SUB character and the comments using them don't. Substitutions will replace partial comments as in
+#SUB `//foobar` will be replaced with `//_abar` in the above example. This can be used to order
+#SUB items for glossaries or indexes alphabetically.
+#SUB
+#USE [[USE]]
+#USE Documenting Files
+#USE -----------------
+#USE
+#USE Usually one wants to write documentation in more or less smaller blocks which later shall be
+#USE brought into proper order. The xref:SUB[substitutions] feature is the key for this. One writes
+#USE his documentation blocks with comments which later get replaced by the right sorting key and
+#USE finally brought into (alphabetical) stable-sort order. You might take a look at the pipadoc
+#USE source itself to see it in action.
+#USE
+
+#ENV [[ENV]]
+#ENV Environment Variables
+#ENV ---------------------
+#ENV
+#ENV `COM`::
+#ENV   Defines the line-comment character used in the source file.
+#ENV   Defaults to `//` (C++/C99) if not set. Set this to `#` for shell
+#ENV   like languages.
+[[ "$COM" ]] || COM='//'
+#ENV `DOC`::
+#ENV   The Documentation character which must follow a line comment to be recognized
+#ENV   by pipadoc as documentation. Either one for local definitions or two for global
+#ENV   definitions are used. Defaults to `_` and needs rarely to be changed.
+[[ "$DOC" ]] || DOC='_'
+#ENV `SUB`::
+#ENV   Substitution character. Defaults to `=` and rarely needs to be changed.
+#ENV   See xref:SUB[substitutions] for details.
+#ENV
+[[ "$SUB" ]] || SUB='='
+
+
+
+function usage
+{
+    cat <<EOF
+
+  Extract Documentation from Source files
+
+usage:
+         $0 files... >documentation
+
+example:
+         $0 preamble.cpp title.cpp doc.cpp prolog.cpp >doc.tex
+
+To extract the asciidoc documentation from $0 itself use the following:
+         COM='#' $0 $0
+EOF
+}
+
+#INV [[INV]]
+#INV Invocation
+#INV ----------
+#INV
+#INV Pipadoc is called with a list of files from which the documentation shall be extracted.
+#INV The extracted documentation is piped to stdout. No other commandline options are available.
+#INV
+#INV There are few xref:ENV[environment variables] to do basic configuration.
+#INV
+if [[ $# = 0 ]]; then
+    usage;
+    exit;
+fi
+
+TMP_GSUB=/tmp/pipadoc_$$_gsub
+TMP_GTMP=/tmp/pipadoc_$$_gtmp
+
+
+for i in "$@"; do
+    echo "$i" >&2  #comment test
+
+    TMP_RIP=/tmp/pipadoc_$$_rip
+    TMP_LSUB=/tmp/pipadoc_$$_lsub
+
+    # rip comments out, Note: line comments must start at the beginning of the line or preceeded by a space character
+    grep "^\(.*[[:space:]]\)\?${COM}" <"$i" >$TMP_RIP
+
+    # extract global substitution statements
+    cat $TMP_RIP | egrep "^.*${COM}${DOC}${DOC}${SUB}" \
+        | sed -e "s|\(${COM}\)\(${DOC}${DOC}\)\(${SUB}\)\([[:alnum:]][[:alnum:]_]*\)${SUB}\([[:alnum:]_]*\)${SUB}.*|s\3^.*\1\4\3\1\5\3|" >>$TMP_GSUB
+
+    # extract local substitution statements
+    cat $TMP_RIP |  egrep "^.*${COM}${DOC}${SUB}" \
+        | sed -e "s|\(${COM}\)\(${DOC}\)\(${SUB}\)\([[:alnum:]][[:alnum:]_]*\)${SUB}\([[:alnum:]_]*\)${SUB}.*|s\3^.*\1\4\3\1\5\3|" >>$TMP_LSUB
+
+    # first pass, apply local substitutions, do local sorting, remove line comment chars
+    sed -f $TMP_LSUB $TMP_RIP \
+	-e "s|^\(.*[[:space:]]\)?\(${COM}.*\)|\2|" \
+	-e "\|^.*[[:space:]]\+${COM}|d" \
+	-e "\|^${COM}${DOC}*${SUB}|d" \
+	-e "s|^\(${COM}${DOC}\)\([[:space:]].*\)$|\15\2|" \
+	| sort +0 -1 -s \
+	| sed -e "s|^\(${COM}${DOC}\)\([^${DOC}][[:alnum:]_]*\)\(.*\)$|\1${DOC}5\3|"
+ 
+    # cleanup
+    rm -f $TMP_LSUB
+    rm -f $TMP_RIP
+done >>$TMP_GTMP
+
+# second pass, apply global substitutions, sort and finally remove pipadoc statements
+sed -f $TMP_GSUB $TMP_GTMP \
+    -e "s|^${COM}${DOC}${DOC}\([[:space:]].*\)|${DOC}5\1|" \
+    -e "s|^${COM}${DOC}${DOC}|${DOC}|" \
+    -e "\|^${COM}.*$|d" \
+    | sort +0 -1 -s \
+    | sed -e "s|^${DOC}[[:alnum:]][[:alnum:]_]*[[:space:]]\?||"
+
+
+rm -f $TMP_GSUB
+rm -f $TMP_GTMP
+
+#Document structure:
+#_=TIT=_01= Titles and stuff
+#_=INT=_10= Introduction
+#_=BAS=_10= Basics
+#_=SUB=_20= Substitutions
+#_=INV=_30= Invocation
+#_=USE=_40= Real usage
+#_=ENV=_50= Environment variables
+#_80 Appendix
+#_80 --------
+#_=APP=_81= Appendix
+#_90 License
+#_90 -------
+#_90 [[LIC]]
+#_90 ....
+#_=LIC=_91=
+#_92 ....
+
+# Examples and appendixes:
+#USE .A small C99 Program
+#USE [source,c]
+#USE ----
+#USE //intro This is the well known ``Hello World'' example
+#USE //glos_helloworld A common program to show examples for programming language and tools
+#USE
+#USE //depends Only the Standard C library is needed
+#USE #include <stdio.h>
+#USE
+#USE int main(int argc, char* argv[])
+#USE {
+#USE   //hello print the first commandline argument
+#USE   //glos_argument the text you pass to the programm when calling it from the shell
+#USE   //hello if no argument is given, then exit silently
+#USE   if (argc > 1)
+#USE     printf("Hello %s\n", argv[1]);
+#USE   return 0;
+#USE }
+#USE
+#USE // Now the document structure with substitutions:
+#USE //_05 Yet another 'Hello' program
+#USE //_05
+#USE //_=intro=_10= introduction first right after the title
+#USE //intro
+#USE //_=hello=_20= The main documentation is ordered at key '20'
+#USE //_25
+#USE //_25 Appendix
+#USE //_25 Dependencies:
+#USE //_=depends=_30= Dependencies at '30'
+#USE //_35 Glossary
+#USE //_=glos=_40= glossary will be sorted at 40 with a respective term appended
+#USE ----
+#USE
+#USE Runnning this through pipadoc gives following output:
+#USE ----
+#USE Yet another 'Hello' program
+#USE
+#USE This is the well known ``Hello World'' example
+#USE
+#USE print the first commandline argument
+#USE if no argument is given, then exit silently
+#USE
+#USE Appendix
+#USE Dependencies:
+#USE Only the Standard C library is needed
+#USE Glossary
+#USE the text you pass to the programm when calling it from the shell
+#USE A common program to show examples for programming language and tools
+#USE ----
+#USE
+
+#APP [[c-example]]
+#APP
+#APP .Using C block comments with pipadoc: +example.c+
+#APP ----
+#APP /*
+#APP **_ this is a documentation line
+#APP */
+#APP ----
+#APP use `COM=\'**' pipadoc example.c` to process the documentation see xref:ENV[environment variables]
+#APP for more information about configuring the comment character.
+#APP
