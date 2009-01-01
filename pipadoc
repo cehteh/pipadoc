@@ -35,9 +35,9 @@
 #INT There is no need to extract the source from a literate source and in contrast to ``Literate Programming''
 #INT the order of source and text is defined by the programmer and programming language constraints.
 #INT
-#INT Pipadoc is programming language and documentation system agnostinc, all it requires is that
+#INT Pipadoc is programming language and documentation system agnostic, all it requires is that
 #INT the programming language has some line comments or block comments where one places doc statements
-#INT on each block line then (see xref:c-example[Example for C]).
+#INT on each block line (see xref:c-example[Example for C]).
 #INT
 #BAS [[BAS]]
 #BAS Basic concepts
@@ -55,7 +55,7 @@
 #BAS //_a This is a local ordered comment with the sort key *a*
 #BAS //__Z This is a global ordered comment with the sort key *Z*
 #BAS ----
-#BAS When the sort key is omitted then `5` is choosen as default key.
+#BAS When the sort key is omitted then `5` is chosen as default key.
 #BAS
 #SUB [[SUB]]
 #SUB .Substitutions
@@ -126,7 +126,7 @@ EOF
 #INV ----------
 #INV
 #INV Pipadoc is called with a list of files from which the documentation shall be extracted.
-#INV The extracted documentation is piped to stdout. No other commandline options are available.
+#INV The extracted documentation is piped to stdout. No other command line options are available.
 #INV
 #INV There are few xref:ENV[environment variables] to do basic configuration.
 #INV
