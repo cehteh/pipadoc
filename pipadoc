@@ -101,7 +101,25 @@
 #ENV   See xref:SUB[substitutions] for details.
 #ENV
 [[ "$SUB" ]] || SUB='='
+#ENV [[ENVSXT]]
+#ENV `SXT`::
+#ENV   Section eXTention. Defaults to `.txt`.
+#ENV   See xref:SXT[plaintext files] for details.
+#ENV
+[[ "$SXT" ]] || SXT='.txt'
 
+#SXT [[SXT]]
+#SXT Documentation Only Files
+#SXT ------------------------
+#SXT One can write documentation without the need of pipadoc special comments in files
+#SXT which have a configured extension (see the xref:ENVSXT[SXT] environment variable).
+#SXT Each line in such a file which does not have a pipadoc special comment is then implicitly
+#SXT prepended with the line comment sequence and the basename of that file, for example
+#SXT lines in a file 'foo.txt' will be treated as if they where written with `//foo ` in front of
+#SXT them. Later xref:SUB[substitutions] can be used to organize the document.
+#SXT When such a file has an ordinary pipadoc special comment line then this takes precedence over
+#SXT the implicit commenting.
+#SXT
 
 
 function usage
@@ -145,8 +163,18 @@ for i in "$@"; do
     TMP_RIP=/tmp/pipadoc_$$_rip
     TMP_LSUB=/tmp/pipadoc_$$_lsub
 
-    # rip comments out, Note: line comments must start at the beginning of the line or preceeded by a space character
-    grep "^\(.*[[:space:]]\)\?${COM}" <"$i" >$TMP_RIP
+    filename="${i##*/}"
+    basename="${filename%.*}"
+    extension="${filename#$basename}"
+
+    if [[ "$extension" == "$SXT" ]]; then
+        # plain documentation file
+        sed -e "s|^\(.*\)$|${COM}${basename} \1|" \
+            -e "s|^\(${COM}${basename}.*[[:space:]]\)\?\(${COM}[^[:space:]]\+.*\)|\2|p;d" <"$i" >$TMP_RIP
+    else
+        # rip comments out, Note: line comments must start at the beginning of the line or preceeded by a space character
+        grep "^\(.*[[:space:]]\)\?${COM}" <"$i" >$TMP_RIP
+    fi
 
     # extract global substitution statements
     cat $TMP_RIP | egrep "^.*${COM}${DOC}${DOC}${SUB}" \
@@ -189,7 +217,8 @@ rm -f $TMP_GTMP
 #_=SUB=_20= Substitutions
 #_=INV=_30= Invocation
 #_=USE=_40= Real usage
-#_=ENV=_50= Environment variables
+#_=SXT=_50= Plain Documentation
+#_=ENV=_60= Environment variables
 #_80 Appendix
 #_80 --------
 #_=APP=_81= Appendix
