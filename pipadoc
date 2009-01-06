@@ -187,12 +187,12 @@ for i in "$@"; do
     # first pass, apply local substitutions, do local sorting, remove line comment chars
     sed -f $TMP_LSUB $TMP_RIP \
 	-e "s|^\(.*[[:space:]]\)?\(${COM}.*\)|\2|" \
-	-e "\|^.*[[:space:]]\+${COM}|d" \
+	-e "\|^[[:space:]]\+${COM}|d" \
 	-e "\|^${COM}${DOC}*${SUB}|d" \
 	-e "s|^\(${COM}${DOC}\)\([[:space:]].*\)$|\15\2|" \
 	| sort +0 -1 -s \
 	| sed -e "s|^\(${COM}${DOC}\)\([^${DOC}][[:alnum:]_]*\)\(.*\)$|\1${DOC}5\3|"
- 
+
     # cleanup
     rm -f $TMP_LSUB
     rm -f $TMP_RIP
@@ -202,7 +202,7 @@ done >>$TMP_GTMP
 sed -f $TMP_GSUB $TMP_GTMP \
     -e "s|^${COM}${DOC}${DOC}\([[:space:]].*\)|${DOC}5\1|" \
     -e "s|^${COM}${DOC}${DOC}|${DOC}|" \
-    -e "\|^${COM}.*$|d" \
+    -e "\|^${COM}[^ ]\+.*$|d" \
     | sort +0 -1 -s \
     | sed -e "s|^${DOC}[[:alnum:]][[:alnum:]_]*[[:space:]]\?||"
 
