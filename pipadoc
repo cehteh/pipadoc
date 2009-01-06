@@ -158,7 +158,7 @@ TMP_GTMP=/tmp/pipadoc_$$_gtmp
 
 
 for i in "$@"; do
-    echo "$i" >&2  #comment test
+    echo "Processing: $i" >&2
 
     TMP_RIP=/tmp/pipadoc_$$_rip
     TMP_LSUB=/tmp/pipadoc_$$_lsub
@@ -173,7 +173,7 @@ for i in "$@"; do
             -e "s|^\(${COM}${basename}.*[[:space:]]\)\?\(${COM}[^[:space:]]\+.*\)|\2|p;d" <"$i" >$TMP_RIP
     else
         # rip comments out, Note: line comments must start at the beginning of the line or preceeded by a space character
-        grep "^\(.*[[:space:]]\)\?${COM}" <"$i" >$TMP_RIP
+        grep "^\(.*[[:space:]]\)\?${COM}[^[:space:]]" <"$i" >$TMP_RIP
     fi
 
     # extract global substitution statements
@@ -286,9 +286,8 @@ rm -f $TMP_GTMP
 #APP .Using C block comments with pipadoc: +example.c+
 #APP ----
 #APP /*
-#APP **_ this is a documentation line
+#APP //_ this is a documentation line
 #APP */
 #APP ----
-#APP use `COM=\'**' pipadoc example.c` to process the documentation see xref:ENV[environment variables]
-#APP for more information about configuring the comment character.
+#APP use `pipadoc example.c` to process the documentation.
 #APP

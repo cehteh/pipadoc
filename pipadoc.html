@@ -422,6 +422,7 @@ http://www.gnu.org/software/src-highlite -->
 <span style="font-style: italic"><span style="color: #9A1900">//glos_helloworld A common program to show examples for programming language and tools</span></span>
 
 <span style="font-style: italic"><span style="color: #9A1900">//depends Only the Standard C library is needed</span></span>
+<span style="font-weight: bold"><span style="color: #000080">#include</span></span> <span style="color: #FF0000">&lt;stdio.h&gt;</span>
 
 <span style="color: #009900">int</span> <span style="font-weight: bold"><span style="color: #000000">main</span></span><span style="color: #990000">(</span><span style="color: #009900">int</span> argc<span style="color: #990000">,</span> <span style="color: #009900">char</span><span style="color: #990000">*</span> argv<span style="color: #990000">[])</span>
 <span style="color: #FF0000">{</span>
@@ -526,11 +527,10 @@ the implicit commenting.</p></div>
 <div class="title">Example: Using C block comments with pipadoc: <tt>example.c</tt></div>
 <div class="content">
 <pre><tt>/*
-**_ this is a documentation line
+//_ this is a documentation line
 */</tt></pre>
 </div></div>
-<div class="para"><p>use <tt>COM='**' pipadoc example.c</tt> to process the documentation see <a href="#ENV">environment variables</a>
-for more information about configuring the comment character.</p></div>
+<div class="para"><p>use <tt>pipadoc example.c</tt> to process the documentation.</p></div>
 </div>
 <h2 id="_license">License</h2>
 <div class="sectionbody">
@@ -555,7 +555,7 @@ along with this program; if not, contact Christian Thaeter &lt;ct@pipapo.org&gt;
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2009-01-02 17:23:36 CEST
+Last updated 2009-01-06 23:48:01 CEST
 </div>
 </div>
 </body>
