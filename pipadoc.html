@@ -531,6 +531,11 @@ the implicit commenting.</p></div>
 */</tt></pre>
 </div></div>
 <div class="para"><p>use <tt>pipadoc example.c</tt> to process the documentation.</p></div>
+<div class="para"><div class="title">Future updates/changes</div><p>Autoincrementing no numbered sections anymore!
+Successive substitution comments in the form <tt>//_=name=</tt> will be automatically replaced
+by <tt>//_=name=NNNNNN=</tt> where NNNNNN is a increasing integer, doc comments without key
+will use this number too, <tt>//_</tt> becomes <tt>//_NNNNNN</tt>. Same applies for global doc comments.
+This can the be used to write the document structure lineary down.</p></div>
 </div>
 <h2 id="_license">License</h2>
 <div class="sectionbody">
@@ -555,7 +560,7 @@ along with this program; if not, contact Christian Thaeter &lt;ct@pipapo.org&gt;
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2009-01-06 23:48:01 CEST
+Last updated 2009-01-07 19:41:36 CEST
 </div>
 </div>
 </body>

@@ -210,6 +210,15 @@ sed -f $TMP_GSUB $TMP_GTMP \
 rm -f $TMP_GSUB
 rm -f $TMP_GTMP
 
+#TODO .Future updates/changes
+#TODO
+#TODO Autoincrementing no numbered sections anymore!
+#TODO Successive substitution comments in the form `//\_=name=` will be automatically replaced
+#TODO by `//\_=name=NNNNNN=` where NNNNNN is a increasing integer, doc comments without key
+#TODO will use this number too, `//_` becomes `//_NNNNNN`. Same applies for global doc comments.
+#TODO This can the be used to write the document structure lineary down.
+#TODO
+
 #Document structure:
 #_=TIT=_01= Titles and stuff
 #_=INT=_10= Introduction
@@ -222,6 +231,7 @@ rm -f $TMP_GTMP
 #_80 Appendix
 #_80 --------
 #_=APP=_81= Appendix
+#_=TODO=_82=
 #_90 License
 #_90 -------
 #_90 [[LIC]]
