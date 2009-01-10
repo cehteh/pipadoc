@@ -476,6 +476,17 @@ the text you pass to the programm when calling it from the shell
 A common program to show examples for programming language and tools</tt></pre>
 </div></div>
 </div>
+<h2 id="SXT">Documentation Only Files</h2>
+<div class="sectionbody">
+<div class="para"><p>One can write documentation without the need of pipadoc special comments in files
+which have a configured extension (see the <a href="#ENVSXT">SXT</a> environment variable).
+Each line in such a file which does not have a pipadoc special comment is then implicitly
+prepended with the line comment sequence and the basename of that file, for example
+lines in a file <em>foo.txt</em> will be treated as if they where written with <tt>//foo </tt> in front of
+them. Later <a href="#SUB">substitutions</a> can be used to organize the document.
+When such a file has an ordinary pipadoc special comment line then this takes precedence over
+the implicit commenting.</p></div>
+</div>
 <h2 id="ENV">Environment Variables</h2>
 <div class="sectionbody">
 <div class="vlist"><dl>
@@ -555,7 +566,7 @@ along with this program; if not, contact Christian Thaeter &lt;ct@pipapo.org&gt;
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2009-01-10 18:15:28 CEST
+Last updated 2009-01-10 18:29:18 CEST
 </div>
 </div>
 </body>

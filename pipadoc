@@ -127,6 +127,19 @@
 #ENV
 [[ "$SXT" ]] || SXT='.txt'
 
+#SXT [[SXT]]
+#SXT Documentation Only Files
+#SXT ------------------------
+#SXT
+#SXT One can write documentation without the need of pipadoc special comments in files
+#SXT which have a configured extension (see the xref:ENVSXT[SXT] environment variable).
+#SXT Each line in such a file which does not have a pipadoc special comment is then implicitly
+#SXT prepended with the line comment sequence and the basename of that file, for example
+#SXT lines in a file 'foo.txt' will be treated as if they where written with `//foo ` in front of
+#SXT them. Later xref:SUB[substitutions] can be used to organize the document.
+#SXT When such a file has an ordinary pipadoc special comment line then this takes precedence over
+#SXT the implicit commenting.
+#SXT
 
 #INV [[INV]]
 #INV Invocation
