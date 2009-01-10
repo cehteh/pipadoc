@@ -79,6 +79,7 @@
 #KEY //example.alpha comes before the omega line above
 #KEY ----
 #KEY
+#SUB [[SUB]]
 #SUB .Substitutions
 #SUB A line comment immediately followed by a special `substitution` character (the equal `=` sign by default)
 #SUB followed by a xref:KEY[key] will be replaced by the text defined under that key. The rest of the line
@@ -139,31 +140,34 @@
 
 # here we go
 awk -f /dev/fd/3 ${COM:+-v com="$COM"} ${DOC:+-v doc="$DOC"} ${SUB:+-v subs="$SUB"} ${SXT:+-v sxt="$SXT"} "$@" 3<<"EOF"
+
 # Plaintext file handling
 FILENAME ~ sxt "$" && $0 !~ "^" com {
   match(FILENAME, "/?([^/]*)" sxt "$", p)
-  print com p[1] " " $0
-  $0 = p[1] " " $0
+  $0 = com p[1] " " $0
 }
 
 # Substitution
 match($0, com subs "([[:alpha:]][[:alnum:]_]*)", s) {
   ++n
   subst[n] = s[1]
+  next
 }
 
 # doc comment
 match($0, com doc "([[:space:]](.*))?$", s) {
   ++n
   output[n] = s[2]
+  next
 }
 
 # record all other comments which may be candidate comments
-match($0, "(.*)" com "([[:alpha:]][[:alnum:]_]*)(([.]([^[:space:]]*)))?[[:space:]](.*)", m) && m[1] !~ com {
+match($0, "(.*)" com "([[:alpha:]][[:alnum:]_]*)(([.]([^[:space:]]*)))?([[:space:]](.*))?", m) && m[1] !~ com {
   if (m[2] in maybe)
-    maybe[m[2]] = maybe[m[2]] "\n.." m[5] " " m[6]
+    maybe[m[2]] = maybe[m[2]] "\n.." m[5] " " m[7]
   else
-    maybe[m[2]] = "." m[5] " " m[6]
+    maybe[m[2]] = "." m[5] " " m[7]
+  next
 }
 
 # finally output
@@ -174,16 +178,17 @@ END {
         print output[i]
       else
         {
-          split(maybe[subst[i]], s, "\n[.]")
+          nelements = split(maybe[subst[i]], s, "\n[.]")
           split("", tosort)
 
-          for (j in s)
+          for (j=1; j <=nelements; ++j)
             {
               match(s[j], ".([^[:space:]]*) (.*)", entries)
-              if (entries[1] in tosort)
-                tosort[entries[1]] = tosort[entries[1]] "\n" entries[2]
+
+              if ("." entries[1] in tosort)
+                tosort["." entries[1]] = tosort["." entries[1]] "\n" entries[2]
               else
-                tosort[entries[1]] = entries[2]
+                tosort["." entries[1]] = entries[2]
             }
 
           elements = asorti(tosort, sorted)
@@ -198,7 +203,6 @@ EOF
 
 #Document structure:
 #=TIT Titles and stuff
-#_
 #=INT Introduction
 #=BAS Basics
 #=DIR Direct comments

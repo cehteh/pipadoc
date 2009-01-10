@@ -375,29 +375,41 @@ on each block line (see <a href="#c-example">Example for C</a>).</p></div>
 <td class="content">The following description uses the <a href="#ENV">default</a> settings for all examples.</td>
 </tr></table>
 </div>
-<div class="para"><div class="title">Special Comments</div><p>Pipadoc special comments are the configured (default) line comment characters immediately followed
-by one or two <em>documentation</em> characters, maybe followed by some alphanumeric text which will be
-used as sorting key.</p></div>
+<div class="para"><p>Pipadoc is controlled by special line comments.</p></div>
+<div class="para" id="DIR"><div class="title">Direct comments</div><p>Line comments immediately followed by a special documentation character (the underscore <tt>_</tt> by default)
+are treated as direct comments. They will appear in order of appearance in the generated output.
+These can be used to do some boilerplate stuff. Usually one wants to define a controlling document and
+use this direct comments only there, since using them in different files might yield unexpected results
+since the order then depends on the load order of the files.</p></div>
 <div class="listingblock">
 <div class="content">
-<pre><tt>//_ This is a local ordered comment
-//__ This is a global ordered comment
-//_a This is a local ordered comment with the sort key *a*
-//__Z This is a global ordered comment with the sort key *Z*</tt></pre>
+<pre><tt>//_ This is a direct comment,
+//_ it will appear just verbatim in the generated output</tt></pre>
 </div></div>
-<div class="para"><p>When the sort key is omitted then <tt>5</tt> is chosen as default key.</p></div>
-<div class="para" id="SUB"><div class="title">Substitutions</div><p>One can define simple text substitutions to yield documentation comments as above by
-using a substitution statement instead a sort key:</p></div>
+<div class="para" id="KEY"><div class="title">Keys</div><p>A line comment immediately followed by a alphanumeric keyword (including the <tt>_</tt> underscore character)
+is treated as key, all such keyed comments can later be placed in intended order with
+a <a href="#SUB">substitution</a> comment.</p></div>
 <div class="listingblock">
 <div class="content">
-<pre><tt>//_=foo=_a=  Replace all //foo with //_a in _this_ sourcefile
-//__=bar=__Z=  Replace all //bar with //__Z in _all_ sourcefiles</tt></pre>
+<pre><tt>//example This text will later be inserted where one uses the `//=example` substitution.
+//example All example lines are appended there in order even if they are defined at different
+//example places or in different files</tt></pre>
 </div></div>
-<div class="para"><p>anything following a substitution statement on a line gets ignored and can be use to document
-the purpose of the substitution. Note how substitutions include the <em>documentation</em> special
-character and the comments using them don't. Substitutions will replace partial comments as in
-<tt>//foobar</tt> will be replaced with <tt>//_abar</tt> in the above example. This can be used to order
-items for glossaries or indexes alphabetically.</p></div>
+<div class="para"><div class="title">Sorted Keys</div><p>A key can be appended with a dot <tt>.</tt> and a non-space string. This string will then be used to sort
+these lines alphabetically. This can be used to create sorted indices and glossars, as well as reordering
+paragraphs in stored under one primary key.</p></div>
+<div class="listingblock">
+<div class="content">
+<pre><tt>//example.omega This is sorted after the next line
+//example.alpha comes before the omega line above</tt></pre>
+</div></div>
+<div class="para" id="SUB"><div class="title">Substitutions</div><p>A line comment immediately followed by a special <tt>substitution</tt> character (the equal <tt>=</tt> sign by default)
+followed by a <a href="#KEY">key</a> will be replaced by the text defined under that key. The rest of the line
+is ignored and can be used as comment.</p></div>
+<div class="listingblock">
+<div class="content">
+<pre><tt>//=example this will insert anything defined under `//example` here</tt></pre>
+</div></div>
 </div>
 <h2 id="INV">Invocation</h2>
 <div class="sectionbody">
@@ -419,15 +431,14 @@ by Lorenzo Bettini
 http://www.lorenzobettini.it
 http://www.gnu.org/software/src-highlite -->
 <pre><tt><span style="font-style: italic"><span style="color: #9A1900">//intro This is the well known ``Hello World'' example</span></span>
-<span style="font-style: italic"><span style="color: #9A1900">//glos_helloworld A common program to show examples for programming language and tools</span></span>
+<span style="font-style: italic"><span style="color: #9A1900">//glos.helloworld A common program to show examples for programming language and tools</span></span>
 
 <span style="font-style: italic"><span style="color: #9A1900">//depends Only the Standard C library is needed</span></span>
-<span style="font-weight: bold"><span style="color: #000080">#include</span></span> <span style="color: #FF0000">&lt;stdio.h&gt;</span>
 
 <span style="color: #009900">int</span> <span style="font-weight: bold"><span style="color: #000000">main</span></span><span style="color: #990000">(</span><span style="color: #009900">int</span> argc<span style="color: #990000">,</span> <span style="color: #009900">char</span><span style="color: #990000">*</span> argv<span style="color: #990000">[])</span>
 <span style="color: #FF0000">{</span>
   <span style="font-style: italic"><span style="color: #9A1900">//hello print the first commandline argument</span></span>
-  <span style="font-style: italic"><span style="color: #9A1900">//glos_argument the text you pass to the programm when calling it from the shell</span></span>
+  <span style="font-style: italic"><span style="color: #9A1900">//glos.argument the text you pass to the programm when calling it from the shell</span></span>
   <span style="font-style: italic"><span style="color: #9A1900">//hello if no argument is given, then exit silently</span></span>
   <span style="font-weight: bold"><span style="color: #0000FF">if</span></span> <span style="color: #990000">(</span>argc <span style="color: #990000">&gt;</span> <span style="color: #993399">1</span><span style="color: #990000">)</span>
     <span style="font-weight: bold"><span style="color: #000000">printf</span></span><span style="color: #990000">(</span><span style="color: #FF0000">"Hello %s</span><span style="color: #CC33CC">\n</span><span style="color: #FF0000">"</span><span style="color: #990000">,</span> argv<span style="color: #990000">[</span><span style="color: #993399">1</span><span style="color: #990000">]);</span>
@@ -435,17 +446,17 @@ http://www.gnu.org/software/src-highlite -->
 <span style="color: #FF0000">}</span>
 
 <span style="font-style: italic"><span style="color: #9A1900">// Now the document structure with substitutions:</span></span>
-<span style="font-style: italic"><span style="color: #9A1900">//_05 Yet another 'Hello' program</span></span>
-<span style="font-style: italic"><span style="color: #9A1900">//_05</span></span>
-<span style="font-style: italic"><span style="color: #9A1900">//_=intro=_10= introduction first right after the title</span></span>
+<span style="font-style: italic"><span style="color: #9A1900">//_ Yet another 'Hello' program</span></span>
+<span style="font-style: italic"><span style="color: #9A1900">//_</span></span>
+<span style="font-style: italic"><span style="color: #9A1900">//=intro introduction first right after the title</span></span>
 <span style="font-style: italic"><span style="color: #9A1900">//intro</span></span>
-<span style="font-style: italic"><span style="color: #9A1900">//_=hello=_20= The main documentation is ordered at key '20'</span></span>
-<span style="font-style: italic"><span style="color: #9A1900">//_25</span></span>
-<span style="font-style: italic"><span style="color: #9A1900">//_25 Appendix</span></span>
-<span style="font-style: italic"><span style="color: #9A1900">//_25 Dependencies:</span></span>
-<span style="font-style: italic"><span style="color: #9A1900">//_=depends=_30= Dependencies at '30'</span></span>
-<span style="font-style: italic"><span style="color: #9A1900">//_35 Glossary</span></span>
-<span style="font-style: italic"><span style="color: #9A1900">//_=glos=_40= glossary will be sorted at 40 with a respective term appended</span></span>
+<span style="font-style: italic"><span style="color: #9A1900">//=hello The main documentation</span></span>
+<span style="font-style: italic"><span style="color: #9A1900">//_</span></span>
+<span style="font-style: italic"><span style="color: #9A1900">//_ Appendix</span></span>
+<span style="font-style: italic"><span style="color: #9A1900">//_ Dependencies:</span></span>
+<span style="font-style: italic"><span style="color: #9A1900">//=depends</span></span>
+<span style="font-style: italic"><span style="color: #9A1900">//_ Glossary</span></span>
+<span style="font-style: italic"><span style="color: #9A1900">//=glos glossary will be sorted</span></span>
 </tt></pre></div></div>
 <div class="para"><p>Runnning this through pipadoc gives following output:</p></div>
 <div class="listingblock">
@@ -464,17 +475,6 @@ Glossary
 the text you pass to the programm when calling it from the shell
 A common program to show examples for programming language and tools</tt></pre>
 </div></div>
-</div>
-<h2 id="SXT">Documentation Only Files</h2>
-<div class="sectionbody">
-<div class="para"><p>One can write documentation without the need of pipadoc special comments in files
-which have a configured extension (see the <a href="#ENVSXT">SXT</a> environment variable).
-Each line in such a file which does not have a pipadoc special comment is then implicitly
-prepended with the line comment sequence and the basename of that file, for example
-lines in a file <em>foo.txt</em> will be treated as if they where written with <tt>//foo </tt> in front of
-them. Later <a href="#SUB">substitutions</a> can be used to organize the document.
-When such a file has an ordinary pipadoc special comment line then this takes precedence over
-the implicit commenting.</p></div>
 </div>
 <h2 id="ENV">Environment Variables</h2>
 <div class="sectionbody">
@@ -531,18 +531,13 @@ the implicit commenting.</p></div>
 */</tt></pre>
 </div></div>
 <div class="para"><p>use <tt>pipadoc example.c</tt> to process the documentation.</p></div>
-<div class="para"><div class="title">Future updates/changes</div><p>Autoincrementing no numbered sections anymore!
-Successive substitution comments in the form <tt>//_=name=</tt> will be automatically replaced
-by <tt>//_=name=NNNNNN=</tt> where NNNNNN is a increasing integer, doc comments without key
-will use this number too, <tt>//_</tt> becomes <tt>//_NNNNNN</tt>. Same applies for global doc comments.
-This can the be used to write the document structure lineary down.</p></div>
 </div>
 <h2 id="_license">License</h2>
 <div class="sectionbody">
 <div class="literalblock" id="LIC">
 <div class="content">
-<pre><tt>Copyright (C) 2002, Pipapo Project, Christian Thaeter
-              2009, Christian Thaeter &lt;ct@pipapo.org&gt;
+<pre><tt>Copyright (C)              Pipapo Project
+ 2009,                     Christian Thaeter &lt;ct@pipapo.org&gt;
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -560,7 +555,7 @@ along with this program; if not, contact Christian Thaeter &lt;ct@pipapo.org&gt;
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2009-01-07 19:41:36 CEST
+Last updated 2009-01-10 18:15:28 CEST
 </div>
 </div>
 </body>
