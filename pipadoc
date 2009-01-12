@@ -108,24 +108,23 @@
 #ENV   Defines the line-comment character used in the source file.
 #ENV   Defaults to `//` (C++/C99) if not set. Set this to `#` for shell
 #ENV   like languages.
-[[ "$COM" ]] || COM='//'
-# [[ "$COM" ]] || COM='#'
+test "$COM" || COM='//'
 #ENV `DOC`::
 #ENV   The Documentation character which must follow a line comment to be recognized
 #ENV   by pipadoc as documentation. Either one for local definitions or two for global
 #ENV   definitions are used. Defaults to `_` and needs rarely to be changed.
-[[ "$DOC" ]] || DOC='_'
+test "$DOC" || DOC='_'
 #ENV `SUB`::
 #ENV   Substitution character. Defaults to `=` and rarely needs to be changed.
 #ENV   See xref:SUB[substitutions] for details.
 #ENV
-[[ "$SUB" ]] || SUB='='
+test "$SUB" || SUB='='
 #ENV [[ENVSXT]]
 #ENV `SXT`::
 #ENV   Section eXTention. Defaults to `.txt`.
 #ENV   See xref:SXT[plaintext files] for details.
 #ENV
-[[ "$SXT" ]] || SXT='.txt'
+test "$SXT" || SXT='.txt'
 
 #SXT [[SXT]]
 #SXT Documentation Only Files
