@@ -39,16 +39,14 @@
 #INT the programming language has some line comments or block comments where one places doc statements
 #INT on each block line (see xref:c-example[Example for C]).
 #INT
-#BAS [[BAS]]
-#BAS Basic concepts
-#BAS --------------
+#BAS HEAD- Basic concepts; BAS; concepts
 #BAS
 #BAS NOTE: The following description uses the xref:ENV[default] settings for all examples.
 #BAS
 #BAS Pipadoc is controlled by special line comments.
 #BAS
-#DIR [[DIR]]
-#DIR .Direct comments
+#DIR PARA Direct comments; DIR; low level control
+#DIR
 #DIR Line comments immediately followed by a special documentation character (the underscore `_` by default)
 #DIR are treated as direct comments. They will appear in order of appearance in the generated output.
 #DIR These can be used to do some boilerplate stuff. Usually one wants to define a controlling document and
@@ -59,8 +57,8 @@
 #DIR //_ it will appear just verbatim in the generated output
 #DIR ----
 #DIR
-#KEY [[KEY]]
-#KEY .Keys
+#KEY PARA Keys; KEY; sectioning content
+#KEY
 #KEY A line comment immediately followed by a alphanumeric keyword (including the `_` underscore character)
 #KEY is treated as key, all such keyed comments can later be placed in intended order with
 #KEY a xref:SUB[substitution] comment.
@@ -70,17 +68,16 @@
 #KEY //example places or in different files
 #KEY ----
 #KEY
-#KEY .Sorted Keys
-#KEY A key can be appended with a dot `.` and a non-space string. This string will then be used to sort
-#KEY these lines alphabetically. This can be used to create sorted indices and glossars, as well as reordering
-#KEY paragraphs in stored under one primary key.
-#KEY ----
-#KEY //example.omega This is sorted after the next line
-#KEY //example.alpha comes before the omega line above
-#KEY ----
-#KEY
-#SUB [[SUB]]
-#SUB .Substitutions
+#SOR PARA Sorted Keys; SOR; sorted sections
+#SOR A key can be appended with a dot `.` and a non-space string. This string will then be used to sort
+#SOR these lines alphabetically. This can be used to create sorted indices and glossars, as well as reordering
+#SOR paragraphs in stored under one primary key.
+#SOR ----
+#SOR //example.omega This is sorted after the next line
+#SOR //example.alpha comes before the omega line above
+#SOR ----
+#SOR
+#SUB PARA Substitutions; SUB; paste sections
 #SUB A line comment immediately followed by a special `substitution` character (the equal `=` sign by default)
 #SUB followed by a xref:KEY[key] will be replaced by the text defined under that key. The rest of the line
 #SUB is ignored and can be used as comment.
@@ -89,9 +86,7 @@
 #SUB ----
 #SUB
 
-#USE [[USE]]
-#USE Documenting Files
-#USE -----------------
+#USE HEAD- Documenting Files; USE; usage
 #USE
 #USE Usually one wants to write documentation in more or less smaller blocks which later shall be
 #USE brought into proper order. The xref:SUB[substitutions] feature is the key for this. One writes
@@ -100,9 +95,11 @@
 #USE source itself to see it in action.
 #USE
 
-#ENV [[ENV]]
-#ENV Environment Variables
-#ENV ---------------------
+#PLU HEAD- Plugins; PLU; extending pipadoc
+#PLU Pipadoc can be extended with awk. Please refer to the provided 'asciidoc.pawk' for an example.
+#PLU
+
+#ENV HEAD~ Environment Variables; ENV; configuration
 #ENV
 #ENV `COM`::
 #ENV   Defines the line-comment character used in the source file.
@@ -125,10 +122,13 @@ test "$SUB" || SUB='='
 #ENV   See xref:SXT[plaintext files] for details.
 #ENV
 test "$SXT" || SXT='.txt'
+#ENV `PLG`::
+#ENV   Extension for xref:PLU[awk plugins] to implement generic text manipulations and macros.
+#ENV   Defaults to '.pawk'
+#ENV
+test "$PLG" || PLG='.pawk'
 
-#SXT [[SXT]]
-#SXT Documentation Only Files
-#SXT ------------------------
+#SXT HEAD- Documentation Only Files; SXT; plain documentation
 #SXT
 #SXT One can write documentation without the need of pipadoc special comments in files
 #SXT which have a configured extension (see the xref:ENVSXT[SXT] environment variable).
@@ -139,10 +139,7 @@ test "$SXT" || SXT='.txt'
 #SXT When such a file has an ordinary pipadoc special comment line then this takes precedence over
 #SXT the implicit commenting.
 #SXT
-
-#INV [[INV]]
-#INV Invocation
-#INV ----------
+#INV HEAD- Invocation; INV; running pipadoc
 #INV
 #INV Pipadoc is called with a list of files from which the documentation shall be extracted.
 #INV The extracted documentation is piped to stdout. No other command line options are available.
@@ -150,35 +147,49 @@ test "$SXT" || SXT='.txt'
 #INV There are few xref:ENV[environment variables] to do basic configuration.
 #INV
 
+
+sources=($(for element in "$@"; do [[ $element != *$PLG ]] && printf "%s " $element; done))
+plugins=($(for element in "$@"; do [[ $element = *$PLG ]] && printf "%s " $element; done))
+
+
 # here we go
-awk -f /dev/fd/3 ${COM:+-v com="$COM"} ${DOC:+-v doc="$DOC"} ${SUB:+-v subs="$SUB"} ${SXT:+-v sxt="$SXT"} "$@" 3<<"EOF"
+gawk -f /dev/fd/3 ${COM:+-v com="$COM"} ${DOC:+-v doc="$DOC"} ${SUB:+-v subs="$SUB"} ${SXT:+-v sxt="$SXT"} "${sources[@]}" 3<<EOF
+
+function append(idx, sort, text)
+{
+  if (idx in maybe)
+    maybe[idx] = maybe[idx] "\n.. " text
+  else
+    maybe[idx] = "."sort" "text
+}
+
+$([[ ${#plugins[*]} -gt 0 ]] && cat "${plugins[@]}")
 
 # Plaintext file handling
-FILENAME ~ sxt "$" && $0 !~ "^" com {
-  match(FILENAME, "/?([^/]*)" sxt "$", p)
-  $0 = com p[1] " " $0
+FILENAME ~ sxt "\$" && \$0 !~ "^" com {
+  match(FILENAME, "/?([^/]*)" sxt "\$", p)
+  \$0 = com p[1] " " \$0
 }
 
 # Substitution
-match($0, com subs "([[:alpha:]][[:alnum:]_]*)", s) {
+match(\$0, com subs "([[:alpha:]][[:alnum:]_]*)", s) {
   ++n
   subst[n] = s[1]
   next
 }
 
 # doc comment
-match($0, com doc "([[:space:]](.*))?$", s) {
+match(\$0, com doc "([[:space:]](.*))?\$", s) {
   ++n
   output[n] = s[2]
   next
 }
 
 # record all other comments which may be candidate comments
-match($0, "(.*)" com "([[:alpha:]][[:alnum:]_]*)(([.]([^[:space:]]*)))?([[:space:]](.*))?", m) && m[1] !~ com {
-  if (m[2] in maybe)
-    maybe[m[2]] = maybe[m[2]] "\n.." m[5] " " m[7]
-  else
-    maybe[m[2]] = "." m[5] " " m[7]
+match(\$0, "(.*)" com "([[:alpha:]][[:alnum:]_]*)(([.]([^[:space:]]*)))?([[:space:]](.*))?", m) && m[1] !~ com {
+  #print "append("m[2]"," m[5] "," m[7]")"
+
+  append(m[2], m[5] , m[7])
   next
 }
 
@@ -219,20 +230,25 @@ EOF
 #=BAS Basics
 #=DIR Direct comments
 #=KEY Key comments
+#=SOR sorted keys
 #=SUB Substitutions
 #=INV Invocation
 #=USE Real usage
 #=SXT Plain Documentation
-#=ENV Environment variables
+#=PLU Plugins
 #_ Appendix
 #_ --------
+#=ENV Environment variables
 #=APP Appendix
 #_ License
-#_ -------
+#_ ~~~~~~~
 #_ [[LIC]]
 #_ ....
 #=LIC
 #_ ....
+#_ Index
+#_ -----
+#=index
 
 # Examples and appendixes:
 #USE .A small C99 Program
@@ -295,4 +311,13 @@ EOF
 #APP */
 #APP ----
 #APP use `pipadoc example.c` to process the documentation.
+#APP
+#APP Creating this File
+#APP ~~~~~~~~~~~~~~~~~~
+#APP Pipadoc itself is documented with asciidoc, one can extract the asciidoc source with
+#APP by:
+#APP ----
+#APP COM='#' ./pipadoc pipadoc asciidoc.pawk >pipadoc.txt
+#APP ----
+#APP And then further process the generated asciidoc.txt with the asciidoc toolchain.
 #APP
