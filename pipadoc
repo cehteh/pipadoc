@@ -158,7 +158,7 @@ gawk -f /dev/fd/3 ${COM:+-v com="$COM"} ${DOC:+-v doc="$DOC"} ${SUB:+-v subs="$S
 function append(idx, sort, text)
 {
   if (idx in maybe)
-    maybe[idx] = maybe[idx] "\n.. " text
+    maybe[idx] = maybe[idx] "\n."sort" " text
   else
     maybe[idx] = "."sort" "text
 }
@@ -187,8 +187,6 @@ match(\$0, com doc "([[:space:]](.*))?\$", s) {
 
 # record all other comments which may be candidate comments
 match(\$0, "(.*)" com "([[:alpha:]][[:alnum:]_]*)(([.]([^[:space:]]*)))?([[:space:]](.*))?", m) && m[1] !~ com {
-  #print "append("m[2]"," m[5] "," m[7]")"
-
   append(m[2], m[5] , m[7])
   next
 }
@@ -201,17 +199,18 @@ END {
         print output[i]
       else
         {
-          nelements = split(maybe[subst[i]], s, "\n[.]")
-          split("", tosort)
+          nelements = split(maybe[subst[i]], s, "\n")
+          delete tosort
+          #split("", tosort)
 
-          for (j=1; j <=nelements; ++j)
+          for (j=1; j <= nelements; ++j)
             {
-              match(s[j], ".([^[:space:]]*) (.*)", entries)
+              match(s[j], "[.]([^[:space:]]*) (.*)", entries)
 
-              if ("." entries[1] in tosort)
-                tosort["." entries[1]] = tosort["." entries[1]] "\n" entries[2]
+              if (entries[1] in tosort)
+                tosort[entries[1]] = tosort[entries[1]] "\n" entries[2]
               else
-                tosort["." entries[1]] = entries[2]
+                tosort[entries[1]] = entries[2]
             }
 
           elements = asorti(tosort, sorted)
