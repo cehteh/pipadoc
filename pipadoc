@@ -96,7 +96,19 @@
 #USE
 
 #PLU HEAD- Plugins; PLU; extending pipadoc
-#PLU Pipadoc can be extended with awk. Please refer to the provided 'asciidoc.pawk' for an example.
+#PLU Pipadoc can be extended with awk. This plugins are `awk` snippets which are included into
+#PLU the processing stream. Take a look at the supplied plugins to figure out how it works.
+#PLU
+#PLU Supplied Plugins
+#PLU ~~~~~~~~~~~~~~~~
+#PLU
+#PLU .asciidoc
+#PLU Defines HEAD and PARA macros for headers and paragaphs with automatic index generation
+#PLU in asciidoc
+#PLU
+#PLU .verbatim
+#PLU Lets one include the code _before_ an pipadoc comment with the magic word `VERBATIM`.
+#PLU Used to include code in the documentation.
 #PLU
 
 #ENV HEAD~ Environment Variables; ENV; configuration

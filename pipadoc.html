@@ -567,7 +567,13 @@ the implicit commenting.</p></div>
 </div>
 <h2 id="PLU">Plugins</h2>
 <div class="sectionbody">
-<div class="para"><p>Pipadoc can be extended with awk. Please refer to the provided <em>asciidoc.pawk</em> for an example.</p></div>
+<div class="para"><p>Pipadoc can be extended with awk. This plugins are <tt>awk</tt> snippets which are included into
+the processing stream. Take a look at the supplied plugins to figure out how it works.</p></div>
+<h3 id="_supplied_plugins">Supplied Plugins</h3><div style="clear:left"></div>
+<div class="para"><div class="title">asciidoc</div><p>Defines HEAD and PARA macros for headers and paragaphs with automatic index generation
+in asciidoc</p></div>
+<div class="para"><div class="title">verbatim</div><p>Lets one include the code <em>before</em> an pipadoc comment with the magic word <tt>VERBATIM</tt>.
+Used to include code in the documentation.</p></div>
 </div>
 <h2 id="_appendix">Appendix</h2>
 <div class="sectionbody">
@@ -664,6 +670,14 @@ along with this program; if not, contact Christian Thaeter &lt;ct@pipapo.org&gt;
 <div class="hlist"><table>
 <tr>
 <td class="hlist1">
+<a href="#BAS">Basic concepts</a>
+</td>
+<td class="hlist2">
+concepts
+</td>
+</tr>
+<tr>
+<td class="hlist1">
 <a href="#DIR">Direct comments</a>
 </td>
 <td class="hlist2">
@@ -672,10 +686,34 @@ low level control
 </tr>
 <tr>
 <td class="hlist1">
+<a href="#ENV">Environment Variables</a>
+</td>
+<td class="hlist2">
+configuration
+</td>
+</tr>
+<tr>
+<td class="hlist1">
+<a href="#INV">Invocation</a>
+</td>
+<td class="hlist2">
+running pipadoc
+</td>
+</tr>
+<tr>
+<td class="hlist1">
 <a href="#KEY">Keys</a>
 </td>
 <td class="hlist2">
 sectioning content
+</td>
+</tr>
+<tr>
+<td class="hlist1">
+<a href="#PLU">Plugins</a>
+</td>
+<td class="hlist2">
+extending pipadoc
 </td>
 </tr>
 <tr>
@@ -696,30 +734,6 @@ paste sections
 </tr>
 <tr>
 <td class="hlist1">
-<a href="#USE">Documenting Files</a>
-</td>
-<td class="hlist2">
-usage
-</td>
-</tr>
-<tr>
-<td class="hlist1">
-<a href="#PLU">Plugins</a>
-</td>
-<td class="hlist2">
-extending pipadoc
-</td>
-</tr>
-<tr>
-<td class="hlist1">
-<a href="#ENV">Environment Variables</a>
-</td>
-<td class="hlist2">
-configuration
-</td>
-</tr>
-<tr>
-<td class="hlist1">
 <a href="#SXT">Documentation Only Files</a>
 </td>
 <td class="hlist2">
@@ -728,25 +742,17 @@ plain documentation
 </tr>
 <tr>
 <td class="hlist1">
-<a href="#INV">Invocation</a>
+<a href="#USE">Documenting Files</a>
 </td>
 <td class="hlist2">
-running pipadoc
-</td>
-</tr>
-<tr>
-<td class="hlist1">
-<a href="#BAS">Basic concepts</a>
-</td>
-<td class="hlist2">
-concepts
+usage
 </td>
 </tr>
 </table></div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2009-05-22 22:58:06 CEST
+Last updated 2009-07-09 16:27:34 CEST
 </div>
 </div>
 </body>

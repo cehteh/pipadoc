@@ -1,0 +1,6 @@
+# Include the code *before* the VERBATIM doc comment
+match($0, "(([ \t]*[^ \t]+)*)[ \t]+[^ \t]*"com"(.*) VERBATIM", p) {
+  append(p[3],"",p[1])
+  next
+}
+
