@@ -199,6 +199,11 @@ match(\$0, com doc "([[:space:]](.*))?\$", s) {
 
 # record all other comments which may be candidate comments
 match(\$0, "(.*)" com "([[:alpha:]][[:alnum:]_]*)(([.]([^[:space:]]*)))?([[:space:]](.*))?", m) && m[1] !~ com {
+  sub("%LINE%", FNR, m[5])
+  sub("%FILE%", FILENAME, m[5])
+  sub("%LINE%", FNR, m[7])
+  sub("%FILE%", FILENAME, m[7])
+
   append(m[2], m[5] , m[7])
   next
 }
