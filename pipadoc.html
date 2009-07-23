@@ -481,6 +481,9 @@ paragraphs in stored under one primary key.</p></div>
 <pre><tt>//example.omega This is sorted after the next line
 //example.alpha comes before the omega line above</tt></pre>
 </div></div>
+<div class="para" id="VAR"><div class="title">Variable Substitution</div><p>The strings <tt>%FILE%</tt> and <tt>%LINE%</tt> are substituted with the filename and line currently proccessed.
+They can be used in the secondary sort key, as well as in documentation text directly. When one wants
+to use this words verbatim then then percent signs must be doubled as in <tt>%%FILE%%</tt> or <tt>%%LINE%%</tt>.</p></div>
 <div class="para" id="SUB"><div class="title">Substitutions</div><p>A line comment immediately followed by a special <tt>substitution</tt> character (the equal <tt>=</tt> sign by default)
 followed by a <a href="#KEY">key</a> will be replaced by the text defined under that key. The rest of the line
 is ignored and can be used as comment.</p></div>
@@ -748,11 +751,19 @@ plain documentation
 usage
 </td>
 </tr>
+<tr>
+<td class="hlist1">
+<a href="#VAR">Variable Substitution</a>
+</td>
+<td class="hlist2">
+variable substitution
+</td>
+</tr>
 </table></div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2009-07-09 16:27:34 CEST
+Last updated 2009-07-23 17:00:46 CEST
 </div>
 </div>
 </body>

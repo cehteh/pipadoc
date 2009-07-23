@@ -77,6 +77,12 @@
 #SOR //example.alpha comes before the omega line above
 #SOR ----
 #SOR
+#VAR PARA Variable Substitution; VAR; variable substitution
+#VAR The strings `%%FILE%%` and `%%LINE%%` are substituted with the filename and line currently proccessed.
+#VAR They can be used in the secondary sort key, as well as in documentation text directly. When one wants
+#VAR to use this words verbatim then then percent signs must be doubled as in `%%%FILE%%%` or `%%%LINE%%%`.
+#VAR
+
 #SUB PARA Substitutions; SUB; paste sections
 #SUB A line comment immediately followed by a special `substitution` character (the equal `=` sign by default)
 #SUB followed by a xref:KEY[key] will be replaced by the text defined under that key. The rest of the line
@@ -199,10 +205,19 @@ match(\$0, com doc "([[:space:]](.*))?\$", s) {
 
 # record all other comments which may be candidate comments
 match(\$0, "(.*)" com "([[:alpha:]][[:alnum:]_]*)(([.]([^[:space:]]*)))?([[:space:]](.*))?", m) && m[1] !~ com {
-  sub("%LINE%", FNR, m[5])
-  sub("%FILE%", FILENAME, m[5])
-  sub("%LINE%", FNR, m[7])
-  sub("%FILE%", FILENAME, m[7])
+  gsub("%%FILE%%", " FILE%FILE ", m[5])
+  gsub("%%LINE%%", " LINE%LINE ", m[5])
+  gsub("%LINE%", FNR, m[5])
+  gsub("%FILE%", FILENAME, m[5])
+  gsub(" FILE%FILE ", "%FILE%", m[5])
+  gsub(" LINE%LINE ", "%LINE%", m[5])
+
+  gsub("%%FILE%%", " FILE%FILE ", m[7])
+  gsub("%%LINE%%", " LINE%LINE ", m[7])
+  gsub("%LINE%", FNR, m[7])
+  gsub("%FILE%", FILENAME, m[7])
+  gsub(" FILE%FILE ", "%FILE%", m[7])
+  gsub(" LINE%LINE ", "%LINE%", m[7])
 
   append(m[2], m[5] , m[7])
   next
@@ -247,6 +262,7 @@ EOF
 #=DIR Direct comments
 #=KEY Key comments
 #=SOR sorted keys
+#=VAR Variable substitutions
 #=SUB Substitutions
 #=INV Invocation
 #=USE Real usage
