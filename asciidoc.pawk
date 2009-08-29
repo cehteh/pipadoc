@@ -1,4 +1,13 @@
 
+# include asciidoc comments about filename and linenumber in generated document
+match($0, com "([[:alpha:]][[:alnum:]_]*)(([.]([^[:space:]]*)))?", p) {
+    if(p[1] != old_index)
+    {
+        old_index = p[1]
+        append(p[1], p[4], "// "FILENAME ":" FNR " //")
+    }
+}
+
 # Create an asciidoc paragraph and index entry
 #             Sec       Name  Index Explanation
 match($0, com"(.*) PARA (.*); *(.*); *(.*)", p) {
@@ -23,3 +32,4 @@ match($0, com"(.*) HEAD(.) (.*); *(.*); *(.*)", p) {
     append(p[1],"",gensub(/./, p[2], "g", p[3]))
     next
 }
+
