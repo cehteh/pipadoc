@@ -181,13 +181,13 @@ function append(idx, sort, text)
     maybe[idx] = "."sort" "text
 }
 
-$([[ ${#plugins[*]} -gt 0 ]] && cat "${plugins[@]}")
-
 # Plaintext file handling
 FILENAME ~ sxt "\$" && \$0 !~ "^" com {
   match(FILENAME, "/?([^/]*)" sxt "\$", p)
   \$0 = com p[1] " " \$0
 }
+
+$([[ ${#plugins[*]} -gt 0 ]] && cat "${plugins[@]}")
 
 # Substitution
 match(\$0, com subs "([[:alpha:]][[:alnum:]_]*)", s) {
