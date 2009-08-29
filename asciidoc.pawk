@@ -1,19 +1,25 @@
 
 # Create an asciidoc paragraph and index entry
 #             Sec       Name  Index Explanation
-match($0, com"(.*) PARA (.*); (.*); *(.*)", p) {
-  append("index", tolower(p[3]), "xref:"p[3]"["p[2]"]:: "p[4])
-  append(p[1],"","[["p[3]"]]")
-  append(p[1],"","."p[2])
-  next
+match($0, com"(.*) PARA (.*); *(.*); *(.*)", p) {
+    if(p[3])
+    {
+        append("index", tolower(p[3]), "xref:"p[3]"["p[2]"]:: "p[4])
+        append(p[1],"","[["p[3]"]]")
+    }
+    append(p[1],"","."p[2])
+    next
 }
 
 # Create an asciidoc headline and index entry
 #             Sec      Typ Name  Index Explanation
-match($0, com"(.*) HEAD(.) (.*); (.*); *(.*)", p) {
-  append("index", tolower(p[4]), "xref:"p[4]"["p[3]"]:: "p[5])
-  append(p[1],"","[["p[4]"]]")
-  append(p[1],"",p[3])
-  append(p[1],"",gensub(/./, p[2], "g", p[3]))
-  next
+match($0, com"(.*) HEAD(.) (.*); *(.*); *(.*)", p) {
+    if (p[4])
+    {
+        append("index", tolower(p[4]), "xref:"p[4]"["p[3]"]:: "p[5])
+        append(p[1],"","[["p[4]"]]")
+    }
+    append(p[1],"",p[3])
+    append(p[1],"",gensub(/./, p[2], "g", p[3]))
+    next
 }
