@@ -204,22 +204,22 @@ match(\$0, com doc "([[:space:]](.*))?\$", s) {
 }
 
 # record all other comments which may be candidate comments
-match(\$0, "(.*)" com "([[:alpha:]][[:alnum:]_]*)(([.]([^[:space:]]*)))?([[:space:]](.*))?", m) && m[1] !~ com {
-  gsub("%%FILE%%", " FILE%FILE ", m[5])
-  gsub("%%LINE%%", " LINE%LINE ", m[5])
-  gsub("%LINE%", FNR, m[5])
-  gsub("%FILE%", FILENAME, m[5])
-  gsub(" FILE%FILE ", "%FILE%", m[5])
-  gsub(" LINE%LINE ", "%LINE%", m[5])
+match(\$0, com "([[:alpha:]][[:alnum:]_]*)(([.]([^[:space:]]*)))?([[:space:]](.*))?", m) {
+  gsub("%%FILE%%", " FILE%FILE ", m[4])
+  gsub("%%LINE%%", " LINE%LINE ", m[4])
+  gsub("%LINE%", FNR, m[4])
+  gsub("%FILE%", FILENAME, m[4])
+  gsub(" FILE%FILE ", "%FILE%", m[4])
+  gsub(" LINE%LINE ", "%LINE%", m[4])
 
-  gsub("%%FILE%%", " FILE%FILE ", m[7])
-  gsub("%%LINE%%", " LINE%LINE ", m[7])
-  gsub("%LINE%", FNR, m[7])
-  gsub("%FILE%", FILENAME, m[7])
-  gsub(" FILE%FILE ", "%FILE%", m[7])
-  gsub(" LINE%LINE ", "%LINE%", m[7])
+  gsub("%%FILE%%", " FILE%FILE ", m[6])
+  gsub("%%LINE%%", " LINE%LINE ", m[6])
+  gsub("%LINE%", FNR, m[6])
+  gsub("%FILE%", FILENAME, m[6])
+  gsub(" FILE%FILE ", "%FILE%", m[6])
+  gsub(" LINE%LINE ", "%LINE%", m[6])
 
-  append(m[2], m[5] , m[7])
+  append(m[1], m[4] , m[6])
   next
 }
 
