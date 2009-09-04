@@ -13,23 +13,67 @@ match($0, com "([[:alpha:]][[:alnum:]_]*)(([.]([^[:space:]]*)))?", p) {
 match($0, com"(.*) PARA (.*); *(.*); *(.*)", p) {
     if(p[3])
     {
-        append("index", tolower(p[3]), "xref:"p[3]"["p[2]"]:: "p[4])
+        if (p[4]) append("index", tolower(p[3]), "xref:"p[3]"["p[2]"]:: "p[4])
         append(p[1],"","[["p[3]"]]")
     }
     append(p[1],"","."p[2])
     next
 }
 
+BEGIN {
+    asciidoc_header[0]="="
+    asciidoc_header[1]="-"
+    asciidoc_header[2]="~"
+    asciidoc_header[3]="^"
+    asciidoc_header[4]="+"
+    asciidoc_level=1
+}
+
+
 # Create an asciidoc headline and index entry
 #             Sec      Typ Name  Index Explanation
-match($0, com"(.*) HEAD(.) (.*); *(.*); *(.*)", p) {
-    if (p[4])
+match($0, com"(.*) HEAD([^ ]+) (.*); *(.*); *(.*)", p) {
+    if (p[2] == "==")
+        p[2] = asciidoc_header[asciidoc_level]
+    else if (p[2] == "++")
     {
-        append("index", tolower(p[4]), "xref:"p[4]"["p[3]"]:: "p[5])
-        append(p[1],"","[["p[4]"]]")
+        if (asciidoc_level < 4) ++asciidoc_level
+        p[2] = asciidoc_header[asciidoc_level]
     }
-    append(p[1],"",p[3])
-    append(p[1],"",gensub(/./, p[2], "g", p[3]))
+    else if (p[2] == "--")
+    {
+        if (asciidoc_level > 1) --asciidoc_level
+        p[2] = asciidoc_header[asciidoc_level]
+    }
+    else
+    {
+        for (n_HEAD = 0; n_HEAD <=4; ++n_HEAD) {
+            if (p[2] == asciidoc_header[n_HEAD]) {
+                asciidoc_level = n_HEAD
+                break
+            }
+        }
+    }
+
+    if (p[3])
+    {
+        if (p[4])
+        {
+            if (p[5]) append("index", tolower(p[4]), "xref:"p[4]"["p[3]"]:: "p[5])
+            append(p[1],"","[["p[4]"]]")
+        }
+        append(p[1],"",p[3])
+        append(p[1],"",gensub(/./, p[2], "g", p[3]))
+    }
+    next
+}
+
+
+# Create an asciidoc index and anchor
+#             Sec        Title Index Explanation
+match($0, com"(.*) INDEX (.*); (.*); (.*)", p) {
+    if (p[4]) append("index", tolower(p[3]), "xref:"p[3]"["p[2]"]:: "p[4])
+    append(p[1],"","[["p[3]"]]")
     next
 }
 
