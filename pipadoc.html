@@ -515,6 +515,7 @@ http://www.gnu.org/software/src-highlite -->
 <span style="font-style: italic"><span style="color: #9A1900">//glos.helloworld A common program to show examples for programming language and tools</span></span>
 
 <span style="font-style: italic"><span style="color: #9A1900">//depends Only the Standard C library is needed</span></span>
+<span style="font-weight: bold"><span style="color: #000080">#include</span></span> <span style="color: #FF0000">&lt;stdio.h&gt;</span>
 
 <span style="color: #009900">int</span> <span style="font-weight: bold"><span style="color: #000000">main</span></span><span style="color: #990000">(</span><span style="color: #009900">int</span> argc<span style="color: #990000">,</span> <span style="color: #009900">char</span><span style="color: #990000">*</span> argv<span style="color: #990000">[])</span>
 <span style="color: #FF0000">{</span>
@@ -597,9 +598,8 @@ Used to include code in the documentation.</p></div>
 </dt>
 <dd>
 <p>
-  The Documentation character which must follow a line comment to be recognized
-  by pipadoc as documentation. Either one for local definitions or two for global
-  definitions are used. Defaults to <tt>_</tt> and needs rarely to be changed.
+  The special Documentation character which must follow a line comment to be recognized
+  by pipadoc as documentation. Defaults to <tt>_</tt> and needs rarely to be changed.
 </p>
 </dd>
 <dt>
@@ -628,7 +628,7 @@ Used to include code in the documentation.</p></div>
 <dd>
 <p>
   Extension for <a href="#PLU">awk plugins</a> to implement generic text manipulations and macros.
-  Defaults to <em>.pawk</em>
+  Defaults to <em>.pawk</em>.
 </p>
 </dd>
 </dl></div>
@@ -647,11 +647,12 @@ by:</p></div>
 <div class="content">
 <pre><tt>COM='#' ./pipadoc pipadoc asciidoc.pawk &gt;pipadoc.txt</tt></pre>
 </div></div>
-<div class="para"><p>And then further process the generated asciidoc.txt with the asciidoc toolchain.</p></div>
+<div class="para"><p>And then further process the generated pipadoc.txt with the asciidoc toolchain.</p></div>
 <h3 id="_license">License</h3><div style="clear:left"></div>
 <div class="literalblock" id="LIC">
 <div class="content">
-<pre><tt>Copyright (C)              Pipapo Project
+<pre><tt>// pipadoc:7 //
+Copyright (C)              Pipapo Project
  2009,                     Christian Thaeter &lt;ct@pipapo.org&gt;
 
 This program is free software; you can redistribute it and/or modify
@@ -763,7 +764,7 @@ variable substitution
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2009-07-23 17:00:46 CEST
+Last updated 2009-09-09 01:22:39 CEST
 </div>
 </div>
 </body>

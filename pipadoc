@@ -125,9 +125,8 @@
 #ENV   like languages.
 test "$COM" || COM='//'
 #ENV `DOC`::
-#ENV   The Documentation character which must follow a line comment to be recognized
-#ENV   by pipadoc as documentation. Either one for local definitions or two for global
-#ENV   definitions are used. Defaults to `_` and needs rarely to be changed.
+#ENV   The special Documentation character which must follow a line comment to be recognized
+#ENV   by pipadoc as documentation. Defaults to `_` and needs rarely to be changed.
 test "$DOC" || DOC='_'
 #ENV `SUB`::
 #ENV   Substitution character. Defaults to `=` and rarely needs to be changed.
@@ -142,7 +141,7 @@ test "$SUB" || SUB='='
 test "$SXT" || SXT='.txt'
 #ENV `PLG`::
 #ENV   Extension for xref:PLU[awk plugins] to implement generic text manipulations and macros.
-#ENV   Defaults to '.pawk'
+#ENV   Defaults to '.pawk'.
 #ENV
 test "$PLG" || PLG='.pawk'
 
@@ -351,5 +350,5 @@ EOF
 #APP ----
 #APP COM='#' ./pipadoc pipadoc asciidoc.pawk >pipadoc.txt
 #APP ----
-#APP And then further process the generated asciidoc.txt with the asciidoc toolchain.
+#APP And then further process the generated pipadoc.txt with the asciidoc toolchain.
 #APP
