@@ -4,6 +4,7 @@
 #TIT =================================
 #TIT Christian Thaeter <ct@pipapo.org>
 #TIT
+#LIC ..........................................................................
 #LIC Copyright (C)              Pipapo Project
 #LIC  2009,                     Christian Thaeter <ct@pipapo.org>
 #LIC
@@ -19,6 +20,7 @@
 #LIC
 #LIC You should have received a copy of the GNU General Public License
 #LIC along with this program; if not, contact Christian Thaeter <ct@pipapo.org>.
+#LIC ...........................................................................
 #LIC
 
 #INT Embedding documentation in program source files often yields the problem that the
@@ -274,9 +276,7 @@ EOF
 #_ License
 #_ ~~~~~~~
 #_ [[LIC]]
-#_ ....
 #=LIC
-#_ ....
 #_ Index
 #_ -----
 #=index
