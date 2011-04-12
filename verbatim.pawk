@@ -1,12 +1,18 @@
 # Include the code *before* the VERBATIM doc comment
 # optional characters before 'VERBATIM' will be prepended before the the output,
+# optional spaces after 'VERBATIM' will be removed from the begin of the output
 # optional regex after 'VERBATIM' will be removed from the end of the output
 # for example:
-#  test;  //foo This is a VERBATIM;
+#
+# ----
+#   test;  //foo This is a VERBATIM  ;
+# ----
+#
 # will become
-#  This is a test 
-match($0, "(([ \t]*[^ \t]+)*)[ \t]+[^ \t]*"com"([^ ]*) (.*)VERBATIM(.*)", p) {
-    sub(p[5]"$", "", p[1])
+#  This is a test
+match($0, "(([ \t]*[^ \t]+)*)[ \t]+[^ \t]*"com"([^ ]*) (.*)VERBATIM( *)(.*)", p) {
+    sub("^"p[5], "", p[1])
+    sub(p[6]"$", "", p[1])
     append(p[3],"", p[4] p[1])
     next
 }
