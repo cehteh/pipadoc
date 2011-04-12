@@ -1,11 +1,12 @@
 
 # include asciidoc comments about filename and linenumber in generated document
 match($0, com "([[:alpha:]][[:alnum:]_]*)(([.]([^[:space:]]*)))?", p) {
-    if(p[1] != old_index)
+    if(p[1] != old_index || old_fnr+4 < FNR )
     {
         old_index = p[1]
         append(p[1], p[4], "// "FILENAME ":" FNR " //")
     }
+    old_fnr = FNR
 }
 
 # Create an asciidoc paragraph and index entry
