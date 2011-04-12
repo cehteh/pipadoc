@@ -1,0 +1,16 @@
+# add NoBug annotations under their respective key (not being doc comments)
+
+match($0, "(NOBUG_)?(FIXME|TODO|PLANNED) *\\(\"(.*)\"(, *)?(.*)\\)", p) {
+    if(p[2] != old_index_nb || old_fnr_nb+4 < FNR )
+    {
+        old_index_nb = p[2]
+        append(p[2], "", "// "FILENAME ":" FNR " //")
+    }
+    old_fnr_nb = FNR
+}
+
+match($0, "(NOBUG_)?(FIXME|TODO|PLANNED) *\\(\"(.*)\"(, *)?(.*)\\)", p) {
+    append(p[2], "", "* " p[3] " " (p[5]?"("p[5]")":""))
+}
+
+
