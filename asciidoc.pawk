@@ -1,26 +1,59 @@
+# Copyright (C)                        Pipapo Project
+#  2009, 2011                          Christian Thaeter <ct@pipapo.org>
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2, or (at your option)
+# any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, contact Christian Thaeter <ct@pipapo.org>.
+#
 
-# include asciidoc comments about filename and linenumber in generated document
+
+#PLU.asciidoc HEAD~ asciidoc; asciidoc; support for asciidoc markup and automatic index generation
+#PLU.asciidoc Defines macros for headers and paragaphs with automatic index generation
+#PLU.asciidoc for asciidoc markup. Also includeds comments about the source from where
+#PLU.asciidoc documentation got extracted.
+#PLU.asciidoc
+
 match($0, com "([[:alpha:]][[:alnum:]_]*)(([.]([^[:space:]]*)))?", p) {
-    if(p[1] != old_index || old_fnr+4 < FNR )
+    if(p[1] != old_index || old_fnr+4 < FNR || FILENAME != old_filename)
     {
+        old_filename = FILENAME
         old_index = p[1]
-        append(p[1], p[4], "// "FILENAME ":" FNR " //")
+        append(p[1], p[4], "// " FILENAME ":" FNR " //")
     }
     old_fnr = FNR
 }
 
-# Create an asciidoc paragraph and index entry
+#PLU.asciidoc .PARA
+#PLU.asciidoc  PARA Name; Index ; Explanation
+#PLU.asciidoc
+#PLU.asciidoc Starts a new paragraph with 'Name' as title. When 'Index' is supplied sorting it under
+#PLU.asciidoc 'Index' under the `index` Key with a short 'Explanation' in this index.
+#PLU.asciidoc
+#PLU.asciidoc -----
+#PLU.asciidoc //hello PARA Saying Hello; hello; prints a friendly greeting
+#PLU.asciidoc //hello PARA Saying Hello;;
+#PLU.asciidoc -----
+#PLU.asciidoc
 #             Sec       Name  Index Explanation
-match($0, com"(.*) PARA (.*); *(.*); *(.*)", p) {
-    append(p[1],"","."p[2])
+match($0, com"([[:alpha:]"doc"][[:alnum:]_]*)[.]?([[:alnum:]_]*) PARA (.*); *(.*); *(.*)", p) {
+    append(p[1],p[2],"."p[3])
     if(p[3])
     {
-        id=gensub(/[^[:alnum:]]+/, "", "g", p[3])
-        if (p[4])
+        id=gensub(/[^[:alnum:]]+/, "", "g", p[4])
+        if (p[5])
         {
-            append("index", tolower(p[3]), "xref:"id"["p[2]"]:: "p[4])
+            append("index", tolower(p[4]), "xref:"id"["p[3]"]:: "p[5])
         }
-        append(p[1],"","anchor:"id"[]")
+        append(p[1],p[2],"anchor:"id"[]")
     }
     next
 }
@@ -35,56 +68,78 @@ BEGIN {
 }
 
 
-# Create an asciidoc headline and index entry
+#PLU.asciidoc .HEAD
+#PLU.asciidoc  HEADtyp Name; Index; Explanation
+#PLU.asciidoc
+#PLU.asciidoc Starts a new header of level 'typ' (see below) with 'Name' as title. When 'Index' is supplied,
+#PLU.asciidoc sorting it under 'Index' under the `index` Key with a short 'Explanation' in this index.
+#PLU.asciidoc 'typ' can be a single character denoting the asciidoc levels for titles (=.-,~,^ or +) or one of
+#PLU.asciidoc '++' '--' '==' used to increment, decrement or keep the title level. The later works only within
+#PLU.asciidoc a single source file for now.
+#PLU.asciidoc
+#PLU.asciidoc -----
+#PLU.asciidoc //hello HEAD- Level 1 Heading; head1; second level heading
+#PLU.asciidoc -----
+#PLU.asciidoc
 #             Sec      Typ Name  Index Explanation
-match($0, com"(.*) HEAD([^ ]+) (.*); *(.*); *(.*)", p) {
-    if (p[2] == "==")
-        p[2] = asciidoc_header[asciidoc_level]
-    else if (p[2] == "++")
+#match($0, com"([[:alpha:]"doc"][[:alnum:]_]*)[.]?([[:alpha:]][[:alnum:]_]*)HEAD([^ ]+) (.*); *(.*); *(.*)", p) {
+match($0, com"([[:alpha:]"doc"][[:alnum:]_]*)[.]?([[:alnum:]_]*) HEAD([^ ]+) (.*); *(.*); *(.*)", p) {
+    if (p[3] == "==")
+        p[3] = asciidoc_header[asciidoc_level]
+    else if (p[3] == "++")
     {
         if (asciidoc_level < 4) ++asciidoc_level
-        p[2] = asciidoc_header[asciidoc_level]
+        p[3] = asciidoc_header[asciidoc_level]
     }
-    else if (p[2] == "--")
+    else if (p[3] == "--")
     {
         if (asciidoc_level > 1) --asciidoc_level
-        p[2] = asciidoc_header[asciidoc_level]
+        p[3] = asciidoc_header[asciidoc_level]
     }
     else
     {
         for (n_HEAD = 0; n_HEAD <=4; ++n_HEAD) {
-            if (p[2] == asciidoc_header[n_HEAD]) {
+            if (p[3] == asciidoc_header[n_HEAD]) {
                 asciidoc_level = n_HEAD
                 break
             }
         }
     }
 
-    if (p[3])
+    if (p[4])
     {
-        append(p[1],"",p[3])
-        append(p[1],"",gensub(/./, p[2], "g", p[3]))
+        append(p[1],p[2],p[4])
+        append(p[1],p[2],gensub(/./, p[3], "g", p[4]))
 
-        if (p[4])
+        if (p[5])
         {
-            id=gensub(/[^[:alnum:]]+/, "", "g", p[4])
-            if (p[5]) append("index", tolower(p[4]), "xref:"id"["p[3]"]:: "p[5])
-            append(p[1],"","anchor:"id"[]")
+            id=gensub(/[^[:alnum:]]+/, "", "g", p[5])
+            if (p[6]) append("index", tolower(p[5]), "xref:"id"["p[4]"]:: "p[6])
+            append(p[1],p[2],"anchor:"id"[]")
         }
     }
     next
 }
 
 
-# Create an asciidoc index and anchor
+#PLU.asciidoc .INDEX
+#PLU.asciidoc  INDEX Name; Index; Explanation
+#PLU.asciidoc
+#PLU.asciidoc Creates a standalone index entry without an associated headline or paragraph.
+#PLU.asciidoc Used for index entries and links only.
+#PLU.asciidoc
+#PLU.asciidoc -----
+#PLU.asciidoc //hello INDEX hello; hello; a greeting
+#PLU.asciidoc -----
+#PLU.asciidoc
 #             Sec        Title Index Explanation
-match($0, com"(.*) INDEX (.*); (.*); (.*)", p) {
-    if (p[4])
+match($0, com"([[:alpha:]"doc"][[:alnum:]_]*)[.]?([[:alnum:]_]*) INDEX (.*); (.*); (.*)", p) {
+    if (p[5])
     {
-        id=gensub(/[^[:alnum:]]+/, "", "g", p[3])
-        append("index", tolower(p[3]), "xref:"id"["p[2]"]:: "p[4])
+        id=gensub(/[^[:alnum:]]+/, "", "g", p[4])
+        append("index", tolower(p[4]), "xref:"id"["p[3]"]:: "p[5])
     }
-    append(p[1],"","anchor:"id"[]")
+    append(p[1],p[2],"anchor:"id"[]")
     next
 }
 

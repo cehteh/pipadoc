@@ -1,10 +1,35 @@
-# add NoBug annotations under their respective key (not being doc comments)
+# Copyright (C)                        Pipapo Project
+#  2011                                Christian Thaeter <ct@pipapo.org>
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2, or (at your option)
+# any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, contact Christian Thaeter <ct@pipapo.org>.
+#
+
+#PLU.nobugannotations HEAD~ NoBug annotations; nobugannotations; extracting NoBug annotations from the souce
+#PLU.nobugannotations
+#PLU.nobugannotations The NoBug debugging library (http://nobug.pipapo.org[]) provides
+#PLU.nobugannotations annotations for C/C++ code. This plugin extracts the
+#PLU.nobugannotations `TODO()` `PLANNED()` and `FIXME()` macros under their respective
+#PLU.nobugannotations Key. This can be used to integrate a very lightweight issue tracking
+#PLU.nobugannotations system within the source. For an example usage see the NoBug sources
+#PLU.nobugannotations itself and the 'nobug_issues.txt' Makefile.am target.
+#PLU.nobugannotations
 
 match($0, "(NOBUG_)?(FIXME|TODO|PLANNED) *\\(\"(.*)\"(, *)?(.*)\\)", p) {
     if(p[2] != old_index_nb || old_fnr_nb+4 < FNR )
     {
         old_index_nb = p[2]
-        append(p[2], "", "// "FILENAME ":" FNR " //")
+        append(p[2], "", "// " p[2] " " FILENAME ":" FNR " //")
     }
     old_fnr_nb = FNR
 }
