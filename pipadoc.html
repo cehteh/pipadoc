@@ -799,8 +799,8 @@ the implicit commenting.</p></div>
 <div class="sectionbody">
 <div class="paragraph"><p><a id="PLU"></a>
 Pipadoc can be extended with awk. This plugins are <tt>awk</tt> snippets which are included into
-the processing stream. Take a look at the supplied plugins to figure out how it works.
-when a plugin appears twice within the commandline options then it is included as source too
+the processing stream. Writing plugins is explained later.
+When a plugin appears twice within the commandline options then it is included as source too
 this is used to self-document plugins.</p></div>
 </div>
 <h2 id="_available_plugins">Available Plugins</h2>
@@ -881,6 +881,61 @@ an optional regex after <em>VERBATIM</em> will be removed from the end of the ou
 <pre><tt>  test;  //foo This is a VERBATIM  ;</tt></pre>
 </div></div>
 <div class="paragraph"><p>will become <tt>This is a test</tt></p></div>
+</div>
+<h2 id="_writing_plugins">Writing Plugins</h2>
+<div class="sectionbody">
+<div class="paragraph"><p><a id="pluginwritung"></a>
+Plugins are normal <em>awk</em> snippets which can contain arbitary
+rules. They are inserted quite early in the processing chain to
+give the user fine and low level of control, right after <em>plaintext</em>
+documentation files are processed. That is input coming from
+such an file is normalized to look like an ordinary documentation
+comment to the rest of pipadoc.</p></div>
+<div class="paragraph"><p>pipadoc works in 2 passes, first it collects all potential
+documentation comments. Rules (and plugins) use the provided
+<tt>append(key, sort, text)</tt> function to store the extracted
+documentation and finally this stored text is ordered as defined
+with substitutions and sorted by the sort entry. If no sort entry
+is available, then an empty string "" should be used.</p></div>
+<h3 id="_matching_lines">Matching Lines</h3><div style="clear:left"></div>
+<div class="paragraph"><p><a id="pluginmatching"></a>
+Selecting lines containing documentation is easiest done with the
+awk <tt>match</tt> function, because programming languages rarely follow
+a tabular layout used by awk to tokenize input.</p></div>
+<div class="paragraph"><p>Pipadoc provides the <em>com</em> variable containing the currently defined
+comment character, this can be used to match documentation comments
+as following:</p></div>
+<div class="listingblock">
+<div class="content">
+<pre><tt>match($0, com"([[:alpha:]][[:alnum:]_]*)[.]?([[:alnum:]_]*) (TEXT TO MATCH HERE)", p) {</tt></pre>
+</div></div>
+<div class="paragraph"><p>After this the array <tt>p[]</tt> containd the extracted matches:</p></div>
+<div class="ulist"><ul>
+<li>
+<p>
+p[1] contains the <em>key</em>
+</p>
+</li>
+<li>
+<p>
+p[2] contains the <em>sort</em> key
+</p>
+</li>
+<li>
+<p>
+p[3] and upward can contain anything you want to match there
+</p>
+</li>
+</ul></div>
+<h3 id="_actions">Actions</h3><div style="clear:left"></div>
+<div class="paragraph"><p><a id="pluginaction"></a>
+One can do any kind of awk processing in the body of an awk rule.
+The only important things are that extracted/formated documentation
+should be stored with <tt>append()</tt> as explained earlier and the if one
+wants to stop processing the current line (because it got just added)
+he has to call the <tt>next</tt> statement finally. If not done then the
+following rules are matched against the current line again. This might
+be intentional, but often it is not desired.</p></div>
 </div>
 <h2 id="_appendix">Appendix</h2>
 <div class="sectionbody">
@@ -999,6 +1054,30 @@ extending pipadoc
 </p>
 </dd>
 <dt class="hdlist1">
+<a href="#pluginaction">Actions</a>
+</dt>
+<dd>
+<p>
+handling matched text in a plugin
+</p>
+</dd>
+<dt class="hdlist1">
+<a href="#pluginmatching">Matching Lines</a>
+</dt>
+<dd>
+<p>
+how to select lines
+</p>
+</dd>
+<dt class="hdlist1">
+<a href="#pluginwritung">Writing Plugins</a>
+</dt>
+<dd>
+<p>
+how to write a plugin
+</p>
+</dd>
+<dt class="hdlist1">
 <a href="#SOR">Sorted Keys</a>
 </dt>
 <dd>
@@ -1052,7 +1131,7 @@ including source verbatim in the documentation
 <div id="footnotes"><hr /></div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2011-04-19 08:23:28 CEST
+Last updated 2011-04-20 03:46:27 CEST
 </div>
 </div>
 </body>

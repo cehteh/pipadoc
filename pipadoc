@@ -32,8 +32,8 @@
 #LIR under the GPL. This makes it possible to use pipadoc for commercial/propietary software.
 #LIR
 #LIR The GPL applies when you distribute pipadoc itself, in original or modified form. Since
-#LIR pipadoc is written in bash/awk you already distribute the source as well, so this should
-#LIR not pose any legal problem.
+#LIR pipadoc is written in bash/awk you already distribute the source as well so there should
+#LIR be no problem to comply with the GPL.
 #LIR
 #LIR When you make any improvements or modifications to pipadoc please consider to contact
 #LIR Christian Thäter <ct@pipapo.org> for including them into the mainline.
@@ -154,8 +154,8 @@ test "$PLG" || PLG='.pawk'
 
 #PLU HEAD- Plugins; PLU; extending pipadoc
 #PLU Pipadoc can be extended with awk. This plugins are `awk` snippets which are included into
-#PLU the processing stream. Take a look at the supplied plugins to figure out how it works.
-#PLU when a plugin appears twice within the commandline options then it is included as source too
+#PLU the processing stream. Writing plugins is explained later.
+#PLU When a plugin appears twice within the commandline options then it is included as source too
 #PLU this is used to self-document plugins.
 #PLU
 #PLU Available Plugins
@@ -368,6 +368,7 @@ EOF
 #=SXT Plain Documentation
 #=ENV Environment variables
 #=PLU Plugins
+#=PLW Writing Plugins
 #_ Appendix
 #_ --------
 #=APP Appendix
@@ -431,6 +432,48 @@ EOF
 #USE A common program to show examples for programming language and tools
 #USE ----
 #USE
+
+#PLW HEAD- Writing Plugins; pluginwritung; how to write a plugin
+#PLW Plugins are normal 'awk' snippets which can contain arbitary
+#PLW rules. They are inserted quite early in the processing chain to
+#PLW give the user fine and low level of control, right after 'plaintext'
+#PLW documentation files are processed. That is input coming from
+#PLW such an file is normalized to look like an ordinary documentation
+#PLW comment to the rest of pipadoc.
+#PLW
+#PLW pipadoc works in 2 passes, first it collects all potential
+#PLW documentation comments. Rules (and plugins) use the provided
+#PLW `append(key, sort, text)` function to store the extracted
+#PLW documentation and finally this stored text is ordered as defined
+#PLW with substitutions and sorted by the sort entry. If no sort entry
+#PLW is available, then an empty string "" should be used.
+#PLW
+#PLW HEAD~ Matching Lines; pluginmatching; how to select lines
+#PLW Selecting lines containing documentation is easiest done with the
+#PLW awk `match` function, because programming languages rarely follow
+#PLW a tabular layout used by awk to tokenize input.
+#PLW
+#PLW Pipadoc provides the 'com' variable containing the currently defined
+#PLW comment character, this can be used to match documentation comments
+#PLW as following:
+#PLW ------
+#PLW match($0, com"([[:alpha:]][[:alnum:]_]*)[.]?([[:alnum:]_]*) (TEXT TO MATCH HERE)", p) {
+#PLW ------
+#PLW After this the array `p[]` containd the extracted matches:
+#PLW
+#PLW  * p[1] contains the 'key'
+#PLW  * p[2] contains the 'sort' key
+#PLW  * p[3] and upward can contain anything you want to match there
+#PLW
+#PLW HEAD~ Actions; pluginaction; handling matched text in a plugin
+#PLW One can do any kind of awk processing in the body of an awk rule.
+#PLW The only important things are that extracted/formated documentation
+#PLW should be stored with `append()` as explained earlier and the if one
+#PLW wants to stop processing the current line (because it got just added)
+#PLW he has to call the `next` statement finally. If not done then the
+#PLW following rules are matched against the current line again. This might
+#PLW be intentional, but often it is not desired.
+#PLW
 
 #APP [[c-example]]
 #APP
