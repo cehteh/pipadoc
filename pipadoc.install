@@ -1,0 +1,77 @@
+#!/bin/sh
+# Lua script Installer
+# Copyright (C) 2015  Christian Thäter <ct@pipapo.org>
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+#: CONFIGURATION
+#: -------------
+#:
+#: lua_interpreters are searched in order, the first found is used
+lua_interpreters="luajit lua5.2 lua lua5.1 lua5.3"
+
+#: list all libraries which are required
+dependencies=""
+
+#: default name is guessed from this script name
+source="${0%.install}"
+
+# directory where to install
+export installdir="${installdir:-.}"
+
+#############################################################
+
+name="${source##*/}"
+
+msg()
+{
+    echo "$*" 1>&2
+}
+
+die()
+{
+    echo "$*" 1>&2
+    exit 1
+}
+
+find_binary ()
+{
+    for i in "$@"; do
+        program=$(which "$i")
+        if test "$program" -a -x "$program"; then
+            echo "$program"
+            return
+        fi
+    done
+    die "no suitable interpreter found"
+}
+
+test -f "$source.lua" || die "$source.lua not found"
+
+lua=$(find_binary $lua_interpreters)
+echo "using '$lua' as lua interpreter"
+
+for i in $dependencies; do
+    $lua -e "pcall(require,'luarocks.loader'); require '$i'" 2>/dev/null || die "dependency '$i' not found"
+done
+
+echo "installing script '$installdir/$name'"
+mkdir -p "$installdir"
+cat <<EOF >"$installdir/$name"
+#!$lua
+
+$(cat "$source.lua")
+EOF
+
+chmod +x "$installdir/$name"
