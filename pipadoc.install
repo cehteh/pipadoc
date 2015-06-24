@@ -19,7 +19,7 @@
 #: -------------
 #:
 #: lua_interpreters are searched in order, the first found is used
-lua_interpreters="luajit lua5.2 lua lua5.1 lua5.3"
+lua_interpreters="luajit lua5.3 lua-5.3 lua5.2 lua-5.2 lua lua-5.1"
 
 #: list all libraries which are required
 dependencies=""
