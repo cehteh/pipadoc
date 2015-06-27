@@ -132,7 +132,7 @@ request "luarocks.loader"
 --: otherwise an assertion error is raised.
 --:
 function assert_type(var, expected) --: `%VERBATIM<function%s*(.-%))>`::%{NL}  checks that the 'var' is of 'type' %{NL}
-  assert(type(var) == expected, "type error: "..expected.." expected")
+  assert(type(var) == expected, "type error: "..expected.." expected, got "..type(var))
   return var
 end
 
