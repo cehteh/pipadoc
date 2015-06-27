@@ -36,6 +36,12 @@ local docvars = {
   --docvars:nl     The linebreak character sequence, usually '\n' on unix systems but
   --docvars:nl     can be changed with a commandline option
   NL = "\n",
+  --docvars:nl   `PERCENT`::
+  --docvars:nl     Escapes the percent sign
+  PERCENT = "%{PERCENT}",
+  --docvars:nl   `BACKSLASH`::
+  --docvars:nl     Escapes the backslash
+  BACKSLASH = "\\",
 }
 
 
@@ -76,13 +82,13 @@ end
 --: variable argument list. Any Argument passed to them will be converted to a string and printed
 --: to stderr when the verbosity level is high enough.
 --:
-function warn(...) msg(1, ...) end  --: `VERBATIM<function%s*(.-%))>`::%NL%  report a important but non fatal failure %NL%
-function echo(...) msg(2, ...) end  --: `VERBATIM<function%s*(.-%))>`::%NL%  report normal progress %NL%
-function dbg(...) msg(3, ...) end  --: `VERBATIM<function%s*(.-%))>`::%NL%  show verbose/debugging progress information %NL%
+function warn(...) msg(1, ...) end  --: `VERBATIM<function%s*(.-%))>`::%{NL}  report a important but non fatal failure %{NL}
+function echo(...) msg(2, ...) end  --: `VERBATIM<function%s*(.-%))>`::%{NL}  report normal progress %{NL}
+function dbg(...) msg(3, ...) end  --: `VERBATIM<function%s*(.-%))>`::%{NL}  show verbose/debugging progress information %{NL}
 
 --PLANNED: use echo() for progress
 
-function die(...) --: `VERBATIM<function%s*(.-%))>`::%NL%  report a fatal error and exit the programm %NL%
+function die(...) --: `VERBATIM<function%s*(.-%))>`::%{NL}  report a fatal error and exit the programm %{NL}
   printerr(...)
   os.exit(1)
 end
@@ -102,7 +108,7 @@ end
 --:
 function request(name) --: `VERBATIM<function%s*(.-%))>`::
   --:   try to load optional modules
-  --:   wraps lua 'require' in a pcall so that failure to load a module results in 'nil' rather than a error  %NL%
+  --:   wraps lua 'require' in a pcall so that failure to load a module results in 'nil' rather than a error  %{NL}
   local ok,handle = pcall(require, name)
   if ok then
     return handle
@@ -125,17 +131,17 @@ request "luarocks.loader"
 --: There are some wrapers around 'assert' to check externally supplied data. On success 'var' will be returned
 --: otherwise an assertion error is raised.
 --:
-function assert_type(var, expected) --: `VERBATIM<function%s*(.-%))>`::%NL%  checks that the 'var' is of 'type' %NL%
+function assert_type(var, expected) --: `VERBATIM<function%s*(.-%))>`::%{NL}  checks that the 'var' is of 'type' %{NL}
   assert(type(var) == expected, "type error: "..expected.." expected")
   return var
 end
 
-function assert_char(var) --: `VERBATIM<function%s*(.-%))>`::%NL%  checks that 'var' is a single character %NL%
+function assert_char(var) --: `VERBATIM<function%s*(.-%))>`::%{NL}  checks that 'var' is a single character %{NL}
   assert(type(var) == "string" and #var == 1, "type error: single character expected")
   return var
 end
 
-function assert_notnil(var) --: `VERBATIM<function%s*(.-%))>`::%NL%  checks that 'var' is not 'nil' %NL%
+function assert_notnil(var) --: `VERBATIM<function%s*(.-%))>`::%{NL}  checks that 'var' is not 'nil' %{NL}
   assert(type(var) ~= "nil", "Value expected")
   return var
 end
@@ -319,6 +325,7 @@ end
 --: Each line containing a pipadoc comment are passed down through 'processors' which can do
 --: additinal actions for manipulating the generated Documentaton. This processors are extendable
 --: in Lua.
+--TODO: processors run when reading the files document order of steps somewhere
 --:
 --api:
 --: Processors
@@ -332,7 +339,7 @@ function processor_register(name, func) --: `VERBATIM<function%s*(.-%))>`::
   --:     a function which receives a table of the 'context' parsed from the pipadoc commentline
   --:
   --: Register a new processor. To be called from plugins. Processors need to be enabled
-  --: to be used. Some are by default enabled, unless the --nodefaults commmandline option is
+  --: to be used. Some are by default enabled, unless the --no-defaults commmandline option is
   --: used for invoking pipadoc. Some are bound to specific filetypes.
   --:
   --: When plugins register new processors under the same name of an already existing processor
@@ -344,7 +351,8 @@ function processor_register(name, func) --: `VERBATIM<function%s*(.-%))>`::
   --:     'source' part in before the comment character
   --:   section:::
   --:     parsed section name, will be empty in section-blocks to access the current
-  --:     section name refer to xref:docvars[]
+  --:     section name refer to
+  --FIXME: xref :docvars[]
   --:   op:::
   --:     operator signifying the pipadoc operation
   --:   arg:::
@@ -390,7 +398,8 @@ function operator_register(char, func) --: `VERBATIM<function%s*(.-%))>`::
   --:
   --: Operators drive the main functionality, like invoking the processors and generating the output.
   --:
-  --: see xref:processor_register[] and the pipadoc source for a detailed description of the context table
+  --: see xref :processor_register[] and the pipadoc source for a detailed description of the context table
+  --FIXME: xref :processor_register[]
   assert(string.match(char, "^%p$") == char)
   dbg("register operator:", char)
   operators[char] = assert_type(func, 'function')
@@ -453,7 +462,7 @@ options = {
                 return 1
               end,
 
-  "    --no-defaults                    disables defaults bindings", --:   VERBATIM("(.*)")
+  "    --no-defaults                    disables default filetypes and processors", --:   VERBATIM("(.*)")
   ["--no-defaults"] = function () opt_nodefaults = true end,
 
 
@@ -471,6 +480,7 @@ options = {
   --TODO: force filetype variant  foo.lua:.txt
   --TODO: orphans / doublettes
   --TODO: wordwrap
+  --TODO: eat empty lines
   --TODO: variable replacements
   --TODO: add debug report (warnings/errors) to generated document PIPADOC_LOG section
   --TODO: lineending \n \r\n
@@ -478,7 +488,7 @@ options = {
   --PLANNED: wordwrap
 
   "", --:   VERBATIM("(.*)")
-  "  inputs are filenames or a '-' which denotes stdin", --:   VERBATIM("(.*)")
+  "  inputs are filenames or a '-' which indicates standard input", --:   VERBATIM("(.*)")
 }
 
 --local plugins = {}
@@ -514,80 +524,111 @@ function setup()
   parse_args(arg)
 
   if not opt_nodefaults then
-    --filetypes_def:scons * SCons
+    --filetypes_builtin:scons * SCons
     filetype_register("^SConstuct$", "#")
 
-    --filetypes_def:cmake * CMake
+    --filetypes_builtin:cmake * CMake
     filetype_register({"^CMakeLists.txt$","%.cmake$"}, {"#", "#[["})
 
-    --filetypes_def:c * C, C++, Headerfiles
+    --filetypes_builtin:c * C, C++, Headerfiles
     filetype_register({"%.c$","%.cpp$","%.C$", "%.cxx$", "%.h$"}, {"//", "/*"})
 
-    --filetypes_def:lua * Lua
+    --filetypes_builtin:lua * Lua
     filetype_register({"%.lua$"}, "%-%-")
 
-    --filetypes_def:automake * Autoconf, Automake
+    --filetypes_builtin:automake * Autoconf, Automake
     filetype_register({"%.am$", "%.in$", "^configure.ac$"}, {"#", "dnl"})
 
-    --filetypes_def:make * Makefiles
+    --filetypes_builtin:make * Makefiles
     filetype_register({"^Makefile$", "%.mk$", "%.make$"}, "#")
 
-    --filetypes_def:shell * Shell, Perl, AWK
+    --filetypes_builtin:shell * Shell, Perl, AWK
     filetype_register({"%.sh$", "%.pl$", "%.awk$", }, "#")
 
-    --filetypes_def:prolog * Prolog
+    --filetypes_builtin:prolog * Prolog
     filetype_register({"%.pro$", "%.P$"}, "%")
 
-    --filetypes_def:text * Textfiles, Pipadoc (.pdoc)
+    --filetypes_builtin:text * Textfiles, Pipadoc (.pdoc)
     filetype_register({"%.txt$", "%.TXT$", "%.pdoc$", "^-$"}, {"PIPADOC:", ""})
 
-    --filetypes_def:java * Java, C#
+    --filetypes_builtin:java * Java, C#
     filetype_register({"%.java$", "%.cs$"}, {"//", "/*"})
 
-    --filetypes_def:objective_c * Objective-C
+    --filetypes_builtin:objective_c * Objective-C
     filetype_register({"%.h$", "%.m$", "%.mm$"}, {"//", "/*"})
 
-    --filetypes_def:python * Python
+    --filetypes_builtin:python * Python
     filetype_register("%.py$", "#")
 
-    --filetypes_def:visualbasic * Visual Basic
+    --filetypes_builtin:visualbasic * Visual Basic
     filetype_register("%.vb$", "'")
 
-    --filetypes_def:php * PHP
+    --filetypes_builtin:php * PHP
     filetype_register("%.php%d?$", {"#", "//", "/*"})
  
-    --filetypes_def:javascript * Javascript
+    --filetypes_builtin:javascript * Javascript
     filetype_register("%.js$", "//", "/*")
 
-    --filetypes_def:delphi * Delphi, Pascal
+    --filetypes_builtin:delphi * Delphi, Pascal
     filetype_register({"%.p$", "%.pp$", "^%.pas$"}, {"//", "{", "(*"})
 
-    --filetypes_def:ruby * Ruby
+    --filetypes_builtin:ruby * Ruby
     filetype_register("%.rb$", "#")
 
-    --filetypes_def:sql * SQL
+    --filetypes_builtin:sql * SQL
     filetype_register({"%.sql$", "%.SQL$"}, {"#", "--", "/*"})
   end
 
-  --TODO: DOCME
+  --proc_builtin:
+  --:   `varsubst`::
+  --:     Substitude 'docvars' 
+  --:
+  --:
+  --:     context.text = string.gsub(context.text, "\%%", "%{PERCENT}")
+  --:
+  --:
   processor_register(
-    "docvars",
+    "varsubst",
     function (context)
       assert_type(context, "table")
 
-      --FIXME: prevent re-recursive expansion
-      --FIXME: double percent signs escape to a single percent sign
-      --PLANNED: more general macro and string replacement facility, possibly even functions
-      repeat
-        local var = string.match(context.text, "%%(%a[%w_]*)%%")
-        if var and docvars[var] then
-          context.text = string.gsub(context.text, "%%"..var.."%%", docvars[var])
-        end
-      until not var
+      local sofar = {}
+      local sstring =  string.gsub(context.text, "\\%%", "%%{PERCENT}")
+
+      while not sofar[sstring] do
+        sstring = string.gsub(sstring, "%%{(%a[%w_]*)}",
+                              function (name)
+                                if docvars[name] then
+                                  return docvars[name]
+                                else
+                                  warn("variable undefined:", name)
+                                  return name
+                                end
+                              end
+        )
+        sofar[sstring] = true
+      end
+      context.text = string.gsub(sstring, "%%{PERCENT}", "%%")
     end
   )
 
+
+
   --TODO: docme
+  --proc_builtin:
+  --:
+  --:
+  --:
+  --:
+  --:
+  --:
+  --:
+  --:
+  --:
+  --:
+  --:
+  --:
+  --:
   processor_register(
     "verbatim",
     function (context)
@@ -609,6 +650,20 @@ function setup()
     end
   )
 
+  --proc_builtin:
+  --:
+  --:
+  --:
+  --:
+  --:
+  --:
+  --:
+  --:
+  --:
+  --:
+  --:
+  --:
+  --:
   processor_register(
     "asciidoc",
     function (context)
@@ -628,13 +683,27 @@ function setup()
     end
   )
 
+  --proc_builtin:
+  --:
+  --:
+  --:
+  --:
+  --:
+  --:
+  --:
+  --:
+  --:
+  --:
+  --:
+  --:
+  --:
   processor_register(
     "annotations",
     function (context)
       assert_type(context, "table")
 
       -- insert source references as asciidoc comments
-      if context.section == "TODO" or context.section == "FIXME" or context.section == "PLANNED" then
+      if docvars.SECTION == "TODO" or docvars.SECTION == "FIXME" or docvars.SECTION == "PLANNED" then
         context.text = ""..docvars.FILE..":"..docvars.LINE.."::"..docvars.NL.."  "..context.text
       end
 
@@ -654,7 +723,7 @@ function setup()
 
 
 
-  --op_def:
+  --op_builtin:
   --:   `:` ::
   --:     The documentation operator. Defines normal documentation text. Each pipadoc comment using the `:`
   --:     operator is processed as potential documentation. First all enabled 'processors' are run over it and
@@ -687,7 +756,7 @@ function setup()
   )
 
 
-  --op_def:
+  --op_builtin:
   --:   `=` ::
   --:     Section paste operator. Takes a section name as argument and will paste that section in place.
   operator_register(
@@ -705,10 +774,11 @@ function setup()
   )
 
 
-  --op_def:
+  --op_builtin:
   --:   `@` ::
-  --:     Alphabetic Sorted Section paste operator. Takes a section name as argument and will paste
-  --:     section text with keys alphabetically sorted in place.
+  --:     Takes a section name as argument and will paste section text alphabetically sorted by their keys.
+  --PLANNED: option for sorting locale
+  --PLANNED: option for sorting (up/doen)
   operator_register(
     "@",
     function (context)
@@ -722,21 +792,31 @@ function setup()
     end
   )
 
-  --TODO: op #
-  
+  --op_builtin:
+  --:   `#` ::
+  --:     Takes a section name as argument and will paste section text numerically sorted by their keys.
+  --PLANNED: option for sorting (up/dowen)
+  operator_register(
+    "@",
+    function (context)
+      local section = #context.section > 0 and context.section or docvars.SECTION
+
+      if #context.arg > 0 then
+        section_append(section, nil, "sort", "alphabetic "..context.arg.." "..context.text)
+      else
+        warn("sort section missing:")
+      end
+    end
+  )
+
   --TODO: plugins
   --   for plugin in pairs(plugins) do
   --      load_plugin(plugin)
   --   end
-  
-
-
 
   if not opt_nodefaults then
-    processor_enable("docvars", "verbatim", "annotations", "asciidoc")
+    processor_enable("varsubst", "verbatim", "annotations", "asciidoc")
   end
-
-
 end
 
 
@@ -914,10 +994,17 @@ generate_output(opt_toplevel)
 --: the programming language has some form of comments starting with a defined character sequence
 --: and spaning to the end of the line.
 --:
+--: History
+--: -------
+--:
+--: This 'pipadoc' follows an earlier implementation with a slightly different (incompatible) syntax
+--: and less features which was implemented in AWK. Updating to the new syntax should be quite simple
+--: and is suggested for any Projects using pipadoc.
+--:
 --: Installation
 --: ------------
 --:
---: 'pipadoc' comes as single lua source file `pipadoc.lua` which is portable among most Lua versions
+--: 'pipadoc' is single lua source file `pipadoc.lua` which is portable among most Lua versions
 --: (PUC Lua 5.1, 5.2, 5.3 and luajit). It ships with a `pipadoc.install` shell script which figures a
 --: suitable Lua version out and installs `pipadoc.lua` as `pipadoc` in a given directory or the current
 --: directory by default.
@@ -987,59 +1074,64 @@ generate_output(opt_toplevel)
 --: ---------
 --:
 --=filetypes
+--TODO: optarg
 --:
---: pipadoc has already support for following languages builtin
---: ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+--: pipadoc has builtin support for following languages
+--: ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 --:
---@filetypes_def
---:
---: Processors
---: ----------
---:
---=proc
+--@filetypes_builtin
 --:
 --: Operators
 --: ---------
 --:
 --=op
+--TODO: optarg
 --:
---: Built in default operators
---: ~~~~~~~~~~~~~~~~~~~~~~~~~~
+--: Built in operators
+--: ~~~~~~~~~~~~~~~~~~
 --:
---=op_def
+--=op_builtin
+--:
+--: Processors
+--: ----------
+--:
+--=proc
+--TODO: optarg
+--:
+--: Built in processors
+--: ~~~~~~~~~~~~~~~~~~~
+--:
+--=proc_builtin
 --:
 --: Documentation Variables
 --: -----------------------
 --:
 --: The 'docvars' Lua table holds key/value pairs of variables with the global state
 --: of pipadoc. These can be used by the core and plugins in various ways. Debugging
---: for example prints the FILE:LINE processed and there is a processor to substitute
---: them in the documentation text. The user can set arbitary docvars from commandline.
+--: for example prints the FILE:LINE processed and there is the 'varsubst' processor
+--: to substitute them in the documentation text. The user can set arbitary docvars
+--: from commandline.
+--TODO: optarg
 --:
 --: Predefined docvars
 --: ~~~~~~~~~~~~~~~~~~
 --:
 --@docvars
 --:
+--: Programming API for extensions
+--: ------------------------------
 --:
+--: Some pipadoc lua functions are documented here to be used from plugins.
+--:
+--=api
 
---:
---:
---:
---:
---:
---:
---:
---:
---:
---:
+
 
 --:
 --: TODO
 --: ----
 --:
 --=TODO
---:
 --:
 --: PLANNED
 --: -------
@@ -1052,18 +1144,7 @@ generate_output(opt_toplevel)
 --=FIXME
 --:
 
---: EXAMPLE
---=ex
---@ex
---:
---: Programming API for extensions
---: ------------------------------
---:
---: Some pipadoc lua functions are documented here to be used from plugins.
---:
---=api
 
---TODO: history
 
 --LICENSE:
 --: License Explanation
@@ -1118,3 +1199,97 @@ generate_output(opt_toplevel)
 --TODO: asciidoc //source:line// comments like old pipadoc
 --TODO: integrate old pipadoc.txt documentation
 
+--PLANNED: how to join (and then wordwrap) lines?
+
+--PLANNED: bash like parameter expansion
+--[[
+  --:   PING %{unknown}
+  --:   single percent sign : %{PERCENT} \% \\% %{unknown}
+  --:
+  --:   ASSIGN  %{!%{FOO=BAR}}
+  --:   SUBSTITUTE  %{foobar//o/x}
+  --:   SUBSTRING  %{foobar:2:4}
+  --:   SUBSTRING  %{foobar:3}
+  --:   SUBSTRING  %{foobar:-4}
+  --:   IFELSE %{?foo:bar}
+  --:   IFELSE %{x?foo:bar}
+  --:
+       ${parameter:-word}
+       ${parameter:=word}
+       ${parameter:?word}
+       ${parameter:+word}
+       ${parameter:offset}
+       ${parameter:offset:length}
+       ${!prefix*}
+       ${!prefix@}
+       ${!name[@]}
+       ${!name[*]}
+       ${#parameter}
+       ${parameter#word}
+       ${parameter##word}
+       ${parameter%word}
+       ${parameter%%word}
+       ${parameter/pattern/string}
+       ${parameter^pattern}
+       ${parameter^^pattern}
+       ${parameter,pattern}
+       ${parameter,,pattern}
+--]]
+  --[[
+    ifelse
+
+    %{var?if:else}
+
+    assign
+    %{var=value}
+
+    substr
+    %{parameter:offset}
+    %{parameter:offset:length}
+
+    length
+    %{parameter#}
+
+    %{var/pattern/replacement}
+    %{var//pattern/replacement}
+
+    %{parameter^pattern}
+    %{parameter^^pattern}
+    %{parameter,pattern}
+    %{parameter,,pattern}
+
+    ?:=#/
+
+                                local key,op,value = string.match(name,"([^%p]*)(%p)(.*)")
+                                dbg("varsubst:", name, key,op,value)
+                                if key then
+                                  -- no output
+                                  if #key == 0 and op == "!" then
+                                    return ""
+                                  end
+
+                                  -- assignment
+                                  if #key > 0 and op == "=" then
+                                    docvars[key] = value
+                                    return value
+                                  end
+
+                                  -- ifelse
+                                  if op == "?" then
+                                    local success,failure = string.match(value,"([^:]*):(.*)")
+                                    if #key > 0 then
+                                      return success
+                                    else
+                                      return failure
+                                    end
+                                  end
+
+                                  -- replacement
+                                  if #key > 0 and op == "/" then
+                                    local all,pattern,replacement = string.match(value,"(/?)([^:]*)/(.*)")
+                                    dbg("varsubst:", all,pattern,replacement)
+                                    return string.gsub(key, pattern, replacement, all ~= "/" and 1 or nil)
+                                  end
+                                else
+      end
+  --]]
