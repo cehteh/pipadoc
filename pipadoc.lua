@@ -155,16 +155,15 @@ function to_table(v)
 end
 
 --sections:
---: Text in pipadoc is appended to 'sections'. This sections associated with a name. This sections are later brought in order
---: in a 'toplevel' section. Additionally instead just appending text to a named section, text can be appended under some
+--: Text in pipadoc is appended to named 'sections'. Sections are later brought in order in a 'toplevel' section.
+--: Additionally instead just appending text to a named section, text can be appended under some
 --: alphanumeric key under that section. This enables later sorting for indexes and glossaries.
 --:
 --: Sections can span a block of lines (until another section is set) or one-line setting a section only for the current
---: comment line. Section blocks are selected when the pipadoc comment defines a section and maybe a key but the rest of the
+--: comment line. Blocks are selected when the pipadoc comment defines a section and maybe a key but the rest of the
 --: is empty, every subsequent line which does not define a new section block is then appended to the current block.
 --:
---: One-Line sections are pipadoc comments which define a section and maybe a key and include some documentation text right
---: away.
+--: One-Line sections are selected when a section and maybe a key are followed by some documentation text.
 --:
 --: When no section is set in a file, then the block section name defaults to the files name up, but excluding to the first dot.
 --:
@@ -202,8 +201,6 @@ end
 --: this is appended to the section 'oneline' under key 'a'
 --: this is appended to the section 'oneline' under key 'o'
 --: ----
---:
---FIXME: check syntax for --:key in block and oneline context
 sections = {}
 -- local sections_usecnt = {}
 
@@ -727,25 +724,33 @@ function setup()
     ":",
     function (context)
       -- for oneline sections
-      local section_bak
+      local section_bak, key_back
+
+      if #context.text > 0 then
+        section_bak = docvars.SECTION
+        key_bak = docvars.KEY
+      end
 
       if #context.section > 0 then
-        if #context.text > 0 then
-          section_bak = docvars.SECTION
-        end
         docvars.SECTION = context.section
       end
+
+      if #context.section > 0 or #context.arg > 0 then
+        docvars.KEY = context.arg
+      end
+
 
       for i=1,#processors_enabled do
         processors_available[processors_enabled[i]](context)
       end
 
       if #context.text > 0 or #context.section == 0 then
-        section_append(docvars.SECTION, context.arg, "text", context.text)
+        section_append(docvars.SECTION, docvars.KEY, "text", context.text)
       end
 
       if section_bak then
         docvars.SECTION = section_bak
+        docvars.KEY = key_bak
       end
     end
   )
@@ -854,6 +859,7 @@ function process_file(file)
   --docvars:section   `SECTION`::
   --docvars:sectionb      stores the current section name
   docvars.SECTION = string.match(file, "%.*([^.]*)")
+  docvars.KEY = ""
 
   local fh
   if file == '-' then
