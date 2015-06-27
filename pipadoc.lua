@@ -1137,6 +1137,12 @@ generate_output(opt_toplevel)
 
 
 --:
+--: FIXME
+--: -----
+--:
+--=FIXME
+--:
+--:
 --: TODO
 --: ----
 --:
@@ -1146,11 +1152,6 @@ generate_output(opt_toplevel)
 --: -------
 --:
 --=PLANNED
---:
---: FIXME
---: -----
---:
---=FIXME
 --:
 
 
