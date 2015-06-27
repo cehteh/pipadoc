@@ -528,6 +528,9 @@ function setup()
     docvars.DAY = date.day
     docvars.HOUR = date.hour
     docvars.MINUTE = date.min
+    --docvars:date    `DATE`::
+    --docvars:date      Current date in YEAR/MONTH/DAY format
+    docvars.DATE = "%{YEAR}/%{MONTH}/%{DAY}"
   end
 
   parse_args(arg)
@@ -980,7 +983,7 @@ generate_output(opt_toplevel)
 --: pipadoc - Documentation extractor
 --: =================================
 --: Christian Thaeter <ct@pipapo.org>
---: %{YEAR}/%{MONTH}/%{DAY}
+--: %{DATE}
 --:
 --: Introduction
 --: ------------
