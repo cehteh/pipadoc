@@ -45,7 +45,7 @@ local docvars = {
 }
 
 
---PLANNED: macros/docvars  LUA_FUNC = "VERBATIM<function%s*(.-%))>::\n "
+--PLANNED: macros/docvars  LUA_FUNC = "%VERBATIM<function%s*(.-%))>::\n "
 
 --PLANNED: log to PIPADOC_LOG section, later hooked in here
 local printerr_hook
@@ -82,13 +82,13 @@ end
 --: variable argument list. Any Argument passed to them will be converted to a string and printed
 --: to stderr when the verbosity level is high enough.
 --:
-function warn(...) msg(1, ...) end  --: `VERBATIM<function%s*(.-%))>`::%{NL}  report a important but non fatal failure %{NL}
-function echo(...) msg(2, ...) end  --: `VERBATIM<function%s*(.-%))>`::%{NL}  report normal progress %{NL}
-function dbg(...) msg(3, ...) end  --: `VERBATIM<function%s*(.-%))>`::%{NL}  show verbose/debugging progress information %{NL}
+function warn(...) msg(1, ...) end  --: `%VERBATIM<function%s*(.-%))>`::%{NL}  report a important but non fatal failure %{NL}
+function echo(...) msg(2, ...) end  --: `%VERBATIM<function%s*(.-%))>`::%{NL}  report normal progress %{NL}
+function dbg(...) msg(3, ...) end  --: `%VERBATIM<function%s*(.-%))>`::%{NL}  show verbose/debugging progress information %{NL}
 
 --PLANNED: use echo() for progress
 
-function die(...) --: `VERBATIM<function%s*(.-%))>`::%{NL}  report a fatal error and exit the programm %{NL}
+function die(...) --: `%VERBATIM<function%s*(.-%))>`::%{NL}  report a fatal error and exit the programm %{NL}
   printerr(...)
   os.exit(1)
 end
@@ -106,7 +106,7 @@ end
 --: When luarocks is installed, then the 'luarocks.loader' is loaded by default to make any moduke installed by
 --: luarocks available.
 --:
-function request(name) --: `VERBATIM<function%s*(.-%))>`::
+function request(name) --: `%VERBATIM<function%s*(.-%))>`::
   --:   try to load optional modules
   --:   wraps lua 'require' in a pcall so that failure to load a module results in 'nil' rather than a error  %{NL}
   local ok,handle = pcall(require, name)
@@ -131,17 +131,17 @@ request "luarocks.loader"
 --: There are some wrapers around 'assert' to check externally supplied data. On success 'var' will be returned
 --: otherwise an assertion error is raised.
 --:
-function assert_type(var, expected) --: `VERBATIM<function%s*(.-%))>`::%{NL}  checks that the 'var' is of 'type' %{NL}
+function assert_type(var, expected) --: `%VERBATIM<function%s*(.-%))>`::%{NL}  checks that the 'var' is of 'type' %{NL}
   assert(type(var) == expected, "type error: "..expected.." expected")
   return var
 end
 
-function assert_char(var) --: `VERBATIM<function%s*(.-%))>`::%{NL}  checks that 'var' is a single character %{NL}
+function assert_char(var) --: `%VERBATIM<function%s*(.-%))>`::%{NL}  checks that 'var' is a single character %{NL}
   assert(type(var) == "string" and #var == 1, "type error: single character expected")
   return var
 end
 
-function assert_notnil(var) --: `VERBATIM<function%s*(.-%))>`::%{NL}  checks that 'var' is not 'nil' %{NL}
+function assert_notnil(var) --: `%VERBATIM<function%s*(.-%))>`::%{NL}  checks that 'var' is not 'nil' %{NL}
   assert(type(var) ~= "nil", "Value expected")
   return var
 end
@@ -211,7 +211,7 @@ sections = {}
 --: Sections
 --: ~~~~~~~~
 --:
-function section_append(section, key, action, value) --: `VERBATIM<function%s*(.-%))>`::
+function section_append(section, key, action, value) --: `%VERBATIM<function%s*(.-%))>`::
   --:   section:::
   --:     name of the section to append to, must be a string
   assert_type(section, "string")
@@ -234,7 +234,7 @@ function section_append(section, key, action, value) --: `VERBATIM<function%s*(.
 end
 
 --api:
-function section_get(section, key, index) --: `VERBATIM<function%s*(.-%))>`::
+function section_get(section, key, index) --: `%VERBATIM<function%s*(.-%))>`::
   --:   section:::
   --:     name of the section to append to, must be a string
   assert_type(section, "string")
@@ -278,7 +278,7 @@ local filetypes = {}
 --: Filetypes
 --: ~~~~~~~~~
 --:
-function filetype_register(names, linecommentseqs, ...) --: `VERBATIM<function%s*(.-%))>`::
+function filetype_register(names, linecommentseqs, ...) --: `%VERBATIM<function%s*(.-%))>`::
   --:     names:::
   --:       a Lua pattern or list of patterns matching filenames
   --:     linecommentseqs:::
@@ -332,7 +332,7 @@ end
 --: ~~~~~~~~~~
 --:
 local processors_available = {}
-function processor_register(name, func) --: `VERBATIM<function%s*(.-%))>`::
+function processor_register(name, func) --: `%VERBATIM<function%s*(.-%))>`::
   --:   name:::
   --:     name of the processor
   --:   func:::
@@ -368,7 +368,7 @@ end
 
 local processors_enabled = {}
 --api:
-function processor_enable(...) --: `VERBATIM<function%s*(.-%))>`::
+function processor_enable(...) --: `%VERBATIM<function%s*(.-%))>`::
   --:     ...:::
   --:       called with an ordered list of processors to enable
   --:
@@ -376,6 +376,7 @@ function processor_enable(...) --: `VERBATIM<function%s*(.-%))>`::
   local procs = {...}
   for i=1,#procs do
     assert_type(procs[i], "string")
+    --FIXME: more graceful error when processor is not supported?
     assert_notnil(processors_available[procs[i]])
     processors_enabled[#processors_enabled+1] = procs[i]
   end
@@ -390,7 +391,7 @@ end
 --: operators. Operators must be a single punctuation character
 local operators = {}
 --api:
-function operator_register(char, func) --: `VERBATIM<function%s*(.-%))>`::
+function operator_register(char, func) --: `%VERBATIM<function%s*(.-%))>`::
   --:   char:::
   --:     single punctuation character defining this operator
   --:   func:::
@@ -418,22 +419,22 @@ end
 --usage:
 local options
 options = {
-  "pipadoc [options...] [inputs..]",  --:   VERBATIM("(.*)")
-  "  options are:", --:   VERBATIM("(.*)")
+  "pipadoc [options...] [inputs..]",  --:   %VERBATIM("(.*)")
+  "  options are:", --:   %VERBATIM("(.*)")
 
-  "    -v, --verbose                    increment verbosity level", --:   VERBATIM("(.*)")
+  "    -v, --verbose                    increment verbosity level", --:   %VERBATIM("(.*)")
   ["-v"] = "--verbose",
   ["--verbose"] = function () opt_verbose = opt_verbose+1 end,
 
-  "    -q, --quiet                      supresses any messages", --:   VERBATIM("(.*)")
+  "    -q, --quiet                      supresses any messages", --:   %VERBATIM("(.*)")
   ["-q"] = "--quiet",
   ["--quiet"] = function () opt_verbose = 0 end,
 
-  "    -d, --debug                      set verbosity to maximum", --:   VERBATIM("(.*)")
+  "    -d, --debug                      set verbosity to maximum", --:   %VERBATIM("(.*)")
   ["-d"] = "--debug",
   ["--debug"] = function () opt_verbose = 3 end,
 
-  "    -h, --help                       show this help", --:   VERBATIM("(.*)")
+  "    -h, --help                       show this help", --:   %VERBATIM("(.*)")
   ["-h"] = "--help",
   ["--help"] = function ()
     print("usage:")
@@ -444,8 +445,8 @@ options = {
                end,
 
 
-  "    -c, --comment <file> <comment>   register a filetype pattern", --:   VERBATIM("(.*)")
-  "                                     for files matching a file pattern", --:   VERBATIM("(.*)")
+  "    -c, --comment <file> <comment>   register a filetype pattern", --:   %VERBATIM("(.*)")
+  "                                     for files matching a file pattern", --:   %VERBATIM("(.*)")
   ["-c"] = "--comment",
   ["--comment"] = function (arg,i)
                     assert(type(arg[i+2]))
@@ -454,7 +455,7 @@ options = {
                   end,
 
 
-  "    -t, --toplevel <name>            sets 'name' as toplevel node [MAIN]", --:   VERBATIM("(.*)")
+  "    -t, --toplevel <name>            sets 'name' as toplevel node [MAIN]", --:   %VERBATIM("(.*)")
   ["-t"] = "--toplevel",
   ["--toplevel"] = function (arg, i)
                 assert(type(arg[i+1]))
@@ -462,12 +463,12 @@ options = {
                 return 1
               end,
 
-  "    --no-defaults                    disables default filetypes and processors", --:   VERBATIM("(.*)")
+  "    --no-defaults                    disables default filetypes and processors", --:   %VERBATIM("(.*)")
   ["--no-defaults"] = function () opt_nodefaults = true end,
 
 
-  "    --                               stops parsing the options and treats each", --:   VERBATIM("(.*)")
-  "                                     following argument as input file", --:   VERBATIM("(.*)")
+  "    --                               stops parsing the options and treats each", --:   %VERBATIM("(.*)")
+  "                                     following argument as input file", --:   %VERBATIM("(.*)")
   ["--"] = function () args_done=true end,
 
   --TODO: --alias match pattern --file-as match filename
@@ -487,8 +488,8 @@ options = {
   --TODO: wrap at blank/intelligent
   --PLANNED: wordwrap
 
-  "", --:   VERBATIM("(.*)")
-  "  inputs are filenames or a '-' which indicates standard input", --:   VERBATIM("(.*)")
+  "", --:   %VERBATIM("(.*)")
+  "  inputs are filenames or a '-' which indicates standard input", --:   %VERBATIM("(.*)")
 }
 
 --local plugins = {}
@@ -521,8 +522,20 @@ end
 --FIXME: docme why include /* comments
 
 function setup()
+  do
+    local date = os.date ("*t")
+    --docvars:date    `YEAR, MONTH, DAY, HOUR, MINUTE`::
+    --docvars:date      Current date information
+    docvars.YEAR = date.year
+    docvars.MONTH = date.month
+    docvars.DAY = date.day
+    docvars.HOUR = date.hour
+    docvars.MINUTE = date.min
+  end
+
   parse_args(arg)
 
+  
   if not opt_nodefaults then
     --filetypes_builtin:scons * SCons
     filetype_register("^SConstuct$", "#")
@@ -581,12 +594,13 @@ function setup()
 
   --proc_builtin:
   --:   `varsubst`::
-  --:     Substitude 'docvars' 
+  --:     Substitutes \%{varname} with the the values stored under varname in the 'docvars' table.
+  --:     When no variable with that name is defines, a warning is printed and the variable name
+  --:     itself is substituted. Variables expansion is recursive and nested, but stops when loops
+  --:     are detected. The percent sign can be escaped with a backslash (\\%) or by the
+  --:     \%{PERCENT} docvar.
   --:
-  --:
-  --:     context.text = string.gsub(context.text, "\%%", "%{PERCENT}")
-  --:
-  --:
+  --PLANNED: more variable handling
   processor_register(
     "varsubst",
     function (context)
@@ -596,6 +610,8 @@ function setup()
       local sstring =  string.gsub(context.text, "\\%%", "%%{PERCENT}")
 
       while not sofar[sstring] do
+        dbg("varsubst:", sstring)
+        sofar[sstring] = true
         sstring = string.gsub(sstring, "%%{(%a[%w_]*)}",
                               function (name)
                                 if docvars[name] then
@@ -606,64 +622,50 @@ function setup()
                                 end
                               end
         )
-        sofar[sstring] = true
       end
       context.text = string.gsub(sstring, "%%{PERCENT}", "%%")
     end
   )
 
 
-
-  --TODO: docme
   --proc_builtin:
+  --:   `verbatim`::
+  --:     lifts a the sourcecode preceeding the pipadoc comment or parts of it into the
+  --:     output. A percent sign followed by the keyword `VERBATIM` will be replaced with
+  --:     with the sourcecode before the pipadoc comment. When the `VERBATIM`is followed by
+  --:     a bracketed lua pattern (any kind of brackets are supported: () {} [] <>) then this
+  --:     pattern is matched against the source part of the line. This match or the first
+  --:     capture if it defines any is then pased in place of the VERBATIM statement.
   --:
-  --:
-  --:
-  --:
-  --:
-  --:
-  --:
-  --:
-  --:
-  --:
-  --:
-  --:
-  --:
+  --PLANNED: obsolete this by variable substitutions
   processor_register(
     "verbatim",
     function (context)
       assert_type(context, "table")
 
       repeat
-        local pattern = string.match(context.text, "VERBATIM(%b())")
-        pattern = pattern or string.match(context.text, "VERBATIM(%b[])")
-        pattern = pattern or string.match(context.text, "VERBATIM(%b{})")
-        pattern = pattern or string.match(context.text, "VERBATIM(%b<>)")
+        local pattern = string.match(context.text, "%%VERBATIM(%b())")
+        pattern = pattern or string.match(context.text, "%%VERBATIM(%b[])")
+        pattern = pattern or string.match(context.text, "%%VERBATIM(%b{})")
+        pattern = pattern or string.match(context.text, "%%VERBATIM(%b<>)")
         if pattern then
           local escaped = string.gsub(pattern, "%p", "%%%1")
           local prepart = string.match(context.pre, string.sub(pattern, 2, -2))
-          context.text = string.gsub(context.text, "VERBATIM"..escaped, prepart or "")
+          context.text = string.gsub(context.text, "%%VERBATIM"..escaped, prepart or "")
         end
       until not pattern
 
-      context.text = string.gsub(context.text, "VERBATIM", context.pre)
+      context.text = string.gsub(context.text, "%%VERBATIM", context.pre)
     end
   )
 
   --proc_builtin:
+  --:   `asciidoc`::
+  --:     Defines some helpers for asciidoc formatted text.
+  --:     Each start of a new section puts an asciidoc comment into the output
+  --:     logging FILE:LINE pair from where it originates.
   --:
-  --:
-  --:
-  --:
-  --:
-  --:
-  --:
-  --:
-  --:
-  --:
-  --:
-  --:
-  --:
+  --PLANNED: more asciidoc support
   processor_register(
     "asciidoc",
     function (context)
@@ -684,21 +686,14 @@ function setup()
   )
 
   --proc_builtin:
+  --:   `tracker`::
+  --:     Adds some special support for the sections TODO, FIXME and PLANNED.
+  --:     Each line of the saied sections will be prefixed with an asciidoc reference
+  --:     to its origin.
   --:
-  --:
-  --:
-  --:
-  --:
-  --:
-  --:
-  --:
-  --:
-  --:
-  --:
-  --:
-  --:
+  --PLANNED: use some docvars based templates to format this better (asciidoc, etc)
   processor_register(
-    "annotations",
+    "tracker",
     function (context)
       assert_type(context, "table")
 
@@ -815,7 +810,7 @@ function setup()
   --   end
 
   if not opt_nodefaults then
-    processor_enable("varsubst", "verbatim", "annotations", "asciidoc")
+    processor_enable("varsubst", "verbatim", "tracker", "asciidoc")
   end
 end
 
@@ -975,6 +970,10 @@ generate_output(opt_toplevel)
 --: pipadoc - Documentation extractor
 --: =================================
 --: Christian Thaeter <ct@pipapo.org>
+--: %{YEAR}/%{MONTH}/%{DAY}
+--:
+--: Introduction
+--: ------------
 --:
 --: Embedding documentation in program source files often yields the problem that the
 --: structure of a program is not the optimal structure for the associated documentation.
@@ -1192,8 +1191,8 @@ generate_output(opt_toplevel)
   --@gloss filter/pattern/options  include keys alpahbetically
   --#gloss compare/match/range  include keys numerically
 
-  --code: this is VERBATIM(pattern)
-  --code: this is VERBATIM
+  --code: this is %VERBATIM(pattern)
+  --code: this is %VERBATIM
 
 
 --TODO: asciidoc //source:line// comments like old pipadoc
@@ -1293,3 +1292,8 @@ generate_output(opt_toplevel)
                                 else
       end
   --]]
+
+-- lua pipadoc.lua -d pipadoc.lua >pipadoc.txt ; a2x -k -v --dblatex-opts "-P latex.output.revhistory=0" pipadoc.txt
+
+
+

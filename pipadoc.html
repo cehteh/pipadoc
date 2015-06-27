@@ -2,15 +2,25 @@
     "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-<meta name="generator" content="AsciiDoc 8.5.2" />
+<meta http-equiv="Content-Type" content="application/xhtml+xml; charset=UTF-8" />
+<meta name="generator" content="AsciiDoc 8.6.9" />
 <title>pipadoc - Documentation extractor</title>
 <style type="text/css">
-/* Debug borders */
-p, li, dt, dd, div, pre, h1, h2, h3, h4, h5, h6 {
-/*
-  border: 1px solid red;
-*/
+/* Shared CSS for AsciiDoc xhtml11 and html5 backends */
+
+/* Default font. */
+body {
+  font-family: Georgia,serif;
+}
+
+/* Title font. */
+h1, h2, h3, h4, h5, h6,
+div.title, caption.title,
+thead, p.table.header,
+#toctitle,
+#author, #revnumber, #revdate, #revremark,
+#footer {
+  font-family: Arial,Helvetica,sans-serif;
 }
 
 body {
@@ -35,13 +45,8 @@ strong {
   color: #083194;
 }
 
-tt {
-  color: navy;
-}
-
 h1, h2, h3, h4, h5, h6 {
   color: #527bbd;
-  font-family: sans-serif;
   margin-top: 1.2em;
   margin-bottom: 0.5em;
   line-height: 1.3;
@@ -59,9 +64,11 @@ h3 {
 h3 + * {
   clear: left;
 }
+h5 {
+  font-size: 1.0em;
+}
 
 div.sectionbody {
-  font-family: serif;
   margin-left: 0;
 }
 
@@ -77,45 +84,50 @@ p {
 ul, ol, li > p {
   margin-top: 0;
 }
+ul > li     { color: #aaa; }
+ul > li > * { color: black; }
 
-pre {
+.monospaced, code, pre {
+  font-family: "Courier New", Courier, monospace;
+  font-size: inherit;
+  color: navy;
   padding: 0;
   margin: 0;
 }
+pre {
+  white-space: pre-wrap;
+}
 
-span#author {
+#author {
   color: #527bbd;
-  font-family: sans-serif;
   font-weight: bold;
   font-size: 1.1em;
 }
-span#email {
+#email {
 }
-span#revnumber, span#revdate, span#revremark {
-  font-family: sans-serif;
+#revnumber, #revdate, #revremark {
 }
 
-div#footer {
-  font-family: sans-serif;
+#footer {
   font-size: small;
   border-top: 2px solid silver;
   padding-top: 0.5em;
   margin-top: 4.0em;
 }
-div#footer-text {
+#footer-text {
   float: left;
   padding-bottom: 0.5em;
 }
-div#footer-badges {
+#footer-badges {
   float: right;
   padding-bottom: 0.5em;
 }
 
-div#preamble {
+#preamble {
   margin-top: 1.5em;
   margin-bottom: 1.5em;
 }
-div.tableblock, div.imageblock, div.exampleblock, div.verseblock,
+div.imageblock, div.exampleblock, div.verseblock,
 div.quoteblock, div.literalblock, div.listingblock, div.sidebarblock,
 div.admonitionblock {
   margin-top: 1.0em;
@@ -135,7 +147,6 @@ div.content { /* Block element content. */
 /* Block element titles. */
 div.title, caption.title {
   color: #527bbd;
-  font-family: sans-serif;
   font-weight: bold;
   text-align: left;
   margin-top: 1.0em;
@@ -157,13 +168,15 @@ div.content + div.title {
 
 div.sidebarblock > div.content {
   background: #ffffee;
-  border: 1px solid silver;
+  border: 1px solid #dddddd;
+  border-left: 4px solid #f0f0f0;
   padding: 0.5em;
 }
 
 div.listingblock > div.content {
-  border: 1px solid silver;
-  background: #f4f4f4;
+  border: 1px solid #dddddd;
+  border-left: 5px solid #f0f0f0;
+  background: #f8f8f8;
   padding: 0.5em;
 }
 
@@ -171,8 +184,8 @@ div.quoteblock, div.verseblock {
   padding-left: 1.0em;
   margin-left: 1.0em;
   margin-right: 10%;
-  border-left: 5px solid #dddddd;
-  color: #777777;
+  border-left: 5px solid #f0f0f0;
+  color: #888;
 }
 
 div.quoteblock > div.attribution {
@@ -180,8 +193,9 @@ div.quoteblock > div.attribution {
   text-align: right;
 }
 
-div.verseblock > div.content {
-  white-space: pre;
+div.verseblock > pre.content {
+  font-family: inherit;
+  font-size: inherit;
 }
 div.verseblock > div.attribution {
   padding-top: 0.75em;
@@ -211,7 +225,7 @@ div.exampleblock > div.content {
 }
 
 div.imageblock div.content { padding-left: 0; }
-span.image img { border-style: none; }
+span.image img { border-style: none; vertical-align: text-bottom; }
 a.image:visited { color: white; }
 
 dl {
@@ -254,35 +268,12 @@ div.compact div, div.compact div {
   margin-bottom: 0.1em;
 }
 
-div.tableblock > table {
-  border: 3px solid #527bbd;
-}
-thead, p.table.header {
-  font-family: sans-serif;
-  font-weight: bold;
-}
 tfoot {
   font-weight: bold;
 }
 td > div.verse {
   white-space: pre;
 }
-p.table {
-  margin-top: 0;
-}
-/* Because the table frame attribute is overriden by CSS in most browsers. */
-div.tableblock > table[frame="void"] {
-  border-style: none;
-}
-div.tableblock > table[frame="hsides"] {
-  border-left-style: none;
-  border-right-style: none;
-}
-div.tableblock > table[frame="vsides"] {
-  border-top-style: none;
-  border-bottom-style: none;
-}
-
 
 div.hdlist {
   margin-top: 0.8em;
@@ -339,25 +330,32 @@ span.footnote, span.footnoteref {
   min-width: 100px;
 }
 
-
-@media print {
-  div#footer-badges { display: none; }
+div.colist td {
+  padding-right: 0.5em;
+  padding-bottom: 0.3em;
+  vertical-align: top;
+}
+div.colist td img {
+  margin-top: 0.3em;
 }
 
-div#toc {
+@media print {
+  #footer-badges { display: none; }
+}
+
+#toc {
   margin-bottom: 2.5em;
 }
 
-div#toctitle {
+#toctitle {
   color: #527bbd;
-  font-family: sans-serif;
   font-size: 1.1em;
   font-weight: bold;
   margin-top: 1.0em;
   margin-bottom: 0.1em;
 }
 
-div.toclevel1, div.toclevel2, div.toclevel3, div.toclevel4 {
+div.toclevel0, div.toclevel1, div.toclevel2, div.toclevel3, div.toclevel4 {
   margin-top: 0;
   margin-bottom: 0;
 }
@@ -373,51 +371,173 @@ div.toclevel4 {
   margin-left: 6em;
   font-size: 0.9em;
 }
-/* Workarounds for IE6's broken and incomplete CSS2. */
 
-div.sidebar-content {
-  background: #ffffee;
-  border: 1px solid silver;
-  padding: 0.5em;
+span.aqua { color: aqua; }
+span.black { color: black; }
+span.blue { color: blue; }
+span.fuchsia { color: fuchsia; }
+span.gray { color: gray; }
+span.green { color: green; }
+span.lime { color: lime; }
+span.maroon { color: maroon; }
+span.navy { color: navy; }
+span.olive { color: olive; }
+span.purple { color: purple; }
+span.red { color: red; }
+span.silver { color: silver; }
+span.teal { color: teal; }
+span.white { color: white; }
+span.yellow { color: yellow; }
+
+span.aqua-background { background: aqua; }
+span.black-background { background: black; }
+span.blue-background { background: blue; }
+span.fuchsia-background { background: fuchsia; }
+span.gray-background { background: gray; }
+span.green-background { background: green; }
+span.lime-background { background: lime; }
+span.maroon-background { background: maroon; }
+span.navy-background { background: navy; }
+span.olive-background { background: olive; }
+span.purple-background { background: purple; }
+span.red-background { background: red; }
+span.silver-background { background: silver; }
+span.teal-background { background: teal; }
+span.white-background { background: white; }
+span.yellow-background { background: yellow; }
+
+span.big { font-size: 2em; }
+span.small { font-size: 0.6em; }
+
+span.underline { text-decoration: underline; }
+span.overline { text-decoration: overline; }
+span.line-through { text-decoration: line-through; }
+
+div.unbreakable { page-break-inside: avoid; }
+
+
+/*
+ * xhtml11 specific
+ *
+ * */
+
+div.tableblock {
+  margin-top: 1.0em;
+  margin-bottom: 1.5em;
 }
-div.sidebar-title, div.image-title {
-  color: #527bbd;
-  font-family: sans-serif;
+div.tableblock > table {
+  border: 3px solid #527bbd;
+}
+thead, p.table.header {
   font-weight: bold;
-  margin-top: 0.0em;
-  margin-bottom: 0.5em;
+  color: #527bbd;
+}
+p.table {
+  margin-top: 0;
+}
+/* Because the table frame attribute is overriden by CSS in most browsers. */
+div.tableblock > table[frame="void"] {
+  border-style: none;
+}
+div.tableblock > table[frame="hsides"] {
+  border-left-style: none;
+  border-right-style: none;
+}
+div.tableblock > table[frame="vsides"] {
+  border-top-style: none;
+  border-bottom-style: none;
 }
 
-div.listingblock div.content {
-  border: 1px solid silver;
-  background: #f4f4f4;
-  padding: 0.5em;
+
+/*
+ * html5 specific
+ *
+ * */
+
+table.tableblock {
+  margin-top: 1.0em;
+  margin-bottom: 1.5em;
+}
+thead, p.tableblock.header {
+  font-weight: bold;
+  color: #527bbd;
+}
+p.tableblock {
+  margin-top: 0;
+}
+table.tableblock {
+  border-width: 3px;
+  border-spacing: 0px;
+  border-style: solid;
+  border-color: #527bbd;
+  border-collapse: collapse;
+}
+th.tableblock, td.tableblock {
+  border-width: 1px;
+  padding: 4px;
+  border-style: solid;
+  border-color: #527bbd;
 }
 
-div.quoteblock-attribution {
-  padding-top: 0.5em;
+table.tableblock.frame-topbot {
+  border-left-style: hidden;
+  border-right-style: hidden;
+}
+table.tableblock.frame-sides {
+  border-top-style: hidden;
+  border-bottom-style: hidden;
+}
+table.tableblock.frame-none {
+  border-style: hidden;
+}
+
+th.tableblock.halign-left, td.tableblock.halign-left {
+  text-align: left;
+}
+th.tableblock.halign-center, td.tableblock.halign-center {
+  text-align: center;
+}
+th.tableblock.halign-right, td.tableblock.halign-right {
   text-align: right;
 }
 
-div.verseblock-content {
-  white-space: pre;
+th.tableblock.valign-top, td.tableblock.valign-top {
+  vertical-align: top;
 }
-div.verseblock-attribution {
-  padding-top: 0.75em;
-  text-align: left;
+th.tableblock.valign-middle, td.tableblock.valign-middle {
+  vertical-align: middle;
 }
-
-div.exampleblock-content {
-  border-left: 3px solid #dddddd;
-  padding-left: 0.5em;
+th.tableblock.valign-bottom, td.tableblock.valign-bottom {
+  vertical-align: bottom;
 }
 
-/* IE6 sets dynamically generated links as visited. */
-div#toc a:visited { color: blue; }
+
+/*
+ * manpage specific
+ *
+ * */
+
+body.manpage h1 {
+  padding-top: 0.5em;
+  padding-bottom: 0.5em;
+  border-top: 2px solid silver;
+  border-bottom: 2px solid silver;
+}
+body.manpage h2 {
+  border-style: none;
+}
+body.manpage div.sectionbody {
+  margin-left: 3em;
+}
+
+@media print {
+  body.manpage div#toc { display: none; }
+}
+
+
 </style>
 <script type="text/javascript">
 /*<![CDATA[*/
-window.onload = function(){asciidoc.footnotes(); asciidoc.toc(2);}
 var asciidoc = {  // Namespace.
 
 /////////////////////////////////////////////////////////////////////
@@ -459,7 +579,7 @@ toc: function (toclevels) {
 
   function tocEntries(el, toclevels) {
     var result = new Array;
-    var re = new RegExp('[hH]([2-'+(toclevels+1)+'])');
+    var re = new RegExp('[hH]([1-'+(toclevels+1)+'])');
     // Function that scans the DOM tree for header elements (the DOM2
     // nodeIterator API would be a better technique but not supported by all
     // browsers).
@@ -479,6 +599,25 @@ toc: function (toclevels) {
   }
 
   var toc = document.getElementById("toc");
+  if (!toc) {
+    return;
+  }
+
+  // Delete existing TOC entries in case we're reloading the TOC.
+  var tocEntriesToRemove = [];
+  var i;
+  for (i = 0; i < toc.childNodes.length; i++) {
+    var entry = toc.childNodes[i];
+    if (entry.nodeName.toLowerCase() == 'div'
+     && entry.getAttribute("class")
+     && entry.getAttribute("class").match(/^toclevel/))
+      tocEntriesToRemove.push(entry);
+  }
+  for (i = 0; i < tocEntriesToRemove.length; i++) {
+    toc.removeChild(tocEntriesToRemove[i]);
+  }
+
+  // Rebuild TOC entries.
   var entries = tocEntries(document.getElementById("content"), toclevels);
   for (var i = 0; i < entries.length; ++i) {
     var entry = entries[i];
@@ -506,24 +645,44 @@ toc: function (toclevels) {
  */
 
 footnotes: function () {
-  var cont = document.getElementById("content");
+  // Delete existing footnote entries in case we're reloading the footnodes.
+  var i;
   var noteholder = document.getElementById("footnotes");
+  if (!noteholder) {
+    return;
+  }
+  var entriesToRemove = [];
+  for (i = 0; i < noteholder.childNodes.length; i++) {
+    var entry = noteholder.childNodes[i];
+    if (entry.nodeName.toLowerCase() == 'div' && entry.getAttribute("class") == "footnote")
+      entriesToRemove.push(entry);
+  }
+  for (i = 0; i < entriesToRemove.length; i++) {
+    noteholder.removeChild(entriesToRemove[i]);
+  }
+
+  // Rebuild footnote entries.
+  var cont = document.getElementById("content");
   var spans = cont.getElementsByTagName("span");
   var refs = {};
   var n = 0;
   for (i=0; i<spans.length; i++) {
     if (spans[i].className == "footnote") {
       n++;
-      // Use [\s\S] in place of . so multi-line matches work.
-      // Because JavaScript has no s (dotall) regex flag.
-      note = spans[i].innerHTML.match(/\s*\[([\s\S]*)]\s*/)[1];
+      var note = spans[i].getAttribute("data-note");
+      if (!note) {
+        // Use [\s\S] in place of . so multi-line matches work.
+        // Because JavaScript has no s (dotall) regex flag.
+        note = spans[i].innerHTML.match(/\s*\[([\s\S]*)]\s*/)[1];
+        spans[i].innerHTML =
+          "[<a id='_footnoteref_" + n + "' href='#_footnote_" + n +
+          "' title='View footnote' class='footnote'>" + n + "</a>]";
+        spans[i].setAttribute("data-note", note);
+      }
       noteholder.innerHTML +=
         "<div class='footnote' id='_footnote_" + n + "'>" +
         "<a href='#_footnoteref_" + n + "' title='Return to text'>" +
         n + "</a>. " + note + "</div>";
-      spans[i].innerHTML =
-        "[<a id='_footnoteref_" + n + "' href='#_footnote_" + n +
-        "' title='View footnote' class='footnote'>" + n + "</a>]";
       var id =spans[i].getAttribute("id");
       if (id != null) refs["#"+id] = n;
     }
@@ -543,24 +702,45 @@ footnotes: function () {
       }
     }
   }
+},
+
+install: function(toclevels) {
+  var timerId;
+
+  function reinstall() {
+    asciidoc.footnotes();
+    if (toclevels) {
+      asciidoc.toc(toclevels);
+    }
+  }
+
+  function reinstallAndRemoveTimer() {
+    clearInterval(timerId);
+    reinstall();
+  }
+
+  timerId = setInterval(reinstall, 500);
+  if (document.addEventListener)
+    document.addEventListener("DOMContentLoaded", reinstallAndRemoveTimer, false);
+  else
+    window.onload = reinstallAndRemoveTimer;
 }
 
 }
+asciidoc.install();
 /*]]>*/
 </script>
 </head>
-<body>
+<body class="article">
 <div id="header">
 <h1>pipadoc - Documentation extractor</h1>
 <span id="author">Christian Thaeter</span><br />
-<span id="email"><tt>&lt;<a href="mailto:ct@pipapo.org">ct@pipapo.org</a>&gt;</tt></span><br />
-<div id="toc">
-  <div id="toctitle">Table of Contents</div>
-  <noscript><p><b>JavaScript must be enabled in your browser to display the table of contents.</b></p></noscript>
-</div>
+<span id="email"><code>&lt;<a href="mailto:ct@pipapo.org">ct@pipapo.org</a>&gt;</code></span><br />
+<span id="revdate">2015/6/27</span>
 </div>
 <div id="content">
-<div id="preamble">
+<div class="sect1">
+<h2 id="_introduction">Introduction</h2>
 <div class="sectionbody">
 <div class="paragraph"><p>Embedding documentation in program source files often yields the problem that the
 structure of a program is not the optimal structure for the associated documentation.
@@ -570,568 +750,1334 @@ special comments out of a source file and let one define rules how to bring the
 documentation into proper order.</p></div>
 <div class="paragraph"><p>Pipadoc only extracts and reorders the text from it special comments, it never ever looks at the
 sourcecode or the text it extracts.</p></div>
-<div class="paragraph"><p>This is somewhat similar to &#8220;Literate Programming&#8221; but it puts the emphasis back to the code.
+<div class="paragraph"><p>This is somewhat similar to &#8220;literate Programming&#8221; but it puts the emphasis back to the code.
 There is no need to extract the source from a literate source and in contrast to &#8220;Literate Programming&#8221;
 the order of source and text is defined by the programmer and programming language constraints.</p></div>
 <div class="paragraph"><p>Pipadoc is programming language and documentation system agnostic, all it requires is that
-the programming language has some line comments or block comments where one places doc statements
-on each block line (see <a href="#c-example">Example for C</a>).</p></div>
+the programming language has some form of comments starting with a defined character sequence
+and spaning to the end of the line.</p></div>
 </div>
 </div>
+<div class="sect1">
+<h2 id="_history">History</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>This <em>pipadoc</em> follows an earlier implementation with a slightly different (incompatible) syntax
+and less features which was implemented in AWK. Updating to the new syntax should be quite simple
+and is suggested for any Projects using pipadoc.</p></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_installation">Installation</h2>
+<div class="sectionbody">
+<div class="paragraph"><p><em>pipadoc</em> is single lua source file <code>pipadoc.lua</code> which is portable among most Lua versions
+(PUC Lua 5.1, 5.2, 5.3 and luajit). It ships with a <code>pipadoc.install</code> shell script which figures a
+suitable Lua version out and installs <code>pipadoc.lua</code> as <code>pipadoc</code> in a given directory or the current
+directory by default.</p></div>
+<div class="paragraph"><p>There are different ways how this can be used in a project:</p></div>
+<div class="ulist"><ul>
+<li>
+<p>
+One can rely on a pipadoc installed in $PATH and just call that from the build toolchain
+</p>
+</li>
+<li>
+<p>
+When a installed Lua version is known from the build toolchain one can include the <code>pipadoc.lua</code>
+  into the project and call it with the known Lua interpreter.
+</p>
+</li>
+<li>
+<p>
+One can ship the <code>pipadoc.lua</code> and <code>pipadoc.install</code> and do a local install in the build
+  directory and use this pipadoc thereafter
+</p>
+</li>
+</ul></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_usage">Usage</h2>
+<div class="sectionbody">
+<div class="literalblock">
+<div class="content">
+<pre><code>pipadoc [options...] [inputs..]
+  options are:
+    -v, --verbose                    increment verbosity level
+    -q, --quiet                      supresses any messages
+    -d, --debug                      set verbosity to maximum
+    -h, --help                       show this help
+    -c, --comment &lt;file&gt; &lt;comment&gt;   register a filetype pattern
+                                     for files matching a file pattern
+    -t, --toplevel &lt;name&gt;            sets 'name' as toplevel node [MAIN]
+    --no-defaults                    disables default filetypes and processors
+    --                               stops parsing the options and treats each
+                                     following argument as input file</code></pre>
+</div></div>
+<div class="literalblock">
+<div class="content">
+<pre><code>inputs are filenames or a '-' which indicates standard input</code></pre>
+</div></div>
+</div>
+</div>
+<div class="sect1">
 <h2 id="_basic_concepts">Basic concepts</h2>
 <div class="sectionbody">
-<div class="paragraph"><p><a id="BAS"></a></p></div>
-<div class="admonitionblock">
-<table><tr>
-<td class="icon">
-<div class="title">Note</div>
-</td>
-<td class="content">The following description uses the <a href="#ENV">default</a> settings for all examples.</td>
-</tr></table>
-</div>
-<div class="paragraph"><p>Pipadoc is controlled by special line comments.</p></div>
-<div class="paragraph"><div class="title">Direct comments</div><p><a id="DIR"></a></p></div>
-<div class="paragraph"><p>Line comments immediately followed by a special documentation character (the underscore <tt>_</tt> by default)
-are treated as direct comments. They will appear in order of appearance in the generated output.
-These can be used to do some boilerplate stuff. Usually one wants to define a controlling document and
-use this direct comments only there, since using them in different files might yield unexpected results
-since the order then depends on the load order of the files.</p></div>
-<div class="listingblock">
-<div class="content">
-<pre><tt>//_ This is a direct comment,
-//_ it will appear just verbatim in the generated output</tt></pre>
-</div></div>
-<div class="paragraph"><div class="title">Keys</div><p><a id="KEY"></a></p></div>
-<div class="paragraph"><p>A line comment immediately followed by a alphanumeric keyword (including the <tt>_</tt> underscore character)
-is treated as key, all such keyed comments can later be placed in intended order with
-a <a href="#SUB">substitution</a> comment.</p></div>
-<div class="listingblock">
-<div class="content">
-<pre><tt>//example This text will later be inserted where one uses the `//=example` substitution.
-//example All example lines are appended there in order even if they are defined at different
-//example places or in different files</tt></pre>
-</div></div>
-<div class="paragraph"><div class="title">Sorted Keys</div><p><a id="SOR"></a>
-A key can be appended with a dot <tt>.</tt> and a non-space string. This string will then be used to sort
-these lines alphabetically. This can be used to create sorted indices and glossars, as well as reordering
-paragraphs in stored under one primary key.</p></div>
-<div class="listingblock">
-<div class="content">
-<pre><tt>//example.omega This is sorted after the next line
-//example.alpha comes before the omega line above</tt></pre>
-</div></div>
-<div class="paragraph"><div class="title">Variable Substitution</div><p><a id="VAR"></a>
-The strings <tt>%FILE%</tt> and <tt>%LINE%</tt> are substituted with the filename and line currently proccessed.
-They can be used in the secondary sort key, as well as in documentation text directly. When one wants
-to use this words verbatim then then percent signs must be doubled as in <tt>%%FILE%%</tt> or <tt>%%LINE%%</tt>.</p></div>
-<div class="paragraph"><div class="title">Substitutions</div><p><a id="SUB"></a>
-A line comment immediately followed by a special <tt>substitution</tt> character (the equal <tt>=</tt> sign by default)
-followed by a <a href="#KEY">key</a> will be replaced by the text defined under that key. The rest of the line
-is ignored and can be used as comment.</p></div>
-<div class="listingblock">
-<div class="content">
-<pre><tt>//=example this will insert anything defined under `//example` here</tt></pre>
-</div></div>
-</div>
-<h2 id="_invocation">Invocation</h2>
-<div class="sectionbody">
-<div class="paragraph"><p><a id="INV"></a></p></div>
-<div class="paragraph"><p>Pipadoc is called with a list of files from which the documentation shall be extracted.
-The extracted documentation is piped to stdout. No other command line options are available.</p></div>
-<div class="paragraph"><p>There are few environment variables and commandline options to do <a href="#ENV">basic configuration</a>.</p></div>
-</div>
-<h2 id="_documenting_files">Documenting Files</h2>
-<div class="sectionbody">
-<div class="paragraph"><p><a id="USE"></a></p></div>
-<div class="paragraph"><p>Usually one wants to write documentation in more or less smaller blocks which later shall be
-brought into proper order. The <a href="#SUB">substitutions</a> feature is the key for this. One writes
-his documentation blocks with comments which later get replaced by the right sorting key and
-finally brought into (alphabetical) stable-sort order. You might take a look at the pipadoc
-source itself to see it in action.</p></div>
-<div class="listingblock">
-<div class="title">A small C99 Program</div>
-<div class="content"><!-- Generator: GNU source-highlight 3.1.4
-by Lorenzo Bettini
-http://www.lorenzobettini.it
-http://www.gnu.org/software/src-highlite -->
-<pre><tt><span style="font-style: italic"><span style="color: #9A1900">//intro This is the well known ``Hello World'' example</span></span>
-<span style="font-style: italic"><span style="color: #9A1900">//glos.helloworld A common program to show examples for programming language and tools</span></span>
-
-<span style="font-style: italic"><span style="color: #9A1900">//depends Only the Standard C library is needed</span></span>
-<span style="font-weight: bold"><span style="color: #000080">#include</span></span> <span style="color: #FF0000">&lt;stdio.h&gt;</span>
-
-<span style="color: #009900">int</span> <span style="font-weight: bold"><span style="color: #000000">main</span></span><span style="color: #990000">(</span><span style="color: #009900">int</span> argc<span style="color: #990000">,</span> <span style="color: #009900">char</span><span style="color: #990000">*</span> argv<span style="color: #990000">[])</span>
-<span style="color: #FF0000">{</span>
-  <span style="font-style: italic"><span style="color: #9A1900">//hello print the first commandline argument</span></span>
-  <span style="font-style: italic"><span style="color: #9A1900">//glos.argument the text you pass to the programm when calling it from the shell</span></span>
-  <span style="font-style: italic"><span style="color: #9A1900">//hello if no argument is given, then exit silently</span></span>
-  <span style="font-weight: bold"><span style="color: #0000FF">if</span></span> <span style="color: #990000">(</span>argc <span style="color: #990000">&gt;</span> <span style="color: #993399">1</span><span style="color: #990000">)</span>
-    <span style="font-weight: bold"><span style="color: #000000">printf</span></span><span style="color: #990000">(</span><span style="color: #FF0000">"Hello %s</span><span style="color: #CC33CC">\n</span><span style="color: #FF0000">"</span><span style="color: #990000">,</span> argv<span style="color: #990000">[</span><span style="color: #993399">1</span><span style="color: #990000">]);</span>
-  <span style="font-weight: bold"><span style="color: #0000FF">return</span></span> <span style="color: #993399">0</span><span style="color: #990000">;</span>
-<span style="color: #FF0000">}</span>
-
-<span style="font-style: italic"><span style="color: #9A1900">// Now the document structure with substitutions:</span></span>
-<span style="font-style: italic"><span style="color: #9A1900">//_ Yet another 'Hello' program</span></span>
-<span style="font-style: italic"><span style="color: #9A1900">//_</span></span>
-<span style="font-style: italic"><span style="color: #9A1900">//=intro introduction first right after the title</span></span>
-<span style="font-style: italic"><span style="color: #9A1900">//intro</span></span>
-<span style="font-style: italic"><span style="color: #9A1900">//=hello The main documentation</span></span>
-<span style="font-style: italic"><span style="color: #9A1900">//_</span></span>
-<span style="font-style: italic"><span style="color: #9A1900">//_ Appendix</span></span>
-<span style="font-style: italic"><span style="color: #9A1900">//_ Dependencies:</span></span>
-<span style="font-style: italic"><span style="color: #9A1900">//=depends</span></span>
-<span style="font-style: italic"><span style="color: #9A1900">//_ Glossary</span></span>
-<span style="font-style: italic"><span style="color: #9A1900">//=glos glossary will be sorted</span></span></tt></pre></div></div>
-<div class="paragraph"><p>Runnning this through pipadoc gives following output:</p></div>
-<div class="listingblock">
-<div class="content">
-<pre><tt>Yet another 'Hello' program
-
-This is the well known ``Hello World'' example
-
-print the first commandline argument
-if no argument is given, then exit silently
-
-Appendix
-Dependencies:
-Only the Standard C library is needed
-Glossary
-the text you pass to the programm when calling it from the shell
-A common program to show examples for programming language and tools</tt></pre>
-</div></div>
-</div>
-<h2 id="_documentation_only_files">Documentation Only Files</h2>
-<div class="sectionbody">
-<div class="paragraph"><p><a id="SXT"></a></p></div>
-<div class="paragraph"><p>One can write documentation without the need of pipadoc special comments in files
-which have a configured extension (see the <a href="#ENVSXT">SXT</a> environment variable).
-Each line in such a file which does not have a pipadoc special comment is then implicitly
-prepended with the line comment sequence and the basename of that file, for example
-lines in a file <em>foo.txt</em> will be treated as if they where written with `//foo ` in front of
-them. Later <a href="#SUB">substitutions</a> can be used to organize the document.
-When such a file has an ordinary pipadoc special comment line then this takes precedence over
-the implicit commenting.</p></div>
-</div>
-<h2 id="_commandline_options_and_environment_variables">Commandline options and Environment Variables</h2>
-<div class="sectionbody">
-<div class="paragraph"><p><a id="ENV"></a></p></div>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-<tt>-c</tt> <tt>--comment</tt> <tt>COM=</tt>
-</dt>
-<dd>
-<p>
-  Defines the line-comment character used in the source file.
-  Defaults to <tt>//</tt> (C++/C99) if not set. Set this to <tt>#</tt> for shell
-  like languages.
-</p>
-</dd>
-<dt class="hdlist1">
-<tt>-d</tt> <tt>--docchar</tt> <tt>DOC=</tt>
-</dt>
-<dd>
-<p>
-  The Documentation character which must follow a line comment to be recognized
-  by pipadoc as documentation. Either one for local definitions or two for global
-  definitions are used. Defaults to <tt>_</tt> and needs rarely to be changed.
-</p>
-</dd>
-<dt class="hdlist1">
-<tt>-s</tt> <tt>--substchar</tt> <tt>SUB=</tt>
-</dt>
-<dd>
-<p>
-  Substitution character. Defaults to <tt>=</tt> and rarely needs to be changed.
-  See <a href="#SUB">substitutions</a> for details.
-</p>
-</dd>
-<dt class="hdlist1">
-<tt>-x</tt> <tt>--sectionext</tt> <tt>SXT=</tt>
-</dt>
-<dd>
-<p>
-  Section eXTention. Defaults to <tt>.txt</tt>.
-  See <a href="#SXT">plaintext files</a> for details.
-</p>
-</dd>
-<dt class="hdlist1">
-<tt>-p</tt> <tt>--pluginext</tt> <tt>PLG=</tt>
-</dt>
-<dd>
-<p>
-  Extension for <a href="#PLU">awk plugins</a> to implement generic text manipulations and macros.
-  Defaults to <em>.pawk</em>
-</p>
-</dd>
-</dl></div>
-<div class="dlist" id="ENVSXT"><dl>
-<dt class="hdlist1">
-<tt>-P</tt> <tt>--plugin</tt>
-</dt>
-<dd>
-<p>
-  adds a plugin explicitly (not obeying the plugin extension)
-</p>
-</dd>
-</dl></div>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-<tt>-v</tt> <tt>--verbose</tt>
-</dt>
-<dd>
-<p>
- turns verbosity on (prints the configuration and all files to be processed)
-</p>
-</dd>
-</dl></div>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-<tt>-n</tt> <tt>--do-nothing</tt>
-</dt>
-<dd>
-<p>
-  don&#8217;t extract docs, shows what would be done together with <tt>-v</tt>.
-</p>
-</dd>
-</dl></div>
-</div>
-<h2 id="_plugins">Plugins</h2>
-<div class="sectionbody">
-<div class="paragraph"><p><a id="PLU"></a>
-Pipadoc can be extended with awk. This plugins are <tt>awk</tt> snippets which are included into
-the processing stream. Writing plugins is explained later.
-When a plugin appears twice within the commandline options then it is included as source too
-this is used to self-document plugins.</p></div>
-</div>
-<h2 id="_available_plugins">Available Plugins</h2>
-<div class="sectionbody">
-<h3 id="_asciidoc">asciidoc</h3><div style="clear:left"></div>
-<div class="paragraph"><p><a id="asciidoc"></a>
-Defines macros for headers and paragaphs with automatic index generation
-for asciidoc markup. Also includeds comments about the source from where
-documentation got extracted.</p></div>
+<div class="paragraph"><p>Pipadoc is controlled by special line comments. This is choosen because the most common denominator
+between almost all programming languages is that they have some form of <em>line comment</em>, that is some
+character sequence which defines the rest of the line as comment.</p></div>
+<div class="paragraph"><p>This line comments are enhanced by a simple syntax to make them pipadoc comments. Basically the comment
+character followed directly (without any extra space character) by some definition (see below) becomes
+a pipadoc comment.</p></div>
+<div class="sect2">
+<h3 id="_pipadoc_syntax">Pipadoc Syntax</h3>
+<div class="paragraph"><p>Any <em>linecomment</em> of the programming language directly (without spaces) followed by a optional
+alphanumeric section name, followed by an operator, followed by an optional argument and then the
+documentaton text. Only lines qualitfy this syntax are processed as pipapdoc documentation.</p></div>
+<div class="paragraph"><p>The formal syntax looks like:</p></div>
 <div class="literalblock">
-<div class="title">PARA</div>
 <div class="content">
-<pre><tt>PARA Name; Index ; Explanation</tt></pre>
-</div></div>
-<div class="paragraph"><p>Starts a new paragraph with <em>Name</em> as title. When <em>Index</em> is supplied sorting it under
-<em>Index</em> under the <tt>index</tt> Key with a short <em>Explanation</em> in this index.</p></div>
-<div class="listingblock">
-<div class="content">
-<pre><tt>//hello PARA Saying Hello; hello; prints a friendly greeting
-//hello PARA Saying Hello;;</tt></pre>
+<pre><code>pipadoc = [source] &lt;linecomment&gt; [section] &lt;operator&gt; [arg] [..space.. [documentation_text]]</code></pre>
 </div></div>
 <div class="literalblock">
-<div class="title">HEAD</div>
 <div class="content">
-<pre><tt>HEADtyp Name; Index; Explanation</tt></pre>
-</div></div>
-<div class="paragraph"><p>Starts a new header of level <em>typ</em> (see below) with <em>Name</em> as title. When <em>Index</em> is supplied,
-sorting it under <em>Index</em> under the <tt>index</tt> Key with a short <em>Explanation</em> in this index.
-<em>typ</em> can be a single character denoting the asciidoc levels for titles (=.-,~,^ or <tt>) or one of
-<em></tt>+</em> <em>--</em> <em>==</em> used to increment, decrement or keep the title level. The later works only within
-a single source file for now.</p></div>
-<div class="listingblock">
-<div class="content">
-<pre><tt>//hello HEAD- Level 1 Heading; head1; second level heading</tt></pre>
+<pre><code>source = ..any sourcecode text..</code></pre>
 </div></div>
 <div class="literalblock">
-<div class="title">INDEX</div>
 <div class="content">
-<pre><tt>INDEX Name; Index; Explanation</tt></pre>
+<pre><code>linecomment = ..the linecomment sequence choosen by the filetype..</code></pre>
 </div></div>
-<div class="paragraph"><p>Creates a standalone index entry without an associated headline or paragraph.
-Used for index entries and links only.</p></div>
+<div class="literalblock">
+<div class="content">
+<pre><code>section = ..alphanumeric text including underscore and dots, but without spaces..</code></pre>
+</div></div>
+<div class="literalblock">
+<div class="content">
+<pre><code>operator = [:=@#] by default, one of the defined operators</code></pre>
+</div></div>
+<div class="literalblock">
+<div class="content">
+<pre><code>arg = ..alphanumeric text including underscore and dots, but without spaces..</code></pre>
+</div></div>
+<div class="literalblock">
+<div class="content">
+<pre><code>documentation_text = ..rest of the line, freeform text..</code></pre>
+</div></div>
+<div class="paragraph"><p>It is possible to extend pipadoc with plugins which provide new operators or new processors.</p></div>
+<div class="paragraph"><p>Documentation lines are proccessed according to their operator.</p></div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_sections">Sections</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>Text in pipadoc is appended to <em>sections</em>. This sections associated with a name. This sections are later brought in order
+in a <em>toplevel</em> section. Additionally instead just appending text to a named section, text can be appended under some
+alphanumeric key under that section. This enables later sorting for indexes and glossaries.</p></div>
+<div class="paragraph"><p>Sections can span a block of lines (until another section is set) or one-line setting a section only for the current
+comment line. Section blocks are selected when the pipadoc comment defines a section and maybe a key but the rest of the
+is empty, every subsequent line which does not define a new section block is then appended to the current block.</p></div>
+<div class="paragraph"><p>One-Line sections are pipadoc comments which define a section and maybe a key and include some documentation text right
+away.</p></div>
+<div class="paragraph"><p>When no section is set in a file, then the block section name defaults to the files name up, but excluding to the first dot.</p></div>
+<div class="paragraph"><p>Pipadoc needs a receipe how to assemble all sections togehter. This is done in a <em>toplevel</em> section which defaults to the
+name <em>MAIN</em>.</p></div>
+<div class="listingblock">
+<div class="title">An example document (assume the name example.sh)</div>
+<div class="content">
+<pre><code>#!/bin/sh
+#: here the default section is 'example', derrived from 'example.sh'
+#oneline:o this is appended to the section 'oneline' under key 'o'
+#: back to the 'example' section
+#newname:
+#: this starts a new section block named 'newname'
+#oneline:a this is appended to the section 'oneline' under key 'a'
+#MAIN:
+#: Assemble the document
+#: first the 'newname'
+#=newname
+#: then 'example'
+#=example
+#: and finally 'oneline' alphabetically sorted by keys
+#@oneline</code></pre>
+</div></div>
+<div class="paragraph"><p>Will result in</p></div>
 <div class="listingblock">
 <div class="content">
-<pre><tt>//hello INDEX hello; hello; a greeting</tt></pre>
+<pre><code>Assemble the document
+first the 'newname'
+this starts a new section block named 'newname'
+then 'example'
+here the default section is 'example', derrived from 'example.sh'
+back to the 'example' section
+and finally 'oneline' alphabetically sorted by keys
+this is appended to the section 'oneline' under key 'a'
+this is appended to the section 'oneline' under key 'o'</code></pre>
 </div></div>
-<h3 id="_nobug_annotations">NoBug annotations</h3><div style="clear:left"></div>
-<div class="paragraph"><p><a id="nobugannotations"></a></p></div>
-<div class="paragraph"><p>The NoBug debugging library (<a href="http://nobug.pipapo.org">http://nobug.pipapo.org</a>) provides
-annotations for C/C++ code. This plugin extracts the
-<tt>TODO()</tt> <tt>PLANNED()</tt> and <tt>FIXME()</tt> macros under their respective
-Key. This can be used to integrate a very lightweight issue tracking
-system within the source. For an example usage see the NoBug sources
-itself and the <em>nobug_issues.txt</em> Makefile.am target.</p></div>
-<h3 id="_verbatim">verbatim</h3><div style="clear:left"></div>
-<div class="paragraph"><p><a id="verbatim"></a></p></div>
-<div class="paragraph"><p>Include the code <strong>before</strong> the VERBATIM doc comment</p></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_filetypes">Filetypes</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>Pipadoc needs to know about the syntax of line comments of the files it is reading. For this one can
+register patterns to be matched against the filename together with a list of line comment characters.</p></div>
+<div class="paragraph"><p>Pipadoc includes definitions for some common filetypes already.</p></div>
+<div class="paragraph"><p>A special case is that when a line comment is defined as an empty string ("") then every line of a file is
+considered as documentation but no special operations apply. This is used for parsing plaintext documentation
+files. Which also uses the "PIPADOC:" keyword to enable special operations within text files.</p></div>
+<div class="sect2">
+<h3 id="_pipadoc_has_builtin_support_for_following_languages">pipadoc has builtin support for following languages</h3>
 <div class="ulist"><ul>
 <li>
 <p>
-optional characters between the doc comment and <em>VERBATIM</em> will be prepended before the the output,
+Autoconf, Automake
 </p>
 </li>
 <li>
 <p>
-optional spaces after <em>VERBATIM</em> will be removed from the begin of the output
+C, C++, Headerfiles
 </p>
 </li>
 <li>
 <p>
-an optional regex after <em>VERBATIM</em> will be removed from the end of the output
+CMake
+</p>
+</li>
+<li>
+<p>
+Delphi, Pascal
+</p>
+</li>
+<li>
+<p>
+Java, C#
+</p>
+</li>
+<li>
+<p>
+Javascript
+</p>
+</li>
+<li>
+<p>
+Lua
+</p>
+</li>
+<li>
+<p>
+Makefiles
+</p>
+</li>
+<li>
+<p>
+Objective-C
+</p>
+</li>
+<li>
+<p>
+PHP
+</p>
+</li>
+<li>
+<p>
+Prolog
+</p>
+</li>
+<li>
+<p>
+Python
+</p>
+</li>
+<li>
+<p>
+Ruby
+</p>
+</li>
+<li>
+<p>
+SCons
+</p>
+</li>
+<li>
+<p>
+Shell, Perl, AWK
+</p>
+</li>
+<li>
+<p>
+SQL
+</p>
+</li>
+<li>
+<p>
+Textfiles, Pipadoc (.pdoc)
+</p>
+</li>
+<li>
+<p>
+Visual Basic
 </p>
 </li>
 </ul></div>
-<div class="paragraph"><p>for example:</p></div>
-<div class="listingblock">
-<div class="content">
-<pre><tt>  test;  //foo This is a VERBATIM  ;</tt></pre>
-</div></div>
-<div class="paragraph"><p>will become <tt>This is a test</tt></p></div>
 </div>
-<h2 id="_writing_plugins">Writing Plugins</h2>
-<div class="sectionbody">
-<div class="paragraph"><p><a id="pluginwritung"></a>
-Plugins are normal <em>awk</em> snippets which can contain arbitary
-rules. They are inserted quite early in the processing chain to
-give the user fine and low level of control, right after <em>plaintext</em>
-documentation files are processed. That is input coming from
-such an file is normalized to look like an ordinary documentation
-comment to the rest of pipadoc.</p></div>
-<div class="paragraph"><p>pipadoc works in 2 passes, first it collects all potential
-documentation comments. Rules (and plugins) use the provided
-<tt>append(key, sort, text)</tt> function to store the extracted
-documentation and finally this stored text is ordered as defined
-with substitutions and sorted by the sort entry. If no sort entry
-is available, then an empty string "" should be used.</p></div>
-<h3 id="_matching_lines">Matching Lines</h3><div style="clear:left"></div>
-<div class="paragraph"><p><a id="pluginmatching"></a>
-Selecting lines containing documentation is easiest done with the
-awk <tt>match</tt> function, because programming languages rarely follow
-a tabular layout used by awk to tokenize input.</p></div>
-<div class="paragraph"><p>Pipadoc provides the <em>com</em> variable containing the currently defined
-comment character, this can be used to match documentation comments
-as following:</p></div>
-<div class="listingblock">
-<div class="content">
-<pre><tt>match($0, com"([[:alpha:]][[:alnum:]_]*)[.]?([[:alnum:]_]*) (TEXT TO MATCH HERE)", p) {</tt></pre>
-</div></div>
-<div class="paragraph"><p>After this the array <tt>p[]</tt> containd the extracted matches:</p></div>
-<div class="ulist"><ul>
-<li>
-<p>
-p[1] contains the <em>key</em>
-</p>
-</li>
-<li>
-<p>
-p[2] contains the <em>sort</em> key
-</p>
-</li>
-<li>
-<p>
-p[3] and upward can contain anything you want to match there
-</p>
-</li>
-</ul></div>
-<h3 id="_actions">Actions</h3><div style="clear:left"></div>
-<div class="paragraph"><p><a id="pluginaction"></a>
-One can do any kind of awk processing in the body of an awk rule.
-The only important things are that extracted/formated documentation
-should be stored with <tt>append()</tt> as explained earlier and the if one
-wants to stop processing the current line (because it got just added)
-he has to call the <tt>next</tt> statement finally. If not done then the
-following rules are matched against the current line again. This might
-be intentional, but often it is not desired.</p></div>
 </div>
-<h2 id="_appendix">Appendix</h2>
-<div class="sectionbody">
-<div class="listingblock" id="c-example">
-<div class="title">Using C89 block comments with pipadoc: <tt>example.c</tt></div>
-<div class="content">
-<pre><tt>/*
-**_ this is a documentation line
-*/</tt></pre>
-</div></div>
-<div class="paragraph"><p>use <tt>pipadoc --comment '**' example.c</tt> to extract the documentation.</p></div>
-<h3 id="_creating_this_file">Creating this File</h3><div style="clear:left"></div>
-<div class="paragraph"><p>Pipadoc itself is documented with asciidoc, one can extract the asciidoc source with
-by:</p></div>
-<div class="listingblock">
-<div class="content">
-<pre><tt>COM='#' ./pipadoc  pipadoc *.pawk *.pawk &gt;pipadoc.txt</tt></pre>
-</div></div>
-<div class="paragraph"><p>And then further process the generated pipadoc.txt with the asciidoc toolchain.</p></div>
-<h3 id="_license">License</h3><div style="clear:left"></div>
-<div class="literalblock" id="LIC">
-<div class="content">
-<pre><tt>Copyright (C)                        Pipapo Project
- 2009, 2010, 2011                    Christian Thaeter &lt;ct@pipapo.org&gt;
-
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2, or (at your option)
-any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program; if not, contact Christian Thaeter &lt;ct@pipapo.org&gt;.</tt></pre>
-</div></div>
-<h3 id="_license_explanation">License Explanation</h3><div style="clear:left"></div>
-<div class="paragraph"><p>The License (GPL) only applies to pipadoc, its plugins and any derivative work. The
-purpose of pipadoc is extracting documentation from other files, this does not mean
-that the source from which the documentation is extracted need to be licensed under
-the GPL, neither does this mean that the extracted documentaton need to be licensed
-under the GPL. This makes it possible to use pipadoc for commercial/propietary software.</p></div>
-<div class="paragraph"><p>The GPL applies when you distribute pipadoc itself, in original or modified form. Since
-pipadoc is written in bash/awk you already distribute the source as well, so this should
-not pose any legal problem.</p></div>
-<div class="paragraph"><p>When you make any improvements or modifications to pipadoc please consider to contact
-Christian Thäter &lt;<a href="mailto:ct@pipapo.org">ct@pipapo.org</a>&gt; for including them into the mainline.</p></div>
 </div>
-<h2 id="_index">Index</h2>
+<div class="sect1">
+<h2 id="_operators">Operators</h2>
 <div class="sectionbody">
+<div class="paragraph"><p>Operators define the core functionality of pipadoc. They are mandatory in the pibadoc syntax
+to define a pipadoc comment line. It is possible (but rarely needed) to define additional
+operators. Operators must be a single punctuation character</p></div>
+<div class="sect2">
+<h3 id="_built_in_operators">Built in operators</h3>
 <div class="dlist"><dl>
 <dt class="hdlist1">
-<a href="#asciidoc">asciidoc</a>
+<code>:</code> 
 </dt>
 <dd>
 <p>
-support for asciidoc markup and automatic index generation
-</p>
-</dd>
-<dt class="hdlist1">
-<a href="#BAS">Basic concepts</a>
-</dt>
-<dd>
-<p>
-concepts
-</p>
-</dd>
-<dt class="hdlist1">
-<a href="#DIR">Direct comments</a>
-</dt>
-<dd>
-<p>
-low level control
-</p>
-</dd>
-<dt class="hdlist1">
-<a href="#ENV">Commandline options and Environment Variables</a>
-</dt>
-<dd>
-<p>
-configuration options
-</p>
-</dd>
-<dt class="hdlist1">
-<a href="#INV">Invocation</a>
-</dt>
-<dd>
-<p>
-running pipadoc
-</p>
-</dd>
-<dt class="hdlist1">
-<a href="#KEY">Keys</a>
-</dt>
-<dd>
-<p>
-sectioning content
-</p>
-</dd>
-<dt class="hdlist1">
-<a href="#nobugannotations">NoBug annotations</a>
-</dt>
-<dd>
-<p>
-extracting NoBug annotations from the souce
-</p>
-</dd>
-<dt class="hdlist1">
-<a href="#PLU">Plugins</a>
-</dt>
-<dd>
-<p>
-extending pipadoc
-</p>
-</dd>
-<dt class="hdlist1">
-<a href="#pluginaction">Actions</a>
-</dt>
-<dd>
-<p>
-handling matched text in a plugin
-</p>
-</dd>
-<dt class="hdlist1">
-<a href="#pluginmatching">Matching Lines</a>
-</dt>
-<dd>
-<p>
-how to select lines
-</p>
-</dd>
-<dt class="hdlist1">
-<a href="#pluginwritung">Writing Plugins</a>
-</dt>
-<dd>
-<p>
-how to write a plugin
-</p>
-</dd>
-<dt class="hdlist1">
-<a href="#SOR">Sorted Keys</a>
-</dt>
-<dd>
-<p>
-sorted sections
-</p>
-</dd>
-<dt class="hdlist1">
-<a href="#SUB">Substitutions</a>
-</dt>
-<dd>
-<p>
-paste sections
-</p>
-</dd>
-<dt class="hdlist1">
-<a href="#SXT">Documentation Only Files</a>
-</dt>
-<dd>
-<p>
-plain documentation
-</p>
-</dd>
-<dt class="hdlist1">
-<a href="#USE">Documenting Files</a>
-</dt>
-<dd>
-<p>
-usage
-</p>
-</dd>
-<dt class="hdlist1">
-<a href="#VAR">Variable Substitution</a>
-</dt>
-<dd>
-<p>
-variable substitution
-</p>
-</dd>
-<dt class="hdlist1">
-<a href="#verbatim">verbatim</a>
-</dt>
-<dd>
-<p>
-including source verbatim in the documentation
+    The documentation operator. Defines normal documentation text. Each pipadoc comment using the <code>:</code>
+    operator is processed as potential documentation. First all enabled <em>processors</em> are run over it and
+    finally the text is appended to the current section(/key)
 </p>
 </dd>
 </dl></div>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+<code>=</code> 
+</dt>
+<dd>
+<p>
+    Section paste operator. Takes a section name as argument and will paste that section in place.
+</p>
+</dd>
+</dl></div>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+<code>@</code> 
+</dt>
+<dd>
+<p>
+    Takes a section name as argument and will paste section text alphabetically sorted by their keys.
+</p>
+</dd>
+</dl></div>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+<code>#</code> 
+</dt>
+<dd>
+<p>
+    Takes a section name as argument and will paste section text numerically sorted by their keys.
+</p>
+</dd>
+</dl></div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_processors">Processors</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>Each line containing a pipadoc comment are passed down through <em>processors</em> which can do
+additinal actions for manipulating the generated Documentaton. This processors are extendable
+in Lua.</p></div>
+<div class="sect2">
+<h3 id="_built_in_processors">Built in processors</h3>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+<code>varsubst</code>
+</dt>
+<dd>
+<p>
+    When no variable with that name is defines, a warning is printed and the variable name
+    itself is substituted. Variables expansion is recursive and nested, but stops when loops
+    are detected. The percent sign can be escaped with a backslash (\%) or by the
+</p>
+</dd>
+</dl></div>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+<code>verbatim</code>
+</dt>
+<dd>
+<p>
+    lifts a the sourcecode preceeding the pipadoc comment or parts of it into the
+    output. A percent sign followed by the keyword <code>VERBATIM</code> will be replaced with
+    with the sourcecode before the pipadoc comment. When the `VERBATIM`is followed by
+    a bracketed lua pattern (any kind of brackets are supported: () {} [] &lt;&gt;) then this
+    pattern is matched against the source part of the line. This match or the first
+    capture if it defines any is then pased in place of the VERBATIM statement.
+</p>
+</dd>
+</dl></div>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+<code>asciidoc</code>
+</dt>
+<dd>
+<p>
+    Defines some helpers for asciidoc formatted text.
+    Each start of a new section puts an asciidoc comment into the output
+    logging FILE:LINE pair from where it originates.
+</p>
+</dd>
+</dl></div>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+<code>tracker</code>
+</dt>
+<dd>
+<p>
+    Adds some special support for the sections TODO, FIXME and PLANNED.
+    Each line of the saied sections will be prefixed with an asciidoc reference
+    to its origin.
+</p>
+</dd>
+</dl></div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_documentation_variables">Documentation Variables</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>The <em>docvars</em> Lua table holds key/value pairs of variables with the global state
+of pipadoc. These can be used by the core and plugins in various ways. Debugging
+for example prints the FILE:LINE processed and there is the <em>varsubst</em> processor
+to substitute them in the documentation text. The user can set arbitary docvars
+from commandline.</p></div>
+<div class="sect2">
+<h3 id="_predefined_docvars">Predefined docvars</h3>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+<code>YEAR, MONTH, DAY, HOUR, MINUTE</code>
+</dt>
+<dd>
+<p>
+     Current date information
+</p>
+</dd>
+<dt class="hdlist1">
+<code>FILE</code>
+</dt>
+<dd>
+<p>
+    The file or section name currently processed or some special annotation
+    in angle brakets (eg <em>&lt;startup&gt;</em>) on other processing phases
+</p>
+</dd>
+<dt class="hdlist1">
+<code>LINE</code>
+</dt>
+<dd>
+<p>
+    Current line number of input or section, or indexing key
+    Lines start at 1, if set to 0 then some output formatters skip over it
+</p>
+</dd>
+<dt class="hdlist1">
+<code>NL</code>
+</dt>
+<dd>
+<p>
+    The linebreak character sequence, usually <em>\n</em> on unix systems but
+    can be changed with a commandline option
+</p>
+</dd>
+<dt class="hdlist1">
+<code>PERCENT</code>
+</dt>
+<dd>
+<p>
+    Escapes the percent sign
+</p>
+</dd>
+<dt class="hdlist1">
+<code>BACKSLASH</code>
+</dt>
+<dd>
+<p>
+    Escapes the backslash
+</p>
+</dd>
+<dt class="hdlist1">
+<code>SECTION</code>
+</dt>
+<dd>
+<p>
+     stores the current section name
+</p>
+</dd>
+</dl></div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_programming_api_for_extensions">Programming API for extensions</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>Some pipadoc lua functions are documented here to be used from plugins.</p></div>
+<div class="sect2">
+<h3 id="_logging_progress_and_errors">Logging Progress and Errors</h3>
+<div class="paragraph"><p>There are few function to log progress and report errors. All this functions take a
+variable argument list. Any Argument passed to them will be converted to a string and printed
+to stderr when the verbosity level is high enough.</p></div>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+<code>warn(...)</code>
+</dt>
+<dd>
+<p>
+  report a important but non fatal failure
+</p>
+</dd>
+<dt class="hdlist1">
+<code>echo(...)</code>
+</dt>
+<dd>
+<p>
+  report normal progress
+</p>
+</dd>
+<dt class="hdlist1">
+<code>dbg(...)</code>
+</dt>
+<dd>
+<p>
+  show verbose/debugging progress information
+</p>
+</dd>
+<dt class="hdlist1">
+<code>die(...)</code>
+</dt>
+<dd>
+<p>
+  report a fatal error and exit the programm
+</p>
+</dd>
+</dl></div>
+</div>
+<div class="sect2">
+<h3 id="_optional_lua_modules">Optional Lua Modules</h3>
+<div class="paragraph"><p><em>pipadoc</em> does not depend on any nonstandard Lua libraries, because they may not be installed on the target
+system. But some modules can be loaded optionally to augment its behavior and provide extra features.
+Plugin-writers should try to adhere to this practice if possible and use the <em>request</em> function instead the
+Lua <em>require</em>.</p></div>
+<div class="paragraph"><p>When luarocks is installed, then the <em>luarocks.loader</em> is loaded by default to make any moduke installed by
+luarocks available.</p></div>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+<code>request(name)</code>
+</dt>
+<dd>
+<p>
+  try to load optional modules
+  wraps lua <em>require</em> in a pcall so that failure to load a module results in <em>nil</em> rather than a error
+</p>
+</dd>
+</dl></div>
+</div>
+<div class="sect2">
+<h3 id="_typechecks">Typechecks</h3>
+<div class="paragraph"><p>There are some wrapers around <em>assert</em> to check externally supplied data. On success <em>var</em> will be returned
+otherwise an assertion error is raised.</p></div>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+<code>assert_type(var, expected)</code>
+</dt>
+<dd>
+<p>
+  checks that the <em>var</em> is of <em>type</em>
+</p>
+</dd>
+<dt class="hdlist1">
+<code>assert_char(var)</code>
+</dt>
+<dd>
+<p>
+  checks that <em>var</em> is a single character
+</p>
+</dd>
+<dt class="hdlist1">
+<code>assert_notnil(var)</code>
+</dt>
+<dd>
+<p>
+  checks that <em>var</em> is not <em>nil</em>
+</p>
+</dd>
+</dl></div>
+</div>
+<div class="sect2">
+<h3 id="_sections_2">Sections</h3>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+<code>section_append(section, key, action, value)</code>
+</dt>
+<dd>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+section
+</dt>
+<dd>
+<p>
+    name of the section to append to, must be a string
+</p>
+</dd>
+<dt class="hdlist1">
+key
+</dt>
+<dd>
+<p>
+    the subkey for sorting within that section. <em>nil</em> for appending text to normal sections
+</p>
+</dd>
+<dt class="hdlist1">
+action
+</dt>
+<dd>
+<p>
+    how to process the value in output, currently "text", "include" and "sort" are defined
+</p>
+</dd>
+<dt class="hdlist1">
+value
+</dt>
+<dd>
+<p>
+    the parameter for the action, usually the text to be included in the output.
+</p>
+<div class="literalblock">
+<div class="content">
+<pre><code>Append data to the given section/key</code></pre>
+</div></div>
+</dd>
+</dl></div>
+</dd>
+</dl></div>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+<code>section_get(section, key, index)</code>
+</dt>
+<dd>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+section
+</dt>
+<dd>
+<p>
+    name of the section to append to, must be a string
+</p>
+</dd>
+<dt class="hdlist1">
+key
+</dt>
+<dd>
+<p>
+    the subkey for sorting within that section. maybe <em>nil</em>
+</p>
+</dd>
+<dt class="hdlist1">
+index
+</dt>
+<dd>
+<p>
+    line number to query, when <em>nil</em> defaults to the last line
+</p>
+</dd>
+<dt class="hdlist1">
+returns
+</dt>
+<dd>
+<p>
+    action, value pair or nil
+</p>
+<div class="literalblock">
+<div class="content">
+<pre><code>query the action and value of the given section/key at index (or at end)</code></pre>
+</div></div>
+</dd>
+</dl></div>
+</dd>
+</dl></div>
+</div>
+<div class="sect2">
+<h3 id="_filetypes_2">Filetypes</h3>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+<code>filetype_register(names, linecommentseqs, ...)</code>
+</dt>
+<dd>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+names
+</dt>
+<dd>
+<p>
+      a Lua pattern or list of patterns matching filenames
+</p>
+</dd>
+<dt class="hdlist1">
+linecommentseqs
+</dt>
+<dd>
+<p>
+      a string or list of strings matching comments of the registered filetype
+</p>
+</dd>
+<dt class="hdlist1">
+&#8230;
+</dt>
+<dd>
+<p>
+      (PLANNED FEATURE)
+      the remaining arguments are a list of processors which should be enabled for files if this type
+</p>
+</dd>
+</dl></div>
+</dd>
+</dl></div>
+<div class="paragraph"><p>Register a new filetype.</p></div>
+<div class="paragraph"><p>For example, C and C++ Filetypes are registered like:</p></div>
+<div class="literalblock">
+<div class="content">
+<pre><code>filetype_register({"%.c$","%.cpp$","%.C$", "%.cxx$", "%.h$"}, {"//", "/*"})</code></pre>
+</div></div>
+</div>
+<div class="sect2">
+<h3 id="_processors_2">Processors</h3>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+<code>processor_register(name, func)</code>
+</dt>
+<dd>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+name
+</dt>
+<dd>
+<p>
+    name of the processor
+</p>
+</dd>
+<dt class="hdlist1">
+func
+</dt>
+<dd>
+<p>
+    a function which receives a table of the <em>context</em> parsed from the pipadoc commentline
+</p>
+</dd>
+</dl></div>
+</dd>
+</dl></div>
+<div class="paragraph"><p>Register a new processor. To be called from plugins. Processors need to be enabled
+to be used. Some are by default enabled, unless the --no-defaults commmandline option is
+used for invoking pipadoc. Some are bound to specific filetypes.</p></div>
+<div class="paragraph"><p>When plugins register new processors under the same name of an already existing processor
+the new processor will overrwrite the old one and become registered.</p></div>
+<div class="paragraph"><p>The context passed to the function is a table with following entries:</p></div>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+pre
+</dt>
+<dd>
+<p>
+    <em>source</em> part in before the comment character
+</p>
+</dd>
+<dt class="hdlist1">
+section
+</dt>
+<dd>
+<p>
+    parsed section name, will be empty in section-blocks to access the current
+    section name refer to
+</p>
+</dd>
+<dt class="hdlist1">
+op
+</dt>
+<dd>
+<p>
+    operator signifying the pipadoc operation
+</p>
+</dd>
+<dt class="hdlist1">
+arg
+</dt>
+<dd>
+<p>
+    word right after the operator
+</p>
+</dd>
+<dt class="hdlist1">
+text
+</dt>
+<dd>
+<p>
+    the documentation text
+</p>
+</dd>
+</dl></div>
+<div class="paragraph"><p>This function is free to modify the context in place or call other api funtions to generate
+additional documentation entities.</p></div>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+<code>processor_enable(...)</code>
+</dt>
+<dd>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+&#8230;
+</dt>
+<dd>
+<p>
+      called with an ordered list of processors to enable
+</p>
+</dd>
+</dl></div>
+</dd>
+</dl></div>
+<div class="paragraph"><p>enable the listed processors.</p></div>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+<code>operator_register(char, func)</code>
+</dt>
+<dd>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+char
+</dt>
+<dd>
+<p>
+    single punctuation character defining this operator
+</p>
+</dd>
+<dt class="hdlist1">
+func
+</dt>
+<dd>
+<p>
+    a function which receives a table of the <em>context</em> parsed from the pipadoc commentline
+</p>
+</dd>
+</dl></div>
+</dd>
+</dl></div>
+<div class="paragraph"><p>Operators drive the main functionality, like invoking the processors and generating the output.</p></div>
+<div class="paragraph"><p>see xref :processor_register[] and the pipadoc source for a detailed description of the context table</p></div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_todo">TODO</h2>
+<div class="sectionbody">
+<div class="dlist"><dl>
+<dt class="hdlist1">
+pipadoc.lua:328
+</dt>
+<dd>
+<p>
+  processors run when reading the files document order of steps somewhere
+</p>
+</dd>
+</dl></div>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+pipadoc.lua:474
+</dt>
+<dd>
+<p>
+  --alias match pattern --file-as match filename
+</p>
+</dd>
+</dl></div>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+pipadoc.lua:475
+</dt>
+<dd>
+<p>
+  -o --output
+</p>
+</dd>
+</dl></div>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+pipadoc.lua:476
+</dt>
+<dd>
+<p>
+  -l --load
+</p>
+</dd>
+</dl></div>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+pipadoc.lua:477
+</dt>
+<dd>
+<p>
+  --features  show a report which features (using optional lua modules) are available
+</p>
+</dd>
+</dl></div>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+pipadoc.lua:478
+</dt>
+<dd>
+<p>
+  list-processors
+</p>
+</dd>
+</dl></div>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+pipadoc.lua:479
+</dt>
+<dd>
+<p>
+  list-operators
+</p>
+</dd>
+</dl></div>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+pipadoc.lua:480
+</dt>
+<dd>
+<p>
+  list-sections
+</p>
+</dd>
+</dl></div>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+pipadoc.lua:481
+</dt>
+<dd>
+<p>
+  force filetype variant  foo.lua:.txt
+</p>
+</dd>
+</dl></div>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+pipadoc.lua:482
+</dt>
+<dd>
+<p>
+  orphans / doublettes
+</p>
+</dd>
+</dl></div>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+pipadoc.lua:483
+</dt>
+<dd>
+<p>
+  wordwrap
+</p>
+</dd>
+</dl></div>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+pipadoc.lua:484
+</dt>
+<dd>
+<p>
+  eat empty lines
+</p>
+</dd>
+</dl></div>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+pipadoc.lua:485
+</dt>
+<dd>
+<p>
+  variable replacements
+</p>
+</dd>
+</dl></div>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+pipadoc.lua:486
+</dt>
+<dd>
+<p>
+  add debug report (warnings/errors) to generated document PIPADOC_LOG section
+</p>
+</dd>
+</dl></div>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+pipadoc.lua:487
+</dt>
+<dd>
+<p>
+  lineending \n \r\n
+</p>
+</dd>
+</dl></div>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+pipadoc.lua:488
+</dt>
+<dd>
+<p>
+  wrap at blank/intelligent
+</p>
+</dd>
+</dl></div>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+pipadoc.lua:807
+</dt>
+<dd>
+<p>
+  plugins
+</p>
+</dd>
+</dl></div>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+pipadoc.lua:887
+</dt>
+<dd>
+<p>
+  globbing if no such file exists
+</p>
+</dd>
+</dl></div>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+pipadoc.lua:1063
+</dt>
+<dd>
+<p>
+  docme oneline vs block, default section name, MAIN section
+</p>
+</dd>
+</dl></div>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+pipadoc.lua:1064
+</dt>
+<dd>
+<p>
+  note that literal strings are not special
+</p>
+</dd>
+</dl></div>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+pipadoc.lua:1076
+</dt>
+<dd>
+<p>
+  optarg
+</p>
+</dd>
+</dl></div>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+pipadoc.lua:1087
+</dt>
+<dd>
+<p>
+  optarg
+</p>
+</dd>
+</dl></div>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+pipadoc.lua:1098
+</dt>
+<dd>
+<p>
+  optarg
+</p>
+</dd>
+</dl></div>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+pipadoc.lua:1113
+</dt>
+<dd>
+<p>
+  optarg
+</p>
+</dd>
+</dl></div>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+pipadoc.lua:1198
+</dt>
+<dd>
+<p>
+  asciidoc //source:line// comments like old pipadoc
+</p>
+</dd>
+</dl></div>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+pipadoc.lua:1199
+</dt>
+<dd>
+<p>
+  integrate old pipadoc.txt documentation
+</p>
+</dd>
+</dl></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_planned">PLANNED</h2>
+<div class="sectionbody">
+<div class="dlist"><dl>
+<dt class="hdlist1">
+pipadoc.lua:18
+</dt>
+<dd>
+<p>
+  directives: --! luacall()
+</p>
+</dd>
+</dl></div>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+pipadoc.lua:48
+</dt>
+<dd>
+<p>
+  macros/docvars  LUA_FUNC = "::\n "
+</p>
+</dd>
+</dl></div>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+pipadoc.lua:50
+</dt>
+<dd>
+<p>
+  log to PIPADOC_LOG section, later hooked in here
+</p>
+</dd>
+</dl></div>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+pipadoc.lua:89
+</dt>
+<dd>
+<p>
+  use echo() for progress
+</p>
+</dd>
+</dl></div>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+pipadoc.lua:121
+</dt>
+<dd>
+<p>
+  for pattern matching etc
+</p>
+</dd>
+</dl></div>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+pipadoc.lua:287
+</dt>
+<dd>
+<p>
+  processors to enable for the given filetypes, per filetype processors also supported by --! directives
+</p>
+</dd>
+</dl></div>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+pipadoc.lua:489
+</dt>
+<dd>
+<p>
+  wordwrap
+</p>
+</dd>
+</dl></div>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+pipadoc.lua:603
+</dt>
+<dd>
+<p>
+  more variable handling
+</p>
+</dd>
+</dl></div>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+pipadoc.lua:640
+</dt>
+<dd>
+<p>
+  obsolete this by variable substitutions
+</p>
+</dd>
+</dl></div>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+pipadoc.lua:668
+</dt>
+<dd>
+<p>
+  more asciidoc support
+</p>
+</dd>
+</dl></div>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+pipadoc.lua:674
+</dt>
+<dd>
+<p>
+  make each feature switchable, options to processor
+</p>
+</dd>
+</dl></div>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+pipadoc.lua:694
+</dt>
+<dd>
+<p>
+  use some docvars based templates to format this better (asciidoc, etc)
+</p>
+</dd>
+</dl></div>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+pipadoc.lua:762
+</dt>
+<dd>
+<p>
+  how to use context.text?
+</p>
+</dd>
+</dl></div>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+pipadoc.lua:775
+</dt>
+<dd>
+<p>
+  option for sorting locale
+</p>
+</dd>
+</dl></div>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+pipadoc.lua:776
+</dt>
+<dd>
+<p>
+  option for sorting (up/doen)
+</p>
+</dd>
+</dl></div>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+pipadoc.lua:793
+</dt>
+<dd>
+<p>
+  option for sorting (up/dowen)
+</p>
+</dd>
+</dl></div>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+pipadoc.lua:1201
+</dt>
+<dd>
+<p>
+  how to join (and then wordwrap) lines?
+</p>
+</dd>
+</dl></div>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+pipadoc.lua:1203
+</dt>
+<dd>
+<p>
+  bash like parameter expansion
+</p>
+</dd>
+</dl></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_fixme">FIXME</h2>
+<div class="sectionbody">
+<div class="dlist"><dl>
+<dt class="hdlist1">
+pipadoc.lua:206
+</dt>
+<dd>
+<p>
+  check syntax for --:key in block and oneline context
+</p>
+</dd>
+</dl></div>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+pipadoc.lua:355
+</dt>
+<dd>
+<p>
+  xref :docvars[]
+</p>
+</dd>
+</dl></div>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+pipadoc.lua:379
+</dt>
+<dd>
+<p>
+  more graceful error when processor is not supported?
+</p>
+</dd>
+</dl></div>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+pipadoc.lua:403
+</dt>
+<dd>
+<p>
+  xref :processor_register[]
+</p>
+</dd>
+</dl></div>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+pipadoc.lua:522
+</dt>
+<dd>
+<p>
+  docme why include /* comments
+</p>
+</dd>
+</dl></div>
+</div>
 </div>
 </div>
 <div id="footnotes"><hr /></div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2011-04-20 03:46:27 CEST
+Last updated
+ 2015-06-27 07:29:42 CEST
 </div>
 </div>
 </body>
