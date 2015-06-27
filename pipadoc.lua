@@ -695,7 +695,7 @@ function setup()
       assert_type(context, "table")
 
       -- insert source references as asciidoc comments
-      if docvars.SECTION == "TODO" or docvars.SECTION == "FIXME" or docvars.SECTION == "PLANNED" then
+      if docvars.ISECTION == "TODO" or docvars.ISECTION == "FIXME" or docvars.ISECTION == "PLANNED" then
         context.text = ""..docvars.FILE..":"..docvars.LINE.."::"..docvars.NL.."  "..context.text
       end
 
@@ -733,6 +733,9 @@ function setup()
 
       if #context.section > 0 then
         docvars.SECTION = context.section
+        --docvars:isection   `ISECTION`::
+        --docvars:isection     The current section name for the first line after a section change, else "".
+        docvars.ISECTION = docvars.SECTION
       end
 
       if #context.section > 0 or #context.arg > 0 then
@@ -752,6 +755,7 @@ function setup()
         docvars.SECTION = section_bak
         docvars.KEY = key_bak
       end
+      docvars.ISECTION = ""
     end
   )
 
