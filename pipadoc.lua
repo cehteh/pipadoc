@@ -373,9 +373,11 @@ function processor_enable(...) --: `%VERBATIM<function%s*(.-%))>`::
   local procs = {...}
   for i=1,#procs do
     assert_type(procs[i], "string")
-    --FIXME: more graceful error when processor is not supported?
-    assert_notnil(processors_available[procs[i]])
-    processors_enabled[#processors_enabled+1] = procs[i]
+    if processors_available[procs[i]] then
+      processors_enabled[#processors_enabled+1] = procs[i]
+    else
+      warn("processor not available:", procs[i])
+    end
   end
 end
 
