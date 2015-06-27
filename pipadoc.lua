@@ -325,6 +325,7 @@ end
 --TODO: processors run when reading the files document order of steps somewhere
 --:
 --api:
+--: [[processors]]
 --: Processors
 --: ~~~~~~~~~~
 --:
@@ -348,8 +349,7 @@ function processor_register(name, func) --: `%VERBATIM<function%s*(.-%))>`::
   --:     'source' part in before the comment character
   --:   section:::
   --:     parsed section name, will be empty in section-blocks to access the current
-  --:     section name refer to
-  --FIXME: xref :docvars[]
+  --:     section name refer to xref:docvars[`docvars`]
   --:   op:::
   --:     operator signifying the pipadoc operation
   --:   arg:::
@@ -396,8 +396,7 @@ function operator_register(char, func) --: `%VERBATIM<function%s*(.-%))>`::
   --:
   --: Operators drive the main functionality, like invoking the processors and generating the output.
   --:
-  --: see xref :processor_register[] and the pipadoc source for a detailed description of the context table
-  --FIXME: xref :processor_register[]
+  --: see xref:processors[`processor_register`] and the pipadoc source for a detailed description of the context table
   assert(string.match(char, "^%p$") == char)
   dbg("register operator:", char)
   operators[char] = assert_type(func, 'function')
@@ -1115,6 +1114,7 @@ generate_output(opt_toplevel)
 --:
 --=proc_builtin
 --:
+--: [[docvars]]
 --: Documentation Variables
 --: -----------------------
 --:
