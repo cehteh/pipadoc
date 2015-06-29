@@ -761,11 +761,16 @@ function setup()
 
       for i=1,#processors_enabled do
         processors_available[processors_enabled[i]](context)
+        if not context.text or context.text == 0 then
+          goto out
+        end
       end
 
       if #context.text > 0 or #context.section == 0 then
         section_append(docvars.SECTION, docvars.KEY, "text", context.text)
       end
+
+      ::out::
 
       if section_bak then
         docvars.SECTION = section_bak
