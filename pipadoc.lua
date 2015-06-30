@@ -1212,6 +1212,26 @@ end
 --:
 --=api
 --:
+--: How to generate the pipadoc documentation itself
+--: ------------------------------------------------
+--:
+--: 'pipadoc' documents itself with embedded asciidoc text. This can be extracted with
+--:
+--: ----
+--: lua pipadoc.lua -d pipadoc.lua >pipadoc.txt
+--: ----
+--:
+--: The resulting `pipadoc.txt` can then be processed with the asciidoc toolchain to produce
+--: distribution formats:
+--:
+--: -----
+--: # generate HTML
+--: asciidoc -a toc pipadoc.txt
+--:
+--: # generate PDF
+--: a2x -k -v --dblatex-opts "-P latex.output.revhistory=0" pipadoc.txt
+--: ----
+--:
 --: GNU General Public License
 --: --------------------------
 --:
@@ -1258,46 +1278,9 @@ end
 --PLANNED: only generate PLANNED section when there are PLANNED's
 --:
 
-
-
-
-
---ex:
---: example
---:
---ex:a inline1
---ex:a inline2
---ex:b inline3
---: back to ex
---:
---ex:b
---: not inline in ex.b
---:
---: back to ex
---:
---:c inline ex.c
---:
---:
---:
---foo:
-  --: dokumentiert foo
-
-  --gloss:example example im glossary
-
-  --=gloss include
-
-  --@gloss filter/pattern/options  include keys alpahbetically
-  --#gloss compare/match/range  include keys numerically
-
-  --code: this is %VERBATIM(pattern)
-  --code: this is %VERBATIM
-
-
 --TODO: asciidoc //source:line// comments like old pipadoc
 --TODO: integrate old pipadoc.txt documentation
-
 --PLANNED: how to join (and then wordwrap) lines?
-
 --PLANNED: bash like parameter expansion
 --[[
   --:   PING %{unknown}
@@ -1311,27 +1294,6 @@ end
   --:   IFELSE %{?foo:bar}
   --:   IFELSE %{x?foo:bar}
   --:
-       ${parameter:-word}
-       ${parameter:=word}
-       ${parameter:?word}
-       ${parameter:+word}
-       ${parameter:offset}
-       ${parameter:offset:length}
-       ${!prefix*}
-       ${!prefix@}
-       ${!name[@]}
-       ${!name[*]}
-       ${#parameter}
-       ${parameter#word}
-       ${parameter##word}
-       ${parameter%word}
-       ${parameter%%word}
-       ${parameter/pattern/string}
-       ${parameter^pattern}
-       ${parameter^^pattern}
-       ${parameter,pattern}
-       ${parameter,,pattern}
---]]
   --[[
     ifelse
 
@@ -1355,43 +1317,8 @@ end
     %{parameter,pattern}
     %{parameter,,pattern}
 
-    ?:=#/
-
-                                local key,op,value = string.match(name,"([^%p]*)(%p)(.*)")
-                                dbg("varsubst:", name, key,op,value)
-                                if key then
-                                  -- no output
-                                  if #key == 0 and op == "!" then
-                                    return ""
-                                  end
-
-                                  -- assignment
-                                  if #key > 0 and op == "=" then
-                                    docvars[key] = value
-                                    return value
-                                  end
-
-                                  -- ifelse
-                                  if op == "?" then
-                                    local success,failure = string.match(value,"([^:]*):(.*)")
-                                    if #key > 0 then
-                                      return success
-                                    else
-                                      return failure
-                                    end
-                                  end
-
-                                  -- replacement
-                                  if #key > 0 and op == "/" then
-                                    local all,pattern,replacement = string.match(value,"(/?)([^:]*)/(.*)")
-                                    dbg("varsubst:", all,pattern,replacement)
-                                    return string.gsub(key, pattern, replacement, all ~= "/" and 1 or nil)
-                                  end
-                                else
-      end
-  --]]
-
--- lua pipadoc.lua -d pipadoc.lua >pipadoc.txt ; a2x -k -v --dblatex-opts "-P latex.output.revhistory=0" pipadoc.txt
+--]]
 
 
-
+--PLANNED: org-mode processor
+--PLANNED: merge docvars and context to one table
