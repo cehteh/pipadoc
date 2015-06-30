@@ -960,13 +960,18 @@ function generate_output_sorted(order, which, opt)
   end
 end
 
-
+local sofar_rec={}
 
 function generate_output(which)
   dbg("generate_output:", which)
   local section = sections[which]
 
   if section ~= nil then
+    if sofar_rec[which] then
+      warn("recursive include:",which)
+      return
+    end
+    sofar_rec[which] = true
     sections_usecnt[which] = sections_usecnt[which] + 1
 
     local oldfile=docvars.FILE
@@ -978,13 +983,13 @@ function generate_output(which)
       if section[i].action == "text" then
         io.write(section[i].text, '\n')
       elseif section[i].action == "include" then
-        --TODO: recursion detection
         generate_output(section[i].text)
       elseif section[i].action == "sort" then
         generate_output_sorted(string.match(section[i].text, "^([%w_]*) ?([%w_]*) ?(.*)"))
       end
     end
     docvars.FILE=oldfile
+    sofar_rec[which] = nil
   else
     warn("no section named:", which)
   end
