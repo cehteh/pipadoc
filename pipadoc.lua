@@ -1,4 +1,5 @@
---LICENSE:
+--license:
+--: pipadoc - Documentation extractor
 --: Copyright (C)                        Pipapo Project
 --:  2015,                               Christian Thaeter <ct@pipapo.org>
 --:
@@ -494,7 +495,6 @@ options = {
   --TODO: force filetype variant  foo.lua:.txt
   --TODO: wordwrap
   --TODO: eat empty lines
-  --TODO: variable replacements
   --TODO: add debug report (warnings/errors) to generated document PIPADOC_LOG section
   --TODO: lineending \n \r\n
   --TODO: wrap at blank/intelligent
