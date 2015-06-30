@@ -201,8 +201,9 @@ end
 --: this is appended to the section 'oneline' under key 'a'
 --: this is appended to the section 'oneline' under key 'o'
 --: ----
-sections = {}
--- local sections_usecnt = {}
+local sections = {}
+local sections_usecnt = {}
+local sections_keys_usecnt = {}
 
 --api:
 --: Sections
@@ -491,7 +492,6 @@ options = {
   --TODO: list-operators
   --TODO: list-sections
   --TODO: force filetype variant  foo.lua:.txt
-  --TODO: orphans / doublettes
   --TODO: wordwrap
   --TODO: eat empty lines
   --TODO: variable replacements
@@ -687,13 +687,14 @@ function setup()
       --PLANNED: make each feature switchable, options to processor
 
       -- insert source references as asciidoc comments
-      if context.section ~= "" then
-        local _, value = section_get(context.section, context.key)
-        if value and value ~= "" then
-          section_append(context.section, context.key, "text", "")
-        end
-        section_append(context.section, context.key, "text", "// "..docvars.FILE..":"..docvars.LINE.." //")
-      end
+      --FIXME: broken
+      --if context.section ~= "" then
+      --  local _, value = section_get(context.section, context.key)
+      --  if value and value ~= "" then
+      --    section_append(context.section, context.key, "text", "")
+      --  end
+      --  section_append(context.section, context.key, "text", "// "..docvars.FILE..":"..docvars.LINE.." //")
+      --end
 
     end
   )
@@ -757,7 +758,6 @@ function setup()
       if #context.section > 0 or #context.arg > 0 then
         docvars.KEY = context.arg
       end
-
 
       for i=1,#processors_enabled do
         processors_available[processors_enabled[i]](context)
@@ -935,6 +935,8 @@ function generate_output_sorted(order, which, opt)
   local section = sections[which].keys
 
   if section ~= nil then
+    sections_keys_usecnt[which] = sections_keys_usecnt[which] + 1
+
     local oldfile=docvars.FILE
     docvars.FILE='<output>:'..which
 
@@ -965,16 +967,18 @@ function generate_output(which)
   local section = sections[which]
 
   if section ~= nil then
+    sections_usecnt[which] = sections_usecnt[which] + 1
+
     local oldfile=docvars.FILE
     docvars.FILE='<output>:'..which
     for i=1,#section do
       docvars.LINE=i
       dbg("generate", section[i].action, section[i].text)
-      --:TODO docme actions
+      --TODO: docme actions
       if section[i].action == "text" then
         io.write(section[i].text, '\n')
       elseif section[i].action == "include" then
-        --:TODO recursion detection
+        --TODO: recursion detection
         generate_output(section[i].text)
       elseif section[i].action == "sort" then
         generate_output_sorted(string.match(section[i].text, "^([%w_]*) ?([%w_]*) ?(.*)"))
@@ -992,8 +996,36 @@ process_inputs()
 docvars.FILE = "<output>"
 docvars.LINE = 0
 
+-- initialize orphans / doublettes checker
+for k,_ in pairs(sections) do
+  dbg("sk:", k, #sections[k], next(sections[k].keys))
+  if #sections[k] > 0 then
+    sections_usecnt[k] = 0
+  end
+
+  if next(sections[k].keys) then
+    sections_keys_usecnt[k] = 0
+  end
+end
+
 generate_output(opt_toplevel)
+
 -- orphans / doublettes
+for k,v in pairs(sections_usecnt) do
+  if v == 0 then
+    warn("section unused:", k)
+  elseif v > 1 then
+    warn("section multiple times used:", k, v)
+  end
+end
+
+for k,v in pairs(sections_keys_usecnt) do
+  if v == 0 then
+    warn("section w/ keys unused:", k)
+  elseif v > 1 then
+    warn("section w/ keys multiple times used:", k, v)
+  end
+end
 
 
 
