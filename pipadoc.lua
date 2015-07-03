@@ -1068,6 +1068,16 @@ end
 --: and less features which was implemented in AWK. Updating to the new syntax should be quite simple
 --: and is suggested for any Projects using pipadoc.
 --:
+--: Getting the Source
+--: ------------------
+--:
+--: 'pipadoc' is managed the git revision contol system. You can clone the repository with
+--:
+--:  git clone --depth 1 git://git.pipapo.org/pipadoc
+--:
+--: Some releases will be tagged and get a release branch. Generally 'pipadoc' is planned to have rolling
+--: releases where the 'master' branch will stay stable and developement will be done on the 'devel' branch.
+--:
 --: Installation
 --: ------------
 --:
