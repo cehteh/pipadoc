@@ -712,8 +712,8 @@ function setup()
       assert_type(context, "table")
 
       -- insert source references as asciidoc comments
-      if docvars.ISECTION == "TODO" or docvars.ISECTION == "FIXME" or docvars.ISECTION == "PLANNED" then
-        context.text = ""..docvars.FILE..":"..docvars.LINE.."::"..docvars.NL.."  "..context.text
+      if docvars.ISECTION == "ASSIGNED" or docvars.ISECTION == "TODO" or docvars.ISECTION == "FIXME" or docvars.ISECTION == "PLANNED" then
+        context.text = ""..docvars.FILE..":"..docvars.LINE.."::"..docvars.NL.."  "..context.arg.." "..context.text
       end
 
     end
