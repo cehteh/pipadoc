@@ -1266,22 +1266,34 @@ end
 --: Nevertheless, when you make any improvements to pipadoc please consider to contact
 --: Christian Thäter <ct@pipapo.org> for including them into the mainline.
 --:
+--=ISSUES
+--ISSUES:
+--:
+--: ISSUES
+--: ------
+--:
+--: ASSIGNED
+--: ~~~~~~~~
+--:
+--@ASSIGNED
+--=ASSIGNED
+--:
 --: FIXME
---: -----
+--: ~~~~~
 --:
 --=FIXME
 --:
 --FIXME: only generate FIXME Section when there are FIXME's
 --:
 --: TODO
---: ----
+--: ~~~~
 --:
 --=TODO
 --:
 --TODO: only generate TODO section when there are TODO's
 --:
 --: PLANNED
---: -------
+--: ~~~~~~~
 --:
 --=PLANNED
 --:
