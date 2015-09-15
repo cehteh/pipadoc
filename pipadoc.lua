@@ -18,12 +18,6 @@
 
 --PLANNED: directives: --! luacall()
 
-local args_done = false
-local opt_verbose = 1
-local opt_nodefaults = false
-local opt_toplevel = "MAIN"
-local opt_inputs = {}
-
 local docvars = {
   --docvars:file   `FILE`::
   --docvars:file     The file or section name currently processed or some special annotation
@@ -37,16 +31,14 @@ local docvars = {
   --docvars:nl     The linebreak character sequence, usually '\n' on unix systems but
   --docvars:nl     can be changed with a commandline option
   NL = "\n",
-  --docvars:nl   `PERCENT`::
-  --docvars:nl     Escapes the percent sign
-  PERCENT = "%{PERCENT}",
-  --docvars:nl   `BACKSLASH`::
-  --docvars:nl     Escapes the backslash
-  BACKSLASH = "\\",
 }
 
+local args_done = false
+local opt_verbose = 1
+local opt_nodefaults = false
+local opt_toplevel = "MAIN"
+local opt_inputs = {}
 
---PLANNED: macros/docvars  LUA_FUNC = "%VERBATIM<function%s*(.-%))>::\n "
 
 --PLANNED: log to PIPADOC_LOG section, later hooked in here
 local printerr_hook
@@ -124,6 +116,8 @@ request "luarocks.loader"
 --lfs = request "lfs"
 --posix = request "posix"
 
+local strsubst = require "strsubst"
+strsubst.set_vartable(docvars)
 
 --api:
 --: Typechecks
