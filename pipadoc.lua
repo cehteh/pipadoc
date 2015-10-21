@@ -17,27 +17,29 @@
 --: along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 --PLANNED: directives: --! luacall()
+--TODO: include operator, add a file to the processing list
+
+local LINE = 0
+local FILE = "<startup>"
 
 local docvars = {
-  --docvars:file   `FILE`::
-  --docvars:file     The file or section name currently processed or some special annotation
-  --docvars:file     in angle brakets (eg '<startup>') on other processing phases
-  FILE = "<startup>",
-  --docvars:line   `LINE`::
-  --docvars:line     Current line number of input or section, or indexing key
-  --docvars:line     Lines start at 1, if set to 0 then some output formatters skip over it
-  LINE = 0,
   --docvars:nl   `NL`::
   --docvars:nl     The linebreak character sequence, usually '\n' on unix systems but
   --docvars:nl     can be changed with a commandline option
   NL = "\n",
+  __PARTIAL = "true",
+
+  --MARKUP = "asciidoc",
+  MARKUP = "plain",
+  LANGUAGE = "lua",
 }
 
 local args_done = false
 local opt_verbose = 1
 local opt_nodefaults = false
 local opt_toplevel = "MAIN"
-local opt_inputs = {}
+local opt_inputs = {false}
+local opt_config = "pipadoc.conf"
 
 
 --PLANNED: log to PIPADOC_LOG section, later hooked in here
@@ -62,7 +64,7 @@ end
 
 function msg(lvl,...)
   if lvl <= opt_verbose then
-    printerr(docvars.FILE..":"..(docvars.LINE ~= 0 and docvars.LINE..":" or ""), ...)
+    printerr(FILE..":"..(LINE ~= 0 and LINE..":" or ""), ...)
   end
 end
 
@@ -75,15 +77,26 @@ end
 --: variable argument list. Any Argument passed to them will be converted to a string and printed
 --: to stderr when the verbosity level is high enough.
 --:
-function warn(...) msg(1, ...) end  --: `%VERBATIM<function%s*(.-%))>`::%{NL}  report a important but non fatal failure %{NL}
-function echo(...) msg(2, ...) end  --: `%VERBATIM<function%s*(.-%))>`::%{NL}  report normal progress %{NL}
-function dbg(...) msg(3, ...) end  --: `%VERBATIM<function%s*(.-%))>`::%{NL}  show verbose/debugging progress information %{NL}
+function warn(...) msg(1, ...) end  --: `%VERBATIM<function%s*(.-%))>`::{$NL}  report a important but non fatal failure {$NL}
+function echo(...) msg(2, ...) end  --: `%VERBATIM<function%s*(.-%))>`::{$NL}  report normal progress {$NL}
+function dbg(...) msg(3, ...) end   --: `%VERBATIM<function%s*(.-%))>`::{$NL}  show verbose/debugging progress information {$NL}
+function trace(...) msg(4, ...) end --: `%VERBATIM<function%s*(.-%))>`::{$NL}  show verbose/debugging progress information {$NL}
 
 --PLANNED: use echo() for progress
 
-function die(...) --: `%VERBATIM<function%s*(.-%))>`::%{NL}  report a fatal error and exit the programm %{NL}
+function die(...) --: `%VERBATIM<function%s*(.-%))>`::{$NL}  report a fatal error and exit the programm {$NL}
   printerr(...)
   os.exit(1)
+end
+
+-- debugging only
+function dump_table(p,t)
+  for k,v in pairs(t) do
+    dbg(p,k,v)
+    if type(v) == 'table' then
+      dump_table(p.."/"..k, v)
+    end
+  end
 end
 
 
@@ -96,14 +109,17 @@ end
 --: Plugin-writers should try to adhere to this practice if possible and use the 'request' function instead the
 --: Lua 'require'.
 --:
---: When luarocks is installed, then the 'luarocks.loader' is loaded by default to make any moduke installed by
+--: When luarocks is installed, then the 'luarocks.loader' is loaded by default to make any module installed by
 --: luarocks available.
 --:
 function request(name) --: `%VERBATIM<function%s*(.-%))>`::
   --:   try to load optional modules
-  --:   wraps lua 'require' in a pcall so that failure to load a module results in 'nil' rather than a error  %{NL}
+  --:   wraps lua 'require' in a pcall so that failure to load a module results in 'nil' rather than a error  {$NL}
   local ok,handle = pcall(require, name)
   if ok then
+    if handle._VERSION then
+      dbg("loaded:", name, handle._VERSION)
+    end
     return handle
   else
     warn("Can't load module:", name)
@@ -111,47 +127,90 @@ function request(name) --: `%VERBATIM<function%s*(.-%))>`::
   end
 end
 
---PLANNED: for pattern matching etc
+--TODO: docme
+-- fake an interface
+local function fake(metatable, tab)
+  tab = tab or {}
+  tab.FAKE = true
+  return setmetatable(tab, metatable or {__index = function () end})
+end
+
 request "luarocks.loader"
+--PLANNED: for pattern matching etc
 --lfs = request "lfs"
 --posix = request "posix"
 
-local strsubst = require "strsubst"
-strsubst.set_vartable(docvars)
+local strsubst
+
+local function load_modules()
+  strsubst = request "strsubst" or fake
+  {
+    __index = function (tab, key)
+      return tab._index[key]
+    end,
+
+    __newindex = function (tab, key, value)
+      tab._index[key] = value
+    end,
+
+    __call = function(tab, op, ...)
+      if type(op) == 'table' then
+        rawset(tab, "__index", op)
+      end
+      return op
+    end
+  }
+
+  strsubst(docvars)
+
+-- the strsubst initialization
+-- local initstrsubst = [[
+-- # {MARKUP:=asciidoc}
+-- # {MARKUP:=plain}
+-- # {LANGUAGE:=lua}
+
+end
+
+--PLANNED: macros/docvars  LUA_FUNC = "%VERBATIM<function%s*(.-%))>::\n "
 
 --api:
 --: Typechecks
 --: ~~~~~~~~~~
 --:
---: There are some wrapers around 'assert' to check externally supplied data. On success 'var' will be returned
+--: Some wrapers around 'assert' to check externally supplied data. On success 'var' will be returned
 --: otherwise an assertion error is raised.
 --:
-function assert_type(var, expected) --: `%VERBATIM<function%s*(.-%))>`::%{NL}  checks that the 'var' is of 'type' %{NL}
+function assert_type(var, expected) --: `%VERBATIM<function%s*(.-%))>`::{$NL}  checks that the 'var' is of 'type' {$NL}
   assert(type(var) == expected, "type error: "..expected.." expected, got "..type(var))
   return var
 end
 
-function assert_char(var) --: `%VERBATIM<function%s*(.-%))>`::%{NL}  checks that 'var' is a single character %{NL}
+function maybe_type(var, expected) --: `%VERBATIM<function%s*(.-%))>`::{$NL}  checks that the 'var' is of 'type' or nil {$NL}
+  assert(var == nil or type(var) == expected, "type error: "..expected.." or nil expected, got "..type(var))
+  return var
+end
+
+function assert_char(var) --: `%VERBATIM<function%s*(.-%))>`::{$NL}  checks that 'var' is a single character {$NL}
   assert(type(var) == "string" and #var == 1, "type error: single character expected")
   return var
 end
 
-function assert_notnil(var) --: `%VERBATIM<function%s*(.-%))>`::%{NL}  checks that 'var' is not 'nil' %{NL}
+function assert_notnil(var) --: `%VERBATIM<function%s*(.-%))>`::{$NL}  checks that 'var' is not 'nil' {$NL}
   assert(type(var) ~= "nil", "Value expected")
   return var
 end
 
 
 function to_table(v)
-   if type(v) ~= 'table' then
-      v = {v}
-   end
-   return v
+  if type(v) ~= 'table' then
+    v = {v}
+  end
+  return v
 end
 
 --sections:
---: Text in pipadoc is appended to named 'sections'. Sections are later brought in order in a 'toplevel' section.
---: Additionally instead just appending text to a named section, text can be appended under some
+--: Text in pipadoc is appended to named 'sections'. Sections are later brought into the desired order in a 'toplevel'
+--: section. Additionally instead just appending text to a named section, text can be appended under some
 --: alphanumeric key under that section. This enables later sorting for indexes and glossaries.
 --:
 --: Sections can span a block of lines (until another section is set) or one-line setting a section only for the current
@@ -204,26 +263,30 @@ local sections_keys_usecnt = {}
 --: Sections
 --: ~~~~~~~~
 --:
-function section_append(section, key, action, value) --: `%VERBATIM<function%s*(.-%))>`::
+
+--PLANNED: maybe append the context       , docvars.SECTION, docvars.ARG, docvars.OP,  docvars.TEXT, docvars.PRE
+
+function section_append(section, key, context) --: `%VERBATIM<function%s*(.-%))>`::
   --:   section:::
   --:     name of the section to append to, must be a string
   assert_type(section, "string")
   --:   key:::
   --:     the subkey for sorting within that section. 'nil' for appending text to normal sections
-  --:   action:::
-  --:     how to process the value in output, currently "text", "include" and "sort" are defined
-  --:   value:::
-  --:     the parameter for the action, usually the text to be included in the output.
+  maybe_type(key, "string")
+  --:   context:::
+  --FIXME: DOCME    the parameter for the action, usually the text to be included in the output.
+  maybe_type(context, "table")
   --:
   --:   Append data to the given section/key
+  trace("append:", section, key, context)
   sections[section] = sections[section] or {keys = {}}
   if key and #key > 0 then
     sections[section].keys[key] = sections[section].keys[key] or {}
-    table.insert(sections[section].keys[key], value)
+    table.insert(sections[section].keys[key], context)
   else
-    table.insert(sections[section], {action = action, text = value})
+    table.insert(sections[section], context)
   end
-  dbg(action.. ":", section.."["..(key and #key > 0 and key .."]["..#sections[section].keys[key] or #sections[section]).."]:", value)
+--FIXME:  trace(action.. ":", section.."["..(key and #key > 0 and key .."]["..#sections[section].keys[key] or #sections[section]).."]:", context.TEXT)
 end
 
 --api:
@@ -236,21 +299,21 @@ function section_get(section, key, index) --: `%VERBATIM<function%s*(.-%))>`::
   --:   index:::
   --:     line number to query, when 'nil' defaults to the last line
   --:   returns:::
-  --:     action, value pair or nil
+  --:     value or nil
   --:
-  --:   query the action and value of the given section/key at index (or at end)
+  --:   query the value of the given section/key at index (or at end)
   if not sections[section] then
     return
   end
 
   if not key then
     index = index or #sections[section]
-    echo("nokey",index, sections[section][index].action, sections[section][index].text)
-    return sections[section][index].action, sections[section][index].text
+--FIXME:    echo("nokey", index, sections[section][index].action, sections[section][index].text)
+    return sections[section][index]
   else
     index = index or #sections[section].keys
     echo("key", sections[section].keys[key][index])
-    return "text", sections[section].keys[key][index]
+    return sections[section].keys[key][index]
   end
 end
 
@@ -287,9 +350,11 @@ local filetypes = {}
 --: Filetypes
 --: ~~~~~~~~~
 --:
-function filetype_register(names, linecommentseqs, ...) --: `%VERBATIM<function%s*(.-%))>`::
-  --:     names:::
-  --:       a Lua pattern or list of patterns matching filenames
+function filetype_register(name, filep, linecommentseqs, ...) --: `%VERBATIM<function%s*(.-%))>`::
+  --:     name:::
+  --:       name of the language
+  --:     filep:::
+  --:       a Lua pattern or list of patterns matching filename
   --:     linecommentseqs:::
   --:       a string or list of strings matching comments of the registered filetype
   --:     ...:::
@@ -301,14 +366,15 @@ function filetype_register(names, linecommentseqs, ...) --: `%VERBATIM<function%
   --:
   --: For example, C and C++ Filetypes are registered like:
   --:
-  --:  filetype_register({"%.c$","%.cpp$","%.C$", "%.cxx$", "%.h$"}, {"//", "/*"})
-  names = to_table(names)
+  --:  filetype_register("C", {"%.c$","%.cpp$","%.C$", "%.cxx$", "%.h$"}, {"//", "/*"})
+  --FIXME: assert types and constraints
+  filep = to_table(filep)
   linecommentseqs = to_table(linecommentseqs)
-  for i=1,#names do
-    filetypes[names[i]] = filetypes[names[i]] or {}
+  for i=1,#filep do
+    filetypes[filep[i]] = filetypes[filep[i]] or {name = name}
     for j=1,#linecommentseqs do
-      dbg("register filetype:", names[i], linecommentseqs[j])
-      filetypes[names[i]][#filetypes[names[i]]+1] = linecommentseqs[j]
+      dbg("register filetype:", name, filep[i], linecommentseqs[j])
+      filetypes[filep[i]][#filetypes[filep[i]]+1] = linecommentseqs[j]
     end
   end
 end
@@ -316,7 +382,7 @@ end
 function filetype_get(filename)
   assert_type(filename, "string")
   for k,v in pairs(filetypes) do
-    if string.match(filename, k) then
+    if filename:match(k) then
       return v,k
     end
   end
@@ -395,12 +461,12 @@ end
 
 
 
---op:
---: Operators define the core functionality of pipadoc. They are mandatory in the pibadoc syntax
---: to define a pipadoc comment line. It is possible (but rarely needed) to define additional
---: operators. Operators must be a single punctuation character
+-- --op:
+-- --: Operators define the core functionality of pipadoc. They are mandatory in the pibadoc syntax
+-- --: to define a pipadoc comment line. It is possible (but rarely needed) to define additional
+-- --: operators. Operators must be a single punctuation character
 local operators = {}
---api:
+-- --api:
 function operator_register(char, func) --: `%VERBATIM<function%s*(.-%))>`::
   --:   char:::
   --:     single punctuation character defining this operator
@@ -423,8 +489,11 @@ function operator_pattern()
 end
 
 
-
 --usage:
+
+
+
+
 local options
 options = {
   "pipadoc [options...] [inputs..]",  --:   %VERBATIM("(.*)")
@@ -447,38 +516,56 @@ options = {
   ["--help"] = function ()
     print("usage:")
     for i=1,#options do
-                   print(options[i])
-                 end
-                 os.exit(0)
-               end,
+      print(options[i])
+    end
+    os.exit(0)
+  end,
 
 
-  "    -c, --comment <file> <comment>   register a filetype pattern", --:   %VERBATIM("(.*)")
-  "                                     for files matching a file pattern", --:   %VERBATIM("(.*)")
-  ["-c"] = "--comment",
-  ["--comment"] = function (arg,i)
-                    assert(type(arg[i+2]))
-                    filetype_register(arg[i+1], arg[i+2])
-                    return 2
-                  end,
+  "    -r, --register <name> <file> <comment>  register a filetype pattern", --:   %VERBATIM("(.*)")
+  "                                            for files matching a file pattern", --:   %VERBATIM("(.*)")
+  ["-r"] = "--register",
+  ["--register"] = function (arg,i)
+    assert(type(arg[i+3]))
+    filetype_register(arg[i+1], arg[i+2], arg[i+3])
+    return 2
+  end,
 
 
   "    -t, --toplevel <name>            sets 'name' as toplevel node [MAIN]", --:   %VERBATIM("(.*)")
   ["-t"] = "--toplevel",
   ["--toplevel"] = function (arg, i)
-                assert(type(arg[i+1]))
-                opt_toplevel = arg[i+1]
-                return 1
-              end,
+    assert(type(arg[i+1]))
+    opt_toplevel = arg[i+1]
+    return 1
+  end,
+
+  "    -c, --config <name>             selects a configfile [pipadoc.conf]", --:   %VERBATIM("(.*)")
+  ["-c"] = "--config",
+  ["--config"] = function (arg, i)
+    assert(type(arg[i+1]))
+    opt_config = arg[i+1]
+    return 1
+  end,
+
 
   "    --no-defaults                    disables default filetypes and processors", --:   %VERBATIM("(.*)")
   ["--no-defaults"] = function () opt_nodefaults = true end,
 
 
+  "    -m, --markup <name>              Selects the markup engine for the output [plain]", --:   %VERBATIM("(.*)")
+  ["-m"] = "--markup",
+  ["--markup"] = function (arg, i)
+    assert(type(arg[i+1]))
+    docvars.MARKUP = arg[i+1]
+    return 1
+  end,
+
   "    --                               stops parsing the options and treats each", --:   %VERBATIM("(.*)")
   "                                     following argument as input file", --:   %VERBATIM("(.*)")
   ["--"] = function () args_done=true end,
 
+  
   --TODO: --alias match pattern --file-as match filename
   --TODO: -o --output
   --TODO: -l --load
@@ -498,7 +585,7 @@ options = {
   "  inputs are filenames or a '-' which indicates standard input", --:   %VERBATIM("(.*)")
 }
 
---local plugins = {}
+-- local plugins = {}
 
 function parse_args(arg)
   local i = 1
@@ -526,6 +613,9 @@ function parse_args(arg)
 end
 
 function setup()
+  parse_args(arg)
+  load_modules()
+
   do
     local date = os.date ("*t")
     --docvars:date    `YEAR, MONTH, DAY, HOUR, MINUTE`::
@@ -537,102 +627,69 @@ function setup()
     docvars.MINUTE = date.min
     --docvars:date    `DATE`::
     --docvars:date      Current date in YEAR/MONTH/DAY format
-    docvars.DATE = "%{YEAR}/%{MONTH}/%{DAY}"
+    docvars.DATE = date.year.."/"..date.month.."/"..date.day
   end
 
-  parse_args(arg)
+--  filetype_register("pipadocconfig", "^pipadoc.conf$", {"PIPADOC:", ""})
 
-  
   if not opt_nodefaults then
+    opt_inputs[1] = opt_config
+    filetype_register("pipadocconfig", "^"..opt_config.."$", {"PIPADOC:", ""})
+
     --filetypes_builtin:scons * SCons
-    filetype_register("^SConstuct$", "#")
+    filetype_register("scons", "^SConstuct$", "#")
 
     --filetypes_builtin:cmake * CMake
-    filetype_register({"^CMakeLists.txt$","%.cmake$"}, {"#", "#[["})
+    filetype_register("cmake", {"^CMakeLists.txt$","%.cmake$"}, {"#", "#[["})
 
     --filetypes_builtin:c * C, C++, Headerfiles
-    filetype_register({"%.c$","%.cpp$","%.C$", "%.cxx$", "%.h$"}, {"//", "/*"})
+    filetype_register("c", {"%.c$","%.cpp$", "%.C$", "%.cxx$", "%.h$", "%.hpp$", "%.hxx$"}, {"//", "/*"})
 
     --filetypes_builtin:lua * Lua
-    filetype_register({"%.lua$"}, "%-%-")
+    filetype_register("lua", {"%.lua$"}, "%-%-")
 
     --filetypes_builtin:automake * Autoconf, Automake
-    filetype_register({"%.am$", "%.in$", "^configure.ac$"}, {"#", "dnl"})
+    filetype_register("automake", {"%.am$", "%.in$", "^configure.ac$"}, {"#", "dnl"})
 
     --filetypes_builtin:make * Makefiles
-    filetype_register({"^Makefile$", "%.mk$", "%.make$"}, "#")
+    filetype_register("makefile", {"^Makefile$", "%.mk$", "%.make$"}, "#")
 
     --filetypes_builtin:shell * Shell, Perl, AWK
-    filetype_register({"%.sh$", "%.pl$", "%.awk$", }, "#")
+    filetype_register("shell", {"%.sh$", "%.pl$", "%.awk$", }, "#")
 
     --filetypes_builtin:prolog * Prolog
-    filetype_register({"%.pro$", "%.P$"}, "%")
+    filetype_register("prolog", {"%.pro$", "%.P$"}, "%")
 
-    --filetypes_builtin:text * Textfiles, Pipadoc (.pdoc)
-    filetype_register({"%.txt$", "%.TXT$", "%.pdoc$", "^-$"}, {"PIPADOC:", ""})
+    --filetypes_builtin:text * Textfiles, Pipadoc (`.pdoc`)
+    filetype_register("plain", {"%.txt$", "%.TXT$", "%.pdoc$", "^-$"}, {"PIPADOC:", ""})
 
     --filetypes_builtin:java * Java, C#
-    filetype_register({"%.java$", "%.cs$"}, {"//", "/*"})
+    filetype_register("java", {"%.java$", "%.cs$"}, {"//", "/*"})
 
     --filetypes_builtin:objective_c * Objective-C
-    filetype_register({"%.h$", "%.m$", "%.mm$"}, {"//", "/*"})
+    filetype_register("objc", {"%.h$", "%.m$", "%.mm$"}, {"//", "/*"})
 
     --filetypes_builtin:python * Python
-    filetype_register("%.py$", "#")
+    filetype_register("python", "%.py$", "#")
 
     --filetypes_builtin:visualbasic * Visual Basic
-    filetype_register("%.vb$", "'")
+    filetype_register("visualbasic", "%.vb$", "'")
 
     --filetypes_builtin:php * PHP
-    filetype_register("%.php%d?$", {"#", "//", "/*"})
- 
+    filetype_register("php", "%.php%d?$", {"#", "//", "/*"})
+
     --filetypes_builtin:javascript * Javascript
-    filetype_register("%.js$", "//", "/*")
+    filetype_register("javascript", "%.js$", "//", "/*")
 
     --filetypes_builtin:delphi * Delphi, Pascal
-    filetype_register({"%.p$", "%.pp$", "^%.pas$"}, {"//", "{", "(*"})
+    filetype_register("delphi", {"%.p$", "%.pp$", "^%.pas$"}, {"//", "{", "(*"})
 
     --filetypes_builtin:ruby * Ruby
-    filetype_register("%.rb$", "#")
+    filetype_register("ruby", "%.rb$", "#")
 
     --filetypes_builtin:sql * SQL
-    filetype_register({"%.sql$", "%.SQL$"}, {"#", "--", "/*"})
+    filetype_register("sql", {"%.sql$", "%.SQL$"}, {"#", "--", "/*"})
   end
-
-  --proc_builtin:
-  --:   `varsubst`::
-  --:     Substitutes \%{varname} with the the values stored under varname in the 'docvars' table.
-  --:     When no variable with that name is defines, a warning is printed and the variable name
-  --:     itself is substituted. Variables expansion is recursive and nested, but stops when loops
-  --:     are detected. The percent sign can be escaped with a backslash (\\%) or by the
-  --:     \%{PERCENT} docvar.
-  --:
-  --PLANNED: more variable handling
-  processor_register(
-    "varsubst",
-    function (context)
-      assert_type(context, "table")
-
-      local sofar = {}
-      local sstring =  string.gsub(context.text, "\\%%", "%%{PERCENT}")
-
-      while not sofar[sstring] do
-        dbg("varsubst:", sstring)
-        sofar[sstring] = true
-        sstring = string.gsub(sstring, "%%{(%a[%w_]*)}",
-                              function (name)
-                                if docvars[name] then
-                                  return docvars[name]
-                                else
-                                  warn("variable undefined:", name)
-                                  return name
-                                end
-                              end
-        )
-      end
-      context.text = string.gsub(sstring, "%%{PERCENT}", "%%")
-    end
-  )
 
 
   --proc_builtin:
@@ -644,25 +701,22 @@ function setup()
   --:     pattern is matched against the source part of the line. This match or the first
   --:     capture if it defines any is then pased in place of the VERBATIM statement.
   --:
-  --PLANNED: obsolete this by variable substitutions
   processor_register(
     "verbatim",
     function (context)
-      assert_type(context, "table")
-
       repeat
-        local pattern = string.match(context.text, "%%VERBATIM(%b())")
-        pattern = pattern or string.match(context.text, "%%VERBATIM(%b[])")
-        pattern = pattern or string.match(context.text, "%%VERBATIM(%b{})")
-        pattern = pattern or string.match(context.text, "%%VERBATIM(%b<>)")
+        local pattern = string.match(context.TEXT, "%%VERBATIM(%b())")
+        pattern = pattern or string.match(context.TEXT, "%%VERBATIM(%b[])")
+        pattern = pattern or string.match(context.TEXT, "%%VERBATIM(%b{})")
+        pattern = pattern or string.match(context.TEXT, "%%VERBATIM(%b<>)")
         if pattern then
           local escaped = string.gsub(pattern, "%p", "%%%1")
-          local prepart = string.match(context.pre, string.sub(pattern, 2, -2))
-          context.text = string.gsub(context.text, "%%VERBATIM"..escaped, prepart or "")
+          local prepart = string.match(context.PRE, string.sub(pattern, 2, -2))
+          context.TEXT = string.gsub(context.TEXT, "%%VERBATIM"..escaped, prepart or "")
         end
       until not pattern
 
-      context.text = string.gsub(context.text, "%%VERBATIM", context.pre)
+      context.TEXT = string.gsub(context.TEXT, "%%VERBATIM", context.PRE)
     end
   )
 
@@ -673,25 +727,23 @@ function setup()
   --:     logging FILE:LINE pair from where it originates.
   --:
   --PLANNED: more asciidoc support
-  processor_register(
-    "asciidoc",
-    function (context)
-      assert_type(context, "table")
-
+--  processor_register(
+  --  "asciidoc",
+    --function ()
       --PLANNED: make each feature switchable, options to processor
 
       -- insert source references as asciidoc comments
       --FIXME: broken
-      --if context.section ~= "" then
-      --  local _, value = section_get(context.section, context.key)
+      --if docvars.section ~= "" then
+      --  local _, value = section_get(docvars.section, context.key)
       --  if value and value ~= "" then
-      --    section_append(context.section, context.key, "text", "")
+      --    section_append(docvars.section, context.key, "text", "")
       --  end
-      --  section_append(context.section, context.key, "text", "// "..docvars.FILE..":"..docvars.LINE.." //")
+      --  section_append(docvars.section, context.key, "text", "// "..docvars.FILE..":"..docvars.LINE.." //")
       --end
 
-    end
-  )
+--    end
+ -- )
 
   --proc_builtin:
   --:   `tracker`::
@@ -700,25 +752,24 @@ function setup()
   --:     to its origin.
   --:
   --PLANNED: use some docvars based templates to format this better (asciidoc, etc)
-  processor_register(
-    "tracker",
-    function (context)
-      assert_type(context, "table")
-
+  --PLANNED: maybe add DONE which will be handled in a githook (added to commit message and removed from source)
+  --PLANNED: some way to associate test code with source and docs
+ -- processor_register(
+   -- "tracker",
+  -- - function ()
       -- insert source references as asciidoc comments
-      if docvars.ISECTION == "ASSIGNED" or docvars.ISECTION == "TODO" or docvars.ISECTION == "FIXME" or docvars.ISECTION == "PLANNED" then
-        context.text = ""..docvars.FILE..":"..docvars.LINE.."::"..docvars.NL.."  "..context.arg.." "..context.text
-      end
-
-    end
-  )
+  --    if docvars.isection == "ASSIGNED" or docvars.isection == "TODO" or docvars.isection == "FIXME" or docvars.isection == "PLANNED" then
+    --    docvars.text = ""..docvars.FILE..":"..docvars.LINE.."::"..docvars.NL.."  "..docvars.arg.." "..docvars.text
+     -- end
+   -- end
+ -- )
 
 
   --[[[  dd
-  operator_register(
+    operator_register(
     "!",
     function (arg, text)
-      -- DIRECTIVE load unused reuse
+    -- DIRECTIVE load unused reuse
     end)
   --]]
 
@@ -731,46 +782,68 @@ function setup()
   --:     The documentation operator. Defines normal documentation text. Each pipadoc comment using the `:`
   --:     operator is processed as potential documentation. First all enabled 'processors' are run over it and
   --:     finally the text is appended to the current section(/key)
+--   if false then
+--   operator_register(
+--     ":",
+--     function ()
+--       -- for oneline sections
+-- --      local section_bak, key_back
+
+-- --      if #docvars.TEXt > 0 then
+--  --       section_bak = docvars.section
+--   --      key_bak = docvars.key
+--    --   end
+
+-- --      if #docvars.section > 0 then
+--         --docvars.section = docvars.section
+--         --docvars:isection   `ISECTION`::
+--         --docvars:isection     The current section name for the first line after a section change, else "".
+-- --        docvars.isection = docvars.section
+--  --     end
+
+-- --      if #docvars.section > 0 or #docvars.arg > 0 then
+-- --        docvars.key = docvars.arg
+-- --      end
+
+-- --      for i=1,#processors_enabled do
+-- --        processors_available[processors_enabled[i]](context)
+-- --        if not docvars.text or docvars.text == 0 then
+-- --          goto out
+-- --        end
+-- --      end
+
+-- --      if #docvars.text > 0 or #docvars.section == 0 then
+--         trace("STORE", docvars.section, docvars.key, "text", docvars.text)
+--         section_append(docvars.section, docvars.key, "text", docvars.text)
+--   --    end
+
+-- --      ::out::
+
+-- --      if section_bak then
+-- --        docvars.section = section_bak
+-- --        docvars.key = key_bak
+-- --      end
+-- --      docvars.isection = ""
+--     end
+--   )
+--   end
+
   operator_register(
     ":",
     function (context)
-      -- for oneline sections
-      local section_bak, key_back
-
-      if #context.text > 0 then
-        section_bak = docvars.SECTION
-        key_bak = docvars.KEY
-      end
-
-      if #context.section > 0 then
-        docvars.SECTION = context.section
-        --docvars:isection   `ISECTION`::
-        --docvars:isection     The current section name for the first line after a section change, else "".
-        docvars.ISECTION = docvars.SECTION
-      end
-
-      if #context.section > 0 or #context.arg > 0 then
-        docvars.KEY = context.arg
-      end
-
       for i=1,#processors_enabled do
         processors_available[processors_enabled[i]](context)
-        if not context.text or context.text == 0 then
-          goto out
+        if not context.TEXT then
+          return
         end
       end
+      --PLANNED: maybe append the context       , docvars.SECTION, docvars.ARG, docvars.OP,  docvars.TEXT, docvars.PRE
+      -- context = {FILE:=}{LINE:=}{PRE:=}{SECTION:=}{ARG:=}
 
-      if #context.text > 0 or #context.section == 0 then
-        section_append(docvars.SECTION, docvars.KEY, "text", context.text)
-      end
+      -- partial
+      context.TEXT = strsubst(context.TEXT, context)
 
-      ::out::
-
-      if section_bak then
-        docvars.SECTION = section_bak
-        docvars.KEY = key_bak
-      end
-      docvars.ISECTION = ""
+      section_append(context.SECTION, context.ARG, context)
     end
   )
 
@@ -781,47 +854,41 @@ function setup()
   operator_register(
     "=",
     function (context)
-      local section = #context.section > 0 and context.section or docvars.SECTION
-
-      --PLANNED: how to use context.text?
-      if #context.arg > 0 then
-        section_append(section, nil, "include", context.arg)
+      --PLANNED: how to use docvars.text?
+      if #context.ARG > 0 then
+        section_append(context.SECTION, nil, context)
       else
         warn("include argument missing:")
       end
     end
   )
 
-
   --op_builtin:
   --:   `@` ::
   --:     Takes a section name as argument and will paste section text alphabetically sorted by their keys.
   --PLANNED: option for sorting locale
-  --PLANNED: option for sorting (up/doen)
+  --PLANNED: option for sorting (up/dowen)
   operator_register(
     "@",
     function (context)
-      local section = #context.section > 0 and context.section or docvars.SECTION
-
-      if #context.arg > 0 then
-        section_append(section, nil, "sort", "alphabetic "..context.arg.." "..context.text)
+      if #context.ARG > 0 then
+        section_append(context.SECTION, nil, context)
       else
         warn("sort section missing:")
       end
     end
   )
 
+
   --op_builtin:
   --:   `#` ::
   --:     Takes a section name as argument and will paste section text numerically sorted by their keys.
-  --PLANNED: option for sorting (up/dowen)
+  --PLANNED: option for sorting (up/down)
   operator_register(
-    "@",
+    "#",
     function (context)
-      local section = #context.section > 0 and context.section or docvars.SECTION
-
-      if #context.arg > 0 then
-        section_append(section, nil, "sort", "alphabetic "..context.arg.." "..context.text)
+      if #context.ARG > 0 then
+        section_append(context.SECTION, nil, context)
       else
         warn("sort section missing:")
       end
@@ -833,42 +900,85 @@ function setup()
   --      load_plugin(plugin)
   --   end
 
+  --default_processors:
+  --:
   if not opt_nodefaults then
-    processor_enable("varsubst", "verbatim", "tracker", "asciidoc")
+    processor_enable("verbatim") --: `%VERBATIM<processors_enable%((.-%))>`
+--    processor_enable("tracker", "asciidoc") --: `%VERBATIM<processors_enable%((.-%))>`
+
   end
 end
 
+local dbg_section
+local SECTION
+local ARG
 
 function process_line (line, comment)
   local context = {}
-
   -- special case for plaintext files
-  if comment ~= "" then
-    context.pre, context.section, context.op, context.arg, context.text =
-      string.match(line,"^(.-)"..comment.."([%w_.]*)("..operator_pattern()..")([%w_.]*)%s?(.*)$")
+  if comment == "" then
+    context.PRE, context.COMMENT, context.SECTION, context.OP, context.ARG, context.TEXT =
+      "", " ", "", ":", "", line
   else
-    context.pre = ""
-    context.section = ""
-    context.op = ":"
-    context.arg = ""
-    context.text = line
+    context.PRE, context.COMMENT, context.SECTION, context.OP, context.ARG, context.TEXT =
+      --FIXME: create opchars dynamically
+      string.match(line,"^(.-)("..comment..")([%w_.]*)([:=@#])([%w_.]*)%s?(.*)$")
   end
 
-  if context.op then
-    dbg("pre:", context.pre, "section:", context.section, "op:", context.op, "arg:", context.arg, "text:", context.text)
-    if operators[context.op] then
-      dbg("op:", context.op)
-      while operators[context.op] do
-        context.op = operators[context.op]
-      end
-      context.op(context)
+  --FIXME: wrong section
+  --docvars:file   `FILE`::
+  --docvars:file     The file or section name currently processed or some special annotation
+  --docvars:file     in angle brakets (eg '<startup>') on other processing phases
+  --docvars:line   `LINE`::
+  --docvars:line     Current line number of input or section, or indexing key
+  --docvars:line     Lines start at 1, if set to 0 then some output formatters skip over it
+  context.FILE, context.LINE = FILE, LINE
+
+  if context.PRE then
+    if context.SECTION == "" then
+      context.SECTION = SECTION
+      -- context.ARG = ARG
+      trace("pre:", context.PRE, "section:", context.SECTION, "op:", context.OP, "arg:", context.ARG, "text:", context.TEXT)
+
     else
-      warn("unknown operator:", context.op)
+      if dbg_section ~= context.SECTION then
+        dbg("pre:", context.PRE, "section:", context.SECTION, "op:", context.OP, "arg:", context.ARG, "text:", context.TEXT)
+        dbg_section = context.SECTION
+      end
+
+      if context.TEXT == "" then
+        SECTION = context.SECTION
+        -- ARG = context.ARG
+        return
+      end
+    end
+
+    for i=1,#processors_enabled do
+      processors_available[processors_enabled[i]](context)
+      if not context.TEXT then
+        return
+      end
+    end
+
+    -- section_append(context.SECTION, context.ARG, context)
+
+    local op = context.OP
+    if op then
+      if operators[op] then
+        while operators[op] do
+          op = operators[op]
+        end
+        op(context)
+      else
+        warn("unknown operator:", op)
+      end
     end
   end
 end
 
 function process_file(file)
+  --FIXME: first check if file is available, then warn
+  --FIXME: rename linecommentseqs, LANGUAGE=linecommentseqs.name
   local linecommentseqs, pattern = filetype_get(file)
   if not linecommentseqs then
     warn("unknown file type:", file)
@@ -877,12 +987,13 @@ function process_file(file)
 
   --docvars:section   `SECTION`::
   --docvars:section      stores the current section name
-  docvars.SECTION = string.match(file, "%.*([^.]*)")
-  docvars.KEY = ""
+  SECTION = string.match(file, "%.*([^.]*)")
+  ARG = ""
+  dbg("section:", SECTION)
 
   local fh
   if file == '-' then
-    docvars.FILE = "<stdin>"
+    FILE = "<stdin>"
     fh = io.stdin
   else
     fh = io.open(file)
@@ -890,15 +1001,14 @@ function process_file(file)
       warn("file not found:", file)
       return
     end
-    docvars.FILE = file
+    FILE = file
   end
 
-  docvars.LINE = 0
-  dbg("section:", docvars.SECTION)
+  LINE = 0
 
   for line in fh:lines() do
-    docvars.LINE = docvars.LINE+1
-    dbg("line:", line)
+    LINE = LINE+1
+    trace("input:", line)
     local comment = filetype_select(line, linecommentseqs)
     if comment then
       process_line(line, comment)
@@ -909,95 +1019,211 @@ end
 
 function process_inputs()
   for i=1,#opt_inputs do
-    --TODO: globbing if no such file exists
-    process_file(opt_inputs[i])
+    if opt_inputs[i] ~= false then
+      --TODO: globbing if no such file exists
+      process_file(opt_inputs[i])
+    end
   end
 end
 
-local sortfuncs = {
-  numeric = function (a,b)
-    return (tonumber(a) or 0) < (tonumber(b) or 0)
+
+
+
+
+
+
+
+
+
+
+
+
+local default_generators = {
+  [":"] = function (context)
+    return context.TEXT.."\n"
+    --return strsubst(context.TEXT, context).."\n"
   end,
-  alphabetic = function (a,b)
-    return tostring(a) < tostring(b)
+  ["="] = function (context)
+    return generate_output(context.ARG)
   end,
+  ["@"] = function (context)
+    dbg("generate_output_sorted:", order, which, opt)
+    local which = context.ARG
+    local section = sections[context.ARG].keys
+    local text = ""
+
+    if section ~= nil then
+      sections_keys_usecnt[which] = sections_keys_usecnt[which] + 1
+
+      local oldfile = FILE
+      FILE ='<output>:'..which
+
+      local sorted = {}
+
+      for k in pairs(section) do
+        table.insert(sorted, k)
+      end
+
+      table.sort(sorted, function(a,b) return tostring(a) < tostring(b) end)
+
+      if #sorted == 0 then
+        warn("section is empty:",which)
+        return ""
+      end
+
+      for i=1,#sorted do
+        LINE=sorted[i]
+        for j=1,#section[sorted[i]] do
+          text = text..section[sorted[i]][j].TEXT..'\n'
+        end
+      end
+      FILE = oldfile
+    else
+      warn("no section named:", which)
+    end
+    return text
+  end,
+ -- numeric = function (a,b)
+ --   return (tonumber(a) or 0) < (tonumber(b) or 0)
+ -- end,
+
+
+    --    return generate_output(context.ARG)
+
+  -- function generate_output_sorted(order, which, opt)
+--   dbg("generate_output_sorted:", order, which, opt)
+--   local section = sections[which].keys
+--   local text = ""
+
+--   if section ~= nil then
+--     sections_keys_usecnt[which] = sections_keys_usecnt[which] + 1
+
+--     local oldfile = docvars.FILE
+--     docvars.FILE ='<output>:'..which
+
+--     local sorted = {}
+
+--     for k in pairs(section) do
+--       table.insert(sorted, k)
+--     end
+
+--     table.sort(sorted, sortfuncs[order])
+
+--     if #sorted == 0 then
+--       warn("section is empty:",which)
+--       return ""
+--     end
+
+--     for i=1,#sorted do
+--       docvars.LINE=sorted[i]
+--       for j=1,#section[sorted[i]] do
+--         text = text..section[sorted[i]][j]..'\n'
+--       end
+--     end
+--     docvars.FILE = oldfile
+--   else
+--     warn("no section named:", which)
+--   end
+--   return text
+-- end
+ -- numeric = function (a,b)
+ --   return (tonumber(a) or 0) < (tonumber(b) or 0)
+ -- end,
+  ["#"] = nil,
+-- function generate_output_sorted(order, which, opt)
+--   dbg("generate_output_sorted:", order, which, opt)
+--   local section = sections[which].keys
+--   local text = ""
+
+--   if section ~= nil then
+--     sections_keys_usecnt[which] = sections_keys_usecnt[which] + 1
+
+--     local oldfile = docvars.FILE
+--     docvars.FILE ='<output>:'..which
+
+--     local sorted = {}
+
+--     for k in pairs(section) do
+--       table.insert(sorted, k)
+--     end
+
+--     table.sort(sorted, sortfuncs[order])
+
+--     if #sorted == 0 then
+--       warn("section is empty:",which)
+--       return ""
+--     end
+
+--     for i=1,#sorted do
+--       docvars.LINE=sorted[i]
+--       for j=1,#section[sorted[i]] do
+--         text = text..section[sorted[i]][j]..'\n'
+--       end
+--     end
+--     docvars.FILE = oldfile
+--   else
+--     warn("no section named:", which)
+--   end
+--   return text
+-- end
+--  alphabetic = function (a,b)
+ --   return tostring(a) < tostring(b)
+ -- end,
 }
 
 
-function generate_output_sorted(order, which, opt)
-  dbg("generate_output_sorted:", order, which, opt)
-  local section = sections[which].keys
 
-  if section ~= nil then
-    sections_keys_usecnt[which] = sections_keys_usecnt[which] + 1
-
-    local oldfile=docvars.FILE
-    docvars.FILE='<output>:'..which
-
-    local sorted = {}
-
-    for k in pairs(section) do
-      table.insert(sorted, k)
-    end
-
-    table.sort(sorted, sortfuncs[order])
-
-    for i=1,#sorted do
-      docvars.LINE=sorted[i]
-      for j=1,#section[sorted[i]] do
-        io.write(section[sorted[i]][j], '\n')
-      end
-    end
-    docvars.FILE=oldfile
-  else
-    warn("no section named:", which)
-  end
-end
 
 local sofar_rec={}
 
-function generate_output(which)
+function generate_output(which, generators)
   dbg("generate_output:", which)
+  generators = generators or default_generators
   local section = sections[which]
+  local text = ""
 
   if section ~= nil then
     if sofar_rec[which] then
       warn("recursive include:",which)
-      return
+      return ""
+    end
+    if #section == 0 then
+      warn("section is empty:",which)
+      return ""
     end
     sofar_rec[which] = true
     sections_usecnt[which] = sections_usecnt[which] + 1
 
-    local oldfile=docvars.FILE
-    docvars.FILE='<output>:'..which
+    local oldfile = FILE
+    FILE = '<output>:'..which
     for i=1,#section do
-      docvars.LINE=i
-      dbg("generate", section[i].action, section[i].text)
+      LINE=i
+      --FIXME: context  trace("generate", section[i].TEXT)
       --TODO: docme actions
-      if section[i].action == "text" then
-        io.write(section[i].text, '\n')
-      elseif section[i].action == "include" then
-        generate_output(section[i].text)
-      elseif section[i].action == "sort" then
-        generate_output_sorted(string.match(section[i].text, "^([%w_]*) ?([%w_]*) ?(.*)"))
+      local genfunc = generators[section[i].OP]
+      if genfunc then
+        text = text .. genfunc(section[i])
+      else
+        warn("no generator function for:", section[i].OP)
       end
     end
-    docvars.FILE=oldfile
+    FILE = oldfile
     sofar_rec[which] = nil
   else
     warn("no section named:", which)
   end
+  return text
 end
+
 
 setup()
 process_inputs()
 
-docvars.FILE = "<output>"
-docvars.LINE = 0
+FILE = "<output>"
+LINE = 0
 
 -- initialize orphans / doublettes checker
 for k,_ in pairs(sections) do
-  dbg("sk:", k, #sections[k], next(sections[k].keys))
   if #sections[k] > 0 then
     sections_usecnt[k] = 0
   end
@@ -1007,8 +1233,10 @@ for k,_ in pairs(sections) do
   end
 end
 
-generate_output(opt_toplevel)
+--docvars.__PARTIAL = ""
+io.write(generate_output(opt_toplevel))
 
+LINE = 0
 -- orphans / doublettes
 for k,v in pairs(sections_usecnt) do
   if v == 0 then
@@ -1032,7 +1260,7 @@ end
 --: pipadoc - Documentation extractor
 --: =================================
 --: Christian Thaeter <ct@pipapo.org>
---: %{DATE}
+--: {$DATE}
 --:
 --: Introduction
 --: ------------
@@ -1060,12 +1288,12 @@ end
 --:
 --: This 'pipadoc' follows an earlier implementation with a slightly different (incompatible) syntax
 --: and less features which was implemented in AWK. Updating to the new syntax should be quite simple
---: and is suggested for any Projects using pipadoc.
+--: and is suggested for any projects using pipadoc.
 --:
 --: Getting the Source
 --: ------------------
 --:
---: 'pipadoc' is managed the git revision contol system. You can clone the repository with
+--: Pipadoc is managed the git revision contol system. You can clone the repository with
 --:
 --:  git clone --depth 1 git://git.pipapo.org/pipadoc
 --:
@@ -1075,10 +1303,11 @@ end
 --: Installation
 --: ------------
 --:
---: 'pipadoc' is single lua source file `pipadoc.lua` which is portable among most Lua versions
---: (PUC Lua 5.1, 5.2, 5.3 and luajit). It ships with a `pipadoc.install` shell script which figures a
+--: Pipadoc is single lua source file `pipadoc.lua` which is portable among most Lua versions
+--: (PUC Lua 5.1, 5.2, 5.3 and Luajit). It ships with a `pipadoc.install` shell script which figures a
 --: suitable Lua version out and installs `pipadoc.lua` as `pipadoc` in a given directory or the current
 --: directory by default.
+--TODO: dependency strsubst
 --:
 --: There are different ways how this can be used in a project:
 --:
@@ -1297,44 +1526,9 @@ end
 --TODO: asciidoc //source:line// comments like old pipadoc
 --TODO: integrate old pipadoc.txt documentation
 --PLANNED: how to join (and then wordwrap) lines?
---PLANNED: bash like parameter expansion
---[[
-  --:   PING %{unknown}
-  --:   single percent sign : %{PERCENT} \% \\% %{unknown}
-  --:
-  --:   ASSIGN  %{!%{FOO=BAR}}
-  --:   SUBSTITUTE  %{foobar//o/x}
-  --:   SUBSTRING  %{foobar:2:4}
-  --:   SUBSTRING  %{foobar:3}
-  --:   SUBSTRING  %{foobar:-4}
-  --:   IFELSE %{?foo:bar}
-  --:   IFELSE %{x?foo:bar}
-  --:
-  --[[
-    ifelse
-
-    %{var?if:else}
-
-    assign
-    %{var=value}
-
-    substr
-    %{parameter:offset}
-    %{parameter:offset:length}
-
-    length
-    %{parameter#}
-
-    %{var/pattern/replacement}
-    %{var//pattern/replacement}
-
-    %{parameter^pattern}
-    %{parameter^^pattern}
-    %{parameter,pattern}
-    %{parameter,,pattern}
-
---]]
-
-
+--PLANNED: bash like parameter expansion, how to apply that to sections/keys too --%{section}:%{key}
 --PLANNED: org-mode processor
---PLANNED: merge docvars and context to one table
+--PLANNED: INIT section initialize strsubst etc
+--ASSIGNED:ct PLANNED: merge docvars and context to one table
+
+
