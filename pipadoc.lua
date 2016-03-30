@@ -16,22 +16,21 @@
 --: You should have received a copy of the GNU General Public License
 --: along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
---PLANNED: directives: --! luacall()
 --TODO: include operator, add a file to the processing list
+--FIXME: split on newlines
 
 local LINE = 0
 local FILE = "<startup>"
 
 local docvars = {
-  --docvars:nl   `NL`::
-  --docvars:nl     The linebreak character sequence, usually '\n' on unix systems but
-  --docvars:nl     can be changed with a commandline option
+  --docvars:nl `NL`::
+  --docvars:nl   The linebreak character sequence, usually '\n' on unix systems but
+  --docvars:nl   can be changed with a commandline option
+  --FIXME: define in config? needs escapes
   NL = "\n",
-  __PARTIAL = "true",
 
-  --MARKUP = "asciidoc",
+  -- defaults
   MARKUP = "plain",
-  LANGUAGE = "lua",
 }
 
 local args_done = false
@@ -70,6 +69,7 @@ end
 
 
 --api:
+--:
 --: Logging Progress and Errors
 --: ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 --:
@@ -77,17 +77,20 @@ end
 --: variable argument list. Any Argument passed to them will be converted to a string and printed
 --: to stderr when the verbosity level is high enough.
 --:
-function warn(...) msg(1, ...) end  --: `%VERBATIM<function%s*(.-%))>`::{$NL}  report a important but non fatal failure {$NL}
-function echo(...) msg(2, ...) end  --: `%VERBATIM<function%s*(.-%))>`::{$NL}  report normal progress {$NL}
-function dbg(...) msg(3, ...) end   --: `%VERBATIM<function%s*(.-%))>`::{$NL}  show verbose/debugging progress information {$NL}
-function trace(...) msg(4, ...) end --: `%VERBATIM<function%s*(.-%))>`::{$NL}  show verbose/debugging progress information {$NL}
+function warn(...) msg(1, ...) end  --: {FUNC} report a important but non fatal failure
+function echo(...) msg(2, ...) end  --: {FUNC} report normal progress
+function dbg(...) msg(3, ...) end   --: {FUNC} show debugging information
+function trace(...) msg(4, ...) end --: {FUNC} show more detailed progress information
+
 
 --PLANNED: use echo() for progress
 
-function die(...) --: `%VERBATIM<function%s*(.-%))>`::{$NL}  report a fatal error and exit the programm {$NL}
+function die(...) --: {FUNC} report a fatal error and exit the programm
   printerr(...)
   os.exit(1)
 end
+
+
 
 -- debugging only
 function dump_table(p,t)
@@ -101,6 +104,7 @@ end
 
 
 --api:
+--:
 --: Optional Lua Modules
 --: ~~~~~~~~~~~~~~~~~~~~
 --:
@@ -112,9 +116,8 @@ end
 --: When luarocks is installed, then the 'luarocks.loader' is loaded by default to make any module installed by
 --: luarocks available.
 --:
-function request(name) --: `%VERBATIM<function%s*(.-%))>`::
-  --:   try to load optional modules
-  --:   wraps lua 'require' in a pcall so that failure to load a module results in 'nil' rather than a error  {$NL}
+function request(name) --: {FUNC} try to load optional modules
+  --:    wraps lua 'require' in a pcall so that failure to load a module results in 'nil' rather than a error
   local ok,handle = pcall(require, name)
   if ok then
     if handle._VERSION then
@@ -161,7 +164,7 @@ local function load_modules()
     end
   }
 
-  strsubst(docvars)
+  strsubst (docvars)
 
 -- the strsubst initialization
 -- local initstrsubst = [[
@@ -174,28 +177,29 @@ end
 --PLANNED: macros/docvars  LUA_FUNC = "%VERBATIM<function%s*(.-%))>::\n "
 
 --api:
+--:
 --: Typechecks
 --: ~~~~~~~~~~
 --:
 --: Some wrapers around 'assert' to check externally supplied data. On success 'var' will be returned
 --: otherwise an assertion error is raised.
 --:
-function assert_type(var, expected) --: `%VERBATIM<function%s*(.-%))>`::{$NL}  checks that the 'var' is of 'type' {$NL}
+function assert_type(var, expected) --: {FUNC} checks that the 'var' is of 'type'
   assert(type(var) == expected, "type error: "..expected.." expected, got "..type(var))
   return var
 end
 
-function maybe_type(var, expected) --: `%VERBATIM<function%s*(.-%))>`::{$NL}  checks that the 'var' is of 'type' or nil {$NL}
+function maybe_type(var, expected) --: {FUNC} checks that the 'var' is of 'type' or nil
   assert(var == nil or type(var) == expected, "type error: "..expected.." or nil expected, got "..type(var))
   return var
 end
 
-function assert_char(var) --: `%VERBATIM<function%s*(.-%))>`::{$NL}  checks that 'var' is a single character {$NL}
+function assert_char(var) --: {FUNC} checks that 'var' is a single character
   assert(type(var) == "string" and #var == 1, "type error: single character expected")
   return var
 end
 
-function assert_notnil(var) --: `%VERBATIM<function%s*(.-%))>`::{$NL}  checks that 'var' is not 'nil' {$NL}
+function assert_notnil(var) --: {FUNC} checks that 'var' is not 'nil'
   assert(type(var) ~= "nil", "Value expected")
   return var
 end
@@ -260,13 +264,14 @@ local sections_usecnt = {}
 local sections_keys_usecnt = {}
 
 --api:
+--:
 --: Sections
 --: ~~~~~~~~
 --:
 
 --PLANNED: maybe append the context       , docvars.SECTION, docvars.ARG, docvars.OP,  docvars.TEXT, docvars.PRE
 
-function section_append(section, key, context) --: `%VERBATIM<function%s*(.-%))>`::
+function section_append(section, key, context) --: {FUNC}
   --:   section:::
   --:     name of the section to append to, must be a string
   assert_type(section, "string")
@@ -290,7 +295,7 @@ function section_append(section, key, context) --: `%VERBATIM<function%s*(.-%))>
 end
 
 --api:
-function section_get(section, key, index) --: `%VERBATIM<function%s*(.-%))>`::
+function section_get(section, key, index) --: {FUNC}
   --:   section:::
   --:     name of the section to append to, must be a string
   assert_type(section, "string")
@@ -347,10 +352,11 @@ local filetypes = {}
 
 
 --api:
+--:
 --: Filetypes
 --: ~~~~~~~~~
 --:
-function filetype_register(name, filep, linecommentseqs, ...) --: `%VERBATIM<function%s*(.-%))>`::
+function filetype_register(name, filep, linecommentseqs, ...) --: {FUNC}
   --:     name:::
   --:       name of the language
   --:     filep:::
@@ -371,7 +377,7 @@ function filetype_register(name, filep, linecommentseqs, ...) --: `%VERBATIM<fun
   filep = to_table(filep)
   linecommentseqs = to_table(linecommentseqs)
   for i=1,#filep do
-    filetypes[filep[i]] = filetypes[filep[i]] or {name = name}
+    filetypes[filep[i]] = filetypes[filep[i]] or {language = name}
     for j=1,#linecommentseqs do
       dbg("register filetype:", name, filep[i], linecommentseqs[j])
       filetypes[filep[i]][#filetypes[filep[i]]+1] = linecommentseqs[j]
@@ -396,70 +402,6 @@ function filetype_select(line, linecommentseqs)
   end
 end
 
---proc:
---: Each line containing a pipadoc comment are passed down through 'processors' which can do
---: additinal actions for manipulating the generated Documentaton. This processors are extendable
---: in Lua.
---:
---api:
---:
---: Processors
---: ~~~~~~~~~~
---:
-local processors_available = {}
-function processor_register(name, func) --: `%VERBATIM<function%s*(.-%))>`::
-  --:   name:::
-  --:     name of the processor
-  --:   func:::
-  --:     a function which receives a table of the 'context' parsed from the pipadoc commentline
-  --:
-  --: Register a new processor. To be called from plugins. Processors need to be enabled
-  --: to be used. Some are by default enabled, unless the --no-defaults commmandline option is
-  --: used for invoking pipadoc. Some are bound to specific filetypes.
-  --:
-  --: When plugins register new processors under the same name of an already existing processor
-  --: the new processor will overrwrite the old one and become registered.
-  --:
-  --: The context passed to the function is a table with following entries:
-  --:
-  --:   pre:::
-  --:     'source' part in before the comment character
-  --:   section:::
-  --:     parsed section name, will be empty in section-blocks to access the current
-  --:     section name refer to <<docvars>>
-  --:   op:::
-  --:     operator signifying the pipadoc operation
-  --:   arg:::
-  --:     word right after the operator
-  --:   text:::
-  --:     the documentation text
-  --:
-  --: This function is free to modify the context in place or call other api funtions to generate
-  --: additional documentation entities.
-  dbg("register processor:", name)
-  processors_available[assert_type(name, "string")] = assert_type(func, "function")
-end
-
-local processors_enabled = {}
---api:
-function processor_enable(...) --: `%VERBATIM<function%s*(.-%))>`::
-  --:     ...:::
-  --:       called with an ordered list of processors to enable
-  --:
-  --: enable the listed processors.
-  local procs = {...}
-  for i=1,#procs do
-    assert_type(procs[i], "string")
-    if processors_available[procs[i]] then
-      processors_enabled[#processors_enabled+1] = procs[i]
-    else
-      warn("processor not available:", procs[i])
-    end
-  end
-end
-
-
-
 
 -- --op:
 -- --: Operators define the core functionality of pipadoc. They are mandatory in the pibadoc syntax
@@ -467,7 +409,7 @@ end
 -- --: operators. Operators must be a single punctuation character
 local operators = {}
 -- --api:
-function operator_register(char, func) --: `%VERBATIM<function%s*(.-%))>`::
+function operator_register(char, func) --: {FUNC}
   --:   char:::
   --:     single punctuation character defining this operator
   --:   func:::
@@ -490,28 +432,23 @@ end
 
 
 --usage:
+local options = {
+  "pipadoc [options...] [inputs..]",  --:  {STRING}
+  "  options are:", --:  {STRING}
 
-
-
-
-local options
-options = {
-  "pipadoc [options...] [inputs..]",  --:   %VERBATIM("(.*)")
-  "  options are:", --:   %VERBATIM("(.*)")
-
-  "    -v, --verbose                    increment verbosity level", --:   %VERBATIM("(.*)")
+  "    -v, --verbose                           increment verbosity level", --:  {STRING}
   ["-v"] = "--verbose",
   ["--verbose"] = function () opt_verbose = opt_verbose+1 end,
 
-  "    -q, --quiet                      supresses any messages", --:   %VERBATIM("(.*)")
+  "    -q, --quiet                             supresses any messages", --:  {STRING}
   ["-q"] = "--quiet",
   ["--quiet"] = function () opt_verbose = 0 end,
 
-  "    -d, --debug                      set verbosity to maximum", --:   %VERBATIM("(.*)")
+  "    -d, --debug                             set verbosity to maximum", --:  {STRING}
   ["-d"] = "--debug",
   ["--debug"] = function () opt_verbose = 3 end,
 
-  "    -h, --help                       show this help", --:   %VERBATIM("(.*)")
+  "    -h, --help                              show this help", --:  {STRING}
   ["-h"] = "--help",
   ["--help"] = function ()
     print("usage:")
@@ -522,8 +459,8 @@ options = {
   end,
 
 
-  "    -r, --register <name> <file> <comment>  register a filetype pattern", --:   %VERBATIM("(.*)")
-  "                                            for files matching a file pattern", --:   %VERBATIM("(.*)")
+  "    -r, --register <name> <file> <comment>  register a filetype pattern", --:  {STRING}
+  "                                            for files matching a file pattern", --:  {STRING}
   ["-r"] = "--register",
   ["--register"] = function (arg,i)
     assert(type(arg[i+3]))
@@ -532,7 +469,7 @@ options = {
   end,
 
 
-  "    -t, --toplevel <name>            sets 'name' as toplevel node [MAIN]", --:   %VERBATIM("(.*)")
+  "    -t, --toplevel <name>                   sets 'name' as toplevel node [MAIN]", --:  {STRING}
   ["-t"] = "--toplevel",
   ["--toplevel"] = function (arg, i)
     assert(type(arg[i+1]))
@@ -540,7 +477,7 @@ options = {
     return 1
   end,
 
-  "    -c, --config <name>             selects a configfile [pipadoc.conf]", --:   %VERBATIM("(.*)")
+  "    -c, --config <name>                     selects a configfile [pipadoc.conf]", --:  {STRING}
   ["-c"] = "--config",
   ["--config"] = function (arg, i)
     assert(type(arg[i+1]))
@@ -549,11 +486,11 @@ options = {
   end,
 
 
-  "    --no-defaults                    disables default filetypes and processors", --:   %VERBATIM("(.*)")
+  "    --no-defaults                           disables default filetypes and processors", --:  {STRING}
   ["--no-defaults"] = function () opt_nodefaults = true end,
 
 
-  "    -m, --markup <name>              Selects the markup engine for the output [plain]", --:   %VERBATIM("(.*)")
+  "    -m, --markup <name>                     selects the markup engine for the output [plain]", --:  {STRING}
   ["-m"] = "--markup",
   ["--markup"] = function (arg, i)
     assert(type(arg[i+1]))
@@ -561,11 +498,10 @@ options = {
     return 1
   end,
 
-  "    --                               stops parsing the options and treats each", --:   %VERBATIM("(.*)")
-  "                                     following argument as input file", --:   %VERBATIM("(.*)")
+  "    --                                      stops parsing the options and treats each", --:  {STRING}
+  "                                            following argument as input file", --:  {STRING}
   ["--"] = function () args_done=true end,
 
-  
   --TODO: --alias match pattern --file-as match filename
   --TODO: -o --output
   --TODO: -l --load
@@ -581,8 +517,8 @@ options = {
   --TODO: wrap at blank/intelligent
   --PLANNED: wordwrap
 
-  "", --:   %VERBATIM("(.*)")
-  "  inputs are filenames or a '-' which indicates standard input", --:   %VERBATIM("(.*)")
+  "", --:  {STRING}
+  "  inputs are filenames or a '-' which indicates standard input", --:  {STRING}
 }
 
 -- local plugins = {}
@@ -618,24 +554,28 @@ function setup()
 
   do
     local date = os.date ("*t")
-    --docvars:date    `YEAR, MONTH, DAY, HOUR, MINUTE`::
-    --docvars:date      Current date information
+    --docvars:date `YEAR, MONTH, DAY, HOUR, MINUTE`::
+    --docvars:date   Current date information
     docvars.YEAR = date.year
     docvars.MONTH = date.month
     docvars.DAY = date.day
     docvars.HOUR = date.hour
     docvars.MINUTE = date.min
-    --docvars:date    `DATE`::
-    --docvars:date      Current date in YEAR/MONTH/DAY format
+    --docvars:date `DATE`::
+    --docvars:date   Current date in YEAR/MONTH/DAY format
     docvars.DATE = date.year.."/"..date.month.."/"..date.day
   end
 
---  filetype_register("pipadocconfig", "^pipadoc.conf$", {"PIPADOC:", ""})
+  local config = io.open(opt_config)
+  if config then
+    dbg("load config:", opt_config)
+    strsubst(config:read("*a"))
+    config:close()
+  else
+    warn("failed config:", opt_config)
+  end
 
   if not opt_nodefaults then
-    opt_inputs[1] = opt_config
-    filetype_register("pipadocconfig", "^"..opt_config.."$", {"PIPADOC:", ""})
-
     --filetypes_builtin:scons * SCons
     filetype_register("scons", "^SConstuct$", "#")
 
@@ -691,166 +631,22 @@ function setup()
     filetype_register("sql", {"%.sql$", "%.SQL$"}, {"#", "--", "/*"})
   end
 
-
-  --proc_builtin:
-  --:   `verbatim`::
-  --:     lifts a the sourcecode preceeding the pipadoc comment or parts of it into the
-  --:     output. A percent sign followed by the keyword `VERBATIM` will be replaced with
-  --:     with the sourcecode before the pipadoc comment. When the `VERBATIM`is followed by
-  --:     a bracketed lua pattern (any kind of brackets are supported: () {} [] <>) then this
-  --:     pattern is matched against the source part of the line. This match or the first
-  --:     capture if it defines any is then pased in place of the VERBATIM statement.
-  --:
-  processor_register(
-    "verbatim",
-    function (context)
-      repeat
-        local pattern = string.match(context.TEXT, "%%VERBATIM(%b())")
-        pattern = pattern or string.match(context.TEXT, "%%VERBATIM(%b[])")
-        pattern = pattern or string.match(context.TEXT, "%%VERBATIM(%b{})")
-        pattern = pattern or string.match(context.TEXT, "%%VERBATIM(%b<>)")
-        if pattern then
-          local escaped = string.gsub(pattern, "%p", "%%%1")
-          local prepart = string.match(context.PRE, string.sub(pattern, 2, -2))
-          context.TEXT = string.gsub(context.TEXT, "%%VERBATIM"..escaped, prepart or "")
-        end
-      until not pattern
-
-      context.TEXT = string.gsub(context.TEXT, "%%VERBATIM", context.PRE)
-    end
-  )
-
-  --proc_builtin:
-  --:   `asciidoc`::
-  --:     Defines some helpers for asciidoc formatted text.
-  --:     Each start of a new section puts an asciidoc comment into the output
-  --:     logging FILE:LINE pair from where it originates.
-  --:
-  --PLANNED: more asciidoc support
---  processor_register(
-  --  "asciidoc",
-    --function ()
-      --PLANNED: make each feature switchable, options to processor
-
-      -- insert source references as asciidoc comments
-      --FIXME: broken
-      --if docvars.section ~= "" then
-      --  local _, value = section_get(docvars.section, context.key)
-      --  if value and value ~= "" then
-      --    section_append(docvars.section, context.key, "text", "")
-      --  end
-      --  section_append(docvars.section, context.key, "text", "// "..docvars.FILE..":"..docvars.LINE.." //")
-      --end
-
---    end
- -- )
-
-  --proc_builtin:
-  --:   `tracker`::
-  --:     Adds some special support for the sections TODO, FIXME and PLANNED.
-  --:     Each line of the saied sections will be prefixed with an asciidoc reference
-  --:     to its origin.
-  --:
-  --PLANNED: use some docvars based templates to format this better (asciidoc, etc)
-  --PLANNED: maybe add DONE which will be handled in a githook (added to commit message and removed from source)
-  --PLANNED: some way to associate test code with source and docs
- -- processor_register(
-   -- "tracker",
-  -- - function ()
-      -- insert source references as asciidoc comments
-  --    if docvars.isection == "ASSIGNED" or docvars.isection == "TODO" or docvars.isection == "FIXME" or docvars.isection == "PLANNED" then
-    --    docvars.text = ""..docvars.FILE..":"..docvars.LINE.."::"..docvars.NL.."  "..docvars.arg.." "..docvars.text
-     -- end
-   -- end
- -- )
-
-
-  --[[[  dd
-    operator_register(
-    "!",
-    function (arg, text)
-    -- DIRECTIVE load unused reuse
-    end)
-  --]]
-
-
-
-
-
   --op_builtin:
-  --:   `:` ::
-  --:     The documentation operator. Defines normal documentation text. Each pipadoc comment using the `:`
-  --:     operator is processed as potential documentation. First all enabled 'processors' are run over it and
-  --:     finally the text is appended to the current section(/key)
---   if false then
---   operator_register(
---     ":",
---     function ()
---       -- for oneline sections
--- --      local section_bak, key_back
-
--- --      if #docvars.TEXt > 0 then
---  --       section_bak = docvars.section
---   --      key_bak = docvars.key
---    --   end
-
--- --      if #docvars.section > 0 then
---         --docvars.section = docvars.section
---         --docvars:isection   `ISECTION`::
---         --docvars:isection     The current section name for the first line after a section change, else "".
--- --        docvars.isection = docvars.section
---  --     end
-
--- --      if #docvars.section > 0 or #docvars.arg > 0 then
--- --        docvars.key = docvars.arg
--- --      end
-
--- --      for i=1,#processors_enabled do
--- --        processors_available[processors_enabled[i]](context)
--- --        if not docvars.text or docvars.text == 0 then
--- --          goto out
--- --        end
--- --      end
-
--- --      if #docvars.text > 0 or #docvars.section == 0 then
---         trace("STORE", docvars.section, docvars.key, "text", docvars.text)
---         section_append(docvars.section, docvars.key, "text", docvars.text)
---   --    end
-
--- --      ::out::
-
--- --      if section_bak then
--- --        docvars.section = section_bak
--- --        docvars.key = key_bak
--- --      end
--- --      docvars.isection = ""
---     end
---   )
---   end
-
+  --: `:` ::
+  --:   The documentation operator. Defines normal documentation text. Each pipadoc comment using the `:`
+  --:   operator is processed as potential documentation. First all enabled 'processors' are run over it and
+  --:   finally the text is appended to the current section(/key)
   operator_register(
     ":",
     function (context)
-      for i=1,#processors_enabled do
-        processors_available[processors_enabled[i]](context)
-        if not context.TEXT then
-          return
-        end
-      end
-      --PLANNED: maybe append the context       , docvars.SECTION, docvars.ARG, docvars.OP,  docvars.TEXT, docvars.PRE
-      -- context = {FILE:=}{LINE:=}{PRE:=}{SECTION:=}{ARG:=}
-
-      -- partial
-      context.TEXT = strsubst(context.TEXT, context)
-
       section_append(context.SECTION, context.ARG, context)
     end
   )
 
 
   --op_builtin:
-  --:   `=` ::
-  --:     Section paste operator. Takes a section name as argument and will paste that section in place.
+  --: `=` ::
+  --:   Section paste operator. Takes a section name as argument and will paste that section in place.
   operator_register(
     "=",
     function (context)
@@ -864,8 +660,8 @@ function setup()
   )
 
   --op_builtin:
-  --:   `@` ::
-  --:     Takes a section name as argument and will paste section text alphabetically sorted by their keys.
+  --: `@` ::
+  --:   Takes a section name as argument and will paste section text alphabetically sorted by their keys.
   --PLANNED: option for sorting locale
   --PLANNED: option for sorting (up/dowen)
   operator_register(
@@ -881,8 +677,8 @@ function setup()
 
 
   --op_builtin:
-  --:   `#` ::
-  --:     Takes a section name as argument and will paste section text numerically sorted by their keys.
+  --: `#` ::
+  --:   Takes a section name as argument and will paste section text numerically sorted by their keys.
   --PLANNED: option for sorting (up/down)
   operator_register(
     "#",
@@ -894,19 +690,6 @@ function setup()
       end
     end
   )
-
-  --TODO: plugins
-  --   for plugin in pairs(plugins) do
-  --      load_plugin(plugin)
-  --   end
-
-  --default_processors:
-  --:
-  if not opt_nodefaults then
-    processor_enable("verbatim") --: `%VERBATIM<processors_enable%((.-%))>`
---    processor_enable("tracker", "asciidoc") --: `%VERBATIM<processors_enable%((.-%))>`
-
-  end
 end
 
 local dbg_section
@@ -915,6 +698,13 @@ local ARG
 
 function process_line (line, comment)
   local context = {}
+
+  local ppline = strsubst("{$PREPROCESS?{$_$$$PREPROCESS}:{$_}}", {_ = line})
+  if ppline ~= "" then
+    trace("prepr:", ppline)
+    line = ppline
+  end
+
   -- special case for plaintext files
   if comment == "" then
     context.PRE, context.COMMENT, context.SECTION, context.OP, context.ARG, context.TEXT =
@@ -926,12 +716,13 @@ function process_line (line, comment)
   end
 
   --FIXME: wrong section
-  --docvars:file   `FILE`::
-  --docvars:file     The file or section name currently processed or some special annotation
-  --docvars:file     in angle brakets (eg '<startup>') on other processing phases
-  --docvars:line   `LINE`::
-  --docvars:line     Current line number of input or section, or indexing key
-  --docvars:line     Lines start at 1, if set to 0 then some output formatters skip over it
+  --docvars:file `FILE`::
+  --docvars:file   The file or section name currently processed or some special annotation
+  --docvars:file   in angle brakets (eg '<startup>') on other processing phases
+  --FIXME: LINE is used nn preprocessor, rename
+  --docvars:line `LINE`::
+  --docvars:line   Current line number of input or section, or indexing key
+  --docvars:line   Lines start at 1, if set to 0 then some output formatters skip over it
   context.FILE, context.LINE = FILE, LINE
 
   if context.PRE then
@@ -949,13 +740,6 @@ function process_line (line, comment)
       if context.TEXT == "" then
         SECTION = context.SECTION
         -- ARG = context.ARG
-        return
-      end
-    end
-
-    for i=1,#processors_enabled do
-      processors_available[processors_enabled[i]](context)
-      if not context.TEXT then
         return
       end
     end
@@ -978,18 +762,13 @@ end
 
 function process_file(file)
   --FIXME: first check if file is available, then warn
-  --FIXME: rename linecommentseqs, LANGUAGE=linecommentseqs.name
-  local linecommentseqs, pattern = filetype_get(file)
-  if not linecommentseqs then
+  local descriptor, pattern = filetype_get(file)
+  if not descriptor then
     warn("unknown file type:", file)
     return
   end
 
-  --docvars:section   `SECTION`::
-  --docvars:section      stores the current section name
-  SECTION = string.match(file, "%.*([^.]*)")
   ARG = ""
-  dbg("section:", SECTION)
 
   local fh
   if file == '-' then
@@ -1004,12 +783,20 @@ function process_file(file)
     FILE = file
   end
 
+  --FIXME: wrong docsection
+  --docvars:section `SECTION`::
+  --docvars:section   stores the current section name
+  SECTION = file:match("%.*([^.]*)")
   LINE = 0
+  dbg("section:", SECTION)
+
+  docvars.LANGUAGE = descriptor.language
+  dbg("LANGUAGE:", docvars.LANGUAGE)
 
   for line in fh:lines() do
     LINE = LINE+1
     trace("input:", line)
-    local comment = filetype_select(line, linecommentseqs)
+    local comment = filetype_select(line, descriptor)
     if comment then
       process_line(line, comment)
     end
@@ -1029,23 +816,24 @@ end
 
 
 
-
-
-
-
-
-
-
-
-
 local default_generators = {
   [":"] = function (context)
-    return context.TEXT.."\n"
-    --return strsubst(context.TEXT, context).."\n"
+    --return context.TEXT.."\n"
+    --context.TEXT = strsubst("{$$$PREPROCESS}", context)
+
+    local ret = strsubst(context.TEXT, context)
+    if ret == "" and context.TEXT ~= "" then
+      return ""
+    else
+      trace ("generate:", ret)
+      return ret.."\n"
+    end
   end,
+
   ["="] = function (context)
     return generate_output(context.ARG)
   end,
+
   ["@"] = function (context)
     dbg("generate_output_sorted:", order, which, opt)
     local which = context.ARG
@@ -1262,6 +1050,7 @@ end
 --: Christian Thaeter <ct@pipapo.org>
 --: {$DATE}
 --:
+--:
 --: Introduction
 --: ------------
 --:
@@ -1283,12 +1072,14 @@ end
 --: the programming language has some form of comments starting with a defined character sequence
 --: and spaning to the end of the line.
 --:
+--:
 --: History
 --: -------
 --:
 --: This 'pipadoc' follows an earlier implementation with a slightly different (incompatible) syntax
---: and less features which was implemented in AWK. Updating to the new syntax should be quite simple
+--: and less features which was implemented in AWK. Updating to the new syntax should be straightforward
 --: and is suggested for any projects using pipadoc.
+--:
 --:
 --: Getting the Source
 --: ------------------
@@ -1297,8 +1088,9 @@ end
 --:
 --:  git clone --depth 1 git://git.pipapo.org/pipadoc
 --:
---: Some releases will be tagged and get a release branch. Generally 'pipadoc' is planned to have rolling
---: releases where the 'master' branch will stay stable and developement will be done on the 'devel' branch.
+--: Some releases will be tagged and get a release branch. 'pipadoc' is planned to have rolling releases
+--: where the 'master' branch will stay stable and developement will be done on the 'devel' branch.
+--:
 --:
 --: Installation
 --: ------------
@@ -1317,10 +1109,12 @@ end
 --: - One can ship the `pipadoc.lua` and `pipadoc.install` and do a local install in the build
 --:   directory and use this pipadoc thereafter
 --:
+--:
 --: Usage
 --: -----
 --:
 --=usage
+--:
 --:
 --: Basic concepts
 --: --------------
@@ -1333,6 +1127,9 @@ end
 --: character followed directly (without any extra space character) by some definition (see below) becomes
 --: a pipadoc comment.
 --:
+--TODO: Pipadoc operates line by line
+--TODO: Control is only in comments, sources cant be escaped
+--:
 --: [[syntax]]
 --: Pipadoc Syntax
 --: ~~~~~~~~~~~~~~
@@ -1343,41 +1140,34 @@ end
 --:
 --: The formal syntax looks like:
 --:
---:   pipadoc = [source] <linecomment> [section] <operator> [arg] [..space.. [documentation_text]]
+--:  pipadoc = [source] <linecomment> [section] <operator> [arg] [..space.. [documentation_text]]
 --:
---:   source = ..any sourcecode text..
+--:  source = ..any sourcecode text..
 --:
---:   linecomment = ..the linecomment sequence choosen by the filetype..
+--:  linecomment = ..the linecomment sequence choosen by the filetype..
 --:
---:   section = ..alphanumeric text including underscore and dots, but without spaces..
+--:  section = ..alphanumeric text including underscore and dots, but without spaces..
 --:
---:   operator = [:=@#] by default, one of the defined operators
+--:  operator = [:=@#] by default, one of the defined operators
 --:
---:   arg = ..alphanumeric text including underscore and dots, but without spaces..
+--:  arg = ..alphanumeric text including underscore and dots, but without spaces..
 --:
---:   documentation_text = ..rest of the line, freeform text..
+--:  documentation_text = ..rest of the line, freeform text..
 --:
---:
---: It is possible to extend pipadoc with plugins which provide new operators or new processors.
 --:
 --: Documentation lines are proccessed according to their operator.
 --:
 --TODO: docme oneline vs block, default section name, MAIN section
 --TODO: note that literal strings are not special
---PLANNED: how to run processors before parsing over every line
---: Order of operation
---: ~~~~~~~~~~~~~~~~~~
+--:
+--: Order of operations
+--: ~~~~~~~~~~~~~~~~~~~
 --:
 --: Pipadoc parse each file given on the commandline in order.
 --: Only lines which contain pipadoc comments (see <<syntax>> above) are used in
 --: any further steps.
 --:
---: On each such documentation line, all defined processors are in order they
---: where enabled as long there is text left to process. Processors can modify the
---: documentation text which may affect subsequent processors.
---:
---: When all processors are run and there is still text left, it will be appended
---: to the active section/key.
+--DOCME: strsubst it will be appended to the active section/key.
 --:
 --: Finally the output is generated by starting assembling the toplevel section
 --: ('MAIN' if not otherwise defined).
@@ -1387,6 +1177,7 @@ end
 --: -----------------
 --:
 --=sections
+--:
 --:
 --: Filetypes
 --: ---------
@@ -1399,6 +1190,7 @@ end
 --:
 --@filetypes_builtin
 --:
+--:
 --: Operators
 --: ---------
 --:
@@ -1410,16 +1202,6 @@ end
 --:
 --=op_builtin
 --:
---: Processors
---: ----------
---:
---=proc
---TODO: optarg
---:
---: Built in processors
---: ~~~~~~~~~~~~~~~~~~~
---:
---=proc_builtin
 --:
 --: [[docvars]]
 --: Documentation Variables
@@ -1445,13 +1227,14 @@ end
 --:
 --=api
 --:
+--:
 --: How to generate the pipadoc documentation itself
 --: ------------------------------------------------
 --:
 --: 'pipadoc' documents itself with embedded asciidoc text. This can be extracted with
 --:
 --: ----
---: lua pipadoc.lua -d pipadoc.lua >pipadoc.txt
+--: lua pipadoc.lua -m asciidoc -d pipadoc.lua >pipadoc.txt
 --: ----
 --:
 --: The resulting `pipadoc.txt` can then be processed with the asciidoc toolchain to produce
@@ -1489,6 +1272,7 @@ end
 --: Nevertheless, when you make any improvements to pipadoc please consider to contact
 --: Christian Thäter <ct@pipapo.org> for including them into the mainline.
 --:
+--TRACKER:
 --=ISSUES
 --ISSUES:
 --:
@@ -1522,13 +1306,28 @@ end
 --:
 --PLANNED: only generate PLANNED section when there are PLANNED's
 --:
+--: DOCME
+--: ~~~~~
+--:
+--=DOCME
+--:
+--PLANNED: only generate DOCME section when there are DOCMES's
+--:
 
+
+--DOCME: 2 phases, strsubst
 --TODO: asciidoc //source:line// comments like old pipadoc
 --TODO: integrate old pipadoc.txt documentation
+--PLANNED: not only pipadoc.conf but also pipadoc.sty templates, conf are local only configurations, .sty are global styles
 --PLANNED: how to join (and then wordwrap) lines?
 --PLANNED: bash like parameter expansion, how to apply that to sections/keys too --%{section}:%{key}
 --PLANNED: org-mode processor
 --PLANNED: INIT section initialize strsubst etc
 --ASSIGNED:ct PLANNED: merge docvars and context to one table
 
+--TODO: escape non doc text (verbatim from code) in preprocessor
 
+--TODO: special sections
+--TODO: CONFIG:PRE
+--TODO: CONFIG:POST
+--TODO: CONFIG:GENERATE
