@@ -38,7 +38,7 @@ local opt_verbose = 1
 local opt_nodefaults = false
 local opt_toplevel = "MAIN"
 local opt_inputs = {false}
-local opt_config = "pipadoc.conf"
+local opt_config = "pipadoc.pconf"
 
 
 --PLANNED: log to PIPADOC_LOG section, later hooked in here
@@ -602,6 +602,9 @@ function setup()
 
     --filetypes_builtin:text * Textfiles, Pipadoc (`.pdoc`)
     filetype_register("plain", {"%.txt$", "%.TXT$", "%.pdoc$", "^-$"}, {"PIPADOC:", ""})
+
+    --filetypes_builtin:pipadocconfig * Pipadoc config (`.pconf`)
+    filetype_register("pconf", "%.pconf$", {"#", "^ "})
 
     --filetypes_builtin:java * Java, C#
     filetype_register("java", {"%.java$", "%.cs$"}, {"//", "/*"})
