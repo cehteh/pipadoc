@@ -1,12 +1,26 @@
-* preprocessors
+#pconf:
 
-* generic
+#:
+#: Preprocessing
+#: ~~~~~~~~~~~~~
+#:
+#: Preprocessing dispatches to a preprocessor per source language.
+#: By now there are some uppercase keywords in curly braces recognized which
+#: expand the text to some further string substitutions.
+#:
 
 {PREPROCESS:={``{PREPROCESS_$LANGUAGE}}}
 
-** specific (languages)
+#: The following keywords are prededined, but not available for all source languages:
+#:
+#:  - \{STRING\}
+#:    is substituted with the first literal string in double quotes from the
+#:    source left of the comment.
+#:
+#:  - \{FUNC\}
+#:    gets substituted with the function prototype from the source
+#:
 
-*** lua
 
 {PREPROCESS_lua:={``{
 {$_/{``{STRING}}/{``{$$STRING_lua}}}
@@ -14,17 +28,12 @@
 }}}
 
 
-{``PREPROCESS_lua:={``{
-{$_/{``{STRING}}/{``{$$STRING_lua}}}
-/{``{FUNC}}/{``{$${FUNCTION_lua}}}
-}}}
 
-
-
-
-* text formatters
-
-** generic
+#: Text formatting
+#: ~~~~~~~~~~~~~~~
+#:
+#:
+#:
 
 {ITEMIZE:={ITEMIZE_$MARKUP}}
 {FONT_MONO:={FONT_MONO_$MARKUP}}
@@ -33,38 +42,38 @@
 
 {HEADER:={HEADER_$MARKUP}}
 
-** specific (markups)
-
-*** plaintext
+# specific (markups)
+#
+# plaintext
 {FONT_MONO_plain:={``{$_}}}
 {FONT_LITERAL_plain:={``{$_}}}
 {INDENT_plain:={  }}
-{ITEMIZE_plain:={``{$_item}:{$NL}{$$$INDENT}{$_content}}}
+{ITEMIZE_plain:={``{$_item}:{$NL}{$$$INDENT}{$_text}}}
 {HEADER_plain:={``{^^{$_}}}}
 
-
-*** asciidoc
+# asciidoc
 {ASCIIDOC_HEADER_LEVELS:={`{=-~^+}}}
 
 {FONT_MONO_asciidoc:={``{{+}{$_}{+}}}}
 {FONT_LITERAL_asciidoc:={``{{`}{$_}{`}}}}
 {INDENT_asciidoc:={  }}
-{ITEMIZE_asciidoc:={``{$_item}::{$NL}{$$$INDENT}{$_content}}}
-{HEADER_asciidoc:={``{{$NL}{$_}{$NL}{$_//{.}/{=}}}}}}
+{ITEMIZE_asciidoc:={``{$_item}::{$NL}{$$$INDENT}{$_text}}}
+{HEADER_asciidoc:={``{{$NL}{$_}{$NL}{$_//{.}/{=}}}}}
 
 {FUNCTION_asciidoc:={``{\`{$_}\`::{$NL} }}}
 
 
-* source processing
+# source processing
 
-** generic
+# generic
 {VERBATIM:={``{$PRE/{$_}/{%1}}}}
 {FUNCTION:={``{FUNCTION_$LANGUAGE}}}
+{STRING={``{STRING_$LANGUAGE}}}
 {SOURCE:={``{SOURCE_$LANGUAGE}}}
 
-** specific (languages)
+# specific (languages)
 
-*** lua
+# lua
 {STRING_lua:={``{{.*"(.*)".*}$$VERBATIM}}}
-{FUNCTION_lua:={``{{_item:={{{``function%s*([^)]*%)).*}$$VERBATIM}$$$FONT_LITERAL}}{_content:={$_}}$$$ITEMIZE}}}
+{FUNCTION_lua:={``{{_item:={{{``function%s*([^)]*%)).*}$$VERBATIM}$$$FONT_LITERAL}}{_text:={$_}}$$$ITEMIZE}}}
 {SOURCE_lua:={``{{$PRE}{$COMMENT} {$_} [{$FILE}{:}{$LINE}]}}}
