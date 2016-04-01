@@ -165,16 +165,8 @@ local function load_modules()
   }
 
   strsubst (docvars)
-
--- the strsubst initialization
--- local initstrsubst = [[
--- # {MARKUP:=asciidoc}
--- # {MARKUP:=plain}
--- # {LANGUAGE:=lua}
-
 end
 
---PLANNED: macros/docvars  LUA_FUNC = "%VERBATIM<function%s*(.-%))>::\n "
 
 --api:
 --:
@@ -205,7 +197,7 @@ function assert_notnil(var) --: {FUNC} checks that 'var' is not 'nil'
 end
 
 
-function to_table(v)
+function to_table(v) --: {FUNC} if 'v' is not a table then return {v}
   if type(v) ~= 'table' then
     v = {v}
   end
@@ -356,26 +348,32 @@ local filetypes = {}
 --: Filetypes
 --: ~~~~~~~~~
 --:
-function filetype_register(name, filep, linecommentseqs, ...) --: {FUNC}
+function filetype_register(name, filep, linecommentseqs) --: {FUNC}
   --:     name:::
   --:       name of the language
   --:     filep:::
   --:       a Lua pattern or list of patterns matching filename
   --:     linecommentseqs:::
   --:       a string or list of strings matching comments of the registered filetype
-  --:     ...:::
-  --PLANNED: processors to enable for the given filetypes, per filetype processors also supported by --! directives
-  --:       (PLANNED FEATURE)
-  --:       the remaining arguments are a list of processors which should be enabled for files if this type
   --:
   --: Register a new filetype.
   --:
   --: For example, C and C++ Filetypes are registered like:
   --:
   --:  filetype_register("C", {"%.c$","%.cpp$","%.C$", "%.cxx$", "%.h$"}, {"//", "/*"})
-  --FIXME: assert types and constraints
+  --:
+  assert_type(name, "string")
+
   filep = to_table(filep)
+  for _,v in pairs(filep) do
+    assert_type(v, "string")
+  end
+
   linecommentseqs = to_table(linecommentseqs)
+  for _,v in pairs(linecommentseqs) do
+    assert_type(v, "string")
+  end
+
   for i=1,#filep do
     filetypes[filep[i]] = filetypes[filep[i]] or {language = name}
     for j=1,#linecommentseqs do
@@ -403,12 +401,15 @@ function filetype_select(line, linecommentseqs)
 end
 
 
--- --op:
--- --: Operators define the core functionality of pipadoc. They are mandatory in the pibadoc syntax
--- --: to define a pipadoc comment line. It is possible (but rarely needed) to define additional
--- --: operators. Operators must be a single punctuation character
+--op:
+--: Operators define the core functionality of pipadoc. They are mandatory in the pipadoc syntax
+--: to define a pipadoc comment line. It is possible (but rarely needed) to define additional
+--: operators. Operators must be a single punctuation character
 local operators = {}
--- --api:
+
+
+--TODO: operator_register(char, read, generate) .. add generator function here too
+--api:
 function operator_register(char, func) --: {FUNC}
   --:   char:::
   --:     single punctuation character defining this operator
@@ -506,7 +507,6 @@ local options = {
   --TODO: -o --output
   --TODO: -l --load
   --TODO: --features  show a report which features (using optional lua modules) are available
-  --TODO: list-processors
   --TODO: list-operators
   --TODO: list-sections
   --TODO: force filetype variant  foo.lua:.txt
@@ -520,8 +520,6 @@ local options = {
   "", --:  {STRING}
   "  inputs are filenames or a '-' which indicates standard input", --:  {STRING}
 }
-
--- local plugins = {}
 
 function parse_args(arg)
   local i = 1
@@ -566,16 +564,19 @@ function setup()
     docvars.DATE = date.year.."/"..date.month.."/"..date.day
   end
 
-  local config = io.open(opt_config)
-  if config then
-    dbg("load config:", opt_config)
-    strsubst(config:read("*a"))
-    config:close()
-  else
-    warn("failed config:", opt_config)
-  end
-
   if not opt_nodefaults then
+    --PLANNED: read style file like a config, lower priority, differnt paths (./ /etc/ ~/ ...)
+    if not strsubst.FAKE then
+      local config = io.open(opt_config)
+      if config then
+        dbg("load config:", opt_config)
+        strsubst(config:read("*a"))
+        config:close()
+      else
+        warn("failed config:", opt_config)
+      end
+    end
+
     --filetypes_builtin:scons * SCons
     filetype_register("scons", "^SConstuct$", "#")
 
@@ -702,10 +703,12 @@ local ARG
 function process_line (line, comment)
   local context = {}
 
-  local ppline = strsubst("{$PREPROCESS?{$_$$$PREPROCESS}:{$_}}", {_ = line})
-  if ppline ~= "" then
-    trace("prepr:", ppline)
-    line = ppline
+  if not strsubst.FAKE then
+    local ppline = strsubst("{$PREPROCESS?{$_$$$PREPROCESS}:{$_}}", {_ = line})
+    if ppline ~= "" then
+      trace("prepr:", ppline)
+      line = ppline
+    end
   end
 
   -- special case for plaintext files
@@ -746,8 +749,6 @@ function process_line (line, comment)
         return
       end
     end
-
-    -- section_append(context.SECTION, context.ARG, context)
 
     local op = context.OP
     if op then
@@ -821,9 +822,6 @@ end
 
 local default_generators = {
   [":"] = function (context)
-    --return context.TEXT.."\n"
-    --context.TEXT = strsubst("{$$$PREPROCESS}", context)
-
     local ret = strsubst(context.TEXT, context)
     if ret == "" and context.TEXT ~= "" then
       return ""
@@ -874,92 +872,8 @@ local default_generators = {
     end
     return text
   end,
- -- numeric = function (a,b)
- --   return (tonumber(a) or 0) < (tonumber(b) or 0)
- -- end,
 
-
-    --    return generate_output(context.ARG)
-
-  -- function generate_output_sorted(order, which, opt)
---   dbg("generate_output_sorted:", order, which, opt)
---   local section = sections[which].keys
---   local text = ""
-
---   if section ~= nil then
---     sections_keys_usecnt[which] = sections_keys_usecnt[which] + 1
-
---     local oldfile = docvars.FILE
---     docvars.FILE ='<output>:'..which
-
---     local sorted = {}
-
---     for k in pairs(section) do
---       table.insert(sorted, k)
---     end
-
---     table.sort(sorted, sortfuncs[order])
-
---     if #sorted == 0 then
---       warn("section is empty:",which)
---       return ""
---     end
-
---     for i=1,#sorted do
---       docvars.LINE=sorted[i]
---       for j=1,#section[sorted[i]] do
---         text = text..section[sorted[i]][j]..'\n'
---       end
---     end
---     docvars.FILE = oldfile
---   else
---     warn("no section named:", which)
---   end
---   return text
--- end
- -- numeric = function (a,b)
- --   return (tonumber(a) or 0) < (tonumber(b) or 0)
- -- end,
   ["#"] = nil,
--- function generate_output_sorted(order, which, opt)
---   dbg("generate_output_sorted:", order, which, opt)
---   local section = sections[which].keys
---   local text = ""
-
---   if section ~= nil then
---     sections_keys_usecnt[which] = sections_keys_usecnt[which] + 1
-
---     local oldfile = docvars.FILE
---     docvars.FILE ='<output>:'..which
-
---     local sorted = {}
-
---     for k in pairs(section) do
---       table.insert(sorted, k)
---     end
-
---     table.sort(sorted, sortfuncs[order])
-
---     if #sorted == 0 then
---       warn("section is empty:",which)
---       return ""
---     end
-
---     for i=1,#sorted do
---       docvars.LINE=sorted[i]
---       for j=1,#section[sorted[i]] do
---         text = text..section[sorted[i]][j]..'\n'
---       end
---     end
---     docvars.FILE = oldfile
---   else
---     warn("no section named:", which)
---   end
---   return text
--- end
---  alphabetic = function (a,b)
- --   return tostring(a) < tostring(b)
- -- end,
 }
 
 
@@ -1024,7 +938,6 @@ for k,_ in pairs(sections) do
   end
 end
 
---docvars.__PARTIAL = ""
 io.write(generate_output(opt_toplevel))
 
 LINE = 0
@@ -1061,19 +974,14 @@ end
 --: structure of a program is not the optimal structure for the associated documentation.
 --: Still there are many good reasons to maintain documentation together with the source right within
 --: the code which defines the documented functionality. Pipadoc addresses this problem by extracting
---: special comments out of a source file and let one define rules how to bring the
---: documentation into proper order.
---:
---: Pipadoc only extracts and reorders the text from it special comments, it never ever looks at the
---: sourcecode or the text it extracts.
---:
---: This is somewhat similar to ``literate Programming'' but it puts the emphasis back to the code.
---: There is no need to extract the source from a literate source and in contrast to ``Literate Programming''
---: the order of source and text is defined by the programmer and programming language constraints.
+--: special comments out of a source file and let one define rules how to compile the
+--: documentation into proper order.  This is somewhat similar to ``literate Programming'' but
+--: it puts the emphasis back to the code.
 --:
 --: Pipadoc is programming language and documentation system agnostic, all it requires is that
 --: the programming language has some form of comments starting with a defined character sequence
---: and spaning to the end of the line.
+--: and spaning to the end of the source line. Moreover documentation parts can be written in plain text
+--: files aside from the sources.
 --:
 --:
 --: History
@@ -1091,8 +999,7 @@ end
 --:
 --:  git clone --depth 1 git://git.pipapo.org/pipadoc
 --:
---: Some releases will be tagged and get a release branch. 'pipadoc' is planned to have rolling releases
---: where the 'master' branch will stay stable and developement will be done on the 'devel' branch.
+--: The 'master' branch will stay stable and developement will be done on the 'devel' branch.
 --:
 --:
 --: Installation
@@ -1102,7 +1009,6 @@ end
 --: (PUC Lua 5.1, 5.2, 5.3 and Luajit). It ships with a `pipadoc.install` shell script which figures a
 --: suitable Lua version out and installs `pipadoc.lua` as `pipadoc` in a given directory or the current
 --: directory by default.
---TODO: dependency strsubst
 --:
 --: There are different ways how this can be used in a project:
 --:
@@ -1111,6 +1017,8 @@ end
 --:   into the project and call it with the known Lua interpreter.
 --: - One can ship the `pipadoc.lua` and `pipadoc.install` and do a local install in the build
 --:   directory and use this pipadoc thereafter
+--:
+--: Pipadoc tries to load 
 --:
 --:
 --: Usage
@@ -1126,12 +1034,20 @@ end
 --: between almost all programming languages is that they have some form of 'line comment', that is some
 --: character sequence which defines the rest of the line as comment.
 --:
---: This line comments are enhanced by a simple syntax to make them pipadoc comments. Basically the comment
---: character followed directly (without any extra space character) by some definition (see below) becomes
---: a pipadoc comment.
+--: This line comments are enhanced by a simple syntax to make them pipadoc comments. The comment
+--: character sequence followed directly (without any extra space character) by some definition (see below)
+--: becomes a pipadoc comment.
 --:
---TODO: Pipadoc operates line by line
---TODO: Control is only in comments, sources cant be escaped
+--: Pipadoc operates in some phases. First all given files are read and parsed and finally the output is
+--: generated by bringing all accumulated documentation parts together into proper order.
+--:
+--: When the 'strsubst' lua package is available, pipadoc adds uses this to add some extra functionality.
+--: That is at the initial read step the source code can be transformed by some preprocessing expressions.
+--: For example the default config defines some keywords to augment the documentation with special
+--: functionality. Finally on the output stage 'strsubst' is called on the generated documentation which
+--: can then generate further functionaliy like parsing function prototypes and generating documentation for
+--: them or use some macros to simplify/enhance the generated output/markup.
+--:
 --:
 --: [[syntax]]
 --: Pipadoc Syntax
@@ -1166,20 +1082,28 @@ end
 --: Order of operations
 --: ~~~~~~~~~~~~~~~~~~~
 --:
---: Pipadoc parse each file given on the commandline in order.
---: Only lines which contain pipadoc comments (see <<syntax>> above) are used in
---: any further steps.
+--: Pipadoc parse each file given on the commandline in order. Each line will be preprocessed
+--: (when 'strsubst' is available). Then only lines which contain pipadoc comments (see <<syntax>>
+--: above) are used in any further steps. By default, preprocesing will *not* add pipadoc comments
+--: but user defined preprocessing rules may override this decision.
 --:
---DOCME: strsubst it will be appended to the active section/key.
+--: Reading files and preprocessing is done on a line by line base. Preprocessing can not span
+--: multiple lines.
 --:
---: Finally the output is generated by starting assembling the toplevel section
---: ('MAIN' if not otherwise defined).
+--: After all files are read the output is generated by starting assembling the toplevel section
+--: ('MAIN' if not otherwise defined). Again 'strsubst' may be used to expand each generated line.
 --:
 --:
 --: Sections and Keys
 --: -----------------
 --:
 --=sections
+--:
+--:
+--: String Substitation
+--: -------------------
+--:
+--TODO: DOCME
 --:
 --:
 --: Filetypes
@@ -1248,7 +1172,7 @@ end
 --: asciidoc -a toc pipadoc.txt
 --:
 --: # generate PDF
---: a2x -k -v --dblatex-opts "-P latex.output.revhistory=0" pipadoc.txt
+--: a2x -L -k -v --dblatex-opts "-P latex.output.revhistory=0" pipadoc.txt
 --: ----
 --:
 --: GNU General Public License
@@ -1275,8 +1199,6 @@ end
 --: Nevertheless, when you make any improvements to pipadoc please consider to contact
 --: Christian Thäter <ct@pipapo.org> for including them into the mainline.
 --:
---TRACKER:
---=ISSUES
 --ISSUES:
 --:
 --: ISSUES
@@ -1309,16 +1231,8 @@ end
 --:
 --PLANNED: only generate PLANNED section when there are PLANNED's
 --:
---: DOCME
---: ~~~~~
---:
---=DOCME
---:
---PLANNED: only generate DOCME section when there are DOCMES's
---:
 
 
---DOCME: 2 phases, strsubst
 --TODO: asciidoc //source:line// comments like old pipadoc
 --TODO: integrate old pipadoc.txt documentation
 --PLANNED: not only pipadoc.conf but also pipadoc.sty templates, conf are local only configurations, .sty are global styles
@@ -1334,3 +1248,5 @@ end
 --TODO: CONFIG:PRE
 --TODO: CONFIG:POST
 --TODO: CONFIG:GENERATE
+--PLANNED: include operator
+--PLANNED: include from strsubst/config? how?
