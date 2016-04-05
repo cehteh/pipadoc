@@ -1,34 +1,5 @@
 #pconf:
 
-#:
-#: Preprocessing
-#: ~~~~~~~~~~~~~
-#:
-#: Preprocessing dispatches to a preprocessor per source language.
-#: By now there are some uppercase keywords in curly braces recognized which
-#: expand the text to some further string substitutions.
-#:
-
-{PREPROCESS:={``{PREPROCESS_$LANGUAGE}}}
-
-#: The following keywords are prededined, but not available for all source languages:
-#:
-#:  - \{STRING\}
-#:    is substituted with the first literal string in double quotes from the
-#:    source left of the comment.
-#:
-#:  - \{FUNC\}
-#:    gets substituted with the function prototype from the source
-#:
-
-
-{PREPROCESS_lua:={``{
-{$_/{``{STRING}}/{``{$$STRING_lua}}}
-/{``{FUNC}}{` ?(.*)}/{``{{`%1}$$FUNCTION_lua}}
-}}}
-
-
-
 #: Text formatting
 #: ~~~~~~~~~~~~~~~
 #:
@@ -75,5 +46,5 @@
 
 # lua
 {STRING_lua:={``{{.*"(.*)".*}$$VERBATIM}}}
-{FUNCTION_lua:={``{{_item:={{{``function%s*([^)]*%)).*}$$VERBATIM}$$$FONT_LITERAL}}{_text:={$_}}$$$ITEMIZE}}}
+{FUNCTION_lua:={``{{function *([^)]-%)).*}$$VERBATIM}}}
 {SOURCE_lua:={``{{$PRE}{$COMMENT} {$_} [{$FILE}{:}{$LINE}]}}}

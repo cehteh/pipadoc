@@ -736,7 +736,7 @@ asciidoc.install(2);
 <h1>pipadoc - Documentation extractor</h1>
 <span id="author">Christian Thaeter</span><br />
 <span id="email"><code>&lt;<a href="mailto:ct@pipapo.org">ct@pipapo.org</a>&gt;</code></span><br />
-<span id="revdate">2015/6/30</span>
+<span id="revdate">2016/4/5</span>
 <div id="toc">
   <div id="toctitle">Table of Contents</div>
   <noscript><p><b>JavaScript must be enabled in your browser to display the table of contents.</b></p></noscript>
@@ -750,31 +750,39 @@ asciidoc.install(2);
 structure of a program is not the optimal structure for the associated documentation.
 Still there are many good reasons to maintain documentation together with the source right within
 the code which defines the documented functionality. Pipadoc addresses this problem by extracting
-special comments out of a source file and let one define rules how to bring the
-documentation into proper order.</p></div>
-<div class="paragraph"><p>Pipadoc only extracts and reorders the text from it special comments, it never ever looks at the
-sourcecode or the text it extracts.</p></div>
-<div class="paragraph"><p>This is somewhat similar to &#8220;literate Programming&#8221; but it puts the emphasis back to the code.
-There is no need to extract the source from a literate source and in contrast to &#8220;Literate Programming&#8221;
-the order of source and text is defined by the programmer and programming language constraints.</p></div>
+special comments out of a source file and let one define rules how to compile the
+documentation into proper order.  This is somewhat similar to &#8220;literate Programming&#8221; but
+it puts the emphasis back to the code.</p></div>
 <div class="paragraph"><p>Pipadoc is programming language and documentation system agnostic, all it requires is that
 the programming language has some form of comments starting with a defined character sequence
-and spaning to the end of the line.</p></div>
+and spaning to the end of the source line. Moreover documentation parts can be written in plain text
+files aside from the sources.</p></div>
 </div>
 </div>
 <div class="sect1">
 <h2 id="_history">History</h2>
 <div class="sectionbody">
 <div class="paragraph"><p>This <em>pipadoc</em> follows an earlier implementation with a slightly different (incompatible) syntax
-and less features which was implemented in AWK. Updating to the new syntax should be quite simple
-and is suggested for any Projects using pipadoc.</p></div>
+and less features which was implemented in AWK. Updating to the new syntax should be straightforward
+and is suggested for any projects using pipadoc.</p></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_getting_the_source">Getting the Source</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>Pipadoc is managed the git revision contol system. You can clone the repository with</p></div>
+<div class="literalblock">
+<div class="content">
+<pre><code>git clone --depth 1 git://git.pipapo.org/pipadoc</code></pre>
+</div></div>
+<div class="paragraph"><p>The <em>master</em> branch will stay stable and developement will be done on the <em>devel</em> branch.</p></div>
 </div>
 </div>
 <div class="sect1">
 <h2 id="_installation">Installation</h2>
 <div class="sectionbody">
-<div class="paragraph"><p><em>pipadoc</em> is single lua source file <code>pipadoc.lua</code> which is portable among most Lua versions
-(PUC Lua 5.1, 5.2, 5.3 and luajit). It ships with a <code>pipadoc.install</code> shell script which figures a
+<div class="paragraph"><p>Pipadoc is single lua source file <code>pipadoc.lua</code> which is portable among most Lua versions
+(PUC Lua 5.1, 5.2, 5.3 and Luajit). It ships with a <code>pipadoc.install</code> shell script which figures a
 suitable Lua version out and installs <code>pipadoc.lua</code> as <code>pipadoc</code> in a given directory or the current
 directory by default.</p></div>
 <div class="paragraph"><p>There are different ways how this can be used in a project:</p></div>
@@ -797,6 +805,7 @@ One can ship the <code>pipadoc.lua</code> and <code>pipadoc.install</code> and d
 </p>
 </li>
 </ul></div>
+<div class="paragraph"><p>Pipadoc tries to load</p></div>
 </div>
 </div>
 <div class="sect1">
@@ -806,16 +815,18 @@ One can ship the <code>pipadoc.lua</code> and <code>pipadoc.install</code> and d
 <div class="content">
 <pre><code>pipadoc [options...] [inputs..]
   options are:
-    -v, --verbose                    increment verbosity level
-    -q, --quiet                      supresses any messages
-    -d, --debug                      set verbosity to maximum
-    -h, --help                       show this help
-    -c, --comment &lt;file&gt; &lt;comment&gt;   register a filetype pattern
-                                     for files matching a file pattern
-    -t, --toplevel &lt;name&gt;            sets 'name' as toplevel node [MAIN]
-    --no-defaults                    disables default filetypes and processors
-    --                               stops parsing the options and treats each
-                                     following argument as input file</code></pre>
+    -v, --verbose                           increment verbosity level
+    -q, --quiet                             supresses any messages
+    -d, --debug                             set verbosity to maximum
+    -h, --help                              show this help
+    -r, --register &lt;name&gt; &lt;file&gt; &lt;comment&gt;  register a filetype pattern
+                                            for files matching a file pattern
+    -t, --toplevel &lt;name&gt;                   sets 'name' as toplevel node [MAIN]
+    -c, --config &lt;name&gt;                     selects a configfile [pipadoc.conf]
+    --no-defaults                           disables default filetypes and processors
+    -m, --markup &lt;name&gt;                     selects the markup engine for the output [plain]
+    --                                      stops parsing the options and treats each
+                                            following argument as input file</code></pre>
 </div></div>
 <div class="literalblock">
 <div class="content">
@@ -829,9 +840,12 @@ One can ship the <code>pipadoc.lua</code> and <code>pipadoc.install</code> and d
 <div class="paragraph"><p>Pipadoc is controlled by special line comments. This is choosen because the most common denominator
 between almost all programming languages is that they have some form of <em>line comment</em>, that is some
 character sequence which defines the rest of the line as comment.</p></div>
-<div class="paragraph"><p>This line comments are enhanced by a simple syntax to make them pipadoc comments. Basically the comment
-character followed directly (without any extra space character) by some definition (see below) becomes
-a pipadoc comment.</p></div>
+<div class="paragraph"><p>This line comments are enhanced by a simple syntax to make them pipadoc comments. The comment
+character sequence followed directly (without any extra space character) by some definition (see below)
+becomes a pipadoc comment.</p></div>
+<div class="paragraph"><p>Pipadoc operates in some phases. First all given files are read and parsed and finally the output is
+generated by bringing all accumulated documentation parts together into proper order.</p></div>
+<div class="paragraph"><p>When the <em>strsubst</em> lua package is available, pipadoc adds uses this to add some extra functionality.</p></div>
 <div class="sect2">
 <h3 id="syntax">Pipadoc Syntax</h3>
 <div class="paragraph"><p>Any <em>linecomment</em> of the programming language directly (without spaces) followed by a optional
@@ -866,29 +880,23 @@ documentaton text. Only lines qualitfy this syntax are processed as pipapdoc doc
 <div class="content">
 <pre><code>documentation_text = ..rest of the line, freeform text..</code></pre>
 </div></div>
-<div class="paragraph"><p>It is possible to extend pipadoc with plugins which provide new operators or new processors.</p></div>
 <div class="paragraph"><p>Documentation lines are proccessed according to their operator.</p></div>
 </div>
 <div class="sect2">
-<h3 id="_order_of_operation">Order of operation</h3>
-<div class="paragraph"><p>Pipadoc parse each file given on the commandline in order.
-Only lines which contain pipadoc comments (see <a href="#syntax">[syntax]</a> above) are used in
-any further steps.</p></div>
-<div class="paragraph"><p>On each such documentation line, all defined processors are in order they
-where enabled as long there is text left to process. Processors can modify the
-documentation text which may affect subsequent processors.</p></div>
-<div class="paragraph"><p>When all processors are run and there is still text left, it will be appended
-to the active section/key.</p></div>
-<div class="paragraph"><p>Finally the output is generated by starting assembling the toplevel section
-(<em>MAIN</em> if not otherwise defined).</p></div>
+<h3 id="_order_of_operations">Order of operations</h3>
+<div class="paragraph"><p>Pipadoc parse each file given on the commandline in order. Only lines which contain
+pipadoc comments (see <a href="#syntax">[syntax]</a> above) are used in any further steps.
+Reading files is done on a line by line base.</p></div>
+<div class="paragraph"><p>After all files are read the output is generated by starting assembling the toplevel section
+(<em>MAIN</em> if not otherwise defined). <em>Strsubst</em> may be used to expand each generated line.</p></div>
 </div>
 </div>
 </div>
 <div class="sect1">
 <h2 id="_sections_and_keys">Sections and Keys</h2>
 <div class="sectionbody">
-<div class="paragraph"><p>Text in pipadoc is appended to named <em>sections</em>. Sections are later brought in order in a <em>toplevel</em> section.
-Additionally instead just appending text to a named section, text can be appended under some
+<div class="paragraph"><p>Text in pipadoc is appended to named <em>sections</em>. Sections are later brought into the desired order in a <em>toplevel</em>
+section. Additionally instead just appending text to a named section, text can be appended under some
 alphanumeric key under that section. This enables later sorting for indexes and glossaries.</p></div>
 <div class="paragraph"><p>Sections can span a block of lines (until another section is set) or one-line setting a section only for the current
 comment line. Blocks are selected when the pipadoc comment defines a section and maybe a key but the rest of the
@@ -929,6 +937,11 @@ and finally 'oneline' alphabetically sorted by keys
 this is appended to the section 'oneline' under key 'a'
 this is appended to the section 'oneline' under key 'o'</code></pre>
 </div></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_string_substitation">String Substitation</h2>
+<div class="sectionbody">
 </div>
 </div>
 <div class="sect1">
@@ -1011,6 +1024,11 @@ PHP
 </li>
 <li>
 <p>
+Pipadoc config (<code>.pconf</code>)
+</p>
+</li>
+<li>
+<p>
 Prolog
 </p>
 </li>
@@ -1041,7 +1059,7 @@ SQL
 </li>
 <li>
 <p>
-Textfiles, Pipadoc (.pdoc)
+Textfiles, Pipadoc (<code>.pdoc</code>)
 </p>
 </li>
 <li>
@@ -1056,7 +1074,7 @@ Visual Basic
 <div class="sect1">
 <h2 id="_operators">Operators</h2>
 <div class="sectionbody">
-<div class="paragraph"><p>Operators define the core functionality of pipadoc. They are mandatory in the pibadoc syntax
+<div class="paragraph"><p>Operators define the core functionality of pipadoc. They are mandatory in the pipadoc syntax
 to define a pipadoc comment line. It is possible (but rarely needed) to define additional
 operators. Operators must be a single punctuation character</p></div>
 <div class="sect2">
@@ -1067,9 +1085,9 @@ operators. Operators must be a single punctuation character</p></div>
 </dt>
 <dd>
 <p>
-    The documentation operator. Defines normal documentation text. Each pipadoc comment using the <code>:</code>
-    operator is processed as potential documentation. First all enabled <em>processors</em> are run over it and
-    finally the text is appended to the current section(/key)
+  The documentation operator. Defines normal documentation text. Each pipadoc comment using the <code>:</code>
+  operator is processed as potential documentation. First all enabled <em>processors</em> are run over it and
+  finally the text is appended to the current section(/key)
 </p>
 </dd>
 <dt class="hdlist1">
@@ -1077,7 +1095,7 @@ operators. Operators must be a single punctuation character</p></div>
 </dt>
 <dd>
 <p>
-    Section paste operator. Takes a section name as argument and will paste that section in place.
+  Section paste operator. Takes a section name as argument and will paste that section in place.
 </p>
 </dd>
 <dt class="hdlist1">
@@ -1085,7 +1103,7 @@ operators. Operators must be a single punctuation character</p></div>
 </dt>
 <dd>
 <p>
-    Takes a section name as argument and will paste section text alphabetically sorted by their keys.
+  Takes a section name as argument and will paste section text alphabetically sorted by their keys.
 </p>
 </dd>
 <dt class="hdlist1">
@@ -1093,63 +1111,7 @@ operators. Operators must be a single punctuation character</p></div>
 </dt>
 <dd>
 <p>
-    Takes a section name as argument and will paste section text numerically sorted by their keys.
-</p>
-</dd>
-</dl></div>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_processors">Processors</h2>
-<div class="sectionbody">
-<div class="paragraph"><p>Each line containing a pipadoc comment are passed down through <em>processors</em> which can do
-additinal actions for manipulating the generated Documentaton. This processors are extendable
-in Lua.</p></div>
-<div class="sect2">
-<h3 id="_built_in_processors">Built in processors</h3>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-<code>varsubst</code>
-</dt>
-<dd>
-<p>
-    When no variable with that name is defines, a warning is printed and the variable name
-    itself is substituted. Variables expansion is recursive and nested, but stops when loops
-    are detected. The percent sign can be escaped with a backslash (\%) or by the
-</p>
-</dd>
-<dt class="hdlist1">
-<code>verbatim</code>
-</dt>
-<dd>
-<p>
-    lifts a the sourcecode preceeding the pipadoc comment or parts of it into the
-    output. A percent sign followed by the keyword <code>VERBATIM</code> will be replaced with
-    with the sourcecode before the pipadoc comment. When the `VERBATIM`is followed by
-    a bracketed lua pattern (any kind of brackets are supported: () {} [] &lt;&gt;) then this
-    pattern is matched against the source part of the line. This match or the first
-    capture if it defines any is then pased in place of the VERBATIM statement.
-</p>
-</dd>
-<dt class="hdlist1">
-<code>asciidoc</code>
-</dt>
-<dd>
-<p>
-    Defines some helpers for asciidoc formatted text.
-    Each start of a new section puts an asciidoc comment into the output
-    logging FILE:LINE pair from where it originates.
-</p>
-</dd>
-<dt class="hdlist1">
-<code>tracker</code>
-</dt>
-<dd>
-<p>
-    Adds some special support for the sections TODO, FIXME and PLANNED.
-    Each line of the saied sections will be prefixed with an asciidoc reference
-    to its origin.
+  Takes a section name as argument and will paste section text numerically sorted by their keys.
 </p>
 </dd>
 </dl></div>
@@ -1172,7 +1134,7 @@ from commandline.</p></div>
 </dt>
 <dd>
 <p>
-     Current date information
+  Current date information
 </p>
 </dd>
 <dt class="hdlist1">
@@ -1180,7 +1142,7 @@ from commandline.</p></div>
 </dt>
 <dd>
 <p>
-     Current date in YEAR/MONTH/DAY format
+  Current date in YEAR/MONTH/DAY format
 </p>
 </dd>
 <dt class="hdlist1">
@@ -1188,16 +1150,8 @@ from commandline.</p></div>
 </dt>
 <dd>
 <p>
-    The file or section name currently processed or some special annotation
-    in angle brakets (eg <em>&lt;startup&gt;</em>) on other processing phases
-</p>
-</dd>
-<dt class="hdlist1">
-<code>ISECTION</code>
-</dt>
-<dd>
-<p>
-    The current section name for the first line after a section change, else "".
+  The file or section name currently processed or some special annotation
+  in angle brakets (eg <em>&lt;startup&gt;</em>) on other processing phases
 </p>
 </dd>
 <dt class="hdlist1">
@@ -1205,8 +1159,8 @@ from commandline.</p></div>
 </dt>
 <dd>
 <p>
-    Current line number of input or section, or indexing key
-    Lines start at 1, if set to 0 then some output formatters skip over it
+  Current line number of input or section, or indexing key
+  Lines start at 1, if set to 0 then some output formatters skip over it
 </p>
 </dd>
 <dt class="hdlist1">
@@ -1214,24 +1168,8 @@ from commandline.</p></div>
 </dt>
 <dd>
 <p>
-    The linebreak character sequence, usually <em>\n</em> on unix systems but
-    can be changed with a commandline option
-</p>
-</dd>
-<dt class="hdlist1">
-<code>PERCENT</code>
-</dt>
-<dd>
-<p>
-    Escapes the percent sign
-</p>
-</dd>
-<dt class="hdlist1">
-<code>BACKSLASH</code>
-</dt>
-<dd>
-<p>
-    Escapes the backslash
+  The linebreak character sequence, usually <em>\n</em> on unix systems but
+  can be changed with a commandline option
 </p>
 </dd>
 <dt class="hdlist1">
@@ -1239,7 +1177,7 @@ from commandline.</p></div>
 </dt>
 <dd>
 <p>
-     stores the current section name
+  stores the current section name
 </p>
 </dd>
 </dl></div>
@@ -1257,35 +1195,43 @@ variable argument list. Any Argument passed to them will be converted to a strin
 to stderr when the verbosity level is high enough.</p></div>
 <div class="dlist"><dl>
 <dt class="hdlist1">
-<code>warn(...)</code>
+warn(&#8230;)
 </dt>
 <dd>
 <p>
-  report a important but non fatal failure
+ report a important but non fatal failure
 </p>
 </dd>
 <dt class="hdlist1">
-<code>echo(...)</code>
+echo(&#8230;)
 </dt>
 <dd>
 <p>
-  report normal progress
+ report normal progress
 </p>
 </dd>
 <dt class="hdlist1">
-<code>dbg(...)</code>
+dbg(&#8230;)
 </dt>
 <dd>
 <p>
-  show verbose/debugging progress information
+ show debugging information
 </p>
 </dd>
 <dt class="hdlist1">
-<code>die(...)</code>
+trace(&#8230;)
 </dt>
 <dd>
 <p>
-  report a fatal error and exit the programm
+ show more detailed progress information
+</p>
+</dd>
+<dt class="hdlist1">
+die(&#8230;)
+</dt>
+<dd>
+<p>
+ report a fatal error and exit the programm
 </p>
 </dd>
 </dl></div>
@@ -1296,47 +1242,63 @@ to stderr when the verbosity level is high enough.</p></div>
 system. But some modules can be loaded optionally to augment its behavior and provide extra features.
 Plugin-writers should try to adhere to this practice if possible and use the <em>request</em> function instead the
 Lua <em>require</em>.</p></div>
-<div class="paragraph"><p>When luarocks is installed, then the <em>luarocks.loader</em> is loaded by default to make any moduke installed by
+<div class="paragraph"><p>When luarocks is installed, then the <em>luarocks.loader</em> is loaded by default to make any module installed by
 luarocks available.</p></div>
 <div class="dlist"><dl>
 <dt class="hdlist1">
-<code>request(name)</code>
+request(name)
 </dt>
 <dd>
 <p>
-  try to load optional modules
-  wraps lua <em>require</em> in a pcall so that failure to load a module results in <em>nil</em> rather than a error
+ try to load optional modules
+   wraps lua <em>require</em> in a pcall so that failure to load a module results in <em>nil</em> rather than a error
 </p>
 </dd>
 </dl></div>
 </div>
 <div class="sect2">
 <h3 id="_typechecks">Typechecks</h3>
-<div class="paragraph"><p>There are some wrapers around <em>assert</em> to check externally supplied data. On success <em>var</em> will be returned
+<div class="paragraph"><p>Some wrapers around <em>assert</em> to check externally supplied data. On success <em>var</em> will be returned
 otherwise an assertion error is raised.</p></div>
 <div class="dlist"><dl>
 <dt class="hdlist1">
-<code>assert_type(var, expected)</code>
+assert_type(var, expected)
 </dt>
 <dd>
 <p>
-  checks that the <em>var</em> is of <em>type</em>
+ checks that the <em>var</em> is of <em>type</em>
 </p>
 </dd>
 <dt class="hdlist1">
-<code>assert_char(var)</code>
+maybe_type(var, expected)
 </dt>
 <dd>
 <p>
-  checks that <em>var</em> is a single character
+ checks that the <em>var</em> is of <em>type</em> or nil
 </p>
 </dd>
 <dt class="hdlist1">
-<code>assert_notnil(var)</code>
+assert_char(var)
 </dt>
 <dd>
 <p>
-  checks that <em>var</em> is not <em>nil</em>
+ checks that <em>var</em> is a single character
+</p>
+</dd>
+<dt class="hdlist1">
+assert_notnil(var)
+</dt>
+<dd>
+<p>
+ checks that <em>var</em> is not <em>nil</em>
+</p>
+</dd>
+<dt class="hdlist1">
+to_table(v)
+</dt>
+<dd>
+<p>
+ if <em>v</em> is not a table then return v
 </p>
 </dd>
 </dl></div>
@@ -1345,7 +1307,7 @@ otherwise an assertion error is raised.</p></div>
 <h3 id="_sections">Sections</h3>
 <div class="dlist"><dl>
 <dt class="hdlist1">
-<code>section_append(section, key, action, value)</code>
+section_append(section, key, context)
 </dt>
 <dd>
 <div class="dlist"><dl>
@@ -1366,64 +1328,65 @@ key
 </p>
 </dd>
 <dt class="hdlist1">
-action
+context
 </dt>
 <dd>
 <p>
-    how to process the value in output, currently "text", "include" and "sort" are defined
+  Append data to the given section/key
 </p>
+</dd>
+</dl></div>
 </dd>
 <dt class="hdlist1">
-value
+section_get(section, key, index)
 </dt>
 <dd>
-<p>
-    the parameter for the action, usually the text to be included in the output.
-</p>
-<div class="literalblock">
-<div class="content">
-<pre><code>  Append data to the given section/key
-`section_get(section, key, index)`::
-  section:::
-    name of the section to append to, must be a string
-  key:::
-    the subkey for sorting within that section. maybe 'nil'
-  index:::
-    line number to query, when 'nil' defaults to the last line
-  returns:::
-    action, value pair or nil</code></pre>
-</div></div>
-<div class="literalblock">
-<div class="content">
-<pre><code>  query the action and value of the given section/key at index (or at end)
-Filetypes</code></pre>
-</div></div>
-</dd>
-</dl></div>
-</dd>
-</dl></div>
-<div class="listingblock">
-<div class="content">
-<pre><code>`filetype_register(names, linecommentseqs, ...)`::
-    names:::
-      a Lua pattern or list of patterns matching filenames
-    linecommentseqs:::
-      a string or list of strings matching comments of the registered filetype
-    ...:::
-      (PLANNED FEATURE)
-      the remaining arguments are a list of processors which should be enabled for files if this type
-
-Register a new filetype.
-
-For example, C and C++ Filetypes are registered like:
-
- filetype_register({"%.c$","%.cpp$","%.C$", "%.cxx$", "%.h$"}, {"//", "/*"})
-
-Processors</code></pre>
-</div></div>
 <div class="dlist"><dl>
 <dt class="hdlist1">
-<code>processor_register(name, func)</code>
+section
+</dt>
+<dd>
+<p>
+    name of the section to append to, must be a string
+</p>
+</dd>
+<dt class="hdlist1">
+key
+</dt>
+<dd>
+<p>
+    the subkey for sorting within that section. maybe <em>nil</em>
+</p>
+</dd>
+<dt class="hdlist1">
+index
+</dt>
+<dd>
+<p>
+    line number to query, when <em>nil</em> defaults to the last line
+</p>
+</dd>
+<dt class="hdlist1">
+returns
+</dt>
+<dd>
+<p>
+    value or nil
+</p>
+<div class="literalblock">
+<div class="content">
+<pre><code>query the value of the given section/key at index (or at end)</code></pre>
+</div></div>
+</dd>
+</dl></div>
+</dd>
+</dl></div>
+</div>
+<div class="sect2">
+<h3 id="_filetypes_2">Filetypes</h3>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+filetype_register(name, filep, linecommentseqs)
 </dt>
 <dd>
 <div class="dlist"><dl>
@@ -1432,7 +1395,46 @@ name
 </dt>
 <dd>
 <p>
-    name of the processor
+      name of the language
+</p>
+</dd>
+<dt class="hdlist1">
+filep
+</dt>
+<dd>
+<p>
+      a Lua pattern or list of patterns matching filename
+</p>
+</dd>
+<dt class="hdlist1">
+linecommentseqs
+</dt>
+<dd>
+<p>
+      a string or list of strings matching comments of the registered filetype
+</p>
+</dd>
+</dl></div>
+</dd>
+</dl></div>
+<div class="paragraph"><p>Register a new filetype.</p></div>
+<div class="paragraph"><p>For example, C and C++ Filetypes are registered like:</p></div>
+<div class="literalblock">
+<div class="content">
+<pre><code>filetype_register("C", "%.c, ", "/*")</code></pre>
+</div></div>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+operator_register(char, func)
+</dt>
+<dd>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+char
+</dt>
+<dd>
+<p>
+    single punctuation character defining this operator
 </p>
 </dd>
 <dt class="hdlist1">
@@ -1446,66 +1448,6 @@ func
 </dl></div>
 </dd>
 </dl></div>
-<div class="paragraph"><p>Register a new processor. To be called from plugins. Processors need to be enabled
-to be used. Some are by default enabled, unless the --no-defaults commmandline option is
-used for invoking pipadoc. Some are bound to specific filetypes.</p></div>
-<div class="paragraph"><p>When plugins register new processors under the same name of an already existing processor
-the new processor will overrwrite the old one and become registered.</p></div>
-<div class="paragraph"><p>The context passed to the function is a table with following entries:</p></div>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-pre
-</dt>
-<dd>
-<p>
-    <em>source</em> part in before the comment character
-</p>
-</dd>
-<dt class="hdlist1">
-section
-</dt>
-<dd>
-<p>
-    parsed section name, will be empty in section-blocks to access the current
-    section name refer to <a href="#docvars">[docvars]</a>
-</p>
-</dd>
-<dt class="hdlist1">
-op
-</dt>
-<dd>
-<p>
-    operator signifying the pipadoc operation
-</p>
-</dd>
-<dt class="hdlist1">
-arg
-</dt>
-<dd>
-<p>
-    word right after the operator
-</p>
-</dd>
-<dt class="hdlist1">
-text
-</dt>
-<dd>
-<p>
-    the documentation text
-</p>
-</dd>
-</dl></div>
-<div class="paragraph"><p>This function is free to modify the context in place or call other api funtions to generate
-additional documentation entities.
-<code>processor_enable(...)</code>::
-    &#8230;:::
-      called with an ordered list of processors to enable</p></div>
-<div class="paragraph"><p>enable the listed processors.
-<code>operator_register(char, func)</code>::
-  char:::
-    single punctuation character defining this operator
-  func:::
-    a function which receives a table of the <em>context</em> parsed from the pipadoc commentline</p></div>
 <div class="paragraph"><p>Operators drive the main functionality, like invoking the processors and generating the output.</p></div>
 </div>
 </div>
@@ -1516,7 +1458,7 @@ additional documentation entities.
 <div class="paragraph"><p><em>pipadoc</em> documents itself with embedded asciidoc text. This can be extracted with</p></div>
 <div class="listingblock">
 <div class="content">
-<pre><code>lua pipadoc.lua -d pipadoc.lua &gt;pipadoc.txt</code></pre>
+<pre><code>lua pipadoc.lua -m asciidoc -d pipadoc.lua &gt;pipadoc.txt</code></pre>
 </div></div>
 <div class="paragraph"><p>The resulting <code>pipadoc.txt</code> can then be processed with the asciidoc toolchain to produce
 distribution formats:</p></div>
@@ -1526,7 +1468,7 @@ distribution formats:</p></div>
 asciidoc -a toc pipadoc.txt
 
 # generate PDF
-a2x -k -v --dblatex-opts "-P latex.output.revhistory=0" pipadoc.txt</code></pre>
+a2x -L -k -v --dblatex-opts "-P latex.output.revhistory=0" pipadoc.txt</code></pre>
 </div></div>
 </div>
 </div>
@@ -1568,440 +1510,12 @@ Christian Thäter &lt;<a href="mailto:ct@pipapo.org">ct@pipapo.org</a>&gt; for i
 </div>
 </div>
 </div>
-<div class="sect1">
-<h2 id="_fixme">FIXME</h2>
-<div class="sectionbody">
-<div class="dlist"><dl>
-<dt class="hdlist1">
-pipadoc.lua:700
-</dt>
-<dd>
-<p>
-  broken
-</p>
-</dd>
-<dt class="hdlist1">
-pipadoc.lua:1277
-</dt>
-<dd>
-<p>
-  only generate FIXME Section when there are FIXME&#8217;s
-</p>
-</dd>
-</dl></div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_todo">TODO</h2>
-<div class="sectionbody">
-<div class="dlist"><dl>
-<dt class="hdlist1">
-pipadoc.lua:498
-</dt>
-<dd>
-<p>
-  --alias match pattern --file-as match filename
-</p>
-</dd>
-<dt class="hdlist1">
-pipadoc.lua:499
-</dt>
-<dd>
-<p>
-  -o --output
-</p>
-</dd>
-<dt class="hdlist1">
-pipadoc.lua:500
-</dt>
-<dd>
-<p>
-  -l --load
-</p>
-</dd>
-<dt class="hdlist1">
-pipadoc.lua:501
-</dt>
-<dd>
-<p>
-  --features  show a report which features (using optional lua modules) are available
-</p>
-</dd>
-<dt class="hdlist1">
-pipadoc.lua:502
-</dt>
-<dd>
-<p>
-  list-processors
-</p>
-</dd>
-<dt class="hdlist1">
-pipadoc.lua:503
-</dt>
-<dd>
-<p>
-  list-operators
-</p>
-</dd>
-<dt class="hdlist1">
-pipadoc.lua:504
-</dt>
-<dd>
-<p>
-  list-sections
-</p>
-</dd>
-<dt class="hdlist1">
-pipadoc.lua:505
-</dt>
-<dd>
-<p>
-  force filetype variant  foo.lua:.txt
-</p>
-</dd>
-<dt class="hdlist1">
-pipadoc.lua:506
-</dt>
-<dd>
-<p>
-  wordwrap
-</p>
-</dd>
-<dt class="hdlist1">
-pipadoc.lua:507
-</dt>
-<dd>
-<p>
-  eat empty lines
-</p>
-</dd>
-<dt class="hdlist1">
-pipadoc.lua:508
-</dt>
-<dd>
-<p>
-  add debug report (warnings/errors) to generated document PIPADOC_LOG section
-</p>
-</dd>
-<dt class="hdlist1">
-pipadoc.lua:509
-</dt>
-<dd>
-<p>
-  lineending \n \r\n
-</p>
-</dd>
-<dt class="hdlist1">
-pipadoc.lua:510
-</dt>
-<dd>
-<p>
-  wrap at blank/intelligent
-</p>
-</dd>
-<dt class="hdlist1">
-pipadoc.lua:847
-</dt>
-<dd>
-<p>
-  plugins
-</p>
-</dd>
-<dt class="hdlist1">
-pipadoc.lua:931
-</dt>
-<dd>
-<p>
-  globbing if no such file exists
-</p>
-</dd>
-<dt class="hdlist1">
-pipadoc.lua:995
-</dt>
-<dd>
-<p>
-  docme actions
-</p>
-</dd>
-<dt class="hdlist1">
-pipadoc.lua:1145
-</dt>
-<dd>
-<p>
-  docme oneline vs block, default section name, MAIN section
-</p>
-</dd>
-<dt class="hdlist1">
-pipadoc.lua:1146
-</dt>
-<dd>
-<p>
-  note that literal strings are not special
-</p>
-</dd>
-<dt class="hdlist1">
-pipadoc.lua:1175
-</dt>
-<dd>
-<p>
-  optarg
-</p>
-</dd>
-<dt class="hdlist1">
-pipadoc.lua:1186
-</dt>
-<dd>
-<p>
-  optarg
-</p>
-</dd>
-<dt class="hdlist1">
-pipadoc.lua:1197
-</dt>
-<dd>
-<p>
-  optarg
-</p>
-</dd>
-<dt class="hdlist1">
-pipadoc.lua:1213
-</dt>
-<dd>
-<p>
-  optarg
-</p>
-</dd>
-<dt class="hdlist1">
-pipadoc.lua:1284
-</dt>
-<dd>
-<p>
-  only generate TODO section when there are TODO&#8217;s
-</p>
-</dd>
-<dt class="hdlist1">
-pipadoc.lua:1294
-</dt>
-<dd>
-<p>
-  asciidoc //source:line// comments like old pipadoc
-</p>
-</dd>
-<dt class="hdlist1">
-pipadoc.lua:1295
-</dt>
-<dd>
-<p>
-  integrate old pipadoc.txt documentation
-</p>
-</dd>
-</dl></div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_planned">PLANNED</h2>
-<div class="sectionbody">
-<div class="dlist"><dl>
-<dt class="hdlist1">
-pipadoc.lua:19
-</dt>
-<dd>
-<p>
-  directives: --! luacall()
-</p>
-</dd>
-<dt class="hdlist1">
-pipadoc.lua:49
-</dt>
-<dd>
-<p>
-  macros/docvars  LUA_FUNC = "::\n "
-</p>
-</dd>
-<dt class="hdlist1">
-pipadoc.lua:51
-</dt>
-<dd>
-<p>
-  log to PIPADOC_LOG section, later hooked in here
-</p>
-</dd>
-<dt class="hdlist1">
-pipadoc.lua:90
-</dt>
-<dd>
-<p>
-  use echo() for progress
-</p>
-</dd>
-<dt class="hdlist1">
-pipadoc.lua:132
-</dt>
-<dd>
-<p>
-  for pattern matching etc
-</p>
-</dd>
-<dt class="hdlist1">
-pipadoc.lua:312
-</dt>
-<dd>
-<p>
-  processors to enable for the given filetypes, per filetype processors also supported by --! directives
-</p>
-</dd>
-<dt class="hdlist1">
-pipadoc.lua:511
-</dt>
-<dd>
-<p>
-  wordwrap
-</p>
-</dd>
-<dt class="hdlist1">
-pipadoc.lua:626
-</dt>
-<dd>
-<p>
-  more variable handling
-</p>
-</dd>
-<dt class="hdlist1">
-pipadoc.lua:663
-</dt>
-<dd>
-<p>
-  obsolete this by variable substitutions
-</p>
-</dd>
-<dt class="hdlist1">
-pipadoc.lua:691
-</dt>
-<dd>
-<p>
-  more asciidoc support
-</p>
-</dd>
-<dt class="hdlist1">
-pipadoc.lua:697
-</dt>
-<dd>
-<p>
-  make each feature switchable, options to processor
-</p>
-</dd>
-<dt class="hdlist1">
-pipadoc.lua:718
-</dt>
-<dd>
-<p>
-  use some docvars based templates to format this better (asciidoc, etc)
-</p>
-</dd>
-<dt class="hdlist1">
-pipadoc.lua:802
-</dt>
-<dd>
-<p>
-  how to use context.text?
-</p>
-</dd>
-<dt class="hdlist1">
-pipadoc.lua:815
-</dt>
-<dd>
-<p>
-  option for sorting locale
-</p>
-</dd>
-<dt class="hdlist1">
-pipadoc.lua:816
-</dt>
-<dd>
-<p>
-  option for sorting (up/doen)
-</p>
-</dd>
-<dt class="hdlist1">
-pipadoc.lua:833
-</dt>
-<dd>
-<p>
-  option for sorting (up/dowen)
-</p>
-</dd>
-<dt class="hdlist1">
-pipadoc.lua:1147
-</dt>
-<dd>
-<p>
-  how to run processors before parsing over every line
-</p>
-</dd>
-<dt class="hdlist1">
-pipadoc.lua:1291
-</dt>
-<dd>
-<p>
-  only generate PLANNED section when there are PLANNED&#8217;s
-</p>
-</dd>
-<dt class="hdlist1">
-pipadoc.lua:1296
-</dt>
-<dd>
-<p>
-  how to join (and then wordwrap) lines?
-</p>
-</dd>
-<dt class="hdlist1">
-pipadoc.lua:1297
-</dt>
-<dd>
-<p>
-  bash like parameter expansion
-</p>
-</dd>
-<dt class="hdlist1">
-pipadoc.lua:1336
-</dt>
-<dd>
-<p>
-  org-mode processor
-</p>
-</dd>
-<dt class="hdlist1">
-pipadoc.lua:1337
-</dt>
-<dd>
-<p>
-  merge docvars and context to one table
-</p>
-<div class="literalblock">
-<div class="content">
-<pre><code>PING unknown
-single percent sign : % % \% unknown</code></pre>
-</div></div>
-<div class="literalblock">
-<div class="content">
-<pre><code>ASSIGN  %{!%{FOO=BAR}}
-SUBSTITUTE  %{foobar//o/x}
-SUBSTRING  %{foobar:2:4}
-SUBSTRING  %{foobar:3}
-SUBSTRING  %{foobar:-4}
-IFELSE %{?foo:bar}
-IFELSE %{x?foo:bar}</code></pre>
-</div></div>
-</dd>
-</dl></div>
-</div>
-</div>
 </div>
 <div id="footnotes"><hr /></div>
 <div id="footer">
 <div id="footer-text">
 Last updated
- 2015-06-30 22:28:13 CEST
+ 2016-04-05 13:03:34 CEST
 </div>
 </div>
 </body>

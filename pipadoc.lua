@@ -77,15 +77,15 @@ end
 --: variable argument list. Any Argument passed to them will be converted to a string and printed
 --: to stderr when the verbosity level is high enough.
 --:
-function warn(...) msg(1, ...) end  --: {FUNC} report a important but non fatal failure
-function echo(...) msg(2, ...) end  --: {FUNC} report normal progress
-function dbg(...) msg(3, ...) end   --: {FUNC} show debugging information
-function trace(...) msg(4, ...) end --: {FUNC} show more detailed progress information
+function warn(...) msg(1, ...) end  --: {$$$FUNCTION}::{$NL} report a important but non fatal failure
+function echo(...) msg(2, ...) end  --: {$$$FUNCTION}::{$NL} report normal progress
+function dbg(...) msg(3, ...) end   --: {$$$FUNCTION}::{$NL} show debugging information
+function trace(...) msg(4, ...) end --: {$$$FUNCTION}::{$NL} show more detailed progress information
 
 
 --PLANNED: use echo() for progress
 
-function die(...) --: {FUNC} report a fatal error and exit the programm
+function die(...) --: {$$$FUNCTION}::{$NL} report a fatal error and exit the programm
   printerr(...)
   os.exit(1)
 end
@@ -116,7 +116,7 @@ end
 --: When luarocks is installed, then the 'luarocks.loader' is loaded by default to make any module installed by
 --: luarocks available.
 --:
-function request(name) --: {FUNC} try to load optional modules
+function request(name) --: {$$$FUNCTION}::{$NL} try to load optional modules
   --:    wraps lua 'require' in a pcall so that failure to load a module results in 'nil' rather than a error
   local ok,handle = pcall(require, name)
   if ok then
@@ -176,28 +176,28 @@ end
 --: Some wrapers around 'assert' to check externally supplied data. On success 'var' will be returned
 --: otherwise an assertion error is raised.
 --:
-function assert_type(var, expected) --: {FUNC} checks that the 'var' is of 'type'
+function assert_type(var, expected) --: {$$$FUNCTION}::{$NL} checks that the 'var' is of 'type'
   assert(type(var) == expected, "type error: "..expected.." expected, got "..type(var))
   return var
 end
 
-function maybe_type(var, expected) --: {FUNC} checks that the 'var' is of 'type' or nil
+function maybe_type(var, expected) --: {$$$FUNCTION}::{$NL} checks that the 'var' is of 'type' or nil
   assert(var == nil or type(var) == expected, "type error: "..expected.." or nil expected, got "..type(var))
   return var
 end
 
-function assert_char(var) --: {FUNC} checks that 'var' is a single character
+function assert_char(var) --: {$$$FUNCTION}::{$NL} checks that 'var' is a single character
   assert(type(var) == "string" and #var == 1, "type error: single character expected")
   return var
 end
 
-function assert_notnil(var) --: {FUNC} checks that 'var' is not 'nil'
+function assert_notnil(var) --: {$$$FUNCTION}::{$NL} checks that 'var' is not 'nil'
   assert(type(var) ~= "nil", "Value expected")
   return var
 end
 
 
-function to_table(v) --: {FUNC} if 'v' is not a table then return {v}
+function to_table(v) --: {$$$FUNCTION}::{$NL} if 'v' is not a table then return {v}
   if type(v) ~= 'table' then
     v = {v}
   end
@@ -263,7 +263,7 @@ local sections_keys_usecnt = {}
 
 --PLANNED: maybe append the context       , docvars.SECTION, docvars.ARG, docvars.OP,  docvars.TEXT, docvars.PRE
 
-function section_append(section, key, context) --: {FUNC}
+function section_append(section, key, context) --: {$$$FUNCTION}::
   --:   section:::
   --:     name of the section to append to, must be a string
   assert_type(section, "string")
@@ -287,7 +287,7 @@ function section_append(section, key, context) --: {FUNC}
 end
 
 --api:
-function section_get(section, key, index) --: {FUNC}
+function section_get(section, key, index) --: {$$$FUNCTION}::
   --:   section:::
   --:     name of the section to append to, must be a string
   assert_type(section, "string")
@@ -348,7 +348,7 @@ local filetypes = {}
 --: Filetypes
 --: ~~~~~~~~~
 --:
-function filetype_register(name, filep, linecommentseqs) --: {FUNC}
+function filetype_register(name, filep, linecommentseqs) --: {$$$FUNCTION}::
   --:     name:::
   --:       name of the language
   --:     filep:::
@@ -410,7 +410,7 @@ local operators = {}
 
 --TODO: operator_register(char, read, generate) .. add generator function here too
 --api:
-function operator_register(char, func) --: {FUNC}
+function operator_register(char, func) --: {$$$FUNCTION}::
   --:   char:::
   --:     single punctuation character defining this operator
   --:   func:::
@@ -434,22 +434,22 @@ end
 
 --usage:
 local options = {
-  "pipadoc [options...] [inputs..]",  --:  {STRING}
-  "  options are:", --:  {STRING}
+  "pipadoc [options...] [inputs..]",  --:  {$$$STRING}
+  "  options are:", --:  {$$$STRING}
 
-  "    -v, --verbose                           increment verbosity level", --:  {STRING}
+  "    -v, --verbose                           increment verbosity level", --:  {$$$STRING}
   ["-v"] = "--verbose",
   ["--verbose"] = function () opt_verbose = opt_verbose+1 end,
 
-  "    -q, --quiet                             supresses any messages", --:  {STRING}
+  "    -q, --quiet                             supresses any messages", --:  {$$$STRING}
   ["-q"] = "--quiet",
   ["--quiet"] = function () opt_verbose = 0 end,
 
-  "    -d, --debug                             set verbosity to maximum", --:  {STRING}
+  "    -d, --debug                             set verbosity to maximum", --:  {$$$STRING}
   ["-d"] = "--debug",
   ["--debug"] = function () opt_verbose = 3 end,
 
-  "    -h, --help                              show this help", --:  {STRING}
+  "    -h, --help                              show this help", --:  {$$$STRING}
   ["-h"] = "--help",
   ["--help"] = function ()
     print("usage:")
@@ -460,8 +460,8 @@ local options = {
   end,
 
 
-  "    -r, --register <name> <file> <comment>  register a filetype pattern", --:  {STRING}
-  "                                            for files matching a file pattern", --:  {STRING}
+  "    -r, --register <name> <file> <comment>  register a filetype pattern", --:  {$$$STRING}
+  "                                            for files matching a file pattern", --:  {$$$STRING}
   ["-r"] = "--register",
   ["--register"] = function (arg,i)
     assert(type(arg[i+3]))
@@ -470,7 +470,7 @@ local options = {
   end,
 
 
-  "    -t, --toplevel <name>                   sets 'name' as toplevel node [MAIN]", --:  {STRING}
+  "    -t, --toplevel <name>                   sets 'name' as toplevel node [MAIN]", --:  {$$$STRING}
   ["-t"] = "--toplevel",
   ["--toplevel"] = function (arg, i)
     assert(type(arg[i+1]))
@@ -478,7 +478,7 @@ local options = {
     return 1
   end,
 
-  "    -c, --config <name>                     selects a configfile [pipadoc.conf]", --:  {STRING}
+  "    -c, --config <name>                     selects a configfile [pipadoc.conf]", --:  {$$$STRING}
   ["-c"] = "--config",
   ["--config"] = function (arg, i)
     assert(type(arg[i+1]))
@@ -487,11 +487,11 @@ local options = {
   end,
 
 
-  "    --no-defaults                           disables default filetypes and processors", --:  {STRING}
+  "    --no-defaults                           disables default filetypes and processors", --:  {$$$STRING}
   ["--no-defaults"] = function () opt_nodefaults = true end,
 
 
-  "    -m, --markup <name>                     selects the markup engine for the output [plain]", --:  {STRING}
+  "    -m, --markup <name>                     selects the markup engine for the output [plain]", --:  {$$$STRING}
   ["-m"] = "--markup",
   ["--markup"] = function (arg, i)
     assert(type(arg[i+1]))
@@ -499,8 +499,8 @@ local options = {
     return 1
   end,
 
-  "    --                                      stops parsing the options and treats each", --:  {STRING}
-  "                                            following argument as input file", --:  {STRING}
+  "    --                                      stops parsing the options and treats each", --:  {$$$STRING}
+  "                                            following argument as input file", --:  {$$$STRING}
   ["--"] = function () args_done=true end,
 
   --TODO: --alias match pattern --file-as match filename
@@ -517,8 +517,8 @@ local options = {
   --TODO: wrap at blank/intelligent
   --PLANNED: wordwrap
 
-  "", --:  {STRING}
-  "  inputs are filenames or a '-' which indicates standard input", --:  {STRING}
+  "", --:  {$$$STRING}
+  "  inputs are filenames or a '-' which indicates standard input", --:  {$$$STRING}
 }
 
 function parse_args(arg)
@@ -703,14 +703,6 @@ local ARG
 function process_line (line, comment)
   local context = {}
 
-  if not strsubst.FAKE then
-    local ppline = strsubst("{$PREPROCESS?{$_$$$PREPROCESS}:{$_}}", {_ = line})
-    if ppline ~= "" then
-      trace("prepr:", ppline)
-      line = ppline
-    end
-  end
-
   -- special case for plaintext files
   if comment == "" then
     context.PRE, context.COMMENT, context.SECTION, context.OP, context.ARG, context.TEXT =
@@ -721,16 +713,20 @@ function process_line (line, comment)
       string.match(line,"^(.-)("..comment..")([%w_.]*)([:=@#])([%w_.]*)%s?(.*)$")
   end
 
+  context.LANGUAGE = docvars.LANGUAGE
+
   --FIXME: wrong section
   --docvars:file `FILE`::
   --docvars:file   The file or section name currently processed or some special annotation
   --docvars:file   in angle brakets (eg '<startup>') on other processing phases
-  --FIXME: LINE is used nn preprocessor, rename
   --docvars:line `LINE`::
   --docvars:line   Current line number of input or section, or indexing key
   --docvars:line   Lines start at 1, if set to 0 then some output formatters skip over it
   context.FILE, context.LINE = FILE, LINE
 
+  warn("parsed section:", context.SECTION, SECTION)
+
+  
   if context.PRE then
     if context.SECTION == "" then
       context.SECTION = SECTION
@@ -790,7 +786,7 @@ function process_file(file)
   --FIXME: wrong docsection
   --docvars:section `SECTION`::
   --docvars:section   stores the current section name
-  SECTION = file:match("%.*([^.]*)")
+  SECTION = FILE:match("[^./]+%f[.\0]")
   LINE = 0
   dbg("section:", SECTION)
 
@@ -1042,12 +1038,6 @@ end
 --: generated by bringing all accumulated documentation parts together into proper order.
 --:
 --: When the 'strsubst' lua package is available, pipadoc adds uses this to add some extra functionality.
---: That is at the initial read step the source code can be transformed by some preprocessing expressions.
---: For example the default config defines some keywords to augment the documentation with special
---: functionality. Finally on the output stage 'strsubst' is called on the generated documentation which
---: can then generate further functionaliy like parsing function prototypes and generating documentation for
---: them or use some macros to simplify/enhance the generated output/markup.
---:
 --:
 --: [[syntax]]
 --: Pipadoc Syntax
@@ -1082,16 +1072,12 @@ end
 --: Order of operations
 --: ~~~~~~~~~~~~~~~~~~~
 --:
---: Pipadoc parse each file given on the commandline in order. Each line will be preprocessed
---: (when 'strsubst' is available). Then only lines which contain pipadoc comments (see <<syntax>>
---: above) are used in any further steps. By default, preprocesing will *not* add pipadoc comments
---: but user defined preprocessing rules may override this decision.
---:
---: Reading files and preprocessing is done on a line by line base. Preprocessing can not span
---: multiple lines.
+--: Pipadoc parse each file given on the commandline in order. Only lines which contain
+--: pipadoc comments (see <<syntax>> above) are used in any further steps.
+--: Reading files is done on a line by line base.
 --:
 --: After all files are read the output is generated by starting assembling the toplevel section
---: ('MAIN' if not otherwise defined). Again 'strsubst' may be used to expand each generated line.
+--: ('MAIN' if not otherwise defined). 'Strsubst' may be used to expand each generated line.
 --:
 --:
 --: Sections and Keys
@@ -1242,7 +1228,6 @@ end
 --PLANNED: INIT section initialize strsubst etc
 --ASSIGNED:ct PLANNED: merge docvars and context to one table
 
---TODO: escape non doc text (verbatim from code) in preprocessor
 
 --TODO: special sections
 --TODO: CONFIG:PRE
@@ -1250,3 +1235,5 @@ end
 --TODO: CONFIG:GENERATE
 --PLANNED: include operator
 --PLANNED: include from strsubst/config? how?
+
+
