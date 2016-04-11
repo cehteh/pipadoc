@@ -1,50 +1,20 @@
-#pconf:
+preprocessor_register ("^lua$",
+                       function (str) return str:gsub("{STRING}", '{CONTEXT.PRE:match(".-\\"([^\\"]*)\\"")}') end
+)
 
-#: Text formatting
-#: ~~~~~~~~~~~~~~~
-#:
-#:
-#:
+preprocessor_register ("^lua$",
+                       function (str) return str:gsub("{FUNCTION}", '+{CONTEXT.PRE:match("function ([^)]*%%))")}+::{DOCVARS.NL} ') end
+)
 
-{ITEMIZE:={ITEMIZE_$MARKUP}}
-{FONT_MONO:={FONT_MONO_$MARKUP}}
-{FONT_LITERAL:={FONT_LITERAL_$MARKUP}}
-{INDENT:={INDENT_$MARKUP}}
+preprocessor_register ("",
+                       function (str) return str:gsub("FIXME:([^ ]*) (.*)", 'FIXME:%1 {CONTEXT.FILE}:{CONTEXT.LINE}::{DOCVARS.NL}  %2') end
+)
 
-{HEADER:={HEADER_$MARKUP}}
+preprocessor_register ("",
+                       function (str) return str:gsub("TODO:([^ ]*) (.*)", 'TODO:%1 {CONTEXT.FILE}:{CONTEXT.LINE}::{DOCVARS.NL}  %2') end
+)
 
-# specific (markups)
-#
-# plaintext
-{FONT_MONO_plain:={``{$_}}}
-{FONT_LITERAL_plain:={``{$_}}}
-{INDENT_plain:={  }}
-{ITEMIZE_plain:={``{$_item}:{$NL}{$$$INDENT}{$_text}}}
-{HEADER_plain:={``{^^{$_}}}}
+preprocessor_register ("",
+                       function (str) return str:gsub("PLANNED:([^ ]*) (.*)", 'PLANNED:%1 {CONTEXT.FILE}:{CONTEXT.LINE}::{DOCVARS.NL}  %2') end
+)
 
-# asciidoc
-{ASCIIDOC_HEADER_LEVELS:={`{=-~^+}}}
-
-{FONT_MONO_asciidoc:={``{{+}{$_}{+}}}}
-{FONT_LITERAL_asciidoc:={``{{`}{$_}{`}}}}
-{INDENT_asciidoc:={  }}
-{ITEMIZE_asciidoc:={``{$_item}::{$NL}{$$$INDENT}{$_text}}}
-{HEADER_asciidoc:={``{{$NL}{$_}{$NL}{$_//{.}/{=}}}}}
-
-{FUNCTION_asciidoc:={``{\`{$_}\`::{$NL} }}}
-
-
-# source processing
-
-# generic
-{VERBATIM:={``{$PRE/{$_}/{%1}}}}
-{FUNCTION:={``{FUNCTION_$LANGUAGE}}}
-{STRING={``{STRING_$LANGUAGE}}}
-{SOURCE:={``{SOURCE_$LANGUAGE}}}
-
-# specific (languages)
-
-# lua
-{STRING_lua:={``{{.*"(.*)".*}$$VERBATIM}}}
-{FUNCTION_lua:={``{{function *([^)]-%)).*}$$VERBATIM}}}
-{SOURCE_lua:={``{{$PRE}{$COMMENT} {$_} [{$FILE}{:}{$LINE}]}}}
