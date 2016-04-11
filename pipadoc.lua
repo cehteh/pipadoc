@@ -893,7 +893,7 @@ local default_generators = {
   end,
 
   ["@"] = function (context)
-    dbg("generate_output_sorted:", order, which, opt)
+    dbg("generate_output_alphasorted:")
     CONTEXT=context
     local which = context.ARG
     local section = sections[context.ARG].keys
@@ -908,7 +908,9 @@ local default_generators = {
       local sorted = {}
 
       for k in pairs(section) do
-        table.insert(sorted, k)
+        if not tonumber (k) then
+          table.insert(sorted, k)
+        end
       end
 
       table.sort(sorted, function(a,b) return tostring(a) < tostring(b) end)
@@ -931,7 +933,46 @@ local default_generators = {
     return text
   end,
 
-  ["#"] = nil,
+  ["#"] = function (context)
+    dbg("generate_output_numasorted:")
+    CONTEXT=context
+    local which = context.ARG
+    local section = sections[context.ARG].keys
+    local text = ""
+
+    if section ~= nil then
+      sections_keys_usecnt[which] = sections_keys_usecnt[which] + 1
+
+      local oldfile = FILE
+      FILE ='<output>:'..which
+
+      local sorted = {}
+
+      for k in pairs(section) do
+        if tonumber (k) then
+          table.insert(sorted, k)
+        end
+      end
+
+      table.sort(sorted, function(a,b) return (tonumber(a) or 0) < (tonumber(b) or 0) end)
+
+      if #sorted == 0 then
+        warn("section is empty:",which)
+        return ""
+      end
+
+      for i=1,#sorted do
+        LINE=sorted[i]
+        for j=1,#section[sorted[i]] do
+          text = text..section[sorted[i]][j].TEXT..'\n'
+        end
+      end
+      FILE = oldfile
+    else
+      warn("no section named:", which)
+    end
+    return text
+  end,
 }
 
 
@@ -1281,5 +1322,4 @@ end
 --TODO: CONFIG:POST
 --TODO: CONFIG:GENERATE
 --PLANNED: include operator
-
-
+--PLANNED: git blame support for issues, include date/committer reference
