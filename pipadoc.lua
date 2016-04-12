@@ -435,6 +435,7 @@ function filetype_select(line, linecommentseqs)
   end
 end
 
+local preprocessors = {}
 
 function preprocessor_register (langpat, preprocess)
   assert_type (langpat, "string")
@@ -447,19 +448,35 @@ function preprocessor_register (langpat, preprocess)
   end
 
   if type (preprocess) == "function" then
-    for k,v in pairs(filetypes) do
-      if not langpat or langpat == "" or v.language:match(langpat) then
-        trace ("add preprocessor for:", v.language)
-        local preprocessors = v.preprocessors or {}
-        table.insert(preprocessors, preprocess)
-        v.preprocessors = preprocessors
-      end
-    end
+    table.insert(preprocessors, {pattern=langpat, preprocessor=preprocess})
   else
     warn ("Unsupported preprocessor type")
   end
 end
 
+-- internal, hook preprocessors into the filetype descriptors
+local function preprocessors_attach ()
+  for i=1,#preprocessors do
+    local ppdesc = preprocessors[i]
+    for k,v in pairs(filetypes) do
+      if ppdesc.pattern == "" or v.language:match(ppdesc.pattern) then
+        local filetype_preprocessors = v.preprocessors or {}
+        local skip = false
+        for i=1,#filetype_preprocessors do
+          if filetype_preprocessors[i] == ppdesc.preprocess then
+            skip = true
+            break
+          end
+        end
+        if not skip then
+          trace ("add preprocessor for:", k, ppdesc.preprocessor)
+          table.insert(filetype_preprocessors, ppdesc.preprocessor)
+          v.preprocessors = filetype_preprocessors
+        end
+      end
+    end
+  end
+end
 
 --op:
 --: Operators define the core functionality of pipadoc. They are mandatory in the pipadoc syntax
@@ -624,6 +641,12 @@ function setup()
   end
 
   if not opt_nodefaults then
+    --PLANNED: read style file like a config, lower priority, differnt paths (./ /etc/ ~/ ...)
+    if opt_config then
+      dbg ("load config:", opt_config)
+      loadfile (opt_config)()
+    end
+
     --filetypes_builtin:scons * SCons
     filetype_register("scons", "^SConstuct$", "#")
 
@@ -680,12 +703,6 @@ function setup()
 
     --filetypes_builtin:sql * SQL
     filetype_register("sql", {"%.sql$", "%.SQL$"}, {"#", "--", "/*"})
-
-    --PLANNED: read style file like a config, lower priority, differnt paths (./ /etc/ ~/ ...)
-    if opt_config then
-      dbg ("load config:", opt_config)
-      loadfile (opt_config)()
-    end
   end
 
   --op_builtin:
@@ -747,6 +764,8 @@ function setup()
       end
     end
   )
+
+  preprocessors_attach ()
 end
 
 local dbg_section
@@ -774,7 +793,7 @@ function process_line (line, comment)
   --DOCVARS:file   in angle brakets (eg '<startup>') on other processing phases
   --DOCVARS:line `LINE`::
   --DOCVARS:line   Current line number of input or section, or indexing key
-  --DOCVARS:line   Lines start at 1, if set to 0 then some output formatters skip over it
+  --DOCVARS:line   Lines start at 1
   context.FILE, context.LINE = FILE, LINE
 
   if context.PRE then
