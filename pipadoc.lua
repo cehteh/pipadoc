@@ -40,7 +40,7 @@ local opt_verbose = 1
 local opt_nodefaults = false
 local opt_toplevel = "MAIN"
 local opt_inputs = {false}
-local opt_config = "pipadoc.pconf"
+local opt_config = "pipadoc.pconf"  --FIXME: pipadoc_config.lua
 
 
 --PLANNED: log to PIPADOC_LOG section, later hooked in here
@@ -886,7 +886,7 @@ function process_file(file)
       for i=1,#descriptor.preprocessors do
         local lineold = line
         line = descriptor.preprocessors[i](line)
-        if line ~= "" and line ~= lineold then
+        if to_text (line) ~= lineold then
           trace("preprocessed:", line)
         end
       end
@@ -917,7 +917,7 @@ local default_generators = {
   [":"] = function (context)
     CONTEXT=context
     local ret = streval(context.TEXT)
-    if ret == "" and context.TEXT ~= "" then
+    if ret == "" and to_text (context.TEXT) then
       return ""
     else
       trace ("generate:", ret)

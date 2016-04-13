@@ -18,3 +18,4 @@ preprocessor_register ("",
                        function (str) return str:gsub("PLANNED:([^ ]*) (.*)", 'PLANNED:%1 {CONTEXT.FILE}:{CONTEXT.LINE}::{DOCVARS.NL}  %2') end
 )
 
+--PLANNED: noweb like preprocessing syntax for chapter substitutions in textfiles
