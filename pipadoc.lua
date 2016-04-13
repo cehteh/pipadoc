@@ -189,7 +189,6 @@ function to_text (v) --: {FUNCTION} convert 'v' to a string, returns 'nil' when 
 end
 
 
-
 -- need to be global, used for escaping in streval
 __BACKSLASH__ = "\\"
 __BACKTICK__ = "`"
@@ -307,7 +306,7 @@ local sections_keys_usecnt = {}
 
 --PLANNED: maybe append the context       , DOCVARS.SECTION, DOCVARS.ARG, DOCVARS.OP,  DOCVARS.TEXT, DOCVARS.PRE
 
-function section_append(section, key, context) --: {$$$FUNCTION}::
+function section_append(section, key, context) --: {FUNCTION} Append data to the given section/key
   --:   section:::
   --:     name of the section to append to, must be a string
   assert_type(section, "string")
@@ -318,7 +317,6 @@ function section_append(section, key, context) --: {$$$FUNCTION}::
   --FIXME: DOCME    the parameter for the action, usually the text to be included in the output.
   maybe_type(context, "table")
   --:
-  --:   Append data to the given section/key
   trace("append:", section, key, context)
   sections[section] = sections[section] or {keys = {}}
   if key and #key > 0 then
@@ -331,7 +329,7 @@ function section_append(section, key, context) --: {$$$FUNCTION}::
 end
 
 --api:
-function section_get(section, key, index) --: {$$$FUNCTION}::
+function section_get(section, key, index) --: {FUNCTION} query the value of the given section/key at index (or at end)
   --:   section:::
   --:     name of the section to append to, must be a string
   assert_type(section, "string")
@@ -342,7 +340,6 @@ function section_get(section, key, index) --: {$$$FUNCTION}::
   --:   returns:::
   --:     value or nil
   --:
-  --:   query the value of the given section/key at index (or at end)
   if not sections[section] then
     return
   end
@@ -392,15 +389,13 @@ local filetypes = {}
 --: Filetypes
 --: ~~~~~~~~~
 --:
-function filetype_register(name, filep, linecommentseqs) --: {$$$FUNCTION}::
+function filetype_register(name, filep, linecommentseqs) --: {FUNCTION} Register a new filetype
   --:     name:::
   --:       name of the language
   --:     filep:::
   --:       a Lua pattern or list of patterns matching filename
   --:     linecommentseqs:::
   --:       a string or list of strings matching comments of the registered filetype
-  --:
-  --: Register a new filetype.
   --:
   --: For example, C and C++ Filetypes are registered like:
   --:
@@ -436,7 +431,7 @@ function filetype_get(filename)
   end
 end
 
-function filetype_select(line, linecommentseqs)
+function comment_select (line, linecommentseqs)
   for i=1,#linecommentseqs do
     if string.match(line, linecommentseqs[i]) then
       return linecommentseqs[i]
@@ -496,7 +491,7 @@ local operators = {}
 
 --TODO: operator_register(char, read, generate) .. add generator function here too
 --api:
-function operator_register(char, func) --: {$$$FUNCTION}::
+function operator_register(char, func) --: {FUNCTION} Register a new operator
   --:   char:::
   --:     single punctuation character defining this operator
   --:   func:::
@@ -682,7 +677,7 @@ function setup()
     filetype_register("shell", {"%.sh$", "%.pl$", "%.awk$", }, "#")
 
     --filetypes_builtin:prolog * Prolog
-    filetype_register("prolog", {"%.pro$", "%.P$"}, "%")
+    filetype_register("prolog", {"%.yap$", "%.pro$", "%.P$"}, "%")
 
     --filetypes_builtin:text * Textfiles, Pipadoc (`.pdoc`)
     filetype_register("plain", {"%.txt$", "%.TXT$", "%.pdoc$", "^-$"}, {"PIPADOC:", ""})
@@ -883,13 +878,13 @@ function process_file(file)
       for i=1,#descriptor.preprocessors do
         local lineold = line
         line = descriptor.preprocessors[i](line)
-        if to_text (line) ~= lineold then
+        if to_text (line) and line ~= lineold then
           trace("preprocessed:", line)
         end
       end
     end
 
-    local comment = filetype_select(line, descriptor)
+    local comment = comment_select(line, descriptor)
 
     if comment then
       process_line(line, comment, descriptor.preprocessors)
