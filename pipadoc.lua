@@ -192,6 +192,7 @@ end
 
 -- need to be global, used for escaping in streval
 __BACKSLASH__ = "\\"
+__BACKTICK__ = "`"
 __BRACEOPEN__ = "{"
 __BRACECLOSE__ = "}"
 
@@ -203,7 +204,7 @@ __BRACECLOSE__ = "}"
 --: Documentation text is passed to the streval() function which recursively evaluates lua expression inside
 --: curly braces. This can be used to retrieve the value of variables, call or define functions. when the
 --: text inside curly braces can not be evaluated it is retained verbatim. One can escape curly braces
---: and the backslash itself by prepending them with a backslash.
+--: the backslash and the backtick itself by prepending them with a backslash or backtick.
 --:
 function streval (str) --: {FUNCTION} evaluate lua code inside curly braces in str
   assert_type (str, "string")
@@ -217,14 +218,16 @@ function streval (str) --: {FUNCTION} evaluate lua code inside curly braces in s
       if #braced > 0 then
         braced = streval_intern(braced.."{}")
         if #braced > 0 then
-          local success,result = pcall(load (braced))
-          if not success or not result then
-            success,result = pcall(load ("return ("..braced..")"))
-          end
-          if success then
-            braced = result or braced
+
+          local success,result = pcall(load ("return ("..braced..")"))
+
+          if success and result then
+            braced = result or ""
           else
-            braced = ""
+            success,result = pcall(load (braced))
+            if success then
+              braced = result or ""
+            end
           end
         end
       end
@@ -234,9 +237,10 @@ function streval (str) --: {FUNCTION} evaluate lua code inside curly braces in s
     return ret
   end
 
-  return streval_intern(str:gsub("\\([{}\\])",
+  return streval_intern(str:gsub("[`\\]([{}\\])",
                                  {
                                    ["\\"] = "{__BACKSLASH__}",
+                                   ["`"] = "{__BACKTICK__}",
                                    ["{"] = "{__BRACEOPEN__}",
                                    ["}"] = "{__BRACECLOSE__}",
                                  }
@@ -628,9 +632,9 @@ function parse_args(arg)
   end
 end
 
+
 local SECTION
 local ARG
-
 
 function setup()
   parse_args(arg)
