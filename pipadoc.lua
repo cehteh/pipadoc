@@ -183,6 +183,11 @@ function to_table(v) --: {FUNCTION} if 'v' is not a table then return {v}
   return v
 end
 
+function to_text (v) --: {FUNCTION} convert 'v' to a string, returns 'nil' when that string would be empty
+  v = v and tostring (v)
+  return v ~= "" and v or nil
+end
+
 
 
 -- need to be global, used for escaping in streval
@@ -623,6 +628,10 @@ function parse_args(arg)
   end
 end
 
+local SECTION
+local ARG
+
+
 function setup()
   parse_args(arg)
 
@@ -705,6 +714,13 @@ function setup()
     filetype_register("sql", {"%.sql$", "%.SQL$"}, {"#", "--", "/*"})
   end
 
+  local function set_section (context)
+    context.SECTION = to_text (context.SECTION) or SECTION
+    dbg("set_section:", context.SECTION, type(context.SECTION))
+    context.ARG = to_text (context.ARG) or ARG
+    dbg("set_arg:", context.ARG, type(context.ARG))
+  end
+
   --op_builtin:
   --: `:` ::
   --:   The documentation operator. Defines normal documentation text. Each pipadoc comment using the `:`
@@ -713,6 +729,13 @@ function setup()
   operator_register(
     ":",
     function (context)
+      if context.TEXT == "" and (to_text (context.SECTION) or to_text(context.ARG)) then
+        SECTION = to_text (context.SECTION) or SECTION
+        ARG = to_text (context.ARG) or ""
+      end
+
+      set_section (context)
+
       section_append(context.SECTION, context.ARG, context)
     end
   )
@@ -724,6 +747,8 @@ function setup()
   operator_register(
     "=",
     function (context)
+      set_section (context)
+
       --PLANNED: how to use DOCVARS.text?
       if #context.ARG > 0 then
         section_append(context.SECTION, nil, context)
@@ -741,6 +766,8 @@ function setup()
   operator_register(
     "@",
     function (context)
+      set_section (context)
+
       if #context.ARG > 0 then
         section_append(context.SECTION, nil, context)
       else
@@ -757,6 +784,8 @@ function setup()
   operator_register(
     "#",
     function (context)
+      set_section (context)
+
       if #context.ARG > 0 then
         section_append(context.SECTION, nil, context)
       else
@@ -769,8 +798,6 @@ function setup()
 end
 
 local dbg_section
-local SECTION
-local ARG
 
 function process_line (line, comment)
   local context = {}
@@ -797,23 +824,8 @@ function process_line (line, comment)
   context.FILE, context.LINE = FILE, LINE
 
   if context.PRE then
-    if context.SECTION == "" then
-      context.SECTION = SECTION
-      -- context.ARG = ARG
-      trace("pre:", context.PRE, "section:", context.SECTION, "op:", context.OP, "arg:", context.ARG, "text:", context.TEXT)
 
-    else
-      if dbg_section ~= context.SECTION then
-        dbg("pre:", context.PRE, "section:", context.SECTION, "op:", context.OP, "arg:", context.ARG, "text:", context.TEXT)
-        dbg_section = context.SECTION
-      end
-
-      if context.TEXT == "" then
-        SECTION = context.SECTION
-        -- ARG = context.ARG
-        return
-      end
-    end
+    trace("pre:", context.PRE, "section:", context.SECTION, "op:", context.OP, "arg:", context.ARG, "text:", context.TEXT)
 
     local op = context.OP
     if op then
@@ -868,8 +880,11 @@ function process_file(file)
 
     if descriptor.preprocessors then
       for i=1,#descriptor.preprocessors do
+        local lineold = line
         line = descriptor.preprocessors[i](line)
-        trace("preprocessed:", line)
+        if line ~= "" and line ~= lineold then
+          trace("preprocessed:", line)
+        end
       end
     end
 
