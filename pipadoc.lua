@@ -32,7 +32,7 @@ DOCVARS = {
   NL = "\n",
 
   -- defaults
-  MARKUP = "plain",
+  MARKUP = "text",
 }
 
 local args_done = false
@@ -572,7 +572,7 @@ local options = {
   ["--no-defaults"] = function () opt_nodefaults = true end,
 
 
-  "    -m, --markup <name>                     selects the markup engine for the output [plain]", --:  {STRING}
+  "    -m, --markup <name>                     selects the markup engine for the output [text]", --:  {STRING}
   ["-m"] = "--markup",
   ["--markup"] = function (arg, i)
     assert(type(arg[i+1]))
@@ -680,7 +680,7 @@ function setup()
     filetype_register("prolog", {"%.yap$", "%.pro$", "%.P$"}, "%")
 
     --filetypes_builtin:text * Textfiles, Pipadoc (`.pdoc`)
-    filetype_register("plain", {"%.txt$", "%.TXT$", "%.pdoc$", "^-$"}, {"PIPADOC:", ""})
+    filetype_register("text", {"%.txt$", "%.TXT$", "%.pdoc$", "^-$"}, {"PIPADOC:", ""})
 
     --filetypes_builtin:java * Java, C#
     filetype_register("java", {"%.java$", "%.cs$"}, {"//", "/*"})
