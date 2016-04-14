@@ -246,6 +246,9 @@ function streval (str) --: {FUNCTION} evaluate lua code inside curly braces in s
                                 ).."{}")
 end
 
+local function pattern_escape (p)
+  return (p:gsub("%W", "%%%1"))
+end
 
 --sections:
 --: Text in pipadoc is appended to named 'sections'. Sections are later brought into the desired order in a 'toplevel'
@@ -416,8 +419,8 @@ function filetype_register(name, filep, linecommentseqs) --: {FUNCTION} Register
   for i=1,#filep do
     filetypes[filep[i]] = filetypes[filep[i]] or {language = name}
     for j=1,#linecommentseqs do
-      dbg("register filetype:", name, filep[i], linecommentseqs[j])
-      filetypes[filep[i]][#filetypes[filep[i]]+1] = linecommentseqs[j]
+      dbg("register filetype:", name, filep[i], pattern_escape (linecommentseqs[j]))
+      filetypes[filep[i]][#filetypes[filep[i]]+1] = pattern_escape(linecommentseqs[j])
     end
   end
 end
