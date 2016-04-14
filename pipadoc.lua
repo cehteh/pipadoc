@@ -668,7 +668,7 @@ function setup()
     filetype_register("c", {"%.c$","%.cpp$", "%.C$", "%.cxx$", "%.h$", "%.hpp$", "%.hxx$"}, {"//", "/*"})
 
     --filetypes_builtin:lua * Lua
-    filetype_register("lua", {"%.lua$"}, "%-%-")
+    filetype_register("lua", {"%.lua$"}, "--")
 
     --filetypes_builtin:automake * Autoconf, Automake
     filetype_register("automake", {"%.am$", "%.in$", "^configure.ac$"}, {"#", "dnl"})
@@ -809,6 +809,7 @@ function process_line (line, comment)
       "", " ", "", ":", "", line
   else
     local pattern = "^(.-)("..comment..")([%w_.]*)([:=@#])([%w_.]*)%s?(.*)$"
+    dbg("pattern:", pattern)
     --FIXME: create opchars dynamically from defined ops
     context.PRE, context.COMMENT, context.SECTION, context.OP, context.ARG, context.TEXT =
       string.match(line,pattern)
