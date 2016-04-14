@@ -715,9 +715,10 @@ function setup()
 
   local function set_section (context)
     context.SECTION = to_text (context.SECTION) or SECTION
-    dbg("set_section:", context.SECTION, type(context.SECTION))
+  end
+
+  local function set_arg (context)
     context.ARG = to_text (context.ARG) or ARG
-    dbg("set_arg:", context.ARG, type(context.ARG))
   end
 
   --op_builtin:
@@ -734,6 +735,7 @@ function setup()
       end
 
       set_section (context)
+      set_arg (context)
 
       section_append(context.SECTION, context.ARG, context)
     end
@@ -770,7 +772,7 @@ function setup()
       if #context.ARG > 0 then
         section_append(context.SECTION, nil, context)
       else
-        warn("sort section missing:")
+        warn("sort argument missing:")
       end
     end
   )
@@ -788,7 +790,7 @@ function setup()
       if #context.ARG > 0 then
         section_append(context.SECTION, nil, context)
       else
-        warn("sort section missing:")
+        warn("sort argument missing:")
       end
     end
   )
@@ -806,9 +808,10 @@ function process_line (line, comment)
     context.PRE, context.COMMENT, context.SECTION, context.OP, context.ARG, context.TEXT =
       "", " ", "", ":", "", line
   else
+    local pattern = "^(.-)("..comment..")([%w_.]*)([:=@#])([%w_.]*)%s?(.*)$"
+    --FIXME: create opchars dynamically from defined ops
     context.PRE, context.COMMENT, context.SECTION, context.OP, context.ARG, context.TEXT =
-      --FIXME: create opchars dynamically
-      string.match(line,"^(.-)("..comment..")([%w_.]*)([:=@#])([%w_.]*)%s?(.*)$")
+      string.match(line,pattern)
   end
 
   context.LANGUAGE = DOCVARS.LANGUAGE
@@ -915,7 +918,7 @@ local default_generators = {
     if ret == "" and to_text (context.TEXT) then
       return ""
     else
-      trace ("generate:", ret)
+      trace ("generate:"..context.FILE..":"..context.LINE, ret)
       return ret.."\n"
     end
   end,
@@ -926,10 +929,10 @@ local default_generators = {
   end,
 
   ["@"] = function (context)
-    dbg("generate_output_alphasorted:")
+    dbg("generate_output_alphasorted:"..context.FILE..":"..context.LINE)
     CONTEXT=context
     local which = context.ARG
-    local section = sections[context.ARG].keys
+    local section = sections[which] and sections[which].keys
     local text = ""
 
     if section ~= nil then
@@ -967,10 +970,10 @@ local default_generators = {
   end,
 
   ["#"] = function (context)
-    dbg("generate_output_numasorted:")
+    dbg("generate_output_numasorted:"..context.FILE..":"..context.LINE)
     CONTEXT=context
     local which = context.ARG
-    local section = sections[context.ARG].keys
+    local section = sections[which] and sections[which].keys
     local text = ""
 
     if section ~= nil then
