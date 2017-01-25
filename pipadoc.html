@@ -736,7 +736,7 @@ asciidoc.install(2);
 <h1>pipadoc - Documentation extractor</h1>
 <span id="author">Christian Thaeter</span><br />
 <span id="email"><code>&lt;<a href="mailto:ct@pipapo.org">ct@pipapo.org</a>&gt;</code></span><br />
-<span id="revdate">Wed Apr 13 12:48:43 2016</span>
+<span id="revdate">Wed Jan 25 18:56:23 2017</span>
 <div id="toc">
   <div id="toctitle">Table of Contents</div>
   <noscript><p><b>JavaScript must be enabled in your browser to display the table of contents.</b></p></noscript>
@@ -824,7 +824,7 @@ One can ship the <code>pipadoc.lua</code> and <code>pipadoc.install</code> and d
     -t, --toplevel &lt;name&gt;                   sets 'name' as toplevel node [MAIN]
     -c, --config &lt;name&gt;                     selects a configfile [pipadoc.conf]
     --no-defaults                           disables default filetypes and processors
-    -m, --markup &lt;name&gt;                     selects the markup engine for the output [plain]
+    -m, --markup &lt;name&gt;                     selects the markup engine for the output [text]
     --                                      stops parsing the options and treats each
                                             following argument as input file</code></pre>
 </div></div>
@@ -1014,11 +1014,6 @@ Objective-C
 <li>
 <p>
 PHP
-</p>
-</li>
-<li>
-<p>
-Pipadoc config (<code>.pconf</code>)
 </p>
 </li>
 <li>
@@ -1326,9 +1321,12 @@ the backslash and the backtick itself by prepending them with a backslash or bac
 <h3 id="_sections">Sections</h3>
 <div class="dlist"><dl>
 <dt class="hdlist1">
-$$$FUNCTION
+<code>section_append(section, key, context)</code>
 </dt>
 <dd>
+<p>
+  Append data to the given section/key
+</p>
 <div class="dlist"><dl>
 <dt class="hdlist1">
 section
@@ -1350,16 +1348,16 @@ key
 context
 </dt>
 <dd>
-<p>
-  Append data to the given section/key
-</p>
 </dd>
 </dl></div>
 </dd>
 <dt class="hdlist1">
-$$$FUNCTION
+<code>section_get(section, key, index)</code>
 </dt>
 <dd>
+<p>
+  query the value of the given section/key at index (or at end)
+</p>
 <div class="dlist"><dl>
 <dt class="hdlist1">
 section
@@ -1392,10 +1390,6 @@ returns
 <p>
     value or nil
 </p>
-<div class="literalblock">
-<div class="content">
-<pre><code>query the value of the given section/key at index (or at end)</code></pre>
-</div></div>
 </dd>
 </dl></div>
 </dd>
@@ -1405,9 +1399,12 @@ returns
 <h3 id="_filetypes_2">Filetypes</h3>
 <div class="dlist"><dl>
 <dt class="hdlist1">
-$$$FUNCTION
+<code>filetype_register(name, filep, linecommentseqs)</code>
 </dt>
 <dd>
+<p>
+  Register a new filetype
+</p>
 <div class="dlist"><dl>
 <dt class="hdlist1">
 name
@@ -1436,7 +1433,6 @@ linecommentseqs
 </dl></div>
 </dd>
 </dl></div>
-<div class="paragraph"><p>Register a new filetype.</p></div>
 <div class="paragraph"><p>For example, C and C++ Filetypes are registered like:</p></div>
 <div class="literalblock">
 <div class="content">
@@ -1444,9 +1440,12 @@ linecommentseqs
 </div></div>
 <div class="dlist"><dl>
 <dt class="hdlist1">
-$$$FUNCTION
+<code>operator_register(char, func)</code>
 </dt>
 <dd>
+<p>
+  Register a new operator
+</p>
 <div class="dlist"><dl>
 <dt class="hdlist1">
 char
@@ -1492,13 +1491,18 @@ a2x -L -k -v --dblatex-opts "-P latex.output.revhistory=0" pipadoc.txt</code></p
 </div>
 </div>
 <div class="sect1">
+<h2 id="_development">Development</h2>
+<div class="sectionbody">
+</div>
+</div>
+<div class="sect1">
 <h2 id="_gnu_general_public_license">GNU General Public License</h2>
 <div class="sectionbody">
 <div class="listingblock">
 <div class="content">
 <pre><code>pipadoc - Documentation extractor
 Copyright (C)                        Pipapo Project
- 2015,                               Christian Thaeter &lt;ct@pipapo.org&gt;
+ 2015, 2016, 2017                    Christian Thaeter &lt;ct@pipapo.org&gt;
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -1534,7 +1538,7 @@ Christian Thäter &lt;<a href="mailto:ct@pipapo.org">ct@pipapo.org</a>&gt; for i
 <div id="footer">
 <div id="footer-text">
 Last updated
- 2016-04-13 12:48:43 CEST
+ 2017-01-25 18:56:23 CET
 </div>
 </div>
 </body>
