@@ -63,7 +63,7 @@ function printerr(...)
   end
 end
 
-function msg(lvl,...)
+function printlvl(lvl,...)
   if lvl <= opt_verbose then
     printerr(FILE..":"..(LINE ~= 0 and LINE..":" or ""), ...)
   end
@@ -79,13 +79,13 @@ end
 --: variable argument list. Any Argument passed to them will be converted to a string and printed
 --: to stderr when the verbosity level is high enough.
 --:
-function warn(...) msg(1, ...) end  --: {FUNCTION} report a important but non fatal failure
-function echo(...) msg(2, ...) end  --: {FUNCTION} report normal progress
-function dbg(...) msg(3, ...) end   --: {FUNCTION} show debugging information
-function trace(...) msg(4, ...) end --: {FUNCTION} show more detailed progress information
+function warn(...) printlvl(1, ...) end  --: {FUNCTION} report a important but non fatal failure
+function info(...) printlvl(2, ...) end  --: {FUNCTION} report normal progress
+function dbg(...) printlvl(3, ...) end   --: {FUNCTION} show debugging information
+function trace(...) printlvl(4, ...) end --: {FUNCTION} show more detailed progress information
 
 
---PLANNED: use echo() for progress
+--PLANNED: use info() for progress
 
 function die(...) --: {FUNCTION} report a fatal error and exit the programm
   printerr(...)
@@ -349,11 +349,11 @@ function section_get(section, key, index) --: {FUNCTION} query the value of the 
 
   if not key then
     index = index or #sections[section]
---FIXME:    echo("nokey", index, sections[section][index].action, sections[section][index].text)
+--FIXME:    info("nokey", index, sections[section][index].action, sections[section][index].text)
     return sections[section][index]
   else
     index = index or #sections[section].keys
-    echo("key", sections[section].keys[key][index])
+    info("key", sections[section].keys[key][index])
     return sections[section].keys[key][index]
   end
 end
