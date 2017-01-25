@@ -1,7 +1,7 @@
 --license:
 --: pipadoc - Documentation extractor
 --: Copyright (C)                        Pipapo Project
---:  2015,                               Christian Thaeter <ct@pipapo.org>
+--:  2015, 2016, 2017                    Christian Thaeter <ct@pipapo.org>
 --:
 --: This program is free software: you can redistribute it and/or modify
 --: it under the terms of the GNU General Public License as published by
@@ -536,11 +536,7 @@ local options = {
   "    -h, --help                              show this help", --:  {STRING}
   ["-h"] = "--help",
   ["--help"] = function ()
-    print("usage:")
-    for i=1,#options do
-      print(options[i])
-    end
-    os.exit(0)
+    usage()
   end,
 
 
@@ -604,6 +600,14 @@ local options = {
   "", --:  {STRING}
   "  inputs are filenames or a '-' which indicates standard input", --:  {STRING}
 }
+
+function usage()
+  print("usage:")
+  for i=1,#options do
+    print(options[i])
+  end
+  os.exit(0)
+end
 
 function parse_args(arg)
   local i = 1
