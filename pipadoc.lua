@@ -874,7 +874,7 @@ function process_file(file)
   --FIXME: wrong docsection
   --DOCVARS:section `SECTION`::
   --DOCVARS:section   stores the current section name
-  SECTION = FILE:match("[^./]+%f[.\0]")
+  SECTION = FILE:match("[^./]+%f[.%z]")
   LINE = 0
   dbg("section:", SECTION)
 
