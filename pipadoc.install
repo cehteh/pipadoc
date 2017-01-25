@@ -15,29 +15,69 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+#: USAGE
+#: -----
+#:
+#: sh pipadoc.install [-c [-s]] [-i "interpreters"] [dir]
+#: sh pipadoc.install -l
+#:
+#: installs 'pipadoc.install.lua' as 'pipadoc.install' in 'dir' (defaults to the current directory)
+#:
+#: -i "interpreters"    - override the list of lua interpreters to be tried,
+#:                        default/compatible interpreters are configured below.
+#: -c                   - compiles the source to bytecode prior installing
+#: -s                   - strips debugging information from the compiled bytecode
+#: -n                   - install nothing, just show what would be done
+#: -l                   - lists defaults and probes available options
+#: -v                   - verbose
+#: -h                   - help
+#:
+#: Note that compiling only saves a few milliseconds runtime cost and, with -s,
+#: a little space. There is not much benefit yet.
+#:
 #: CONFIGURATION
 #: -------------
 #:
-#: lua_interpreters are searched in order, the first found is used
-lua_interpreters="luajit lua5.3 lua-5.3 lua5.2 lua-5.2 lua lua-5.1"
+#: Configuration through shell variables is done within the install script itself:
+#:
+#: 'lua_interpreters' defines a list of lua implemntation which are are searched
+#: in order, the first found is used.
+lua_interpreters="luajit ravi lua5.3 lua-5.3 lua5.2 lua-5.2 lua lua-5.1 lua5.1"
+#:
 
-#: list all libraries which are required
+#: 'dependencies' list all libraries which are required for the installed program
 dependencies=""
+#:
 
-#: default name is guessed from this script name
-source="${0%.install}"
+#: The name of the programm to be installed is guessed from this install script name
+name="${0%.install}"; name="${name##*/}"
+#:
+
+## END OF CONFIGURATION ##
+
 
 # directory where to install
 export installdir="${installdir:-.}"
 
+compile=""
+strip=""
+list=""
+tryonly=""
+verbose=""
+
 #############################################################
 
-name="${source##*/}"
 
 msg()
 {
     echo "$*" 1>&2
 }
+
+dbg()
+{
+    test -z "$verbose" || echo "$*" 1>&2
+}
+
 
 die()
 {
@@ -45,33 +85,121 @@ die()
     exit 1
 }
 
-find_binary ()
+
+
+check_lua ()
 {
-    for i in "$@"; do
-        program=$(which "$i")
-        if test "$program" -a -x "$program"; then
-            echo "$program"
-            return
-        fi
-    done
-    die "no suitable interpreter found"
+    dbg "trying: $1"
+
+    lua_interpreter="$(which "$1")"
+
+    if test "$lua_interpreter" -a -x "$lua_interpreter"; then
+            dbg "found: $lua_interpreter"
+            for i in $dependencies; do
+                dbg "  check dependency: $i"
+                $lua_interpreter -e "pcall(require,'luarocks.loader'); require '$i'" 2>/dev/null ||
+                        {
+                            dbg "    MISSING"
+                            return 1
+                        }
+                dbg "    OK"
+            done
+
+            if test "$list" -o ! -z "$compile" ; then
+                    compiler="$(which $(echo "$1" | sed -e 's/\(lua\)*/\1c/'))"
+                    if test "$compiler" -a -x "$compiler"; then
+                            dbg "  compiler available"
+                            lua_emit()
+                            {
+                                dbg "emit: compile $compiler"
+
+                                echo "#!$lua_interpreter" >"$installdir/$name"
+                                $compiler ${strip:+-s} -o - "$name.lua" >>"$installdir/$name"
+                                chmod +x "$installdir/$name"
+                            }
+                            return 0
+                    elif test -z "$list"; then
+                        msg "don't know how to compile for $lua_interpreter"
+                        return 1
+                    fi
+            else
+                lua_emit()
+                {
+                    dbg "emit: interpreter $lua_interpreter"
+                    echo "#!$lua_interpreter" >"$installdir/$name"
+                    cat "$name.lua" >>"$installdir/$name"
+                    chmod +x "$installdir/$name"
+                }
+                return 0
+            fi
+    fi
+    return 1
 }
 
-test -f "$source.lua" || die "$source.lua not found"
 
-lua=$(find_binary $lua_interpreters)
-echo "using '$lua' as lua interpreter"
+find_lua ()
+{
+    for i in $@; do
+        check_lua "$i" && test -z "$list" && return
+    done
+    test -z "$list" && die "not suitable lua found"
+}
 
-for i in $dependencies; do
-    $lua -e "pcall(require,'luarocks.loader'); require '$i'" 2>/dev/null || die "dependency '$i' not found"
+
+while test "$#" -ge 1; do
+    case "$1" in
+    -i)
+        lua_interpreters="$2"
+        test ! -z "$lua_interpreters" || die "-i <missing argument>"
+        shift 2
+    ;;
+    -c)
+        compile="true"
+        shift
+    ;;
+    -s)
+        strip="true"
+        shift
+    ;;
+    -n)
+        tryonly="true"
+        shift
+    ;;
+    -l)
+        list="true"
+        shift
+    ;;
+    -v)
+        verbose="true"
+        shift
+    ;;
+    -h)
+        sed -e 's/^#: \?\(.*\)/\1/p;d' "$0"
+        exit 0
+        shift
+    ;;
+    *)
+        installdir="$1"
+        shift
+    ;;
+    esac
 done
 
-echo "installing script '$installdir/$name'"
-mkdir -p "$installdir"
-cat <<EOF >"$installdir/$name"
-#!$lua
+test -f "$name.lua" || die "$name.lua not found"
 
-$(cat "$source.lua")
-EOF
+find_lua "$lua_interpreters"
+test "$list" && exit 0
 
-chmod +x "$installdir/$name"
+if test "$tryonly" ; then
+        test -d "$installdir" || msg "$installdir does not exist"
+        test -w "$installdir" || msg "$installdir is not writeable"
+        echo "would install '$installdir/$name'"
+else
+    echo "installing script '$installdir/$name'"
+    mkdir -p "$installdir" || die "could not create $installdir"
+    lua_emit
+fi
+
+
+
+
