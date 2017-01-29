@@ -27,6 +27,7 @@
 #:                        default/compatible interpreters are configured below.
 #: -c                   - compiles the source to bytecode prior installing
 #: -s                   - strips debugging information from the compiled bytecode
+#: -x "suffix"          - add suffix to the installed name
 #: -n                   - install nothing, just show what would be done
 #: -l                   - lists defaults and probes available options
 #: -v                   - verbose
@@ -61,6 +62,7 @@ export installdir="${installdir:-.}"
 
 compile=""
 strip=""
+suffix=""
 list=""
 tryonly=""
 verbose=""
@@ -113,9 +115,9 @@ check_lua ()
                             {
                                 dbg "emit: compile $compiler"
 
-                                echo "#!$lua_interpreter" >"$installdir/$name"
-                                $compiler ${strip:+-s} -o - "$name.lua" >>"$installdir/$name"
-                                chmod +x "$installdir/$name"
+                                echo "#!$lua_interpreter" >"$installdir/$name$suffix"
+                                $compiler ${strip:+-s} -o - "$name.lua" >>"$installdir/$name$suffix"
+                                chmod +x "$installdir/$name$suffix"
                             }
                             return 0
                     elif test -z "$list"; then
@@ -126,9 +128,9 @@ check_lua ()
                 lua_emit()
                 {
                     dbg "emit: interpreter $lua_interpreter"
-                    echo "#!$lua_interpreter" >"$installdir/$name"
-                    cat "$name.lua" >>"$installdir/$name"
-                    chmod +x "$installdir/$name"
+                    echo "#!$lua_interpreter" >"$installdir/$name$suffix"
+                    cat "$name.lua" >>"$installdir/$name$suffix"
+                    chmod +x "$installdir/$name$suffix"
                 }
                 return 0
             fi
@@ -151,6 +153,7 @@ while test "$#" -ge 1; do
     -i)
         lua_interpreters="$2"
         test ! -z "$lua_interpreters" || die "-i <missing argument>"
+        test "$lua_interpreters" || die "-i <missing argument>"
         shift 2
     ;;
     -c)
@@ -160,6 +163,11 @@ while test "$#" -ge 1; do
     -s)
         strip="true"
         shift
+    ;;
+    -x)
+        suffix="$2"
+        test "$suffix" || die "-x <missing argument>"
+        shift 2
     ;;
     -n)
         tryonly="true"
@@ -193,9 +201,9 @@ test "$list" && exit 0
 if test "$tryonly" ; then
         test -d "$installdir" || msg "$installdir does not exist"
         test -w "$installdir" || msg "$installdir is not writeable"
-        echo "would install '$installdir/$name'"
+        echo "would install '$installdir/$name$suffix'"
 else
-    echo "installing script '$installdir/$name'"
+    echo "installing script '$installdir/$name$suffix'"
     mkdir -p "$installdir" || die "could not create $installdir"
     lua_emit
 fi
