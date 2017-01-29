@@ -1,6 +1,6 @@
 #!/bin/sh
 # Lua script Installer
-# Copyright (C) 2015  Christian Thäter <ct@pipapo.org>
+# Copyright (C) 2015, 2017            Christian Thäter <ct@pipapo.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,20 +18,19 @@
 #: USAGE
 #: -----
 #:
-#: sh pipadoc.install [-c [-s]] [-i "interpreters"] [dir]
-#: sh pipadoc.install -l
+#: sh pipadoc.install [<options>] [dir]
 #:
 #: installs 'pipadoc.install.lua' as 'pipadoc.install' in 'dir' (defaults to the current directory)
-#:
-#: -i "interpreters"    - override the list of lua interpreters to be tried,
-#:                        default/compatible interpreters are configured below.
-#: -c                   - compiles the source to bytecode prior installing
-#: -s                   - strips debugging information from the compiled bytecode
-#: -x "suffix"          - add suffix to the installed name
-#: -n                   - install nothing, just show what would be done
-#: -l                   - lists defaults and probes available options
-#: -v                   - verbose
-#: -h                   - help
+#: Options:
+#:  -i "interpreters"    - override the list of lua interpreters to be tried,
+#:                         default/compatible interpreters are configured below.
+#:  -c                   - compiles the source to bytecode prior installing
+#:  -s                   - strips debugging information from the compiled bytecode
+#:  -x "suffix"          - add suffix to the installed name
+#:  -n                   - install nothing, just show what would be done
+#:  -l                   - lists defaults and probes available options
+#:  -v                   - verbose
+#:  -h                   - help
 #:
 #: Note that compiling only saves a few milliseconds runtime cost and, with -s,
 #: a little space. There is not much benefit yet.
