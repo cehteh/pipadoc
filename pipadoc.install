@@ -107,7 +107,7 @@ check_lua ()
                 dbg "    OK"
             done
 
-            if test "$list" -o ! -z "$compile" ; then
+            if test "$list" -o "$compile" ; then
                     compiler="$(which $(echo "$1" | sed -e 's/\(lua\)*/\1c/'))"
                     if test "$compiler" -a -x "$compiler"; then
                             dbg "  compiler available"
@@ -152,7 +152,6 @@ while test "$#" -ge 1; do
     case "$1" in
     -i)
         lua_interpreters="$2"
-        test ! -z "$lua_interpreters" || die "-i <missing argument>"
         test "$lua_interpreters" || die "-i <missing argument>"
         shift 2
     ;;
