@@ -132,14 +132,6 @@ function request(name) --: {FUNCTION} try to load optional modules
   end
 end
 
---TODO: docme
--- fake an interface
-local function fake(metatable, tab)
-  tab = tab or {}
-  tab.FAKE = true
-  return setmetatable(tab, metatable or {__index = function () end})
-end
-
 request "luarocks.loader"
 --PLANNED: for pattern matching etc
 --lfs = request "lfs"
