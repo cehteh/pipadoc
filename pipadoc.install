@@ -28,7 +28,7 @@
 #:  -s                   - strips debugging information from the compiled bytecode
 #:  -x "suffix"          - add suffix to the installed name
 #:  -n                   - install nothing, just show what would be done
-#:  -l                   - lists defaults and probes available options
+#:  -l                   - lists available lua systems
 #:  -v                   - verbose
 #:  -h                   - help
 #:
@@ -173,6 +173,7 @@ while test "$#" -ge 1; do
     ;;
     -l)
         list="true"
+        verbose="true"
         shift
     ;;
     -v)
