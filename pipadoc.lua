@@ -79,15 +79,15 @@ end
 --: variable argument list. Any Argument passed to them will be converted to a string and printed
 --: to stderr when the verbosity level is high enough.
 --:
-function warn(...) printlvl(1, ...) end  --: {FUNCTION} report a important but non fatal failure
-function info(...) printlvl(2, ...) end  --: {FUNCTION} report normal progress
-function dbg(...) printlvl(3, ...) end   --: {FUNCTION} show debugging information
-function trace(...) printlvl(4, ...) end --: {FUNCTION} show more detailed progress information
+function warn(...) printlvl(1, ...) end  --: report a important but non fatal failure
+function info(...) printlvl(2, ...) end  --: report normal progress
+function dbg(...) printlvl(3, ...) end   --: show debugging information
+function trace(...) printlvl(4, ...) end --: show more detailed progress information
 
 
+function die(...) --: report a fatal error and exit the programm
 --PLANNED: use info() for progress
 
-function die(...) --: {FUNCTION} report a fatal error and exit the programm
   printerr(...)
   os.exit(1)
 end
@@ -118,7 +118,7 @@ end
 --: When luarocks is installed, then the 'luarocks.loader' is loaded by default to make any module installed by
 --: luarocks available.
 --:
-function request(name) --: {FUNCTION} try to load optional modules
+function request(name) --: try to load optional modules
   --:    wraps lua 'require' in a pcall so that failure to load a module results in 'nil' rather than a error
   local ok,handle = pcall(require, name)
   if ok then
@@ -147,35 +147,35 @@ request "luarocks.loader"
 --: Some wrapers around 'assert' to check externally supplied data. On success 'var' will be returned
 --: otherwise an assertion error is raised.
 --:
-function assert_type(var, expected) --: {FUNCTION} checks that the 'var' is of 'type'
+function assert_type(var, expected) --: checks that the 'var' is of 'type'
   assert(type(var) == expected, "type error: "..expected.." expected, got "..type(var))
   return var
 end
 
-function maybe_type(var, expected) --: {FUNCTION} checks that the 'var' is of 'type' or nil
+function maybe_type(var, expected) --: checks that the 'var' is of 'type' or nil
   assert(var == nil or type(var) == expected, "type error: "..expected.." or nil expected, got "..type(var))
   return var
 end
 
-function assert_char(var) --: {FUNCTION} checks that 'var' is a single character
+function assert_char(var) --: checks that 'var' is a single character
   assert(type(var) == "string" and #var == 1, "type error: single character expected")
   return var
 end
 
-function assert_notnil(var) --: {FUNCTION} checks that 'var' is not 'nil'
+function assert_notnil(var) --: checks that 'var' is not 'nil'
   assert(type(var) ~= "nil", "Value expected")
   return var
 end
 
 
-function to_table(v) --: {FUNCTION} if 'v' is not a table then return {v}
+function to_table(v) --: if 'v' is not a table then return \\\{v\\\}
   if type(v) ~= 'table' then
     v = {v}
   end
   return v
 end
 
-function to_text (v) --: {FUNCTION} convert 'v' to a string, returns 'nil' when that string would be empty
+function to_text(v) --: convert 'v' to a string, returns 'nil' when that string would be empty
   v = v and tostring (v)
   return v ~= "" and v or nil
 end
@@ -197,7 +197,7 @@ __BRACECLOSE__ = "}"
 --: text inside curly braces can not be evaluated it is retained verbatim. One can escape curly braces
 --: the backslash and the backtick itself by prepending them with a backslash or backtick.
 --:
-function streval (str) --: {FUNCTION} evaluate lua code inside curly braces in str
+function streval (str) --: evaluate lua code inside curly braces in str
   assert_type (str, "string")
 
   local function streval_intern (str)
@@ -301,7 +301,7 @@ local sections_keys_usecnt = {}
 
 --PLANNED: maybe append the context       , DOCVARS.SECTION, DOCVARS.ARG, DOCVARS.OP,  DOCVARS.TEXT, DOCVARS.PRE
 
-function section_append(section, key, context) --: {FUNCTION} Append data to the given section/key
+function section_append(section, key, context) --: Append data to the given section/key
   --:   section:::
   --:     name of the section to append to, must be a string
   assert_type(section, "string")
@@ -324,7 +324,7 @@ function section_append(section, key, context) --: {FUNCTION} Append data to the
 end
 
 --api:
-function section_get(section, key, index) --: {FUNCTION} query the value of the given section/key at index (or at end)
+function section_get(section, key, index) --: query the value of the given section/key at index (or at end)
   --:   section:::
   --:     name of the section to append to, must be a string
   assert_type(section, "string")
@@ -384,7 +384,7 @@ local filetypes = {}
 --: Filetypes
 --: ~~~~~~~~~
 --:
-function filetype_register(name, filep, linecommentseqs) --: {FUNCTION} Register a new filetype
+function filetype_register(name, filep, linecommentseqs) --: Register a new filetype
   --:     name:::
   --:       name of the language
   --:     filep:::
@@ -486,7 +486,7 @@ local operators = {}
 
 --TODO: operator_register(char, read, generate) .. add generator function here too
 --api:
-function operator_register(char, func) --: {FUNCTION} Register a new operator
+function operator_register(char, func) --: Register a new operator
   --:   char:::
   --:     single punctuation character defining this operator
   --:   func:::

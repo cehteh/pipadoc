@@ -1,10 +1,18 @@
+
+-- replace {STRING} in pipadoc comments with the first literal string from the code
 preprocessor_register ("^lua$",
-                       function (str) return str:gsub("{STRING}", '{CONTEXT.PRE:match(".-\\"([^\\"]*)\\"")}') end
+                       function (str)
+                         return str:gsub('^([^"]*"([^"]*)".*--%w*:%w*)(.*){STRING}(.*)', '%1%3%2%4', 1)
+                       end
 )
 
+-- generate asciidoc formatted documentation for functions
 preprocessor_register ("^lua$",
-                       function (str) return str:gsub("{FUNCTION}", '+{CONTEXT.PRE:match("function ([^)]*%%))")}+::{DOCVARS.NL} ') end
+                       function (str)
+                         return str:gsub("^(.*function%s+([^)]*%)).*--%w*:%w*)", '%1 +%2+::{DOCVARS.NL} ', 1)
+                       end
 )
+
 
 
 function git_blame (file, line)
@@ -39,15 +47,22 @@ function git_blame_context ()
 end
 
 preprocessor_register ("",
-                       function (str) return str:gsub("FIXME:([^ ]*) (.*)", 'FIXME:%1 {CONTEXT.FILE}:{CONTEXT.LINE}::{DOCVARS.NL}  %2{git_blame_context ()}{DOCVARS.NL}') end
+                       function (str)
+                         return str:gsub("--FIXME:([^ ]*) (.*)", '--FIXME:%1 {CONTEXT.FILE}:{CONTEXT.LINE}::{DOCVARS.NL}  %2{git_blame_context ()}{DOCVARS.NL}')
+                       end
 )
 
 preprocessor_register ("",
-                       function (str) return str:gsub("TODO:([^ ]*) (.*)", 'TODO:%1 {CONTEXT.FILE}:{CONTEXT.LINE}::{DOCVARS.NL}  %2{git_blame_context ()}{DOCVARS.NL}') end
+                       function (str)
+                         return str:gsub("--TODO:([^ ]*) (.*)", '--TODO:%1 {CONTEXT.FILE}:{CONTEXT.LINE}::{DOCVARS.NL}  %2{git_blame_context ()}{DOCVARS.NL}')
+                       end
 )
 
 preprocessor_register ("",
-                       function (str) return str:gsub("PLANNED:([^ ]*) (.*)", 'PLANNED:%1 {CONTEXT.FILE}:{CONTEXT.LINE}::{DOCVARS.NL}  %2{git_blame_context ()}{DOCVARS.NL}') end
+                       function (str)
+                         return str:gsub("--PLANNED:([^ ]*) (.*)", '--PLANNED:%1 {CONTEXT.FILE}:{CONTEXT.LINE}::{DOCVARS.NL}  %2{git_blame_context ()}{DOCVARS.NL}')
+                       end
 )
 
+--PLANNED: offer different sort orders for issues (date / line)
 --PLANNED: noweb like preprocessing syntax for chapter substitutions in textfiles
