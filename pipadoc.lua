@@ -725,15 +725,20 @@ function setup()
   operator_register(
     ":",
     function (context)
+      local had_args=false
+
       if context.TEXT == "" and (to_text (context.SECTION) or to_text(context.ARG)) then
         SECTION = to_text (context.SECTION) or SECTION
         ARG = to_text (context.ARG) or ""
+        had_args=true
       end
 
       set_section (context)
       set_arg (context)
 
-      section_append(context.SECTION, context.ARG, context)
+      if context.TEXT ~= "" or not had_args then
+        section_append(context.SECTION, context.ARG, context)
+      end
     end
   )
 
