@@ -1,0 +1,52 @@
+#!/bin/sh
+# Pipadoc test suite
+# Copyright (C) 2017            Christian Thäter <ct@pipapo.org>
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+test_lua_interpreters="luajit ravi lua5.3 lua-5.3 lua5.2 lua-5.2 lua lua-5.1 lua5.1"
+
+
+awk '/^#>/{sub("#> ?", ""); print }' pipadoc.test >'test_expected'
+
+
+for i in $test_lua_interpreters; do
+    echo
+    echo "checking $i"
+    sh pipadoc.install -i "$i" -x "_test_$i" || continue
+
+    ./pipadoc_test_$i -r test '%.test$' '#' pipadoc.test >test_out_$i
+
+    if cmp test_out_$i test_expected; then
+            echo "SUCCESS: pipadoc_test_$i"
+            rm "test_out_$i"
+    else
+            echo "FAIL: pipadoc_test_$i"
+            diff -u test_out_$i test_expected
+    fi
+
+    rm "pipadoc_test_$i" 2>/dev/null
+done
+
+# tests
+#MAIN: Pipadoc Testsuite
+#MAIN:
+#:
+#: END
+
+
+# expected results
+#> Pipadoc Testsuite
+#>
+#> END
