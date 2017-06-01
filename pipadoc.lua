@@ -1362,3 +1362,8 @@ end
 --TODO: CONFIG:GENERATE
 --PLANNED: include operator
 --PLANNED: git blame support for issues, include date/committer reference
+
+--- Local Variables:
+--- mode: lua
+--- compile-command: "lua pipadoc.lua -t ISSUES -q pipadoc.lua"
+--- End:
