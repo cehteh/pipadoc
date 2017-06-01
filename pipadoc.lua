@@ -1008,7 +1008,7 @@ local default_generators = {
   end,
 
   ["#"] = function (context)
-    dbg("generate_output_numasorted:"..context.FILE..":"..context.LINE)
+    dbg("generate_output_numsorted:"..context.FILE..":"..context.LINE)
     CONTEXT=context
     local which = context.ARG
     local section = sections[which] and sections[which].keys
