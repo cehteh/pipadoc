@@ -16,13 +16,18 @@
 --: You should have received a copy of the GNU General Public License
 --: along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
---TODO: include operator, add a file to the processing list
+--PLANNED: include operator, add a file to the processing list
 --FIXME: split on newlines
+--PLANNED: merge lines, '+' operator?
+--+        like this, note about indentation, no newline
+--PLANNED: escape pipadoc to avoid wrong parsed pipadoc comments: char* bad="//here:"; //here: the first isn't pipadoc perhaps {DROP}
+--PLANNED: true block comments --name(key makes every further line prepended
+--+        with --name:key util --) is seen, 'PIPADOC:' overrides apply
 
 local LINE = 0
 local FILE = "<startup>"
 
-CONTEXT = {}
+CONTEXT = {} --TODO: whats needed to make CONTEXT and DOCVARS local
 
 DOCVARS = {
   --DOCVARS:nl `NL`::
@@ -85,9 +90,7 @@ function dbg(...) printlvl(3, ...) end   --: show debugging information
 function trace(...) printlvl(4, ...) end --: show more detailed progress information
 
 
-function die(...) --: report a fatal error and exit the programm
---PLANNED: use info() for progress
-
+function die(...) --: report a fatal error and exit the program
   printerr(...)
   os.exit(1)
 end
@@ -182,6 +185,7 @@ end
 
 
 -- need to be global, used for escaping in streval
+--FIXME: how to make them local?
 __BACKSLASH__ = "\\"
 __BACKTICK__ = "`"
 __BRACEOPEN__ = "{"
@@ -196,6 +200,7 @@ __BRACECLOSE__ = "}"
 --: curly braces. This can be used to retrieve the value of variables, call or define functions. when the
 --: text inside curly braces can not be evaluated it is retained verbatim. One can escape curly braces
 --: the backslash and the backtick itself by prepending them with a backslash or backtick.
+--PLANNED: safe/unsafe mode for disabling string evaluation, function calls only, not vars expansion
 --:
 function streval (str) --: evaluate lua code inside curly braces in str
   assert_type (str, "string")
@@ -309,7 +314,7 @@ function section_append(section, key, context) --: Append data to the given sect
   --:     the subkey for sorting within that section. 'nil' for appending text to normal sections
   maybe_type(key, "string")
   --:   context:::
-  --FIXME: DOCME    the parameter for the action, usually the text to be included in the output.
+  --TODO: DOCME document 'context' somewhere else
   maybe_type(context, "table")
   --:
   trace("append:", section, key, context)
@@ -320,7 +325,7 @@ function section_append(section, key, context) --: Append data to the given sect
   else
     table.insert(sections[section], context)
   end
---FIXME:  trace(action.. ":", section.."["..(key and #key > 0 and key .."]["..#sections[section].keys[key] or #sections[section]).."]:", context.TEXT)
+--FIXME: WRITE TEST FOR THIS trace(action.. ":", section.."["..(key and #key > 0 and key .."]["..#sections[section].keys[key] or #sections[section]).."]:", context.TEXT)
 end
 
 --api:
@@ -341,7 +346,7 @@ function section_get(section, key, index) --: query the value of the given secti
 
   if not key then
     index = index or #sections[section]
---FIXME:    info("nokey", index, sections[section][index].action, sections[section][index].text)
+    --FIXME: WRITE TEST FOR THIS   info("nokey", index, sections[section][index].action, sections[section][index].text)
     return sections[section][index]
   else
     index = index or #sections[section].keys
@@ -436,6 +441,7 @@ end
 
 local preprocessors = {}
 
+--TODO: DOCME
 function preprocessor_register (langpat, preprocess)
   assert_type (langpat, "string")
   dbg ("register preprocessor:", langpat, preprocess)
@@ -585,9 +591,10 @@ local options = {
   --TODO: wordwrap
   --TODO: eat empty lines
   --TODO: add debug report (warnings/errors) to generated document PIPADOC_LOG section
-  --TODO: lineending \n \r\n
+  --TODO: line ending \n \r\n
   --TODO: wrap at blank/intelligent
   --PLANNED: wordwrap
+  --PLANNED: some flags get defaults from the config file
 
   "", --:  {STRING}
   "  inputs are filenames or a '-' which indicates standard input", --:  {STRING}
@@ -648,12 +655,13 @@ function setup()
   end
 
   if not opt_nodefaults then
-    --PLANNED: read style file like a config, lower priority, differnt paths (./ /etc/ ~/ ...)
+    --PLANNED: read style file like a config, lower priority, different paths (./ /etc/ ~/ ...)
     if opt_config then
       dbg ("load config:", opt_config)
       loadfile (opt_config)()
     end
 
+    --PLANNED: write preprocessor macro to expand filetype_register() 
     --filetypes_builtin:scons * SCons
     filetype_register("scons", "^SConstuct$", "#")
 
@@ -764,7 +772,7 @@ function setup()
   --: `@` ::
   --:   Takes a section name as argument and will paste section text alphabetically sorted by their keys.
   --PLANNED: option for sorting locale
-  --PLANNED: option for sorting (up/dowen)
+  --PLANNED: option for sorting (up/down)
   operator_register(
     "@",
     function (context)
@@ -811,14 +819,14 @@ function process_line (line, comment)
   else
     local pattern = "^(.-)("..comment..")([%w_.]*)([:=@#])([%w_.]*)%s?(.*)$"
     dbg("pattern:", pattern)
-    --FIXME: create opchars dynamically from defined ops
+    --TODO: create opchars dynamically from defined ops
     context.PRE, context.COMMENT, context.SECTION, context.OP, context.ARG, context.TEXT =
       string.match(line,pattern)
   end
 
   context.LANGUAGE = DOCVARS.LANGUAGE
 
-  --FIXME: wrong section
+  --FIXME: doc section for context
   --DOCVARS:file `FILE`::
   --DOCVARS:file   The file or section name currently processed or some special annotation
   --DOCVARS:file   in angle brakets (eg '<startup>') on other processing phases
@@ -846,7 +854,6 @@ function process_line (line, comment)
 end
 
 function process_file(file)
-  --FIXME: first check if file is available, then warn
   local descriptor, pattern = filetype_get (file)
   if not descriptor then
     warn("unknown file type:", file)
@@ -868,13 +875,14 @@ function process_file(file)
     FILE = file
   end
 
-  --FIXME: wrong docsection
+  --FIXME: create context
   --DOCVARS:section `SECTION`::
   --DOCVARS:section   stores the current section name
   SECTION = FILE:match("[^./]+%f[.%z]")
   LINE = 0
   dbg("section:", SECTION)
 
+  --FIXME: move to context/template
   DOCVARS.LANGUAGE = descriptor.language
   dbg("LANGUAGE:", DOCVARS.LANGUAGE)
 
@@ -905,7 +913,7 @@ end
 function process_inputs()
   for i=1,#opt_inputs do
     if opt_inputs[i] ~= false then
-      --TODO: globbing if no such file exists
+      --TODO: globing if no such file exists
       process_file(opt_inputs[i])
     end
   end
@@ -1042,7 +1050,7 @@ function generate_output(which, generators)
     for i=1,#section do
       LINE=i
       --FIXME: context  trace("generate", section[i].TEXT)
-      --TODO: docme actions
+      --TODO: DOCME actions
       local genfunc = generators[section[i].OP]
       if genfunc then
         text = text .. genfunc(section[i])
@@ -1157,7 +1165,7 @@ end
 --: - One can ship the `pipadoc.lua` and `pipadoc.install` and do a local install in the build
 --:   directory and use this pipadoc thereafter
 --:
---: Pipadoc tries to load 
+--FIXME: Pipadoc tries to load
 --:
 --:
 --: Usage
@@ -1207,7 +1215,7 @@ end
 --:
 --: Documentation lines are proccessed according to their operator.
 --:
---TODO: docme oneline vs block, default section name, MAIN section
+--TODO: DOCME oneline vs block, default section name, MAIN section
 --TODO: note that literal strings are not special
 --:
 --: Order of operations
@@ -1336,16 +1344,17 @@ end
 --:
 --=TODO
 --:
---TODO: only generate TODO section when there are TODO's
+--FIXME: only generate TODO section when there are TODO's
 --:
 --: PLANNED
 --: ~~~~~~~
 --:
 --=PLANNED
 --:
---PLANNED: only generate PLANNED section when there are PLANNED's
+--FIXME: only generate PLANNED section when there are PLANNED's
 --:
 
+--PLANNED: control language/conditionals?  //section?key {condition}  else becomes DROPPED:section_key
 
 --TODO: asciidoc //source:line// comments like old pipadoc
 --TODO: integrate old pipadoc.txt documentation
@@ -1360,7 +1369,6 @@ end
 --TODO: CONFIG:PRE
 --TODO: CONFIG:POST
 --TODO: CONFIG:GENERATE
---PLANNED: include operator
 --PLANNED: git blame support for issues, include date/committer reference
 
 --- Local Variables:
