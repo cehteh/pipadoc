@@ -701,8 +701,14 @@ function setup()
     --filetypes_builtin:make * Makefiles
     filetype_register("makefile", {"^Makefile$", "%.mk$", "%.make$"}, "#")
 
-    --filetypes_builtin:shell * Shell, Perl, AWK
+    --filetypes_builtin:shell * Shell
     filetype_register("shell", {"%.sh$", "%.pl$", "%.awk$", }, "#")
+
+    --filetypes_builtin:perl * Perl
+    filetype_register("perl", {"%.pl$", }, "#")
+
+    --filetypes_builtin:awk * AWK
+    filetype_register("awk", {"%.awk$", }, "#")
 
     --filetypes_builtin:prolog * Prolog
     filetype_register("prolog", {"%.yap$", "%.pro$", "%.P$"}, "%")
