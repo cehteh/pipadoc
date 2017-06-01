@@ -393,7 +393,6 @@ end
 --: files. Which also uses the "PIPADOC:" keyword to enable special operations within text files.
 local filetypes = {}
 
-
 --api:
 --:
 --: Filetypes
@@ -524,6 +523,7 @@ function operator_pattern()
 end
 
 
+
 --usage:
 local options = {
   "pipadoc [options...] [inputs..]",  --:  {STRING}
@@ -579,11 +579,20 @@ local options = {
   ["--no-defaults"] = function () opt_nodefaults = true end,
 
 
+  --TODO: document where markup is used
   "    -m, --markup <name>                     selects the markup engine for the output [text]", --:  {STRING}
   ["-m"] = "--markup",
   ["--markup"] = function (arg, i)
     assert(type(arg[i+1]))
     DOCVARS.MARKUP = arg[i+1]
+    return 1
+  end,
+
+  -- intentionally undocumented option
+  ["--make-doc"] = function (arg, i)
+    os.execute("lua pipadoc.lua -m asciidoc -q pipadoc.lua >pipadoc.txt")
+    os.execute("asciidoc -a toc pipadoc.txt")
+    os.execute('a2x -L -k -v --dblatex-opts "-P latex.output.revhistory=0" pipadoc.txt')
     return 1
   end,
 
@@ -863,7 +872,6 @@ function process_line (line, comment)
   context.FILE, context.LINE = FILE, LINE
 
   if context.PRE then
-
     trace("pre:", context.PRE, "section:", context.SECTION, "op:", context.OP, "arg:", context.ARG, "text:", context.TEXT)
 
     local op = context.OP
@@ -1132,7 +1140,6 @@ for k,v in pairs(sections_keys_usecnt) do
 end
 
 
-
 --MAIN:
 --: pipadoc - Documentation extractor
 --: =================================
@@ -1351,12 +1358,12 @@ end
 --: is to extract documentation from other files, this does not imply that these source files
 --: from which the documentation is extracted need to be licensed under the GPL, neither does
 --: this imply that the extracted documentation need to be licensed under the GPL.
---: Using pipadoc for proprietary software poses no problems about the Licensing terms of
+--: Using pipadoc for non-free software poses no problems about the Licensing terms of
 --: this software.
 --:
 --: The GPL applies when you distribute pipadoc itself, in original or modified form. Since
---: pipadoc is written in Lua you already distribute its source as well, which makes this
---: distribution naturally with the GPL.
+--: pipadoc is written in the lua scripting language, you already distribute its source as well,
+--: which naturally makes this distribution conform with the GPL.
 --:
 --: Nevertheless, when you make any improvements to pipadoc please consider to contact
 --: Christian Thäter <ct@pipapo.org> for including them into the mainline.
@@ -1389,7 +1396,6 @@ end
 --:
 
 --PLANNED: control language/conditionals?  //section?key {condition}  else becomes DROPPED:section_key
-
 --TODO: asciidoc //source:line// comments like old pipadoc
 --TODO: integrate old pipadoc.txt documentation
 --PLANNED: not only pipadoc.conf but also pipadoc.sty templates, conf are local only configurations, .sty are global styles
