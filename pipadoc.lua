@@ -882,19 +882,20 @@ function process_file(file)
     LINE = LINE+1
     trace("input:", line)
 
-    if descriptor.preprocessors then
-      for i=1,#descriptor.preprocessors do
-        local lineold = line
-        line = descriptor.preprocessors[i](line)
-        if to_text (line) and line ~= lineold then
-          trace("preprocessed:", line)
-        end
-      end
-    end
-
     local comment = comment_select(line, descriptor)
 
     if comment then
+      if descriptor.preprocessors then
+        for i=1,#descriptor.preprocessors do
+          local lineold = line
+          line = descriptor.preprocessors[i](line)
+          --PLANNED: preprocessors may expand to multiple lines?
+          if to_text (line) and line ~= lineold then
+            trace("preprocessed:", line)
+          end
+        end
+      end
+
       process_line(line, comment, descriptor.preprocessors)
     end
   end
