@@ -51,7 +51,7 @@ local opt_config = "pipadoc_config.lua"
 --PLANNED: log to PIPADOC_LOG section, later hooked in here
 local printerr_hook
 
-function printerr(...)
+local function printerr(...)
   local line = ""
 
   for i,v in ipairs {...} do
@@ -68,7 +68,7 @@ function printerr(...)
   end
 end
 
-function printlvl(lvl,...)
+local function printlvl(lvl,...)
   if lvl <= opt_verbose then
     printerr(FILE..":"..(LINE ~= 0 and LINE..":" or ""), ...)
   end
@@ -126,21 +126,13 @@ function request(name) --: try to load optional modules
   --:    wraps lua 'require' in a pcall so that failure to load a module results in 'nil' rather than a error
   local ok,handle = pcall(require, name)
   if ok then
-    if handle._VERSION then
-      dbg("loaded:", name, handle._VERSION)
-    end
+    dbg("loaded:", name, handle._VERSION)
     return handle
   else
     warn("Can't load module:", name)
     return nil
   end
 end
-
-request "luarocks.loader"
---PLANNED: for pattern matching etc
---lfs = request "lfs"
---posix = request "posix"
-
 
 
 --api:
@@ -181,14 +173,19 @@ end
 
 function to_table(v) --: if 'v' is not a table then return \\\{v\\\}
   if type(v) ~= 'table' then
-    v = {v}
+    return {v}
+  else
+    return v
   end
-  return v
 end
 
 function to_text(v) --: convert 'v' to a string, returns 'nil' when that string would be empty
-  v = v and tostring (v)
-  return v ~= "" and v or nil
+  v = tostring (v)
+  if v ~= "" then
+    return v
+  else
+    return nil
+  end
 end
 
 
@@ -652,6 +649,10 @@ local ARG
 
 function setup()
   parse_args(arg)
+  request "luarocks.loader"
+  --PLANNED: for pattern matching etc
+  --lfs = request "lfs"
+  --posix = request "posix"
 
   do
     local date = os.date ("*t")
@@ -671,7 +672,14 @@ function setup()
     --PLANNED: read style file like a config, lower priority, different paths (./ /etc/ ~/ ...)
     if opt_config then
       dbg ("load config:", opt_config)
-      loadfile (opt_config)()
+      local config = loadfile(opt_config)
+
+      if config then
+        config ()
+      else
+        warn ("Can't load config file:", opt_config)
+      end
+
     end
 
     --PLANNED: write preprocessor macro to expand filetype_register() 
