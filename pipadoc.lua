@@ -31,8 +31,8 @@ CONTEXT = {} --TODO: whats needed to make CONTEXT and DOCVARS local
 
 DOCVARS = {
   --DOCVARS:nl `NL`::
-  --DOCVARS:nl   The linebreak character sequence, usually '\n' on unix systems but
-  --DOCVARS:nl   can be changed with a commandline option
+  --DOCVARS:nl   The line-break character sequence, usually '\n' on unix systems but
+  --DOCVARS:nl   can be changed with a command-line option
   --FIXME: define in config? needs escapes
   NL = "\n",
 
@@ -80,7 +80,7 @@ end
 --: Logging Progress and Errors
 --: ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 --:
---: There are few function to log progress and report errors. All this functions take a
+--: Here are few functions to log progress and report errors. All this functions take a
 --: variable argument list. Any Argument passed to them will be converted to a string and printed
 --: to stderr when the verbosity level is high enough.
 --:
@@ -110,16 +110,17 @@ end
 
 --api:
 --:
---: Optional Lua Modules
---: ~~~~~~~~~~~~~~~~~~~~
+--: Dependencies
+--: ~~~~~~~~~~~~
 --:
---: 'pipadoc' does not depend on any nonstandard Lua libraries, because they may not be installed on the target
---: system. But some modules can be loaded optionally to augment its behavior and provide extra features.
---: Plugin-writers should try to adhere to this practice if possible and use the 'request' function instead the
---: Lua 'require'.
+--: 'pipadoc' does not depend on any external Lua libraries. The intention is to, by default, make
+--: documentation build able on minimal target systems. Nevertheless Modules can be loaded optionally to augment
+--: pipadocs behavior and provide extra features. Plugin-writers should try to adhere to this practice
+--: if possible and use the 'request' function instead the Lua 'require'. Falling back to simpler but usable
+--: functionality when some library is not available.
 --:
---: When luarocks is installed, then the 'luarocks.loader' is loaded by default to make any module installed by
---: luarocks available.
+--: When luarocks is installed, then the 'luarocks.loader' is loaded to make any module installed by luarocks
+--: available.
 --:
 function request(name) --: try to load optional modules
   --:    wraps lua 'require' in a pcall so that failure to load a module results in 'nil' rather than a error
@@ -144,12 +145,13 @@ request "luarocks.loader"
 
 --api:
 --:
---: Typechecks
+--: Type checks
 --: ~~~~~~~~~~
 --:
---: Some wrapers around 'assert' to check externally supplied data. On success 'var' will be returned
+--: Wrappers around 'assert' to check externally supplied data. On success 'var' will be returned
 --: otherwise an assertion error is raised.
 --:
+
 function assert_type(var, expected) --: checks that the 'var' is of 'type'
   assert(type(var) == expected, "type error: "..expected.." expected, got "..type(var))
   return var
@@ -170,6 +172,12 @@ function assert_notnil(var) --: checks that 'var' is not 'nil'
   return var
 end
 
+--:
+--: Type conversions
+--: ~~~~~~~~~~~~~~~~
+--:
+--: Functions which do specific type conversions.
+--:
 
 function to_table(v) --: if 'v' is not a table then return \\\{v\\\}
   if type(v) ~= 'table' then
@@ -196,10 +204,13 @@ __BRACECLOSE__ = "}"
 --: String evaluation
 --: ~~~~~~~~~~~~~~~~~
 --:
---: Documentation text is passed to the streval() function which recursively evaluates lua expression inside
+--: Documentation-text is passed to the streval() function which recursively evaluates lua expression inside
 --: curly braces. This can be used to retrieve the value of variables, call or define functions. when the
 --: text inside curly braces can not be evaluated it is retained verbatim. One can escape curly braces
---: the backslash and the backtick itself by prepending them with a backslash or backtick.
+--: with a backslash or a back-tick. Backslash and backtick can be escaped by them self.
+--:
+--: WARNING: String evaluation will execute lua code which is embedded in the documentation comments. This
+--:          may lead to unsafe operation when the source is not trusted.
 --PLANNED: safe/unsafe mode for disabling string evaluation, function calls only, not vars expansion
 --:
 function streval (str) --: evaluate lua code inside curly braces in str
@@ -249,24 +260,25 @@ end
 
 --sections:
 --: Text in pipadoc is appended to named 'sections'. Sections are later brought into the desired order in a 'toplevel'
---: section. Additionally instead just appending text to a named section, text can be appended under some
---: alphanumeric key under that section. This enables later sorting for indexes and glossaries.
+--: section. Text can be associated with some alphanumeric key under that section. This enables later sorting for indexes
+--: and glossaries.
 --:
---: Sections can span a block of lines (until another section is set) or one-line setting a section only for the current
---: comment line. Blocks are selected when the pipadoc comment defines a section and maybe a key but the rest of the
---: is empty, every subsequent line which does not define a new section block is then appended to the current block.
+--: Sections can be one line or span a block of lines.
 --:
---: One-Line sections are selected when a section and maybe a key are followed by some documentation text.
+--: One line sections are defined when a section and maybe a key is followed by documentation text.
+--: Block sections start with the section definition but no documentation text on the same line. A Block stays active
+--: until the next block section definition. One line Doctext can be interleaved into Blocks.
 --:
---: When no section is set in a file, then the block section name defaults to the files name up, but excluding to the first dot.
+--: When no section is set in a file, then the block section name defaults to the files name up, but excluding to the
+--: first dot.
 --:
---: Pipadoc needs a receipe how to assemble all sections togehter. This is done in a 'toplevel' section which defaults to the
+--: Pipadoc needs a recipe how to assemble all sections together. This is done in a 'toplevel' section which defaults to the
 --: name 'MAIN'.
 --:
---: .An example document (assume the name example.sh)
+--: .An example document (example.sh)
 --: ----
 --: #!/bin/sh
---: #: here the default section is 'example', derrived from 'example.sh'
+--: #: here the default section is 'example', derived from 'example.sh'
 --: #oneline:o this is appended to the section 'oneline' under key 'o'
 --: #: back to the 'example' section
 --: #newname:
@@ -288,7 +300,7 @@ end
 --: first the 'newname'
 --: this starts a new section block named 'newname'
 --: then 'example'
---: here the default section is 'example', derrived from 'example.sh'
+--: here the default section is 'example', derived from 'example.sh'
 --: back to the 'example' section
 --: and finally 'oneline' alphabetically sorted by keys
 --: this is appended to the section 'oneline' under key 'a'
@@ -314,6 +326,7 @@ function section_append(section, key, context) --: Append data to the given sect
   --:     the subkey for sorting within that section. 'nil' for appending text to normal sections
   maybe_type(key, "string")
   --:   context:::
+  --:     The source line broken down into its components and additional pipadoc metadata
   --TODO: DOCME document 'context' somewhere else
   maybe_type(context, "table")
   --:
@@ -357,12 +370,12 @@ end
 
 
 --filetypes:
---: Pipadoc needs to know about the syntax of line comments of the files it is reading. For this one can
---: register patterns to be matched against the filename together with a list of line comment characters.
+--: Pipadoc needs to know about the syntax of line comments of the files it is reading. For this patterns are
+--: registered to be matched against the file name together with a list of line comment characters.
 --:
---: Pipadoc includes definitions for some common filetypes already. For languages which support block comments
---: the opening (but not the closing) commenting characters are registered as well. This allows for example to
---: define section blocks right away. But using the comment closing sequence right on the line will clobber the
+--: There are many definitions included for common filetypes already. For languages which support block comments
+--: the opening (but not the closing) commenting characters are registered as well. This allows to define section
+--: blocks right away. But using the comment closing sequence right on the line will clobber the
 --: output, just don't do that!
 --:
 --: .Example in C
@@ -379,7 +392,7 @@ end
 --: ----
 --:
 --: A special case is that when a line comment is defined as an empty string ("") then every line of a file is
---: considered as documentation but no special operations apply. This is used for parsing plaintext documentation
+--: considered as documentation but no special operations apply. This is used for plaintext documentation
 --: files. Which also uses the "PIPADOC:" keyword to enable special operations within text files.
 local filetypes = {}
 
@@ -391,7 +404,7 @@ local filetypes = {}
 --:
 function filetype_register(name, filep, linecommentseqs) --: Register a new filetype
   --:     name:::
-  --:       name of the language
+  --:       mnemonic name of the language
   --:     filep:::
   --:       a Lua pattern or list of patterns matching filename
   --:     linecommentseqs:::
@@ -484,9 +497,9 @@ local function preprocessors_attach ()
 end
 
 --op:
---: Operators define the core functionality of pipadoc. They are mandatory in the pipadoc syntax
---: to define a pipadoc comment line. It is possible (but rarely needed) to define additional
---: operators. Operators must be a single punctuation character
+--: Operators define how documentation comments are evaluated, they are the core functionality of pipadoc and mandatory in the pipadoc
+--: syntax to define a pipadoc comment line. It is possible (but rarely needed) to define additional
+--: operators. Operators must be a single punctuation character.
 local operators = {}
 
 
@@ -496,7 +509,7 @@ function operator_register(char, func) --: Register a new operator
   --:   char:::
   --:     single punctuation character defining this operator
   --:   func:::
-  --:     a function which receives a table of the 'context' parsed from the pipadoc commentline
+  --:     a function which receives a table of the 'context' parsed from the pipadoc comment line
   --:
   --: Operators drive the main functionality, like invoking the processors and generating the output.
   --:
@@ -523,7 +536,7 @@ local options = {
   ["-v"] = "--verbose",
   ["--verbose"] = function () opt_verbose = opt_verbose+1 end,
 
-  "    -q, --quiet                             supresses any messages", --:  {STRING}
+  "    -q, --quiet                             suppresses any messages", --:  {STRING}
   ["-q"] = "--quiet",
   ["--quiet"] = function () opt_verbose = 0 end,
 
@@ -556,7 +569,7 @@ local options = {
     return 1
   end,
 
-  "    -c, --config <name>                     selects a configfile [pipadoc.conf]", --:  {STRING}
+  "    -c, --config <name>                     selects a config file [pipadoc_config.lua]", --:  {STRING}
   ["-c"] = "--config",
   ["--config"] = function (arg, i)
     assert(type(arg[i+1]))
@@ -597,7 +610,7 @@ local options = {
   --PLANNED: some flags get defaults from the config file
 
   "", --:  {STRING}
-  "  inputs are filenames or a '-' which indicates standard input", --:  {STRING}
+  "  inputs are file names or a '-' which indicates standard input", --:  {STRING}
 }
 
 function usage()
@@ -827,12 +840,12 @@ function process_line (line, comment)
   context.LANGUAGE = DOCVARS.LANGUAGE
 
   --FIXME: doc section for context
-  --DOCVARS:file `FILE`::
-  --DOCVARS:file   The file or section name currently processed or some special annotation
-  --DOCVARS:file   in angle brakets (eg '<startup>') on other processing phases
-  --DOCVARS:line `LINE`::
-  --DOCVARS:line   Current line number of input or section, or indexing key
-  --DOCVARS:line   Lines start at 1
+  --context:file `FILE`::
+  --context:file   The file or section name currently processed or some special annotation
+  --context:file   in angle brackets (eg '<startup>') on other processing phases
+  --context:line `LINE`::
+  --context:line   Current line number of input or section, or indexing key
+  --context:line   Lines start at 1
   context.FILE, context.LINE = FILE, LINE
 
   if context.PRE then
@@ -876,8 +889,8 @@ function process_file(file)
   end
 
   --FIXME: create context
-  --DOCVARS:section `SECTION`::
-  --DOCVARS:section   stores the current section name
+  --context:section `SECTION`::
+  --context:section   stores the current section name
   SECTION = FILE:match("[^./]+%f[.%z]")
   LINE = 0
   dbg("section:", SECTION)
@@ -1073,7 +1086,7 @@ process_inputs()
 FILE = "<output>"
 LINE = 0
 
--- initialize orphans / doublettes checker
+-- initialize orphans / doublets checker
 for k,_ in pairs(sections) do
   if #sections[k] > 0 then
     sections_usecnt[k] = 0
@@ -1087,7 +1100,7 @@ end
 io.write(generate_output(opt_toplevel))
 
 LINE = 0
--- orphans / doublettes
+-- orphans / doublets
 for k,v in pairs(sections_usecnt) do
   if v == 0 then
     warn("section unused:", k)
@@ -1127,40 +1140,40 @@ end
 --:
 --: Pipadoc is programming language and documentation system agnostic, all it requires is that
 --: the programming language has some form of comments starting with a defined character sequence
---: and spaning to the end of the source line. Moreover documentation parts can be written in plain text
+--: and spanning to the end of the source line. Moreover documentation parts can be written in plain text
 --: files aside from the sources.
 --:
 --:
 --: History
 --: -------
 --:
---: This 'pipadoc' follows an earlier implementation with a slightly different (incompatible) syntax
---: and less features which was implemented in AWK. Updating to the new syntax should be straightforward
---: and is suggested for any projects using pipadoc.
+--: This 'pipadoc' implemented in Lua follows an earlier implementation with a slightly different
+--: (incompatible) syntax and less features which was implemented in AWK. Updating to the new syntax
+--: should be straightforward and is suggested for any projects using pipadoc.
 --:
 --:
 --: Getting the Source
 --: ------------------
 --:
---: Pipadoc is managed the git revision contol system. You can clone the repository with
+--: Pipadoc is managed the git revision control system. You can clone the repository with
 --:
 --:  git clone --depth 1 git://git.pipapo.org/pipadoc
 --:
---: The 'master' branch will stay stable and developement will be done on the 'devel' branch.
+--: The 'master' branch will stay stable and development will be done on the 'devel' branch.
 --:
 --:
 --: Installation
 --: ------------
 --:
 --: Pipadoc is single lua source file `pipadoc.lua` which is portable among most Lua versions
---: (PUC Lua 5.1, 5.2, 5.3 and Luajit). It ships with a `pipadoc.install` shell script which figures a
+--: (PUC Lua 5.1, 5.2, 5.3, Luajit, Ravi). It ships with a `pipadoc.install` shell script which figures a
 --: suitable Lua version out and installs `pipadoc.lua` as `pipadoc` in a given directory or the current
 --: directory by default.
 --:
 --: There are different ways how this can be used in a project:
 --:
---: - One can rely on a pipadoc installed in $PATH and just call that from the build toolchain
---: - When a installed Lua version is known from the build toolchain one can include the `pipadoc.lua`
+--: - One can rely on a pipadoc installed in $PATH and just call that from the build tool chain
+--: - When a installed Lua version is known from the build tool chain one can include the `pipadoc.lua`
 --:   into the project and call it with the known Lua interpreter.
 --: - One can ship the `pipadoc.lua` and `pipadoc.install` and do a local install in the build
 --:   directory and use this pipadoc thereafter
@@ -1177,7 +1190,7 @@ end
 --: Basic concepts
 --: --------------
 --:
---: Pipadoc is controlled by special line comments. This is choosen because the most common denominator
+--: Pipadoc is controlled by special line comments. This is chosen because the most common denominator
 --: between almost all programming languages is that they have some form of 'line comment', that is some
 --: character sequence which defines the rest of the line as comment.
 --:
@@ -1185,24 +1198,25 @@ end
 --: character sequence followed directly (without any extra space character) by some definition (see below)
 --: becomes a pipadoc comment.
 --:
---: Pipadoc operates in some phases. First all given files are read and parsed and finally the output is
+--: Pipadoc processes the given files in phases. First all given files are read and parsed and finally the output is
 --: generated by bringing all accumulated documentation parts together into proper order.
+--TODO: rephrase above paragraph
 --:
 --: [[syntax]]
 --: Pipadoc Syntax
 --: ~~~~~~~~~~~~~~
 --:
---: Any 'linecomment' of the programming language directly (without spaces) followed by a optional
+--: Any 'line-comment' of the programming language directly (without spaces) followed by a optional
 --: alphanumeric section name, followed by an operator, followed by an optional argument and then the
---: documentaton text. Only lines qualitfy this syntax are processed as pipapdoc documentation.
+--: documentation text. Only lines qualify this syntax are processed as pipadoc documentation.
 --:
 --: The formal syntax looks like:
 --:
---:  pipadoc = [source] <linecomment> [section] <operator> [arg] [..space.. [documentation_text]]
+--:  pipadoc = [source] <line comment> [section] <operator> [arg] [..space.. [documentation_text]]
 --:
---:  source = ..any sourcecode text..
+--:  source = ..any source code text..
 --:
---:  linecomment = ..the linecomment sequence choosen by the filetype..
+--:  linecomment = ..the linecomment sequence chosen by the filetype..
 --:
 --:  section = ..alphanumeric text including underscore and dots, but without spaces..
 --:
@@ -1210,10 +1224,10 @@ end
 --:
 --:  arg = ..alphanumeric text including underscore and dots, but without spaces..
 --:
---:  documentation_text = ..rest of the line, freeform text..
+--:  documentation_text = ..rest of the line, free form text..
 --:
 --:
---: Documentation lines are proccessed according to their operator.
+--: Documentation lines are processed according to their operator.
 --:
 --TODO: DOCME oneline vs block, default section name, MAIN section
 --TODO: note that literal strings are not special
@@ -1221,9 +1235,15 @@ end
 --: Order of operations
 --: ~~~~~~~~~~~~~~~~~~~
 --:
---: Pipadoc parse each file given on the commandline in order. Only lines which contain
---: pipadoc comments (see <<syntax>> above) are used in any further steps.
---: Reading files is done on a line by line base.
+--: Pipadoc reads all files line by line and processes them the following order:
+--:
+--: . Preprocessing
+--:   One can register preprocessors for each filetype. This preprocessors are
+--:   lua functions who may alter the entire content of a line before any further processing
+--:
+--: . Parsing
+--:   If a line contains a pipadoc comment (see <<syntax>> above) it will be parsed into
+--:   its components and processed and stored for later generation
 --:
 --: After all files are read the output is generated by starting assembling the toplevel section
 --: ('MAIN' if not otherwise defined).
@@ -1265,8 +1285,8 @@ end
 --: The 'DOCVARS' Lua table holds key/value pairs of variables with the global state
 --: of pipadoc. These can be used by the core and plugins in various ways. Debugging
 --: for example prints the FILE:LINE processed and there is the 'varsubst' processor
---: to substitute them in the documentation text. The user can set arbitary DOCVARS
---: from commandline.
+--: to substitute them in the documentation text. The user can set arbitrary DOCVARS
+--: from command line.
 --TODO: optarg
 --:
 --: Predefined DOCVARS
@@ -1278,7 +1298,7 @@ end
 --: Programming API for extensions
 --: ------------------------------
 --:
---: Some pipadoc lua functions are documented here to be used from plugins.
+--: Lua functions specific to pipadoc which can be used by plugins.
 --:
 --=api
 --:
@@ -1292,7 +1312,7 @@ end
 --: lua pipadoc.lua -m asciidoc -d pipadoc.lua >pipadoc.txt
 --: ----
 --:
---: The resulting `pipadoc.txt` can then be processed with the asciidoc toolchain to produce
+--: The resulting `pipadoc.txt` can then be processed with the asciidoc tool chain to produce
 --: distribution formats:
 --:
 --: -----
@@ -1316,8 +1336,8 @@ end
 --: The License (GPL) only applies to pipadoc and any derivative work. The purpose of pipadoc
 --: is to extract documentation from other files, this does not imply that these source files
 --: from which the documentation is extracted need to be licensed under the GPL, neither does
---: this imply that the extracted documentaton need to be licensed under the GPL.
---: Using pipadoc for propietary software poses no problems about the Licenensing terms of
+--: this imply that the extracted documentation need to be licensed under the GPL.
+--: Using pipadoc for proprietary software poses no problems about the Licensing terms of
 --: this software.
 --:
 --: The GPL applies when you distribute pipadoc itself, in original or modified form. Since
