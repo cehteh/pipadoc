@@ -544,7 +544,7 @@ local options = {
   ["--register"] = function (arg,i)
     assert(type(arg[i+3]))
     filetype_register(arg[i+1], arg[i+2], arg[i+3])
-    return 2
+    return 3
   end,
 
 
