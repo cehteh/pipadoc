@@ -44,7 +44,7 @@ local args_done = false
 local opt_verbose = 1
 local opt_nodefaults = false
 local opt_toplevel = "MAIN"
-local opt_inputs = {false}
+local opt_inputs = {}
 local opt_config = "pipadoc_config.lua"
 
 
@@ -523,6 +523,10 @@ function operator_pattern()
 end
 
 
+function add_inputfile(filename) --: Add a file to the processing list
+  assert_type(filename, "string")
+  opt_inputs[#opt_inputs+1] = filename
+end
 
 --usage:
 local options = {
@@ -627,6 +631,7 @@ function usage()
   os.exit(0)
 end
 
+
 function parse_args(arg)
   local i = 1
   while i <= #arg do
@@ -636,7 +641,7 @@ function parse_args(arg)
     end
 
     if not options[arg[i]] then
-      opt_inputs[#opt_inputs+1] = arg[i]
+      add_inputfile(arg[i])
     else
       local f = options[arg[i]]
       while options[f] do
@@ -946,11 +951,8 @@ function process_file(file)
 end
 
 function process_inputs()
-  for i=1,#opt_inputs do
-    if opt_inputs[i] ~= false then
-      --TODO: globing if no such file exists
+  for i in ipairs(opt_inputs) do
       process_file(opt_inputs[i])
-    end
   end
 end
 
