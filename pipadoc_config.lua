@@ -13,6 +13,13 @@ preprocessor_register ("^lua$",
                        end
 )
 
+-- for the testsuite
+preprocessor_register ("^test",
+                       function (str)
+                         return str:gsub("FOO", 'BAR')
+                       end
+)
+
 
 
 function git_blame (file, line)

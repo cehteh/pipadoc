@@ -26,7 +26,7 @@ for i in $test_lua_interpreters; do
     echo "checking $i"
     sh pipadoc.install -i "$i" -x "_test_$i" || continue
 
-    ./pipadoc_test_$i -r test '%.test$' '#' pipadoc.test >test_out_$i
+    ./pipadoc_test_$i -t TEST -r test '%.test$' '#' pipadoc.test pipadoc.lua >test_out_$i
 
     if cmp test_out_$i test_expected; then
             echo "SUCCESS: pipadoc_test_$i"
@@ -39,14 +39,63 @@ for i in $test_lua_interpreters; do
     rm "pipadoc_test_$i" 2>/dev/null
 done
 
+
 # tests
-#MAIN: Pipadoc Testsuite
-#MAIN:
+#TEST: Pipadoc Testsuite
+#TEST:
+#:
+#=oneline
+#:
+#@oneline
+#:
+##oneline
+#:
+#=block
+#:
+#@block
+#:
+##block
+#:
+#: FOO
 #:
 #: END
 
+#oneline: oneline test
+#oneline:b oneline w/ arg b
+#oneline:a oneline w/ arg a
+#oneline:2 oneline w/ arg 2
+#oneline:1 oneline w/ arg 1
+
+#block:
+#: block test
+#block:b
+#: block w/ arg b
+#block:a
+#: block w/ arg a
+#block:2
+#: block w/ arg 2
+#block:1
+#: block w/ arg 1
 
 # expected results
 #> Pipadoc Testsuite
+#>
+#> oneline test
+#>
+#> oneline w/ arg a
+#> oneline w/ arg b
+#>
+#> oneline w/ arg 1
+#> oneline w/ arg 2
+#>
+#> block test
+#>
+#> block w/ arg a
+#> block w/ arg b
+#>
+#> block w/ arg 1
+#> block w/ arg 2
+#>
+#> BAR
 #>
 #> END
