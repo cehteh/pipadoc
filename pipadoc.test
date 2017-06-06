@@ -58,6 +58,8 @@ done
 #:
 #: FOO
 #:
+#=streval
+#:
 #: END
 
 #oneline: oneline test
@@ -76,6 +78,13 @@ done
 #: block w/ arg 2
 #block:1
 #: block w/ arg 1
+
+#streval:
+#: {123}
+#: {"foo".."bar"}
+#: {123+{11+22}}
+#: {undefined}
+#: {"foo".."{"bar".."baz"}"}
 
 # expected results
 #> Pipadoc Testsuite
@@ -97,5 +106,11 @@ done
 #> block w/ arg 2
 #>
 #> BAR
+#>
+#> 123
+#> foobar
+#> 156
+#> {undefined}
+#> foobarbaz
 #>
 #> END

@@ -202,7 +202,7 @@ __BRACECLOSE__ = "}"
 --: ~~~~~~~~~~~~~~~~~
 --:
 --: Documentation-text is passed to the streval() function which recursively evaluates lua expression inside
---: curly braces. This can be used to retrieve the value of variables, call or define functions. when the
+--: curly braces. This can be used to retrieve the value of variables, call or define functions. When the
 --: text inside curly braces can not be evaluated it is retained verbatim. One can escape curly braces
 --: with a backslash or a back-tick. Backslash and backtick can be escaped by them self.
 --:
@@ -210,35 +210,45 @@ __BRACECLOSE__ = "}"
 --:          may lead to unsafe operation when the source is not trusted.
 --PLANNED: safe/unsafe mode for disabling string evaluation, function calls only, not vars expansion
 --:
-function streval (str) --: evaluate lua code inside curly braces in str
+
+-- for lua 5.1 compatibility
+local loadlua
+if _VERSION == "Lua 5.1" then
+  loadlua = loadstring
+else
+  loadlua = load
+end
+
+
+function streval (str) --: evaluate lua code inside curly braces in str.
   assert_type (str, "string")
 
   local function streval_intern (str)
     local ret= ""
 
-    for pre,braced in str:gmatch("([^{]*)(%b{})") do
-      braced=braced:sub(2,-2)
+    for pre,braced,post in str:gmatch("([^{]*)(%b{})([^{]*)") do
+      local recbraced=braced:sub(2,-2)
 
       if #braced > 0 then
-        braced = streval_intern(braced.."{}")
+        recbraced = streval_intern(recbraced)
         if #braced > 0 then
 
-          local success,result = pcall(load ("return ("..braced..")"))
+          local success,result = pcall(loadlua ("return ("..recbraced..")"))
 
           if success and result then
             braced = result or ""
           else
-            success,result = pcall(load (braced))
+            success,result = pcall(loadlua (recbraced))
             if success then
               braced = result or ""
             end
           end
         end
       end
-      ret = ret..pre..tostring(braced)
+      ret = ret..pre..tostring(braced)..post
     end
 
-    return ret
+    return ret == "" and str or ret
   end
 
   return streval_intern(str:gsub("[`\\]([{}\\])",
@@ -248,8 +258,9 @@ function streval (str) --: evaluate lua code inside curly braces in str
                                    ["{"] = "{__BRACEOPEN__}",
                                    ["}"] = "{__BRACECLOSE__}",
                                  }
-                                ).."{}")
+                                ))
 end
+
 
 local function pattern_escape (p)
   return (p:gsub("%W", "%%%1"))
