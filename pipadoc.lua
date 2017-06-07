@@ -544,64 +544,82 @@ local options = {
   "pipadoc [options...] [inputs..]",  --:  {STRING}
   "  options are:", --:  {STRING}
 
-  "    -v, --verbose                           increment verbosity level", --:  {STRING}
+  "    -v, --verbose", --:  {STRING}
+  "                        increment verbosity level", --:  {STRING}
   ["-v"] = "--verbose",
   ["--verbose"] = function () opt_verbose = opt_verbose+1 end,
+  "", --:  {STRING}
 
-  "    -q, --quiet                             suppresses any messages", --:  {STRING}
+  "    -q, --quiet", --:  {STRING}
+  "                        suppresses any messages", --:  {STRING}
   ["-q"] = "--quiet",
   ["--quiet"] = function () opt_verbose = 0 end,
+  "", --:  {STRING}
 
-  "    -d, --debug                             set verbosity to maximum", --:  {STRING}
+  "    -d, --debug", --:  {STRING}
+  "                        set verbosity to maximum", --:  {STRING}
   ["-d"] = "--debug",
   ["--debug"] = function () opt_verbose = 3 end,
+  "", --:  {STRING}
 
-  "    -h, --help                              show this help", --:  {STRING}
+  "    -h, --help", --:  {STRING}
+  "                        show this help", --:  {STRING}
   ["-h"] = "--help",
   ["--help"] = function ()
     usage()
   end,
+  "", --:  {STRING}
 
 
-  "    -r, --register <name> <file> <comment>  register a filetype pattern", --:  {STRING}
-  "                                            for files matching a file pattern", --:  {STRING}
+  "    -r, --register <name> <file> <comment>", --:  {STRING}
+  "                        register a filetype pattern", --:  {STRING}
+  "                        for files matching a file pattern", --:  {STRING}
   ["-r"] = "--register",
   ["--register"] = function (arg,i)
     assert(type(arg[i+3]))
     filetype_register(arg[i+1], arg[i+2], arg[i+3])
     return 3
   end,
+  "", --:  {STRING}
 
 
-  "    -t, --toplevel <name>                   sets 'name' as toplevel node [MAIN]", --:  {STRING}
+  "    -t, --toplevel <name>", --:  {STRING}
+  "                        sets 'name' as toplevel node [MAIN]", --:  {STRING}
   ["-t"] = "--toplevel",
   ["--toplevel"] = function (arg, i)
     assert(type(arg[i+1]))
     opt_toplevel = arg[i+1]
     return 1
   end,
+  "", --:  {STRING}
 
-  "    -c, --config <name>                     selects a config file [pipadoc_config.lua]", --:  {STRING}
+  "    -c, --config <name>", --:  {STRING}
+  "                        selects a config file [pipadoc_config.lua]", --:  {STRING}
   ["-c"] = "--config",
   ["--config"] = function (arg, i)
     assert(type(arg[i+1]))
     opt_config = arg[i+1]
     return 1
   end,
+  "", --:  {STRING}
 
 
-  "    --no-defaults                           disables default filetypes and processors", --:  {STRING}
+  "    --no-defaults", --:  {STRING}
+  "                        disables default filetypes and processors", --:  {STRING}
   ["--no-defaults"] = function () opt_nodefaults = true end,
+  "", --:  {STRING}
 
 
   --TODO: document where markup is used
-  "    -m, --markup <name>                     selects the markup engine for the output [text]", --:  {STRING}
+  "    -m, --markup <name>", --:  {STRING}
+  "                        selects the markup engine for the output [text]", --:  {STRING}
   ["-m"] = "--markup",
   ["--markup"] = function (arg, i)
     assert(type(arg[i+1]))
     DOCVARS.MARKUP = arg[i+1]
     return 1
   end,
+  "", --:  {STRING}
 
   -- intentionally undocumented option
   ["--make-doc"] = function (arg, i)
@@ -611,8 +629,9 @@ local options = {
     return 1
   end,
 
-  "    --                                      stops parsing the options and treats each", --:  {STRING}
-  "                                            following argument as input file", --:  {STRING}
+  "    --", --:  {STRING}
+  "                        stops parsing the options and treats each", --:  {STRING}
+  "                        following argument as input file", --:  {STRING}
   ["--"] = function () args_done=true end,
 
   --TODO: --alias match pattern --file-as match filename
@@ -1218,7 +1237,9 @@ end
 --: Usage
 --: -----
 --:
+--: ____
 --=usage
+--: ____
 --:
 --:
 --: Basic concepts
@@ -1246,6 +1267,7 @@ end
 --:
 --: The formal syntax looks like:
 --:
+--: ____
 --:  pipadoc = [source] <line comment> [section] <operator> [arg] [..space.. [documentation_text]]
 --:
 --:  source = ..any source code text..
@@ -1259,6 +1281,7 @@ end
 --:  arg = ..alphanumeric text including underscore and dots, but without spaces..
 --:
 --:  documentation_text = ..rest of the line, free form text..
+--: ____
 --:
 --:
 --: Documentation lines are processed according to their operator.
