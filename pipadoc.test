@@ -33,7 +33,7 @@ for i in $test_lua_interpreters; do
             rm "test_out_$i"
     else
             echo "FAIL: pipadoc_test_$i"
-            diff -u test_out_$i test_expected
+            diff -u test_expected test_out_$i
     fi
 
     rm "pipadoc_test_$i" 2>/dev/null
