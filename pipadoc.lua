@@ -189,13 +189,6 @@ function to_text(v) --: convert 'v' to a string, returns 'nil' when that string 
 end
 
 
--- need to be global, used for escaping in streval
---FIXME: how to make them local?
-__BACKSLASH__ = "\\"
-__BACKTICK__ = "`"
-__BRACEOPEN__ = "{"
-__BRACECLOSE__ = "}"
-
 --api:
 --:
 --: String evaluation
@@ -219,6 +212,12 @@ else
   loadlua = load
 end
 
+local escapes = {
+  __BACKSLASH__ = "\\",
+  __BACKTICK__ = "`",
+  __BRACEOPEN__ = "{",
+  __BRACECLOSE__ = "}",
+}
 
 function streval (str) --: evaluate lua code inside curly braces in str.
   assert_type (str, "string")
@@ -227,20 +226,25 @@ function streval (str) --: evaluate lua code inside curly braces in str.
     local ret= ""
 
     for pre,braced,post in str:gmatch("([^{]*)(%b{})([^{]*)") do
-      local recbraced=braced:sub(2,-2)
+      local inbraced=braced:sub(2,-2)
 
-      if #braced > 0 then
-        recbraced = streval_intern(recbraced)
-        if #braced > 0 then
+      if #inbraced > 0 then
 
-          local success,result = pcall(loadlua ("return ("..recbraced..")"))
+        if escapes[inbraced] then
+          braced=escapes[inbraced]
+        else
+          inbraced = streval_intern(inbraced)
+          if #inbraced > 0 then
 
-          if success and result then
-            braced = result or ""
-          else
-            success,result = pcall(loadlua (recbraced))
-            if success then
+            local success,result = pcall(loadlua ("return ("..inbraced..")"))
+
+            if success and result then
               braced = result or ""
+            else
+              success,result = pcall(loadlua (inbraced))
+              if success then
+                braced = result or ""
+              end
             end
           end
         end
