@@ -17,12 +17,13 @@
 --: along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 --PLANNED: include operator, add a file to the processing list
---FIXME: split on newlines
+--PLANNED: split on newlines
 --PLANNED: merge lines, '+' operator?
 --+        like this, note about indentation, no newline
 --PLANNED: escape pipadoc to avoid wrong parsed pipadoc comments: char* bad="//here:"; //here: the first isn't pipadoc perhaps {DROP}
 --PLANNED: true block comments --name(key makes every further line prepended
 --+        with --name:key util --) is seen, 'PIPADOC:' overrides apply
+--TODO: most functions local
 
 local LINE = 0
 local FILE = "<startup>"
@@ -49,6 +50,7 @@ local opt_config = "pipadoc_config.lua"
 
 
 --PLANNED: log to PIPADOC_LOG section, later hooked in here
+--TODO: pass context
 local printerr_hook
 
 local function printerr(...)
@@ -84,6 +86,7 @@ end
 --: variable argument list. Any Argument passed to them will be converted to a string and printed
 --: to stderr when the verbosity level is high enough.
 --:
+--TODO: local functions
 function warn(...) printlvl(1, ...) end  --: report a important but non fatal failure
 function info(...) printlvl(2, ...) end  --: report normal progress
 function dbg(...) printlvl(3, ...) end   --: show debugging information
@@ -171,6 +174,7 @@ end
 --: Functions which do specific type conversions.
 --:
 
+--FIXME: why double escaping in docstring? -> testcase
 function to_table(v) --: if 'v' is not a table then return \\\{v\\\}
   if type(v) ~= 'table' then
     return {v}
@@ -328,8 +332,9 @@ local sections_keys_usecnt = {}
 --: ~~~~~~~~
 --:
 
---PLANNED: maybe append the context       , DOCVARS.SECTION, DOCVARS.ARG, DOCVARS.OP,  DOCVARS.TEXT, DOCVARS.PRE
+--PLANNED: document doublete/orphan checker
 
+--FIXME: CONTEXT
 function section_append(section, key, context) --: Append data to the given section/key
   --:   section:::
   --:     name of the section to append to, must be a string
@@ -350,7 +355,6 @@ function section_append(section, key, context) --: Append data to the given sect
   else
     table.insert(sections[section], context)
   end
---FIXME: WRITE TEST FOR THIS trace(action.. ":", section.."["..(key and #key > 0 and key .."]["..#sections[section].keys[key] or #sections[section]).."]:", context.TEXT)
 end
 
 --api:
@@ -371,7 +375,7 @@ function section_get(section, key, index) --: query the value of the given secti
 
   if not key then
     index = index or #sections[section]
-    --FIXME: WRITE TEST FOR THIS   info("nokey", index, sections[section][index].action, sections[section][index].text)
+    info("nokey", index, sections[section][index].action, sections[section][index].text)
     return sections[section][index]
   else
     index = index or #sections[section].keys
@@ -514,7 +518,7 @@ end
 local operators = {}
 
 
---TODO: operator_register(char, read, generate) .. add generator function here too
+--PLANNED: operator_register(char, read, generate) .. add generator function here too
 --api:
 function operator_register(char, func) --: Register a new operator
   --:   char:::
@@ -614,7 +618,7 @@ local options = {
   "", --:  {STRING}
 
 
-  --TODO: document where markup is used
+  --TODO: document where markup is used (custom preprocessor/generators hooks?)
   "    -m, --markup <name>", --:  {STRING}
   "                        selects the markup engine for the output [text]", --:  {STRING}
   ["-m"] = "--markup",
@@ -645,7 +649,6 @@ local options = {
   --TODO: list-operators
   --TODO: list-sections
   --TODO: force filetype variant  foo.lua:.txt
-  --TODO: wordwrap
   --TODO: eat empty lines
   --TODO: add debug report (warnings/errors) to generated document PIPADOC_LOG section
   --TODO: line ending \n \r\n
@@ -730,7 +733,7 @@ function setup()
 
     end
 
-    --PLANNED: write preprocessor macro to expand filetype_register() 
+    --PLANNED: write preprocessor macro to expand filetype_register() as documentation
     --filetypes_builtin:scons * SCons
     filetype_register("scons", "^SConstuct$", "#")
 
@@ -1098,6 +1101,7 @@ local default_generators = {
 
 local sofar_rec={}
 
+--PLANNED: register generators possibly togehter with register operator
 function generate_output(which, generators)
   dbg("generate_output:", which)
   generators = generators or default_generators
@@ -1161,16 +1165,20 @@ LINE = 0
 -- orphans / doublets
 for k,v in pairs(sections_usecnt) do
   if v == 0 then
+    --TODO: document these warnings
     warn("section unused:", k)
   elseif v > 1 then
+    --TODO: document these warnings
     warn("section multiple times used:", k, v)
   end
 end
 
 for k,v in pairs(sections_keys_usecnt) do
   if v == 0 then
+    --TODO: document these warnings
     warn("section w/ keys unused:", k)
   elseif v > 1 then
+    --TODO: document these warnings
     warn("section w/ keys multiple times used:", k, v)
   end
 end
