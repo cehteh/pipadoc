@@ -20,25 +20,31 @@ test_lua_interpreters="luajit ravi lua5.3 lua-5.3 lua5.2 lua-5.2 lua lua-5.1 lua
 
 awk '/^#>/{sub("#> ?", ""); print }' pipadoc.test >'test_expected'
 
+error=0
 
 for i in $test_lua_interpreters; do
     echo
     echo "checking $i"
     sh pipadoc.install -i "$i" -x "_test_$i" || continue
 
-    ./pipadoc_test_$i -t TEST -r test '%.test$' '#' pipadoc.test pipadoc.lua >test_out_$i
+    echo "./pipadoc_test_$i -t TEST -r test '%.test$' '#' pipadoc.test pipadoc.lua"
+    if ./pipadoc_test_$i -t TEST -r test '%.test$' '#' pipadoc.test pipadoc.lua >test_out_$i; then
 
-    if cmp test_out_$i test_expected; then
-            echo "SUCCESS: pipadoc_test_$i"
-            rm "test_out_$i"
+            if cmp test_out_$i test_expected; then
+                    echo "SUCCESS: pipadoc_test_$i"
+                    rm "test_out_$i"
+                    rm "pipadoc_test_$i" 2>/dev/null
+            else
+                echo "FAIL: pipadoc_test_$i"
+                diff -u test_expected test_out_$i
+                error=$((error + 1))
+            fi
     else
-            echo "FAIL: pipadoc_test_$i"
-            diff -u test_expected test_out_$i
+        error=$((error + 1))
     fi
-
-    rm "pipadoc_test_$i" 2>/dev/null
 done
 
+return $error
 
 # tests
 #TEST: Pipadoc Testsuite
@@ -126,3 +132,6 @@ done
 #> {"foo".."{"bar".."baz"}"}
 #>
 #> END
+
+
+#TODO: test expected stderr
