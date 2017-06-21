@@ -240,6 +240,7 @@ function streval (str) --: evaluate lua code inside curly braces in str.
           inbraced = streval_intern(inbraced)
           if #inbraced > 0 then
 
+            --PLANNED: execute only when safe
             local success,result = pcall(loadlua ("return ("..inbraced..")"))
 
             if success and result then
