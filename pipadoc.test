@@ -64,7 +64,7 @@ return $error
 #:
 #@argonly
 #:
-#: FOO
+#: TESTFOO
 #:
 #=streval
 #:
@@ -122,7 +122,7 @@ return $error
 #> 1. arg oneline
 #> 2. arg block
 #>
-#> BAR
+#> TESTBAR
 #>
 #> 123
 #> foobar

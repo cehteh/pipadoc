@@ -16,13 +16,18 @@ preprocessor_register ("^lua$",
 -- for the testsuite
 preprocessor_register ("^test",
                        function (str)
-                         return str:gsub("FOO", 'BAR')
+                         local ret,num = str:gsub("TESTFOO", 'TESTBAR')
+                         if num > 0 then
+                           warn("Test-Substitute TESTFOO with TESTBAR")
+                         end
+                         return ret
                        end
 )
 
 
 
 function git_blame (file, line)
+  dbg("blame",file, line)
   local result = {}
   local git = io.popen("git blame '"..file.."' -L "..tostring(line)..",+1 -p 2>/dev/null")
 
