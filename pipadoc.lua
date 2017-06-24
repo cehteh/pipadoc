@@ -346,8 +346,6 @@ local sections_keys_usecnt = {}
 --: ~~~~~~~~
 --:
 
---PLANNED: document doublete/orphan checker
-
 function section_append(section, key, context) --: Append data to the given section/key
   --:   section:::
   --:     name of the section to append to, must be a string
@@ -520,6 +518,7 @@ function operator_register(char, func) --: Register a new operator
   operators[char] = assert_type(func, 'function')
 end
 
+--FIXME: unused, use it!
 function operator_pattern()
   local pattern=""
   for k in pairs(operators) do
@@ -980,6 +979,7 @@ local function process_file(file)
 
     local comment = comment_select(line, descriptor)
 
+    --PLANNED: move preprocessing into process_line
     if comment then
       if descriptor.preprocessors then
         for i=1,#descriptor.preprocessors do
@@ -1156,6 +1156,9 @@ end
 setup()
 process_inputs()
 
+--PLANNED: document doublete/orphan checker
+--PLANNED: refactor doublete/orphan into function
+
 -- initialize orphans / doublets checker
 for k,_ in pairs(sections) do
   if #sections[k] > 0 then
@@ -1180,11 +1183,9 @@ local doublette = {
 
 for k,v in pairs(sections_usecnt) do
   if v == 0 then
-    --TODO: document these warnings
     CONTEXT = orphan
     warn("section unused:", k)
   elseif v > 1 then
-    --TODO: document these warnings
     CONTEXT = doublette
     warn("section multiple times used:", k, v)
   end
@@ -1193,11 +1194,9 @@ end
 
 for k,v in pairs(sections_keys_usecnt) do
   if v == 0 then
-    --TODO: document these warnings
     CONTEXT = orphan
     warn("section w/ keys unused:", k)
   elseif v > 1 then
-    --TODO: document these warnings
     CONTEXT = doublette
     warn("section w/ keys multiple times used:", k, v)
   end
@@ -1498,7 +1497,6 @@ end
 --TODO: CONFIG:PRE
 --TODO: CONFIG:POST
 --TODO: CONFIG:GENERATE
---PLANNED: git blame support for issues, include date/committer reference
 
 --- Local Variables:
 --- mode: lua

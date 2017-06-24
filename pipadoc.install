@@ -48,6 +48,7 @@ lua_interpreters="luajit ravi lua5.3 lua-5.3 lua5.2 lua-5.2 lua lua-5.1 lua5.1"
 #: 'dependencies' list all libraries which are required for the installed program
 dependencies=""
 #:
+#PLANNED: use luarocks for installing dependencies
 
 #: The name of the programm to be installed is guessed from this install script name
 name="${0%.install}"; name="${name##*/}"
