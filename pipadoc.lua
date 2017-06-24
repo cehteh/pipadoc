@@ -26,8 +26,15 @@
 --TODO: most functions local
 
 
---FIXME: DOCME
+
 CONTEXT = {
+  --context:file `FILE`::
+  --context:file   The file or section name currently processed or some special annotation
+  --context:file   in angle brackets (eg '<startup>') on other processing phases
+  --context:line `LINE`::
+  --context:line   Current line number of input or section, or indexing key
+  --context:line   Lines start at 1
+
   FILE = "<startup>"
 }
 
@@ -35,10 +42,12 @@ DOCVARS = {
   --DOCVARS:nl `NL`::
   --DOCVARS:nl   The line-break character sequence, usually '\n' on unix systems but
   --DOCVARS:nl   can be changed with a command-line option
-  --FIXME: define in config? needs escapes
   NL = "\n",
 
-  -- defaults
+  --DOCVARS:markup `MARKUP`::
+  --DOCVARS:markup   The markup syntax (--markup option). This information is not
+  --DOCVARS:markup   used by pipadoc itself but preprocessors and custom extensions
+  --DOCVARS:markup   may use it.
   MARKUP = "text",
 }
 
@@ -51,7 +60,6 @@ local opt_config = "pipadoc_config.lua"
 
 
 --PLANNED: log to PIPADOC_LOG section, later hooked in here
---TODO: pass context
 local printerr_hook
 
 local function printerr(...)
@@ -204,7 +212,10 @@ end
 --: text inside curly braces can not be evaluated it is retained verbatim. One can escape curly braces
 --: with a backslash or a back-tick. Backslash and backtick can be escaped by them self.
 --:
---: WARNING: String evaluation will execute lua code which is embedded in the documentation comments. This
+--: 'streval' tries first to do simple variable substitutions from the `CONTEXT` and `DOCVARS` tables. This
+--: is always a safe operation and CONTEXT/DOCVARS does not need to be qualified.
+--:
+--: WARNING: String evaluation may execute lua code which is embedded in the documentation comments. This
 --:          may lead to unsafe operation when the source is not trusted.
 --PLANNED: safe/unsafe mode for disabling string evaluation, function calls only, not vars expansion
 --:
@@ -349,7 +360,6 @@ function section_append(section, key, context) --: Append data to the given sect
   maybe_type(key, "string")
   --:   context:::
   --:     The source line broken down into its components and additional pipadoc metadata
-  --TODO: DOCME document 'context' somewhere else
   maybe_type(context, "table")
   --:
   trace("append:", section, key, context)
@@ -899,6 +909,22 @@ function process_line (line, comment, filecontext)
   }
   CONTEXT=context
 
+  --context:
+  --:pre `PRE`::
+  --:pre   Contains the sourcecode in before the linecomment.
+  --:pre   To be used by preprocessors to gather information.
+  --:comment `COMMENT`::
+  --:comment   Character sequence which was used as line comment.
+  --:section `SECTION`::
+  --:section   Section where the documentation should appear.
+  --:op `OP`::
+  --:op   Single punctuation Operator defining how to process this line.
+  --:arg `ARG`::
+  --:arg   Optional argument to the operator. This can be the sort key
+  --:arg   (alphabetic or numeric) or another section name for pasting.
+  --:text `TEXT`::
+  --:text   The actual Documentation Text.
+
   -- special case for plaintext files
   if comment == "" then
     context.PRE, context.COMMENT, context.SECTION, context.OP, context.ARG, context.TEXT =
@@ -912,14 +938,6 @@ function process_line (line, comment, filecontext)
     context.SECTION = to_text(context.SECTION)
     context.ARG = to_text(context.ARG)
   end
-
-  --FIXME: doc section for context
-  --context:file `FILE`::
-  --context:file   The file or section name currently processed or some special annotation
-  --context:file   in angle brackets (eg '<startup>') on other processing phases
-  --context:line `LINE`::
-  --context:line   Current line number of input or section, or indexing key
-  --context:line   Lines start at 1
 
   if context.PRE then
     trace("pre:", context.PRE, "section:", context.SECTION, "op:", context.OP, "arg:", context.ARG, "text:", context.TEXT)
@@ -1385,6 +1403,23 @@ end
 --:
 --@DOCVARS
 --:
+--: [[CONTEXT]]
+--: The Context
+--: -----------
+--:
+--: The current state and parsed information is stored in 'context' tables.
+--: There is on global +CONTEXT+ variable which always references the current
+--: context. In some execution phases this may be a partial/fake context which
+--: is only instantiated with necessary information for debugging/logging.
+--: Usually the +FILE+ member is then put into angle brakets.
+--:
+--: CONTEXT members
+--: ~~~~~~~~~~~~~~~
+--:
+--: The following members are used in 'contexts'. `FILE` is always set to something
+--: meaningful. The other members are optional.
+--:
+--@context
 --:
 --: Programming API for extensions
 --: ------------------------------
