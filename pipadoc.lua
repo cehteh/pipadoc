@@ -362,7 +362,7 @@ function section_append(section, key, context) --: Append data to the given sect
   --:     The source line broken down into its components and additional pipadoc metadata
   assert_type(context, "table")
   --:
-  trace("append:", section, key, context)
+  trace("append:", section, key, context.TEXT)
   sections[section] = sections[section] or {keys = {}}
   if key and #key > 0 then
     sections[section].keys[key] = sections[section].keys[key] or {}
@@ -545,7 +545,10 @@ local options = {
   "    -v, --verbose", --:  {STRING}
   "                        increment verbosity level", --:  {STRING}
   ["-v"] = "--verbose",
-  ["--verbose"] = function () opt_verbose = opt_verbose+1 end,
+  ["--verbose"] = function ()
+    opt_verbose = opt_verbose+1
+    dbg("verbose:", opt_verbose)
+  end,
   "", --:  {STRING}
 
   "    -q, --quiet", --:  {STRING}
@@ -557,7 +560,10 @@ local options = {
   "    -d, --debug", --:  {STRING}
   "                        set verbosity to maximum", --:  {STRING}
   ["-d"] = "--debug",
-  ["--debug"] = function () opt_verbose = 3 end,
+  ["--debug"] = function ()
+    opt_verbose = 3
+    dbg("verbose:", opt_verbose)
+  end,
   "", --:  {STRING}
 
   "    -h, --help", --:  {STRING}
@@ -587,6 +593,7 @@ local options = {
   ["--toplevel"] = function (arg, i)
     assert(type(arg[i+1]))
     opt_toplevel = arg[i+1]
+    dbg("toplevel:", opt_toplevel)
     return 1
   end,
   "", --:  {STRING}
@@ -597,6 +604,7 @@ local options = {
   ["--config"] = function (arg, i)
     assert(type(arg[i+1]))
     opt_config = arg[i+1]
+    dbg("config:", opt_config)
     return 1
   end,
   "", --:  {STRING}
@@ -604,7 +612,10 @@ local options = {
 
   "    --no-defaults", --:  {STRING}
   "                        disables default filetypes and processors", --:  {STRING}
-  ["--no-defaults"] = function () opt_nodefaults = true end,
+  ["--no-defaults"] = function ()
+    opt_nodefaults = true
+    dbg("nodefaults")
+  end,
   "", --:  {STRING}
 
 
@@ -615,6 +626,7 @@ local options = {
   ["--markup"] = function (arg, i)
     assert(type(arg[i+1]))
     DOCVARS.MARKUP = arg[i+1]
+    dbg("markup:", DOCVARS.MARKUP)
     return 1
   end,
   "", --:  {STRING}
