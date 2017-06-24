@@ -360,7 +360,7 @@ function section_append(section, key, context) --: Append data to the given sect
   maybe_type(key, "string")
   --:   context:::
   --:     The source line broken down into its components and additional pipadoc metadata
-  maybe_type(context, "table")
+  assert_type(context, "table")
   --:
   trace("append:", section, key, context)
   sections[section] = sections[section] or {keys = {}}
@@ -518,6 +518,7 @@ function operator_register(char, func) --: Register a new operator
   --: Operators drive the main functionality, like invoking the processors and generating the output.
   --:
   assert(string.match(char, "^%p$") == char)
+  assert_type(func, 'function')
   dbg("register operator:", char)
   operators[char] = assert_type(func, 'function')
 end
