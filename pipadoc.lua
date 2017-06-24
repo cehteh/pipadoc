@@ -25,10 +25,11 @@
 --+        with --name:key util --) is seen, 'PIPADOC:' overrides apply
 --TODO: most functions local
 
-local LINE = 0
-local FILE = "<startup>"
 
-CONTEXT = {} --TODO: whats needed to make CONTEXT and DOCVARS local
+--FIXME: DOCME
+CONTEXT = {
+  FILE = "<startup>"
+}
 
 DOCVARS = {
   --DOCVARS:nl `NL`::
@@ -72,7 +73,7 @@ end
 
 local function printlvl(lvl,...)
   if lvl <= opt_verbose then
-    printerr(FILE..":"..(LINE ~= 0 and LINE..":" or ""), ...)
+    printerr(CONTEXT.FILE..":"..(CONTEXT.LINE and CONTEXT.LINE..":" or ""), ...)
   end
 end
 
@@ -236,6 +237,10 @@ function streval (str) --: evaluate lua code inside curly braces in str.
 
         if escapes[inbraced] then
           braced=escapes[inbraced]
+        elseif CONTEXT[inbraced] then
+          braced=CONTEXT[inbraced]
+        elseif DOCVARS[inbraced] then
+          braced=DOCVARS[inbraced]
         else
           inbraced = streval_intern(inbraced)
           if #inbraced > 0 then
@@ -335,7 +340,6 @@ local sections_keys_usecnt = {}
 
 --PLANNED: document doublete/orphan checker
 
---FIXME: CONTEXT
 function section_append(section, key, context) --: Append data to the given section/key
   --:   section:::
   --:     name of the section to append to, must be a string
@@ -671,8 +675,13 @@ end
 
 
 function parse_args(arg)
+  CONTEXT = {
+    FILE="<parse_args>"
+  }
+
   local i = 1
   while i <= #arg do
+    CONTEXT.LINE=i
     while string.match(arg[i], "^%-%a%a+") do
       parse_args {"-"..string.sub(arg[i],2,2)}
       arg[i] = "-"..string.sub(arg[i],3)
@@ -695,12 +704,15 @@ function parse_args(arg)
   end
 end
 
-
-local SECTION
-local ARG
+-- store state for block comments
+local block_section
+local block_arg
 
 function setup()
   parse_args(arg)
+  CONTEXT = {
+    FILE="<setup>"
+  }
   request "luarocks.loader"
   --PLANNED: for pattern matching etc
   --lfs = request "lfs"
@@ -796,14 +808,6 @@ function setup()
     filetype_register("sql", {"%.sql$", "%.SQL$"}, {"#", "--", "/*"})
   end
 
-  local function set_section (context)
-    context.SECTION = to_text (context.SECTION) or SECTION
-  end
-
-  local function set_arg (context)
-    context.ARG = to_text (context.ARG) or ARG
-  end
-
   --op_builtin:
   --: `:` ::
   --:   The documentation operator. Defines normal documentation text. Each pipadoc comment using the `:`
@@ -812,18 +816,20 @@ function setup()
   operator_register(
     ":",
     function (context)
-      local had_args=false
 
-      if context.TEXT == "" and (to_text (context.SECTION) or to_text(context.ARG)) then
-        SECTION = to_text (context.SECTION) or SECTION
-        ARG = to_text (context.ARG) or ""
-        had_args=true
-      end
-
-      set_section (context)
-      set_arg (context)
-
-      if context.TEXT ~= "" or not had_args then
+      if context.TEXT ~= "" and (context.SECTION or context.ARG) then
+        --oneline
+        context.SECTION = context.SECTION or block_section
+        context.ARG = context.ARG or block_arg
+        section_append(context.SECTION, context.ARG, context)
+      elseif context.TEXT == "" and (context.SECTION or context.ARG) then
+        --block head
+        block_section = context.SECTION or block_section
+        block_arg = context.ARG -- or block_arg
+      else
+        --block cont
+        context.SECTION = context.SECTION or block_section
+        context.ARG = context.ARG or block_arg
         section_append(context.SECTION, context.ARG, context)
       end
     end
@@ -836,9 +842,8 @@ function setup()
   operator_register(
     "=",
     function (context)
-      set_section (context)
+      context.SECTION = context.SECTION or block_section
 
-      --PLANNED: how to use DOCVARS.text?
       if #context.ARG > 0 then
         section_append(context.SECTION, nil, context)
       else
@@ -855,7 +860,7 @@ function setup()
   operator_register(
     "@",
     function (context)
-      set_section (context)
+      context.SECTION = context.SECTION or block_section
 
       if #context.ARG > 0 then
         section_append(context.SECTION, nil, context)
@@ -873,7 +878,7 @@ function setup()
   operator_register(
     "#",
     function (context)
-      set_section (context)
+      context.SECTION = context.SECTION or block_section
 
       if #context.ARG > 0 then
         section_append(context.SECTION, nil, context)
@@ -886,24 +891,27 @@ function setup()
   preprocessors_attach ()
 end
 
-local dbg_section
 
-function process_line (line, comment)
-  local context = {}
+function process_line (line, comment, filecontext)
+  local context = {
+    FILE = filecontext.FILE,
+    LINE = filecontext.LINE,
+  }
+  CONTEXT=context
 
   -- special case for plaintext files
   if comment == "" then
     context.PRE, context.COMMENT, context.SECTION, context.OP, context.ARG, context.TEXT =
-      "", " ", "", ":", "", line
+      "", " ", nil, ":", nil, line
   else
     local pattern = "^(.-)("..comment..")([%w_.]*)([:=@#])([%w_.]*)%s?(.*)$"
     dbg("pattern:", pattern)
     --TODO: create opchars dynamically from defined ops
     context.PRE, context.COMMENT, context.SECTION, context.OP, context.ARG, context.TEXT =
       string.match(line,pattern)
+    context.SECTION = to_text(context.SECTION)
+    context.ARG = to_text(context.ARG)
   end
-
-  context.LANGUAGE = DOCVARS.LANGUAGE
 
   --FIXME: doc section for context
   --context:file `FILE`::
@@ -912,7 +920,6 @@ function process_line (line, comment)
   --context:line `LINE`::
   --context:line   Current line number of input or section, or indexing key
   --context:line   Lines start at 1
-  context.FILE, context.LINE = FILE, LINE
 
   if context.PRE then
     trace("pre:", context.PRE, "section:", context.SECTION, "op:", context.OP, "arg:", context.ARG, "text:", context.TEXT)
@@ -938,11 +945,14 @@ function process_file(file)
     return
   end
 
-  ARG = ""
+  local filecontext = {
+    FILE="<process_file>",
+  }
+  CONTEXT=filecontext
 
   local fh
   if file == '-' then
-    FILE = "<stdin>"
+    filecontext.FILE = "<stdin>"
     fh = io.stdin
   else
     fh = io.open(file)
@@ -950,22 +960,20 @@ function process_file(file)
       warn("file not found:", file)
       return
     end
-    FILE = file
+    filecontext.FILE = file
   end
 
-  --FIXME: create context
   --context:section `SECTION`::
   --context:section   stores the current section name
-  SECTION = FILE:match("[^./]+%f[.%z]")
-  LINE = 0
-  dbg("section:", SECTION)
+  block_section = filecontext.FILE:match("[^./]+%f[.%z]")
+  dbg("section:", block_section)
 
-  --FIXME: move to context/template
-  DOCVARS.LANGUAGE = descriptor.language
-  dbg("LANGUAGE:", DOCVARS.LANGUAGE)
+  filecontext.LANGUAGE = descriptor.language
+  dbg("language:", filecontext.LANGUAGE)
 
+  filecontext.LINE=0
   for line in fh:lines() do
-    LINE = LINE+1
+    filecontext.LINE = filecontext.LINE +1
     trace("input:", line)
 
     local comment = comment_select(line, descriptor)
@@ -982,7 +990,7 @@ function process_file(file)
         end
       end
 
-      process_line(line, comment, descriptor.preprocessors)
+      process_line(line, comment, filecontext)
     end
   end
   fh:close()
@@ -999,7 +1007,6 @@ end
 
 local default_generators = {
   [":"] = function (context)
-    CONTEXT=context
     local ret = streval(context.TEXT)
     if ret == "" and to_text (context.TEXT) then
       return ""
@@ -1010,13 +1017,11 @@ local default_generators = {
   end,
 
   ["="] = function (context)
-    CONTEXT=context
     return generate_output(context.ARG)
   end,
 
   ["@"] = function (context)
     dbg("generate_output_alphasorted:"..context.FILE..":"..context.LINE)
-    CONTEXT=context
     local which = context.ARG
     local section = sections[which] and sections[which].keys
     local text = ""
@@ -1024,8 +1029,8 @@ local default_generators = {
     if section ~= nil then
       sections_keys_usecnt[which] = sections_keys_usecnt[which] + 1
 
-      local oldfile = FILE
-      FILE ='<output>:'..which
+      local oldfile = context.FILE
+      context.FILE ='<output>:'..which
 
       local sorted = {}
 
@@ -1043,12 +1048,12 @@ local default_generators = {
       end
 
       for i=1,#sorted do
-        LINE=sorted[i]
+        context.LINE=sorted[i]
         for j=1,#section[sorted[i]] do
           text = text..section[sorted[i]][j].TEXT..'\n'
         end
       end
-      FILE = oldfile
+      context.FILE = oldfile
     else
       warn("no section named:", which)
     end
@@ -1057,7 +1062,6 @@ local default_generators = {
 
   ["#"] = function (context)
     dbg("generate_output_numsorted:"..context.FILE..":"..context.LINE)
-    CONTEXT=context
     local which = context.ARG
     local section = sections[which] and sections[which].keys
     local text = ""
@@ -1065,8 +1069,8 @@ local default_generators = {
     if section ~= nil then
       sections_keys_usecnt[which] = sections_keys_usecnt[which] + 1
 
-      local oldfile = FILE
-      FILE ='<output>:'..which
+      local oldfile = context.FILE
+      context.FILE ='<output>:'..which
 
       local sorted = {}
 
@@ -1084,12 +1088,12 @@ local default_generators = {
       end
 
       for i=1,#sorted do
-        LINE=sorted[i]
+        context.LINE=sorted[i]
         for j=1,#section[sorted[i]] do
           text = text..section[sorted[i]][j].TEXT..'\n'
         end
       end
-      FILE = oldfile
+      context.FILE = oldfile
     else
       warn("no section named:", which)
     end
@@ -1104,6 +1108,11 @@ local sofar_rec={}
 
 --PLANNED: register generators possibly togehter with register operator
 function generate_output(which, generators)
+  local context = {
+    FILE = "<output>"
+  }
+  CONTEXT = context
+
   dbg("generate_output:", which)
   generators = generators or default_generators
   local section = sections[which]
@@ -1121,20 +1130,19 @@ function generate_output(which, generators)
     sofar_rec[which] = true
     sections_usecnt[which] = sections_usecnt[which] + 1
 
-    local oldfile = FILE
-    FILE = '<output>:'..which
+    context.FILE = '<output>:'..which
     for i=1,#section do
-      LINE=i
-      --FIXME: context  trace("generate", section[i].TEXT)
+      context.LINE=i
       --TODO: DOCME actions
       local genfunc = generators[section[i].OP]
       if genfunc then
+        CONTEXT=section[i]
         text = text .. genfunc(section[i])
+        CONTEXT=context
       else
         warn("no generator function for:", section[i].OP)
       end
     end
-    FILE = oldfile
     sofar_rec[which] = nil
   else
     warn("no section named:", which)
@@ -1145,9 +1153,6 @@ end
 
 setup()
 process_inputs()
-
-FILE = "<output>"
-LINE = 0
 
 -- initialize orphans / doublets checker
 for k,_ in pairs(sections) do
@@ -1162,24 +1167,36 @@ end
 
 io.write(generate_output(opt_toplevel))
 
-LINE = 0
 -- orphans / doublets
+local orphan = {
+  FILE = "<orphan>"
+}
+
+local doublette = {
+  FILE = "<doublette>"
+}
+
 for k,v in pairs(sections_usecnt) do
   if v == 0 then
     --TODO: document these warnings
+    CONTEXT = orphan
     warn("section unused:", k)
   elseif v > 1 then
     --TODO: document these warnings
+    CONTEXT = doublette
     warn("section multiple times used:", k, v)
   end
 end
 
+
 for k,v in pairs(sections_keys_usecnt) do
   if v == 0 then
     --TODO: document these warnings
+    CONTEXT = orphan
     warn("section w/ keys unused:", k)
   elseif v > 1 then
     --TODO: document these warnings
+    CONTEXT = doublette
     warn("section w/ keys multiple times used:", k, v)
   end
 end

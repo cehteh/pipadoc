@@ -9,7 +9,7 @@ preprocessor_register ("^lua$",
 -- generate asciidoc formatted documentation for functions
 preprocessor_register ("^lua$",
                        function (str)
-                         return str:gsub("^(.*function%s+([^)]*%)).*--%w*:%w*)", '%1 +%2+::{DOCVARS.NL} ', 1)
+                         return str:gsub("^(.*function%s+([^)]*%)).*--%w*:%w*)", '%1 +*%2*+::{NL} ', 1)
                        end
 )
 
@@ -60,19 +60,19 @@ end
 
 preprocessor_register ("",
                        function (str)
-                         return str:gsub("--FIXME:([^ ]*) (.*)", '--FIXME:%1 {CONTEXT.FILE}:{CONTEXT.LINE}::{DOCVARS.NL}  %2{git_blame_context ()}{DOCVARS.NL}')
+                         return str:gsub("--FIXME:([^ ]*) (.*)", '--FIXME:%1 {FILE}:{LINE}::{NL}  %2{git_blame_context ()}{NL}')
                        end
 )
 
 preprocessor_register ("",
                        function (str)
-                         return str:gsub("--TODO:([^ ]*) (.*)", '--TODO:%1 {CONTEXT.FILE}:{CONTEXT.LINE}::{DOCVARS.NL}  %2{git_blame_context ()}{DOCVARS.NL}')
+                         return str:gsub("--TODO:([^ ]*) (.*)", '--TODO:%1 {FILE}:{LINE}::{NL}  %2{git_blame_context ()}{NL}')
                        end
 )
 
 preprocessor_register ("",
                        function (str)
-                         return str:gsub("--PLANNED:([^ ]*) (.*)", '--PLANNED:%1 {CONTEXT.FILE}:{CONTEXT.LINE}::{DOCVARS.NL}  %2{git_blame_context ()}{DOCVARS.NL}')
+                         return str:gsub("--PLANNED:([^ ]*) (.*)", '--PLANNED:%1 {FILE}:{LINE}::{NL}  %2{git_blame_context ()}{NL}')
                        end
 )
 
