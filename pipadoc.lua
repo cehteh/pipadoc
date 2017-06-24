@@ -372,34 +372,6 @@ function section_append(section, key, context) --: Append data to the given sect
   end
 end
 
---api:
-function section_get(section, key, index) --: query the value of the given section/key at index (or at end)
-  --:   section:::
-  --:     name of the section to append to, must be a string
-  assert_type(section, "string")
-  --:   key:::
-  --:     the subkey for sorting within that section. maybe 'nil'
-  --:   index:::
-  --:     line number to query, when 'nil' defaults to the last line
-  --:   returns:::
-  --:     value or nil
-  --:
-  if not sections[section] then
-    return
-  end
-
-  if not key then
-    index = index or #sections[section]
-    info("nokey", index, sections[section][index].action, sections[section][index].text)
-    return sections[section][index]
-  else
-    index = index or #sections[section].keys
-    info("key", sections[section].keys[key][index])
-    return sections[section].keys[key][index]
-  end
-end
-
-
 --filetypes:
 --: Pipadoc needs to know about the syntax of line comments of the files it is reading. For this patterns are
 --: registered to be matched against the file name together with a list of line comment characters.
