@@ -23,8 +23,6 @@
 --PLANNED: escape pipadoc to avoid wrong parsed pipadoc comments: char* bad="//here:"; //here: the first isn't pipadoc perhaps {DROP}
 --PLANNED: true block comments --name(key makes every further line prepended
 --+        with --name:key util --) is seen, 'PIPADOC:' overrides apply
---TODO: most functions local
-
 
 
 CONTEXT = {
@@ -95,7 +93,6 @@ end
 --: variable argument list. Any Argument passed to them will be converted to a string and printed
 --: to stderr when the verbosity level is high enough.
 --:
---TODO: local functions
 function warn(...) printlvl(1, ...) end  --: report a important but non fatal failure
 function info(...) printlvl(2, ...) end  --: report normal progress
 function dbg(...) printlvl(3, ...) end   --: show debugging information
@@ -439,7 +436,7 @@ function filetype_register(name, filep, linecommentseqs) --: Register a new file
   end
 end
 
-function filetype_get(filename)
+local function filetype_get(filename)
   assert_type(filename, "string")
   for k,v in pairs(filetypes) do
     if filename:match(k) then
@@ -448,7 +445,7 @@ function filetype_get(filename)
   end
 end
 
-function comment_select (line, linecommentseqs)
+local function comment_select (line, linecommentseqs)
   for i=1,#linecommentseqs do
     if string.match(line, linecommentseqs[i]) then
       return linecommentseqs[i]
@@ -705,7 +702,7 @@ end
 local block_section
 local block_arg
 
-function setup()
+local function setup()
   parse_args(arg)
   CONTEXT = {
     FILE="<setup>"
@@ -889,7 +886,7 @@ function setup()
 end
 
 
-function process_line (line, comment, filecontext)
+local function process_line (line, comment, filecontext)
   local context = {
     FILE = filecontext.FILE,
     LINE = filecontext.LINE,
@@ -943,7 +940,7 @@ function process_line (line, comment, filecontext)
   end
 end
 
-function process_file(file)
+local function process_file(file)
   local descriptor, pattern = filetype_get (file)
   if not descriptor then
     warn("unknown file type:", file)
@@ -1001,7 +998,7 @@ function process_file(file)
   fh:close()
 end
 
-function process_inputs()
+local function process_inputs()
   for i in ipairs(opt_inputs) do
       process_file(opt_inputs[i])
   end
