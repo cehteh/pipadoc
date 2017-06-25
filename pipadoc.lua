@@ -180,8 +180,7 @@ end
 --: Functions which do specific type conversions.
 --:
 
---FIXME: why double escaping in docstring? -> testcase
-function to_table(v) --: if 'v' is not a table then return \\\{v\\\}
+function to_table(v) --: if 'v' is not a table then return +++\{v\}+++
   if type(v) ~= 'table' then
     return {v}
   else
