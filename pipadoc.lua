@@ -891,6 +891,18 @@ local function process_line (line, comment, filecontext)
   }
   CONTEXT=context
 
+  local preprocessors = filecontext.filetype.preprocessors
+  if preprocessors then
+    for i=1,#preprocessors do
+      local linepp = preprocessors[i](line)
+      --PLANNED: preprocessors may expand to multiple lines?
+      if to_text (linepp) and line ~= linenew then
+        line = linepp
+        trace("preprocessed:", line)
+      end
+    end
+  end
+
   --context:
   --:pre `PRE`::
   --:pre   Contains the sourcecode in before the linecomment.
@@ -939,14 +951,17 @@ local function process_line (line, comment, filecontext)
 end
 
 local function process_file(file)
-  local descriptor, pattern = filetype_get (file)
-  if not descriptor then
+  local filetype = filetype_get (file)
+  if not filetype then
     warn("unknown file type:", file)
     return
   end
 
+  -- filecontext is a partial context storing data
+  -- of the current file processed
   local filecontext = {
     FILE="<process_file>",
+    filetype=filetype
   }
   CONTEXT=filecontext
 
@@ -968,7 +983,7 @@ local function process_file(file)
   block_section = filecontext.FILE:match("[^./]+%f[.%z]")
   dbg("section:", block_section)
 
-  filecontext.LANGUAGE = descriptor.language
+  filecontext.LANGUAGE = filetype.language
   dbg("language:", filecontext.LANGUAGE)
 
   filecontext.LINE=0
@@ -976,21 +991,9 @@ local function process_file(file)
     filecontext.LINE = filecontext.LINE +1
     trace("input:", line)
 
-    local comment = comment_select(line, descriptor)
+    local comment = comment_select(line, filetype)
 
-    --PLANNED: move preprocessing into process_line
     if comment then
-      if descriptor.preprocessors then
-        for i=1,#descriptor.preprocessors do
-          local lineold = line
-          line = descriptor.preprocessors[i](line)
-          --PLANNED: preprocessors may expand to multiple lines?
-          if to_text (line) and line ~= lineold then
-            trace("preprocessed:", line)
-          end
-        end
-      end
-
       process_line(line, comment, filecontext)
     end
   end
