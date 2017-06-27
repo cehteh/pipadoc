@@ -517,13 +517,18 @@ function operator_register(char, func) --: Register a new operator
   operators[char] = assert_type(func, 'function')
 end
 
---FIXME: unused, use it!
+
+local operator_pattern_cache
+
 function operator_pattern()
-  local pattern=""
-  for k in pairs(operators) do
-    pattern = pattern..k
+  if not operator_pattern_cache then
+    operator_pattern_cache= "["
+    for k in pairs(operators) do
+      operator_pattern_cache = operator_pattern_cache..k
+    end
+    operator_pattern_cache = operator_pattern_cache.."]"
   end
-  return "["..pattern.."]"
+  return operator_pattern_cache
 end
 
 
@@ -646,9 +651,10 @@ local options = {
   --TODO: list-operators
   --TODO: list-sections
   --TODO: force filetype variant  foo.lua:.txt
-  --TODO: eat empty lines
+  --TODO: eat (double, triple, ..) empty lines
   --TODO: add debug report (warnings/errors) to generated document PIPADOC_LOG section
   --TODO: line ending \n \r\n
+  --TODO: --define -D name=value for setting DOCVARS
   --TODO: wrap at blank/intelligent
   --PLANNED: wordwrap
   --PLANNED: some flags get defaults from the config file
@@ -924,9 +930,8 @@ local function process_line (line, comment, filecontext)
     context.PRE, context.COMMENT, context.SECTION, context.OP, context.ARG, context.TEXT =
       "", " ", nil, ":", nil, line
   else
-    local pattern = "^(.-)("..comment..")([%w_.]*)([:=@#])([%w_.]*)%s?(.*)$"
+    local pattern = "^(.-)("..comment..")([%w_.]*)("..operator_pattern()..")([%w_.]*)%s?(.*)$"
     dbg("pattern:", pattern)
-    --TODO: create opchars dynamically from defined ops
     context.PRE, context.COMMENT, context.SECTION, context.OP, context.ARG, context.TEXT =
       string.match(line,pattern)
     context.SECTION = to_text(context.SECTION)
