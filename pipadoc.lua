@@ -498,23 +498,34 @@ end
 --: Operators define how documentation comments are evaluated, they are the core functionality of pipadoc and mandatory in the pipadoc
 --: syntax to define a pipadoc comment line. It is possible (but rarely needed) to define additional
 --: operators. Operators must be a single punctuation character.
-local operators = {}
+--:
+local procfuncs = {}
+local genfuncs = {}
 
-
---PLANNED: operator_register(char, read, generate) .. add generator function here too
 --api:
-function operator_register(char, func) --: Register a new operator
+--:
+--: Operators
+--: ~~~~~~~~~
+--:
+--: Operators have 2 functions associated. The first one is the processing function which defines how a documentation
+--: comment gets stored. The second one is the generator function which will emits the documentation.
+--:
+function operator_register(char, procfunc, genfunc) --: Register a new operator
   --:   char:::
-  --:     single punctuation character defining this operator
-  --:   func:::
-  --:     a function which receives a table of the 'context' parsed from the pipadoc comment line
-  --:
-  --: Operators drive the main functionality, like invoking the processors and generating the output.
+  --:     single punctuation character defining this operator.
+  --:   procfunc +function(context)+:::
+  --:     a function which receives a table of the 'context' parsed from the pipadoc comment line.
+  --:     It is responsible for storing the context under the approbiate section/key and possibly
+  --:     Keep a state for further processing.
+  --:   genfunc +function(context)+:::
+  --:     the a function generating the output from given context.
   --:
   assert(string.match(char, "^%p$") == char)
-  assert_type(func, 'function')
+  assert_type(procfunc, 'function')
+  assert_type(genfunc, 'function')
   dbg("register operator:", char)
-  operators[char] = assert_type(func, 'function')
+  procfuncs[char] = procfunc
+  genfuncs[char] = genfunc
 end
 
 
@@ -523,7 +534,7 @@ local operator_pattern_cache
 function operator_pattern()
   if not operator_pattern_cache then
     operator_pattern_cache= "["
-    for k in pairs(operators) do
+    for k in pairs(procfuncs) do
       operator_pattern_cache = operator_pattern_cache..k
     end
     operator_pattern_cache = operator_pattern_cache.."]"
@@ -830,6 +841,16 @@ local function setup()
         context.ARG = context.ARG or block_arg
         section_append(context.SECTION, context.ARG, context)
       end
+    end,
+
+    function (context)
+      local ret = streval(context.TEXT)
+      if ret == "" and to_text (context.TEXT) then
+        return ""
+      else
+        trace ("generate:"..context.FILE..":"..context.LINE, ret)
+        return ret.."\n"
+      end
     end
   )
 
@@ -847,6 +868,10 @@ local function setup()
       else
         warn("include argument missing:")
       end
+    end,
+
+    function (context)
+      return generate_output(context.ARG)
     end
   )
 
@@ -865,6 +890,46 @@ local function setup()
       else
         warn("sort argument missing:")
       end
+    end,
+
+    function (context)
+      dbg("generate_output_alphasorted:"..context.FILE..":"..context.LINE)
+      local which = context.ARG
+      local section = sections[which] and sections[which].keys
+      local text = ""
+
+      if section ~= nil then
+        sections_keys_usecnt[which] = sections_keys_usecnt[which] + 1
+
+        local oldfile = context.FILE
+        context.FILE ='<output>:'..which
+
+        local sorted = {}
+
+        for k in pairs(section) do
+          if not tonumber (k) then
+            table.insert(sorted, k)
+          end
+        end
+
+        table.sort(sorted, function(a,b) return tostring(a) < tostring(b) end)
+
+        if #sorted == 0 then
+          warn("section is empty:",which)
+          return ""
+        end
+
+        for i=1,#sorted do
+          context.LINE=sorted[i]
+          for j=1,#section[sorted[i]] do
+            text = text..section[sorted[i]][j].TEXT..'\n'
+          end
+        end
+        context.FILE = oldfile
+      else
+        warn("no section named:", which)
+      end
+      return text
     end
   )
 
@@ -883,6 +948,46 @@ local function setup()
       else
         warn("sort argument missing:")
       end
+    end,
+
+    function (context)
+      dbg("generate_output_numsorted:"..context.FILE..":"..context.LINE)
+      local which = context.ARG
+      local section = sections[which] and sections[which].keys
+      local text = ""
+
+      if section ~= nil then
+        sections_keys_usecnt[which] = sections_keys_usecnt[which] + 1
+
+        local oldfile = context.FILE
+        context.FILE ='<output>:'..which
+
+        local sorted = {}
+
+        for k in pairs(section) do
+          if tonumber (k) then
+            table.insert(sorted, k)
+          end
+        end
+
+        table.sort(sorted, function(a,b) return (tonumber(a) or 0) < (tonumber(b) or 0) end)
+
+        if #sorted == 0 then
+          warn("section is empty:",which)
+          return ""
+        end
+
+        for i=1,#sorted do
+          context.LINE=sorted[i]
+          for j=1,#section[sorted[i]] do
+            text = text..section[sorted[i]][j].TEXT..'\n'
+          end
+        end
+        context.FILE = oldfile
+      else
+        warn("no section named:", which)
+      end
+      return text
     end
   )
 
@@ -943,9 +1048,10 @@ local function process_line (line, comment, filecontext)
 
     local op = context.OP
     if op then
-      if operators[op] then
-        while operators[op] do
-          op = operators[op]
+      --TODO: document aliasing
+      if procfuncs[op] then
+        while procfuncs[op] do
+          op = procfuncs[op]
         end
         op(context)
       else
@@ -1012,110 +1118,8 @@ local function process_inputs()
 end
 
 
-
-
-local default_generators = {
-  [":"] = function (context)
-    local ret = streval(context.TEXT)
-    if ret == "" and to_text (context.TEXT) then
-      return ""
-    else
-      trace ("generate:"..context.FILE..":"..context.LINE, ret)
-      return ret.."\n"
-    end
-  end,
-
-  ["="] = function (context)
-    return generate_output(context.ARG)
-  end,
-
-  ["@"] = function (context)
-    dbg("generate_output_alphasorted:"..context.FILE..":"..context.LINE)
-    local which = context.ARG
-    local section = sections[which] and sections[which].keys
-    local text = ""
-
-    if section ~= nil then
-      sections_keys_usecnt[which] = sections_keys_usecnt[which] + 1
-
-      local oldfile = context.FILE
-      context.FILE ='<output>:'..which
-
-      local sorted = {}
-
-      for k in pairs(section) do
-        if not tonumber (k) then
-          table.insert(sorted, k)
-        end
-      end
-
-      table.sort(sorted, function(a,b) return tostring(a) < tostring(b) end)
-
-      if #sorted == 0 then
-        warn("section is empty:",which)
-        return ""
-      end
-
-      for i=1,#sorted do
-        context.LINE=sorted[i]
-        for j=1,#section[sorted[i]] do
-          text = text..section[sorted[i]][j].TEXT..'\n'
-        end
-      end
-      context.FILE = oldfile
-    else
-      warn("no section named:", which)
-    end
-    return text
-  end,
-
-  ["#"] = function (context)
-    dbg("generate_output_numsorted:"..context.FILE..":"..context.LINE)
-    local which = context.ARG
-    local section = sections[which] and sections[which].keys
-    local text = ""
-
-    if section ~= nil then
-      sections_keys_usecnt[which] = sections_keys_usecnt[which] + 1
-
-      local oldfile = context.FILE
-      context.FILE ='<output>:'..which
-
-      local sorted = {}
-
-      for k in pairs(section) do
-        if tonumber (k) then
-          table.insert(sorted, k)
-        end
-      end
-
-      table.sort(sorted, function(a,b) return (tonumber(a) or 0) < (tonumber(b) or 0) end)
-
-      if #sorted == 0 then
-        warn("section is empty:",which)
-        return ""
-      end
-
-      for i=1,#sorted do
-        context.LINE=sorted[i]
-        for j=1,#section[sorted[i]] do
-          text = text..section[sorted[i]][j].TEXT..'\n'
-        end
-      end
-      context.FILE = oldfile
-    else
-      warn("no section named:", which)
-    end
-    return text
-  end,
-}
-
-
-
-
 local sofar_rec={}
 
---PLANNED: register generators possibly togehter with register operator
 function generate_output(which, generators)
   local context = {
     FILE = "<output>"
@@ -1123,7 +1127,6 @@ function generate_output(which, generators)
   CONTEXT = context
 
   dbg("generate_output:", which)
-  generators = generators or default_generators
   local section = sections[which]
   local text = ""
 
@@ -1143,7 +1146,7 @@ function generate_output(which, generators)
     for i=1,#section do
       context.LINE=i
       --TODO: DOCME actions
-      local genfunc = generators[section[i].OP]
+      local genfunc = genfuncs[section[i].OP]
       if genfunc then
         CONTEXT=section[i]
         text = text .. genfunc(section[i])
