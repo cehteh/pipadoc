@@ -6,12 +6,14 @@ preprocessor_register ("^lua$",
                        end
 )
 
+--PLANNED: generate function index
 -- generate asciidoc formatted documentation for functions
 preprocessor_register ("^lua$",
                        function (str)
                          return str:gsub("^(.*function%s+([^)]*%)).*--%w*:%w*)", '%1 +*%2*+::{NL} ', 1)
                        end
 )
+
 
 -- for the testsuite
 preprocessor_register ("^test",

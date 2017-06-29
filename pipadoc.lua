@@ -23,7 +23,7 @@
 --PLANNED: escape pipadoc to avoid wrong parsed pipadoc comments: char* bad="//here:"; //here: the first isn't pipadoc perhaps {DROP}
 --PLANNED: true block comments --name(key makes every further line prepended
 --+        with --name:key util --) is seen, 'PIPADOC:' overrides apply
-
+--PLANNED: postprocessors on markup
 
 CONTEXT = {
   --context:file `FILE`::
@@ -655,20 +655,21 @@ local options = {
   "                        following argument as input file", --:  {STRING}
   ["--"] = function () args_done=true end,
 
-  --TODO: --alias match pattern --file-as match filename
-  --TODO: -o --output
-  --TODO: -l --load
-  --TODO: --features  show a report which features (using optional lua modules) are available
-  --TODO: list-operators
-  --TODO: list-sections
-  --TODO: force filetype variant  foo.lua:.txt
-  --TODO: eat (double, triple, ..) empty lines
-  --TODO: add debug report (warnings/errors) to generated document PIPADOC_LOG section
-  --TODO: line ending \n \r\n
-  --TODO: --define -D name=value for setting DOCVARS
-  --TODO: wrap at blank/intelligent
+  --PLANNED: --alias match pattern --file-as match filename
+  --PLANNED: -o --output
+  --PLANNED: -l --load
+  --PLANNED: --features  show a report which features (using optional lua modules) are available
+  --PLANNED: list-operators
+  --PLANNED: list-sections
+  --PLANNED: force filetype variant  foo.lua:.txt
+  --PLANNED: eat (double, triple, ..) empty lines
+  --PLANNED: add debug report (warnings/errors) to generated document PIPADOC_LOG section
+  --PLANNED: line ending \n \r\n
+  --PLANNED: --define -D name=value for setting DOCVARS
+  --PLANNED: wrap at blank/intelligent
   --PLANNED: wordwrap
   --PLANNED: some flags get defaults from the config file
+  --PLANNED: source indent with prettyprinting --indent columns
 
   "", --:  {STRING}
   "  inputs are file names or a '-' which indicates standard input", --:  {STRING}
@@ -1145,7 +1146,6 @@ function generate_output(which, generators)
     context.FILE = '<output>:'..which
     for i=1,#section do
       context.LINE=i
-      --TODO: DOCME actions
       local genfunc = genfuncs[section[i].OP]
       if genfunc then
         CONTEXT=section[i]
@@ -1271,8 +1271,6 @@ end
 --:   into the project and call it with the known Lua interpreter.
 --: - One can ship the `pipadoc.lua` and `pipadoc.install` and do a local install in the build
 --:   directory and use this pipadoc thereafter
---:
---FIXME: Pipadoc tries to load
 --:
 --:
 --: Usage
@@ -1476,37 +1474,35 @@ end
 --:
 --=FIXME
 --:
---FIXME: only generate FIXME Section when there are FIXME's
+--PLANNED: only generate FIXME Section when there are FIXME's
 --:
 --: TODO
 --: ~~~~
 --:
 --=TODO
 --:
---FIXME: only generate TODO section when there are TODO's
+--PLANNED: only generate TODO section when there are TODO's
 --:
 --: PLANNED
 --: ~~~~~~~
 --:
 --=PLANNED
 --:
---FIXME: only generate PLANNED section when there are PLANNED's
+--PLANNED: only generate PLANNED section when there are PLANNED's
 --:
 
 --PLANNED: control language/conditionals?  //section?key {condition}  else becomes DROPPED:section_key
---TODO: asciidoc //source:line// comments like old pipadoc
---TODO: integrate old pipadoc.txt documentation
+--PLANNED: asciidoc //source:line// comments like old pipadoc
 --PLANNED: not only pipadoc.conf but also pipadoc.sty templates, conf are local only configurations, .sty are global styles
 --PLANNED: how to join (and then wordwrap) lines?
 --PLANNED: bash like parameter expansion, how to apply that to sections/keys too --%{section}:%{key}
 --PLANNED: org-mode processor
 --PLANNED: INIT section for configuration
 
-
---TODO: special sections
---TODO: CONFIG:PRE
---TODO: CONFIG:POST
---TODO: CONFIG:GENERATE
+--PLANNED: special sections
+--PLANNED: CONFIG:PRE
+--PLANNED: CONFIG:POST
+--PLANNED: CONFIG:GENERATE
 
 --- Local Variables:
 --- mode: lua
