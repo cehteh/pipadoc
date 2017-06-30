@@ -572,8 +572,8 @@ function operator_pattern()
   return operator_pattern_cache
 end
 
-
-function add_inputfile(filename) --: Add a file to the processing list
+--api_various:
+function add_inputfile(filename) --: Add a 'filename' to the list of files to process
   assert_type(filename, "string")
   opt_inputs[#opt_inputs+1] = filename
 end
@@ -1366,6 +1366,12 @@ end
 --: ....
 --:
 --:
+--: Example
+--: ~~~~~~~
+--:
+--: The pipadoc documentation you are just reading here is made and embedded in 'pipadoc.lua'
+--: itself. Refer to it's source to see how it is done.
+--:
 --TODO: DOCME oneline vs block, default section name, MAIN section
 --TODO: note that literal strings are not special
 --:
@@ -1481,6 +1487,12 @@ end
 --=api_op
 --=api_preproc
 --=api_sections
+--:
+--: Other functions
+--: ~~~~~~~~~~~~~~~
+--:
+--=api_various
+--:
 --:
 --: How to generate the pipadoc documentation itself
 --: ------------------------------------------------
