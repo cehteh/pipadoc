@@ -10,7 +10,7 @@ preprocessor_register ("^lua$",
 -- generate asciidoc formatted documentation for functions
 preprocessor_register ("^lua$",
                        function (str)
-                         return str:gsub("^(.*function%s+([^)]*%)).*--%w*:%w*)", '%1 +*%2*+::{NL} ', 1)
+                         return str:gsub("^(.*function%s+([^)]*%)).*%-%-%w*:%w*)", '%1 +*%2*+::{NL} ', 1)
                        end
 )
 
