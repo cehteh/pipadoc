@@ -460,8 +460,28 @@ end
 
 local preprocessors = {}
 
---TODO: DOCME
-function preprocessor_register (langpat, preprocess)
+--api_preproc:
+--:
+--: Preprocessors
+--: ~~~~~~~~~~~~~
+--:
+--: One can register multiple preprocessors for different filetypes. A preprocessor can modify
+--: the line prior it is parsed and further processed. Preprocessing happens only on lines which
+--: contains a comment. By default pipadoc has no preprocessors loaded. An user may define
+--: these in a config file. See the 'pipadoc_config.lua' which ships with the pipadoc
+--: distribution.
+--:
+function preprocessor_register (langpat, preprocess) --: register a preprocessor
+  --:   langpat:::
+  --:     Register preprocessor to all filetypes whose mnemonic matches 'langpat'.
+  --:   preprocess:::
+  --:     The preprocesor to register. Can be one of:
+  --:     `function (line) ... end` ::::
+  --:       Takes a string (the source line) and shall return the preprocessed line or 'nil' to
+  --:       drop the line.
+  --:     `+++\{pattern, repl [, n]\}+++` ::::
+  --:       Generates a function calling 'string.gsub(pattern, repl [, n])' for preprocessing.
+  --:
   assert_type (langpat, "string")
   dbg ("register preprocessor:", langpat, preprocess)
 
@@ -475,7 +495,7 @@ function preprocessor_register (langpat, preprocess)
     table.insert(preprocessors, {pattern=langpat, preprocessor=preprocess})
   else
     warn ("unsupported preprocessor type") --cwarn: {STRING} ::
-    --cwarn:  Tried to 'preprocessor_register()' something that is not a function.
+    --cwarn:  Tried to 'preprocessor_register()' something that is not a function or table.
   end
 end
 
