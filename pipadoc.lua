@@ -89,9 +89,9 @@ end
 --: Logging Progress and Errors
 --: ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 --:
---: Here are few functions to log progress and report errors. All this functions take a
---: variable argument list. Any Argument passed to them will be converted to a string and printed
---: to stderr when the verbosity level is high enough.
+--: Functions for to log progress and report errors. All this functions take a variable argument
+--: list. Any Argument passed to them will be converted to a string and printed to stderr when
+--: the verbosity level is high enough.
 --:
 function warn(...) printlvl(1, ...) end  --: report a important but non fatal failure
 function info(...) printlvl(2, ...) end  --: report normal progress
@@ -133,8 +133,8 @@ end
 --: installed.
 --:
 function request(name) --: try to load optional modules
-  --:    wraps lua 'require' in a pcall so that failure to load a module results in 'nil' rather
-  --:    than a error
+  --:    wraps lua 'require' in a pcall so that failure to load module 'name' results in 'nil'
+  --:    rather than a error.
   local ok,handle = pcall(require, name)
   if ok then
     dbg("loaded:", name, handle._VERSION)
@@ -150,7 +150,7 @@ end
 --api_typecheck:
 --:
 --: Type checks
---: ~~~~~~~~~~
+--: ~~~~~~~~~~~
 --:
 --: Wrappers around 'assert' to check externally supplied data. On success 'var' will be returned
 --: otherwise an assertion error is raised.
@@ -1476,7 +1476,7 @@ end
 --: Programming API for extensions
 --: ------------------------------
 --:
---: Lua functions specific to pipadoc which can be used by plugins.
+--: Functions pipadoc exports to be used by extensions/config files.
 --:
 --=api_load
 --=api_logging
