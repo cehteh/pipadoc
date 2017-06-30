@@ -27,7 +27,7 @@ preprocessor_register ("^test",
 )
 
 
---TODO: ldoc/doxygen/javadoc compatible macros @param @return @see etc.
+--PLANNED: ldoc/doxygen/javadoc compatible macros @param @return @see etc.
 
 
 function git_blame (file, line)

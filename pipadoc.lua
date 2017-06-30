@@ -20,10 +20,11 @@
 --PLANNED: split on newlines
 --PLANNED: merge lines, '+' operator?
 --+        like this, note about indentation, no newline
---PLANNED: escape pipadoc to avoid wrong parsed pipadoc comments: char* bad="//here:"; //here: the first isn't pipadoc perhaps {DROP}
 --PLANNED: true block comments --name(key makes every further line prepended
 --+        with --name:key util --) is seen, 'PIPADOC:' overrides apply
 --PLANNED: postprocessors on markup
+--PLANNED: links for all 'see' references
+--PLANNED: document config file
 
 CONTEXT = {
   --context:file `FILE`::
@@ -1569,7 +1570,7 @@ end
 --PLANNED: asciidoc //source:line// comments like old pipadoc
 --PLANNED: not only pipadoc.conf but also pipadoc.sty templates, conf are local only configurations, .sty are global styles
 --PLANNED: how to join (and then wordwrap) lines?
---PLANNED: bash like parameter expansion, how to apply that to sections/keys too --%{section}:%{key}
+--PLANNED: bash like parameter expansion, how to apply that to sections/keys too --%{section}:%{key} .. how about streval on SECTION and ARG //{SECTION}:{ARG}
 --PLANNED: org-mode processor
 --PLANNED: INIT section for configuration
 
@@ -1577,6 +1578,7 @@ end
 --PLANNED: CONFIG:PRE
 --PLANNED: CONFIG:POST
 --PLANNED: CONFIG:GENERATE
+--PLANNED: manpage
 
 --- Local Variables:
 --- mode: lua
