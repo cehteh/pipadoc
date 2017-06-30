@@ -140,7 +140,8 @@ function request(name) --: try to load optional modules
     dbg("loaded:", name, handle._VERSION)
     return handle
   else
-    warn("Can't load module:", name)
+    warn("can't load module:", name) --cwarn: {STRING} ::
+    --cwarn:  'request()' failed to load a module.
     return nil
   end
 end
@@ -473,7 +474,8 @@ function preprocessor_register (langpat, preprocess)
   if type (preprocess) == "function" then
     table.insert(preprocessors, {pattern=langpat, preprocessor=preprocess})
   else
-    warn ("Unsupported preprocessor type")
+    warn ("unsupported preprocessor type") --cwarn: {STRING} ::
+    --cwarn:  Tried to 'preprocessor_register()' something that is not a function.
   end
 end
 
@@ -759,7 +761,8 @@ local function setup()
       if config then
         config ()
       else
-        warn ("Can't load config file:", opt_config)
+        warn ("can't load config file:", opt_config) --cwarn: {STRING} ::
+        --cwarn:  The config file ('--config' option) could not be loaded.
       end
 
     end
@@ -879,7 +882,8 @@ local function setup()
       if #context.ARG > 0 then
         section_append(context.SECTION, nil, context)
       else
-        warn("include argument missing:")
+        warn("paste argument missing")  --cwarn: {STRING} ::
+        --cwarn:  Using the '=' operator without an argument.
       end
     end,
 
@@ -902,7 +906,8 @@ local function setup()
       if #context.ARG > 0 then
         section_append(context.SECTION, nil, context)
       else
-        warn("sort argument missing:")
+        warn("sort argument missing") --cwarn: {STRING} ::
+        ---cwarn:  Using the '@' or '#' operator without an argument.
       end
     end,
 
@@ -929,7 +934,8 @@ local function setup()
         table.sort(sorted, function(a,b) return tostring(a) < tostring(b) end)
 
         if #sorted == 0 then
-          warn("section is empty:",which)
+          warn("section is empty:",which) --cwarn: {STRING} ::
+          --cwarn:  Using '=', '@' or '#' on a section which has no data (under respective keys).
           return ""
         end
 
@@ -941,7 +947,8 @@ local function setup()
         end
         context.FILE = oldfile
       else
-        warn("no section named:", which)
+        warn("no section named:", which) --cwarn: {STRING} ::
+        --cwarn:  Using '=', '@' or '#' on a section which as never defined.
       end
       return text
     end
@@ -1068,7 +1075,8 @@ end
 local function process_file(file)
   local filetype = filetype_get (file)
   if not filetype then
-    warn("unknown file type:", file)
+    warn("unknown file type:", file) --cwarn: {STRING} ::
+    --cwarn:  The type of the given file was not recongized (see '--register' option).
     return
   end
 
@@ -1087,7 +1095,8 @@ local function process_file(file)
   else
     fh = io.open(file)
     if not fh then
-      warn("file not found:", file)
+      warn("file not found:", file) --cwarn: {STRING} ::
+      --cwarn:  A given File can not be opened (wrong path or typo?).
       return
     end
     filecontext.FILE = file
@@ -1138,7 +1147,8 @@ function generate_output(which, generators)
 
   if section ~= nil then
     if sofar_rec[which] then
-      warn("recursive include:",which)
+      warn("recursive paste:",which) --cwarn: {STRING} ::
+      --cwarn:  Pasted sections (see '=' operator) can not recursively include themself.
       return ""
     end
     if #section == 0 then
@@ -1199,10 +1209,13 @@ local doublette = {
 for k,v in pairs(sections_usecnt) do
   if v == 0 then
     CONTEXT = orphan
-    warn("section unused:", k)
+    warn("section unused:", k) --cwarn: {STRING} ::
+    --cwarn:  The printed section was not used. This might be intentional when generating
+    --cwarn:  only partial outputs.
   elseif v > 1 then
     CONTEXT = doublette
-    warn("section multiple times used:", k, v)
+    warn("section multiple times used:", k, v) --cwarn: {STRING} ::
+    --cwarn:  Section was pasted multiple times in the output.
   end
 end
 
@@ -1210,10 +1223,12 @@ end
 for k,v in pairs(sections_keys_usecnt) do
   if v == 0 then
     CONTEXT = orphan
-    warn("section w/ keys unused:", k)
+    warn("section w/ keys unused:", k) --cwarn: {STRING} ::
+    --cwarn:  Section with keys (numeric or alphabetic) was not used.
   elseif v > 1 then
     CONTEXT = doublette
-    warn("section w/ keys multiple times used:", k, v)
+    warn("section w/ keys multiple times used:", k, v) --cwarn: {STRING} ::
+    --cwarn:  Section was used multiple times in the output ('@' or '#' operator).
   end
 end
 
@@ -1423,6 +1438,14 @@ end
 --: ~~~~~~~~~~~~~~~~~~
 --:
 --@DOCVARS
+--:
+--: Common warnings
+--: ---------------
+--:
+--: Pipadoc emits warnings on problems. These are mostly harmless but may need some attention.
+--: Warnings are supressed with the '-q' option.
+--:
+--=cwarn
 --:
 --: Programming API for extensions
 --: ------------------------------
