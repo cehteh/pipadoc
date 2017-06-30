@@ -64,21 +64,30 @@ end
 
 preprocessor_register ("",
                        function (str)
-                         return str:gsub("--FIXME:([^ ]*) (.*)", '--FIXME:%1 {FILE}:{LINE}::{NL}  %2{git_blame_context ()}{NL}')
+                         return str:gsub("--FIXME:([^ ]*) (.*)", --NODOC
+                                         '--FIXME:%1 {FILE}:{LINE}::{NL}  %2{git_blame_context ()}{NL}') --NODOC
+                       end
+)
+
+
+preprocessor_register ("",
+                       function (str)
+                         return str:gsub("--TODO:([^ ]*) (.*)", --NODOC
+                                         '--TODO:%1 {FILE}:{LINE}::{NL}  %2{git_blame_context ()}{NL}') --NODOC
                        end
 )
 
 preprocessor_register ("",
                        function (str)
-                         return str:gsub("--TODO:([^ ]*) (.*)", '--TODO:%1 {FILE}:{LINE}::{NL}  %2{git_blame_context ()}{NL}')
-                       end
-)
-
-preprocessor_register ("",
-                       function (str)
-                         return str:gsub("--PLANNED:([^ ]*) (.*)", '--PLANNED:%1 {FILE}:{LINE}::{NL}  %2{git_blame_context ()}{NL}')
+                         return str:gsub("--PLANNED:([^ ]*) (.*)", --NODOC
+                                         '--PLANNED:%1 {FILE}:{LINE}::{NL}  %2{git_blame_context ()}{NL}') --NODOC
                        end
 )
 
 --PLANNED: offer different sort orders for issues (date / line)
 --PLANNED: noweb like preprocessing syntax for chapter substitutions in textfiles
+
+--- Local Variables:
+--- mode: lua
+--- compile-command: "lua pipadoc.lua -t ISSUES -q pipadoc.lua pipadoc_config.lua pipadoc.install pipadoc.test"
+--- End:

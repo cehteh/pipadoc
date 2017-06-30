@@ -1525,5 +1525,5 @@ end
 
 --- Local Variables:
 --- mode: lua
---- compile-command: "lua pipadoc.lua -t ISSUES -q pipadoc.lua"
+--- compile-command: "lua pipadoc.lua -t ISSUES -q pipadoc.lua pipadoc_config.lua pipadoc.install pipadoc.test"
 --- End:
