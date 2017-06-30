@@ -84,7 +84,7 @@ local function printlvl(lvl,...)
 end
 
 
---api:
+--api_logging:
 --:
 --: Logging Progress and Errors
 --: ~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -117,7 +117,7 @@ function dump_table(p,t)
 end
 
 
---api:
+--api_load:
 --:
 --: Dependencies
 --: ~~~~~~~~~~~~
@@ -125,12 +125,12 @@ end
 --: 'pipadoc' does not depend on any external Lua libraries. The intention is to, by default,
 --: make documentation build able on minimal target systems. Nevertheless Modules can be loaded
 --: optionally to augment pipadocs behavior and provide extra features. Plugin-writers should
---: try to adhere to this practice if possible and use the 'request' function instead the Lua
---: 'require'. Falling back to simpler but usable functionality when some library is not
+--: try to adhere to this practice if possible and use the 'request()' function instead the Lua
+--: 'require()'. Falling back to simpler but usable functionality when some library is not
 --: available.
 --:
---: When luarocks is installed, then the 'luarocks.loader' is loaded to make any module
---: installed by luarocks available.
+--: Pipadoc already calls 'request "luarocks.loader"' to make rocks modules available when
+--: installed.
 --:
 function request(name) --: try to load optional modules
   --:    wraps lua 'require' in a pcall so that failure to load a module results in 'nil' rather
@@ -146,7 +146,7 @@ function request(name) --: try to load optional modules
 end
 
 
---api:
+--api_typecheck:
 --:
 --: Type checks
 --: ~~~~~~~~~~
@@ -175,6 +175,7 @@ function assert_notnil(var) --: checks that 'var' is not 'nil'
   return var
 end
 
+--api_typeconv:
 --:
 --: Type conversions
 --: ~~~~~~~~~~~~~~~~
@@ -200,7 +201,7 @@ function to_text(v) --: convert 'v' to a string, returns 'nil' when that string 
 end
 
 
---api:
+--api_streval:
 --:
 --: String evaluation
 --: ~~~~~~~~~~~~~~~~~
@@ -343,7 +344,7 @@ local sections = {}
 local sections_usecnt = {}
 local sections_keys_usecnt = {}
 
---api:
+--api_sections:
 --:
 --: Sections
 --: ~~~~~~~~
@@ -399,7 +400,7 @@ end
 --: operations within text files.
 local filetypes = {}
 
---api:
+--api_filetypes:
 --:
 --: Filetypes
 --: ~~~~~~~~~
@@ -508,7 +509,7 @@ end
 local procfuncs = {}
 local genfuncs = {}
 
---api:
+--api_op:
 --:
 --: Operators
 --: ~~~~~~~~~
@@ -1428,8 +1429,15 @@ end
 --:
 --: Lua functions specific to pipadoc which can be used by plugins.
 --:
---=api
---:
+--=api_load
+--=api_logging
+--=api_typecheck
+--=api_typeconv
+--=api_streval
+--=api_filetypes
+--=api_op
+--=api_preproc
+--=api_sections
 --:
 --: How to generate the pipadoc documentation itself
 --: ------------------------------------------------
