@@ -61,13 +61,13 @@ local opt_config = "pipadoc_config.lua"
 local printerr_hook
 
 local function printerr(...)
+  local args={...}
   local line = ""
-
-  for i,v in ipairs {...} do
+  for i=1,#args do
     if i > 1 then
       line = line.."\t"
     end
-    line = line..tostring(v)
+    line = line..tostring(args[i] or "\t")
   end
   line = line.."\n"
 
