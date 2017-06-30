@@ -1113,10 +1113,12 @@ local function process_file(file)
     filecontext.LINE = filecontext.LINE +1
     trace("input:", line)
 
-    local comment = comment_select(line, filetype)
+    if  not line:match("NODOC$") then
+      local comment = comment_select(line, filetype)
 
-    if comment then
-      process_line(line, comment, filecontext)
+      if comment then
+        process_line(line, comment, filecontext)
+      end
     end
   end
   fh:close()
@@ -1318,7 +1320,7 @@ end
 --:
 --: .The formal syntax looks like:
 --: ....
---: pipadoc = [source] <linecomment> opspec [..space.. [documentationtext]]
+--: pipadoc = [source] <linecomment> opspec [..space.. [documentationtext]] !"NODOC"
 --:
 --: source = ..any source code text..
 --:
@@ -1358,8 +1360,12 @@ end
 --:
 --: It is important to know that reading happens only line by line, operations can not span
 --: lines. Preprocessing and Parsing may be stateful and thus preserve information for further
---: processing.
+--: processing. There is one special case, when a line ends with "NODOC" it is not parsed as
+--: documentation text. This can be used to escape lines.
 --:
+--: ----
+--: const char* example = "//MAIN: this is a C string and not documentation"; //NODOC{NL}
+--: ----
 --:
 --: Sections and Keys
 --: -----------------
