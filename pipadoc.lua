@@ -1057,20 +1057,17 @@ local function process_line (line, comment, filecontext)
     context.ARG = to_text(context.ARG)
   end
 
-  if context.PRE then
-    trace("pre:", context.PRE, "section:", context.SECTION, "op:", context.OP, "arg:", context.ARG, "text:", context.TEXT)
-
-    local op = context.OP
-    if op then
-      --TODO: document aliasing
-      if procfuncs[op] then
-        while procfuncs[op] do
-          op = procfuncs[op]
-        end
-        op(context)
-      else
-        warn("unknown operator:", op)
+  local op = context.OP
+  if op then
+    dbg("pre:", context.PRE, "section:", context.SECTION, "op:", op, "arg:", context.ARG, "text:", context.TEXT)
+    --TODO: document aliasing
+    if procfuncs[op] then
+      while procfuncs[op] do
+        op = procfuncs[op]
       end
+      op(context)
+    else
+      warn("unknown operator:", op)
     end
   end
 end
