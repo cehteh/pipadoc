@@ -654,7 +654,7 @@ local options = {
 
   -- intentionally undocumented option
   ["--make-doc"] = function (arg, i)
-    os.execute("lua pipadoc.lua -m asciidoc -q pipadoc.lua >pipadoc.txt")
+    os.execute("lua pipadoc.lua -m asciidoc pipadoc.lua >pipadoc.txt")
     os.execute("asciidoc -a toc pipadoc.txt")
     os.execute('a2x -L -k -v --dblatex-opts "-P latex.output.revhistory=0" pipadoc.txt')
     return 1
