@@ -736,7 +736,7 @@ asciidoc.install(2);
 <h1>pipadoc - Documentation extractor</h1>
 <span id="author">Christian Thaeter</span><br />
 <span id="email"><code>&lt;<a href="mailto:ct@pipapo.org">ct@pipapo.org</a>&gt;</code></span><br />
-<span id="revdate">Fri Jun 30 18:58:45 2017</span>
+<span id="revdate">Sat Jul  1 01:59:29 2017</span>
 <div id="toc">
   <div id="toctitle">Table of Contents</div>
   <noscript><p><b>JavaScript must be enabled in your browser to display the table of contents.</b></p></noscript>
@@ -887,6 +887,11 @@ arg = ..alphanumeric text including underscore and dots..
 
 documentationtext = ..rest of the line..</code></pre>
 </div></div>
+</div>
+<div class="sect2">
+<h3 id="_example">Example</h3>
+<div class="paragraph"><p>The pipadoc documentation you are just reading here is made and embedded in <em>pipadoc.lua</em>
+itself. Refer to it&#8217;s source to see how it is done.</p></div>
 </div>
 <div class="sect2">
 <h3 id="_order_of_operations">Order of operations</h3>
@@ -1245,7 +1250,7 @@ unsupported preprocessor type
 </dt>
 <dd>
 <p>
- Tried to <em>preprocessor_register()</em> something that is not a function.
+ Tried to <em>preprocessor_register()</em> something that is not a function or table.
 </p>
 </dd>
 <dt class="hdlist1">
@@ -1351,7 +1356,7 @@ section w/ keys multiple times used:
 <div class="sect1">
 <h2 id="_programming_api_for_extensions">Programming API for extensions</h2>
 <div class="sectionbody">
-<div class="paragraph"><p>Lua functions specific to pipadoc which can be used by plugins.</p></div>
+<div class="paragraph"><p>Functions pipadoc exports to be used by extensions/config files.</p></div>
 <div class="sect2">
 <h3 id="_dependencies">Dependencies</h3>
 <div class="paragraph"><p><em>pipadoc</em> does not depend on any external Lua libraries. The intention is to, by default,
@@ -1369,17 +1374,17 @@ installed.</p></div>
 <dd>
 <p>
   try to load optional modules
-   wraps lua <em>require</em> in a pcall so that failure to load a module results in <em>nil</em> rather
-   than a error
+   wraps lua <em>require</em> in a pcall so that failure to load module <em>name</em> results in <em>nil</em>
+   rather than a error.
 </p>
 </dd>
 </dl></div>
 </div>
 <div class="sect2">
 <h3 id="_logging_progress_and_errors">Logging Progress and Errors</h3>
-<div class="paragraph"><p>Here are few functions to log progress and report errors. All this functions take a
-variable argument list. Any Argument passed to them will be converted to a string and printed
-to stderr when the verbosity level is high enough.</p></div>
+<div class="paragraph"><p>Functions for to log progress and report errors. All this functions take a variable argument
+list. Any Argument passed to them will be converted to a string and printed to stderr when
+the verbosity level is high enough.</p></div>
 <div class="dlist"><dl>
 <dt class="hdlist1">
 <code><strong>warn(&#8230;)</strong></code>
@@ -1602,6 +1607,61 @@ genfunc <code>function(context)</code>
 </dl></div>
 </div>
 <div class="sect2">
+<h3 id="_preprocessors">Preprocessors</h3>
+<div class="paragraph"><p>One can register multiple preprocessors for different filetypes. A preprocessor can modify
+the line prior it is parsed and further processed. Preprocessing happens only on lines which
+contains a comment. By default pipadoc has no preprocessors loaded. An user may define
+these in a config file. See the <em>pipadoc_config.lua</em> which ships with the pipadoc
+distribution.</p></div>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+<code><strong>preprocessor_register (langpat, preprocess)</strong></code>
+</dt>
+<dd>
+<p>
+  register a preprocessor
+</p>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+langpat
+</dt>
+<dd>
+<p>
+    Register preprocessor to all filetypes whose mnemonic matches <em>langpat</em>.
+</p>
+</dd>
+<dt class="hdlist1">
+preprocess
+</dt>
+<dd>
+<p>
+    The preprocesor to register. Can be one of:
+</p>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+<code>function (line) ... end</code> 
+</dt>
+<dd>
+<p>
+      Takes a string (the source line) and shall return the preprocessed line or <em>nil</em> to
+      drop the line.
+</p>
+</dd>
+<dt class="hdlist1">
+<code>{pattern, repl [, n]}</code> 
+</dt>
+<dd>
+<p>
+      Generates a function calling <em>string.gsub(pattern, repl [, n])</em> for preprocessing.
+</p>
+</dd>
+</dl></div>
+</dd>
+</dl></div>
+</dd>
+</dl></div>
+</div>
+<div class="sect2">
 <h3 id="_sections">Sections</h3>
 <div class="dlist"><dl>
 <dt class="hdlist1">
@@ -1637,6 +1697,19 @@ context
 </p>
 </dd>
 </dl></div>
+</dd>
+</dl></div>
+</div>
+<div class="sect2">
+<h3 id="_other_functions">Other functions</h3>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+<code><strong>add_inputfile(filename)</strong></code>
+</dt>
+<dd>
+<p>
+  Add a <em>filename</em> to the list of files to process
+</p>
 </dd>
 </dl></div>
 </div>
@@ -1705,7 +1778,7 @@ Christian Thäter &lt;<a href="mailto:ct@pipapo.org">ct@pipapo.org</a>&gt; for i
 <div id="footer">
 <div id="footer-text">
 Last updated
- 2017-06-30 18:58:45 CEST
+ 2017-07-01 01:59:29 CEST
 </div>
 </div>
 </body>
