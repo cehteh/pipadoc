@@ -410,6 +410,10 @@ end
 --: line of a file is considered as documentation but no special operations apply. This is used
 --: for plaintext documentation files. Which also uses the "PIPADOC:" keyword to enable special
 --: operations within text files.
+--:
+--: New uncommon filetypes can be added from a config file with 'filetype_register()'  or with --: the
+--: '--register' commandline option.
+--:
 local filetypes = {}
 
 --api_filetypes:
@@ -1409,31 +1413,44 @@ end
 --:
 --: Any 'line-comment' of the programming language directly (without spaces) followed by a
 --: optional alphanumeric section name, followed by an operator, followed by an optional
---: argument and then the documentation text. Only lines qualify this syntax are processed as
---: pipadoc documentation.
+--: argument and then the documentation text and not ending in 'NODOC'. Only lines qualify this
+--: syntax are processed as pipadoc documentation.
 --:
 --: .The formal syntax looks like:
 --: ....
---: pipadoc = [source] <linecomment> opspec [..space.. [documentationtext]] !"NODOC"
+--: pipadoc = [source] <linecomment> opspec [..space.. [documentationtext]] !"NODOC$"
 --:
 --: source = ..any source code text..
 --:
 --: linecomment = ..the linecomment sequence chosen by the filetype..
 --:
---: opspec = [section] <operator> [arg]
+--: opspec = [section] <operator> [argument]
 --:
 --: section = ..alphanumeric text including underscore and dots..
 --:
 --: operator = [:=@#]
 --:
---: arg = ..alphanumeric text including underscore and dots..
+--: argument = ..alphanumeric text including underscore and dots..
 --:
 --: documentationtext = ..rest of the line..
 --: ....
 --:
+--: There is one special case, when a line ends with "NODOC" it is not parsed as
+--: documentation text. This is used to escape lines.
 --:
---TODO: DOCME oneline vs block, default section name, MAIN section
---TODO: note that literal strings are not special
+--: IMPORTANT: Pipadoc does not know anything except the line comment characters about the source
+--:            programming languages syntax. This includes Literal strings and any other
+--:            syntactic form which may look like a line comment, but is not. Such lines need to
+--:            be marked with 'NODOC' to make them unambigous.
+--:
+--: Documentation can be either blocked or oneline. Blocks start with a documentation comment
+--: including a section or argument specifier but have no documentation text. The text block then
+--: follows in documentation commant where section and argument are empty. They span unti a new
+--: documentation block is set. Oneline documentation is defined by a documentation comment which
+--: sets either section or argument and has a non empty documentation text. They can be
+--: interleaved within blocks, after a oneline documentation the preceeding block continues.
+--: This is used to define index and glosary items right within block documentation.
+--:
 --:
 --: Order of operations
 --: ~~~~~~~~~~~~~~~~~~~
