@@ -22,7 +22,6 @@
 --+        like this, note about indentation, no newline
 --PLANNED: true block comments --name(key makes every further line prepended
 --+        with --name:key util --) is seen, 'PIPADOC:' overrides apply
---PLANNED: postprocessors on markup
 --PLANNED: links for all 'see' references
 --PLANNED: document config file
 
@@ -459,8 +458,8 @@ local function comment_select (line, linecommentseqs)
   end
 end
 
-local preprocessors = {}
 
+local preprocessors = {}
 --api_preproc:
 --:
 --: Preprocessors
@@ -522,6 +521,65 @@ local function preprocessors_attach ()
       end
     end
   end
+end
+
+local postprocessors = {}
+--api_postproc:
+--:
+--: Postprocessors
+--: ~~~~~~~~~~~~~~
+--: Postprocessors run at output generation time. They are registered per markup types.
+--: Processors are called in order of their definition.
+--:
+function postprocessor_register (markuppat, postprocess) --: register a postprocessor
+  --:   markuppat:::
+  --:     Register postprocessor to all markups whose name matche 'markuppat'.
+  --:   postprocess:::
+  --:     The postprocesor to register. Can be one of:
+  --:     `function (line) ... end` ::::
+  --:       Takes a string (the source line) and shall return the postprocessed line or 'nil' to
+  --:       drop the line.
+  --:     `+++\{pattern, repl [, n]\}+++` ::::
+  --:       Generates a function calling 'string.gsub(pattern, repl [, n])' for postprocessing.
+  --:
+  assert_type (markuppat, "string")
+  dbg ("register postprocessor:", markuppat, postprocess)
+
+  if type (postprocess) == "table" then
+    postprocess = function (str)
+      return str:gsub (postprocess, postprocess[1], postprocess[2], postprocess[3])
+    end
+  end
+
+  if type (postprocess) == "function" then
+    table.insert(postprocessors, {pattern=markuppat, postprocessor=postprocess})
+  else
+    warn ("unsupported postprocessor type") --cwarn: {STRING} ::
+    --cwarn:  Tried to 'postprocessor_register()' something that is not a function or table.
+  end
+end
+
+
+local active_postprocessors = {}
+
+local function postprocessors_attach ()
+  for i=1,#postprocessors do
+    local ppdesc = postprocessors[i]
+    if DOCVARS.MARKUP:match(ppdesc.pattern) then
+      trace ("add postprocessor for:", DOCVARS.MARKUP, ppdesc.postprocessor)
+      table.insert(active_postprocessors, ppdesc.postprocessor)
+    end
+  end
+end
+
+
+local function postprocessors_run (text)
+  for i=1,#active_postprocessors do
+    trace ("postprocess:", text)
+    text = active_postprocessors[i](text)
+  end
+  trace ("postprocess done:", text)
+  return text
 end
 
 --op:
@@ -879,7 +937,7 @@ local function setup()
     end,
 
     function (context)
-      local ret = streval(context.TEXT)
+      local ret = postprocessors_run (context.TEXT)
       if ret == "" and to_text (context.TEXT) then
         return ""
       else
@@ -1035,6 +1093,7 @@ local function setup()
   )
 
   preprocessors_attach ()
+  postprocessors_attach ()
 end
 
 
@@ -1487,6 +1546,7 @@ end
 --=api_filetypes
 --=api_op
 --=api_preproc
+--=api_postproc
 --=api_sections
 --:
 --: Other functions
