@@ -17,12 +17,37 @@ preprocessor_register ("^lua$",
 
 
 -- keel track of original file:line as asciidoc comments
-local file,line=0
+local file
+local line=0
+local origin=true
+
 postprocessor_register ("^asciidoc$",
                         function (text)
-                          if CONTEXT.FILE ~= file or math.abs(CONTEXT.LINE - line) > 3 then
+                          if text:match("^NOORIGIN") then
+                            origin=false
+                          else
+                            return text
+                          end
+                        end
+)
+
+postprocessor_register ("^asciidoc$",
+                        function (text)
+                          if text:match("^ORIGIN") then
+                            origin=true
+                          else
+                            return text
+                          end
+                        end
+)
+
+
+postprocessor_register ("^asciidoc$",
+                        function (text)
+                          if origin and ( CONTEXT.FILE ~= file or math.abs(CONTEXT.LINE - line) > 4) then
                             text = "// {FILE}:{LINE} //{NL}"..text
                           end
+
                           file = CONTEXT.FILE
                           line = CONTEXT.LINE
                           return text

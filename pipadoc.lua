@@ -586,7 +586,7 @@ end
 local function postprocessors_run (text)
   for i=1,#active_postprocessors do
     trace ("postprocess:", text)
-    text = active_postprocessors[i](text)
+    text = active_postprocessors[i](text) or ""
   end
   trace ("postprocess done:", text)
   return text
@@ -1385,9 +1385,11 @@ end
 --: Usage
 --: -----
 --:
+--: NOORIGIN
 --: .....
 --=usage
 --: .....
+--: ORIGIN
 --:
 --:
 --: Basic concepts
