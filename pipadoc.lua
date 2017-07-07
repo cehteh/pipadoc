@@ -745,6 +745,20 @@ local options = {
   end,
   "", --:  {STRING}
 
+  "    -D, --define <name>=<value>", --:  {STRING}
+  "                        define a custom DOCVAR", --:  {STRING}
+  ["-D"] = "--define",
+  ["--define"] = function (arg,i)
+    assert(type(arg[i+1]))
+    dbg("define1:", arg[i+1])
+    local key,value = arg[i+1]:match("^([%w_]+)=(.+)")
+    dbg("define:", key, value)
+    DOCVARS[key] = value
+    return 1
+  end,
+  "", --:  {STRING}
+
+
   -- intentionally undocumented option
   ["--make-doc"] = function (arg, i)
     os.execute("lua pipadoc.lua -m asciidoc pipadoc.lua >pipadoc.txt")
@@ -768,7 +782,6 @@ local options = {
   --PLANNED: eat (double, triple, ..) empty lines
   --PLANNED: add debug report (warnings/errors) to generated document PIPADOC_LOG section
   --PLANNED: line ending \n \r\n
-  --PLANNED: --define -D name=value for setting DOCVARS
   --PLANNED: wrap at blank/intelligent
   --PLANNED: wordwrap
   --PLANNED: some flags get defaults from the config file
@@ -1491,7 +1504,6 @@ end
 --: ---------
 --:
 --=filetypes
---TODO: optarg
 --:
 --: Programming languages supported by pipadoc
 --: ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1503,7 +1515,6 @@ end
 --: ---------
 --:
 --=op
---TODO: optarg
 --:
 --: Built in operators
 --: ~~~~~~~~~~~~~~~~~~
@@ -1539,7 +1550,6 @@ end
 --: for example prints the FILE:LINE processed and there is the 'varsubst' processor
 --: to substitute them in the documentation text. The user can set arbitrary DOCVARS
 --: from command line.
---TODO: optarg
 --:
 --: Predefined DOCVARS
 --: ~~~~~~~~~~~~~~~~~~
