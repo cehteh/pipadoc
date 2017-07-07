@@ -1,3 +1,4 @@
+--PLANNED: make preprocessors markup agnostic? (needs postprocessors)
 
 -- replace {STRING} in pipadoc comments with the first literal string from the code
 preprocessor_register ("^lua$",
