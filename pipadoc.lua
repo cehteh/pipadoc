@@ -746,14 +746,21 @@ local options = {
   "", --:  {STRING}
 
   "    -D, --define <name>=<value>", --:  {STRING}
-  "                        define a custom DOCVAR", --:  {STRING}
+  "                        define a DOCVAR", --:  {STRING}
+  "    -D, --define -<name>", --:  {STRING}
+  "                        undefine a DOCVAR", --:  {STRING}
   ["-D"] = "--define",
   ["--define"] = function (arg,i)
     assert(type(arg[i+1]))
-    dbg("define1:", arg[i+1])
     local key,value = arg[i+1]:match("^([%w_]+)=(.+)")
-    dbg("define:", key, value)
-    DOCVARS[key] = value
+    local undef = arg[i+1]:match("^[!-]([%w_]+)")
+    if undef then
+      dbg("undef:", undef)
+      DOCVARS[undef] = nil
+    elseif key then
+      dbg("define:", key, value)
+      DOCVARS[key] = value
+    end
     return 1
   end,
   "", --:  {STRING}
