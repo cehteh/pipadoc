@@ -16,12 +16,10 @@
 --: You should have received a copy of the GNU General Public License
 --: along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+--PLANNED: preprocess on all lines (nobug annotation macros)
 --PLANNED: include operator, add a file to the processing list
---PLANNED: split on newlines
 --PLANNED: merge lines, '+' operator?
 --+        like this, note about indentation, no newline
---PLANNED: true block comments --name(key makes every further line prepended
---+        with --name:key util --) is seen, 'PIPADOC:' overrides apply
 --PLANNED: links for all 'see' references
 --PLANNED: document config file
 
@@ -781,14 +779,11 @@ local options = {
 
   --PLANNED: --alias match pattern --file-as match filename
   --PLANNED: -o --output
-  --PLANNED: -l --load
   --PLANNED: --features  show a report which features (using optional lua modules) are available
-  --PLANNED: list-operators
   --PLANNED: list-sections
   --PLANNED: force filetype variant  foo.lua:.txt
-  --PLANNED: eat (double, triple, ..) empty lines
+  --PLANNED: eat (double, triple, ..) empty lines (do this in a postprocessor)
   --PLANNED: add debug report (warnings/errors) to generated document PIPADOC_LOG section
-  --PLANNED: line ending \n \r\n
   --PLANNED: wrap at blank/intelligent
   --PLANNED: wordwrap
   --PLANNED: some flags get defaults from the config file
@@ -1142,7 +1137,7 @@ local function process_line (line, comment, filecontext)
   if preprocessors then
     for i=1,#preprocessors do
       local linepp = preprocessors[i](line)
-      --PLANNED: preprocessors may expand to multiple lines?
+      --PLANNED: preprocessors may expand to multiple lines? return table
       if to_text (linepp) and line ~= linenew then
         line = linepp
         trace("preprocessed:", line)
@@ -1665,7 +1660,6 @@ end
 --:
 
 --PLANNED: control language/conditionals?  //section?key {condition}  else becomes DROPPED:section_key
---PLANNED: asciidoc //source:line// comments like old pipadoc
 --PLANNED: not only pipadoc.conf but also pipadoc.sty templates, conf are local only configurations, .sty are global styles
 --PLANNED: how to join (and then wordwrap) lines?
 --PLANNED: bash like parameter expansion, how to apply that to sections/keys too --%{section}:%{key} .. how about streval on SECTION and ARG //{SECTION}:{ARG}
