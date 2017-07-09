@@ -492,7 +492,7 @@ function preprocessor_register (langpat, preprocess) --: register a preprocessor
   --:     `function (line) ... end` ::::
   --:       Takes a string (the source line) and shall return the preprocessed line or 'nil' to
   --:       drop the line.
-  --:     `+++\{pattern, repl [, n]\}+++` ::::
+  --:     +{pattern, repl [, n]}+ ::::
   --:       Generates a function calling 'string.gsub(pattern, repl [, n])' for preprocessing.
   --:
   assert_type (langpat, "string")
@@ -552,7 +552,7 @@ function postprocessor_register (markuppat, postprocess) --: register a postproc
   --:     `function (line) ... end` ::::
   --:       Takes a string (the source line) and shall return the postprocessed line or 'nil' to
   --:       drop the line.
-  --:     `+++\{pattern, repl [, n]\}+++` ::::
+  --:     +{pattern, repl [, n]}+ ::::
   --:       Generates a function calling 'string.gsub(pattern, repl [, n])' for postprocessing.
   --:
   assert_type (markuppat, "string")
