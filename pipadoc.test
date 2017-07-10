@@ -65,6 +65,7 @@ return $error
 #@argonly
 #:
 #: TESTFOO
+echo TESTPP becomes a docline
 #:
 #=streval
 #:
@@ -123,6 +124,7 @@ return $error
 #> 2. arg block
 #>
 #> TESTBAR
+#> TESTBAR becomes a docline
 #>
 #> 123
 #> foobar

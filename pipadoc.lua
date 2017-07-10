@@ -16,7 +16,6 @@
 --: You should have received a copy of the GNU General Public License
 --: along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
---PLANNED: preprocess on all lines (nobug annotation macros)
 --PLANNED: include operator, add a file to the processing list
 --PLANNED: merge lines, '+' operator?
 --+        like this, note about indentation, no newline
@@ -479,10 +478,9 @@ local preprocessors = {}
 --: ~~~~~~~~~~~~~
 --:
 --: One can register multiple preprocessors for different filetypes. A preprocessor can modify
---: the line prior it is parsed and further processed. Preprocessing happens only on lines which
---: contains a comment. By default pipadoc has no preprocessors loaded. An user may define
---: these in a config file. See the 'pipadoc_config.lua' which ships with the pipadoc
---: distribution.
+--: the line prior it is parsed and further processed. By default pipadoc has no preprocessors
+--: defined. The user may define these in a config file. See the 'pipadoc_config.lua' which
+--: ships with the pipadoc distribution.
 --:
 function preprocessor_register (langpat, preprocess) --: register a preprocessor
   --:   langpat:::
@@ -1133,22 +1131,9 @@ local function process_line (line, comment, filecontext)
   }
   CONTEXT=context
 
-  local preprocessors = filecontext.filetype.preprocessors
-  if preprocessors then
-    for i=1,#preprocessors do
-      local linepp = preprocessors[i](line)
-      --PLANNED: preprocessors may expand to multiple lines? return table
-      if to_text (linepp) and line ~= linenew then
-        line = linepp
-        trace("preprocessed:", line)
-      end
-    end
-  end
-
   --context:
   --:pre `PRE`::
   --:pre   Contains the sourcecode in before the linecomment.
-  --:pre   To be used by preprocessors to gather information.
   --:comment `COMMENT`::
   --:comment   Character sequence which was used as line comment.
   --:section `SECTION`::
@@ -1225,6 +1210,19 @@ local function process_file(file)
     trace("input:", line)
 
     if  not line:match("NODOC$") then
+
+      local preprocessors = filecontext.filetype.preprocessors
+      if preprocessors then
+        for i=1,#preprocessors do
+          local linepp = preprocessors[i](line)
+          --PLANNED: preprocessors may expand to multiple lines? return table
+          if to_text (linepp) and line ~= linenew then
+            line = linepp
+            trace("preprocessed:", line)
+          end
+        end
+      end
+
       local comment = comment_select(line, filetype)
 
       if comment then

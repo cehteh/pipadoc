@@ -65,6 +65,16 @@ postprocessor_register ("",
 -- for the testsuite
 preprocessor_register ("^test",
                        function (str)
+                         local ret,num = str:gsub("TESTPP", '#: TESTFOO')
+                         if num > 0 then
+                           warn("Test-Substitute TESTPP with #: TESTFOO")
+                         end
+                         return ret
+                       end
+)
+
+preprocessor_register ("^test",
+                       function (str)
                          local ret,num = str:gsub("TESTFOO", 'TESTBAR')
                          if num > 0 then
                            warn("Test-Substitute TESTFOO with TESTBAR")
