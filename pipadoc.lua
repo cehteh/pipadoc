@@ -1209,20 +1209,20 @@ local function process_file(file)
     filecontext.LINE = filecontext.LINE +1
     trace("input:", line)
 
-    if  not line:match("NODOC$") then
-
-      local preprocessors = filecontext.filetype.preprocessors
-      if preprocessors then
-        for i=1,#preprocessors do
-          local linepp = preprocessors[i](line)
-          --PLANNED: preprocessors may expand to multiple lines? return table
-          if to_text (linepp) and line ~= linenew then
-            line = linepp
-            trace("preprocessed:", line)
-          end
+    local preprocessors = filecontext.filetype.preprocessors
+    if preprocessors then
+      for i=1,#preprocessors do
+        local linepp = preprocessors[i](line)
+        --PLANNED: preprocessors may expand to multiple lines? return table
+        if to_text (linepp) and line ~= lineppw then
+          line = linepp
+          trace("preprocessed:", line)
         end
+        if not line then break end
       end
+    end
 
+    if line then
       local comment = comment_select(line, filetype)
 
       if comment then
@@ -1426,12 +1426,11 @@ end
 --:
 --: Any 'line-comment' of the programming language directly (without spaces) followed by a
 --: optional alphanumeric section name, followed by an operator, followed by an optional
---: argument and then the documentation text and not ending in 'NODOC'. Only lines qualify this
---: syntax are processed as pipadoc documentation.
+--: argument. Only lines qualify this syntax are processed as pipadoc documentation.
 --:
 --: .The formal syntax looks like:
 --: ....
---: pipadoc = [source] <linecomment> opspec [..space.. [documentationtext]] !"NODOC$"
+--: pipadoc = [source] <linecomment> opspec [..space.. [documentationtext]]
 --:
 --: source = ..any source code text..
 --:
@@ -1448,13 +1447,16 @@ end
 --: documentationtext = ..rest of the line..
 --: ....
 --:
---: There is one special case, when a line ends with "NODOC" it is not parsed as
---: documentation text. This is used to escape lines.
+--: There config shipped with pipadoc gives an example to drop a line when it end with "NODOC".
 --:
 --: IMPORTANT: Pipadoc does not know anything except the line comment characters about the source
 --:            programming languages syntax. This includes Literal strings and any other
 --:            syntactic form which may look like a line comment, but is not. Such lines need to
---:            be marked with 'NODOC' to make them unambigous.
+--:            be dropped by a preprocessor to make them unambigous.
+--:
+--: ----
+--: const char* example = "//MAIN: this is a C string and not documentation"; //NODOC{NL}
+--: ----
 --:
 --: Documentation can be either blocked or oneline. Blocks start with a documentation comment
 --: including a section or argument specifier but have no documentation text. The text block then
@@ -1491,9 +1493,6 @@ end
 --: lines. The processing steps may be stateful and thus preserve information for further
 --: processing.
 --:
---: ----
---: const char* example = "//MAIN: this is a C string and not documentation"; //NODOC{NL}
---: ----
 --:
 --: Sections and Keys
 --: -----------------

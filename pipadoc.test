@@ -63,6 +63,7 @@ return $error
 ##block
 #:
 #@argonly
+#: not a docline NODOC
 #:
 #: TESTFOO
 echo TESTPP becomes a docline

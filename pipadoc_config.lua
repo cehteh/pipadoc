@@ -1,5 +1,13 @@
 --PLANNED: make preprocessors markup agnostic? (needs postprocessors)
 
+preprocessor_register ("",
+                       function (str)
+                         if not str:match("NODOC$") then
+                           return str
+                         end
+                       end
+)
+
 -- replace {STRING} in pipadoc comments with the first literal string from the code
 preprocessor_register ("^lua$",
                        function (str)
