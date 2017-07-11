@@ -1243,7 +1243,7 @@ end
 
 local sofar_rec={}
 
-function generate_output(which, generators)
+function generate_output(which)
   local context = {
     FILE = "<output>"
   }
