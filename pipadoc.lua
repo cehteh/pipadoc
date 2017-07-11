@@ -19,8 +19,6 @@
 --PLANNED: include operator, add a file to the processing list
 --PLANNED: merge lines, '+' operator?
 --+        like this, note about indentation, no newline
---PLANNED: links for all 'see' references
---PLANNED: document config file
 
 CONTEXT = {
   --context:file `FILE`::
@@ -765,7 +763,7 @@ local options = {
 
   -- intentionally undocumented option
   ["--make-doc"] = function (arg, i)
-    os.execute("lua pipadoc.lua -m asciidoc pipadoc.lua >pipadoc.txt")
+    os.execute("lua pipadoc.lua -m asciidoc pipadoc.lua pipadoc_config.lua >pipadoc.txt")
     os.execute("asciidoc -a toc pipadoc.txt")
     os.execute('a2x -L -k -v --dblatex-opts "-P latex.output.revhistory=0" pipadoc.txt')
     return 1
@@ -1555,6 +1553,29 @@ end
 --: ~~~~~~~~~~~~~~~~~~
 --:
 --@DOCVARS
+--:
+--:
+--: Configuration File
+--: ------------------
+--:
+--: Pipadoc tries to load a configuration file on startup. By default it's named
+--: +pipadoc_config.lua+ in the current directory. This name can be changed by the '--config'
+--: option.
+--:
+--: The configuration file is used to define additional pre- and post-processors, define states
+--: for those and define custom operators. It is loaded and executed as it own chunk and may only
+--: access the global variables (DOCVARS, CONTEXT) and api functions described later.
+--:
+--:
+--: Example Configuration File
+--: ~~~~~~~~~~~~~~~~~~~~~~~~~~
+--:
+--: Pipadoc itself comes with a configuration file for generating it's own documentation and
+--: assist the testsuite. This is a good starting point for writing your own configuration.
+--:
+--: There are pre- and post- processors defined for:
+--:
+--=default_config
 --:
 --: Common Warnings
 --: ---------------

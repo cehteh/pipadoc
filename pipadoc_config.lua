@@ -1,5 +1,7 @@
 --PLANNED: make preprocessors markup agnostic? (needs postprocessors)
 
+--default_config:
+--: * Remove any line which ends in 'NODOC'.
 preprocessor_register ("",
                        function (str)
                          if not str:match("NODOC$") then
@@ -8,15 +10,15 @@ preprocessor_register ("",
                        end
 )
 
--- replace {STRING} in pipadoc comments with the first literal string from the code
+--: *  Replace +++\{STRING\}+++ in pipadoc comments with the first literal string from the code.
 preprocessor_register ("^lua$",
                        function (str)
                          return str:gsub('^([^"]*"([^"]*)".*--%w*:%w*)(.*){STRING}(.*)', '%1%3%2%4', 1)
                        end
 )
 
---PLANNED: generate function index
--- generate asciidoc formatted documentation for functions
+--TODO: generate function index
+--: * Generate asciidoc formatted documentation for Lua functions.
 preprocessor_register ("^lua$",
                        function (str)
                          return str:gsub("^(.*function%s+([^)]*%)).*%-%-%w*:%w*)", '%1 +*%2*+::{NL} ', 1)
@@ -24,7 +26,9 @@ preprocessor_register ("^lua$",
 )
 
 
--- keep track of original file:line as asciidoc comments
+--: * Keep track of original file:line as asciidoc comments in the output.
+--:   Disable this tracking when a doc comment starts with 'NOORIGIN' and
+--:   re-enable it with a doc comment starting with 'ORGIN'.
 local file
 local line=0
 local origin=true
@@ -62,7 +66,7 @@ postprocessor_register ("^asciidoc$",
                         end
 )
 
--- do string evaluation on all output lines
+--: * Do string evaluation on all output lines.
 postprocessor_register ("",
                         function (text)
                           return streval(text)
@@ -92,9 +96,12 @@ preprocessor_register ("^test",
 )
 
 
+
 --PLANNED: ldoc/doxygen/javadoc compatible macros @param @return @see etc.
 
-
+--: * Generate asciidoc formatted lists for doc comments in FIXME/TODO/PLANNED sections.
+--:   Each such item includes information gathered from the git commit which touched
+--:   that line last.
 function git_blame (file, line)
   dbg("blame",file, line)
   local result = {}
