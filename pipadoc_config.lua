@@ -24,7 +24,7 @@ preprocessor_register ("^lua$",
 )
 
 
--- keel track of original file:line as asciidoc comments
+-- keep track of original file:line as asciidoc comments
 local file
 local line=0
 local origin=true
