@@ -21,10 +21,10 @@
 --+        like this, note about indentation, no newline
 
 CONTEXT = {
-  --context:file `FILE`::
-  --context:file   The file or section name currently processed or some special annotation
+  --context:file {vardef('FILE')}
+  --Context:file   The file or section name currently processed or some special annotation
   --context:file   in angle brackets (eg '<startup>') on other processing phases
-  --context:line `LINE`::
+  --context:line {vardef('LINE')}
   --context:line   Current line number of input or section, or indexing key
   --context:line   Lines start at 1
 
@@ -32,16 +32,16 @@ CONTEXT = {
 }
 
 DOCVARS = {
-  --DOCVARS:nl `NL`::
+  --DOCVARS:nl {vardef('NL')}
   --DOCVARS:nl   The line-break character sequence, defaults to '\n' and
   --DOCVARS:nl   can be changed with the '--define' command-line option.
   NL = "\n",
 
-  --DOCVARS:nil `NIL`::
+  --DOCVARS:nil {vardef('NIL')}
   --DOCVARS:nil   Expands to an empty string.
   NIL = "",
 
-  --DOCVARS:markup `MARKUP`::
+  --DOCVARS:markup {vardef('MARKUP')}
   --DOCVARS:markup   The markup syntax (--markup option). This information only used by pipadoc
   --DOCVARS:markup   for selecting postprocessors. Other user defined extensions may use it as
   --DOCVARS:markup   well.
@@ -871,17 +871,17 @@ local function setup()
   do
     local time = os.time()
     local date = os.date ("*t", time)
-    --DOCVARS:date `YEAR, MONTH, DAY, HOUR, MINUTE`::
+    --DOCVARS:date {vardef('YEAR, MONTH, DAY, HOUR, MINUTE')}
     --DOCVARS:date   Current date information
     DOCVARS.YEAR = date.year
     DOCVARS.MONTH = date.month
     DOCVARS.DAY = date.day
     DOCVARS.HOUR = date.hour
     DOCVARS.MINUTE = date.min
-    --DOCVARS:date `DATE`::
+    --DOCVARS:date {vardef('DATE')}
     --DOCVARS:date   Current date in YEAR/MONTH/DAY format
     DOCVARS.DATE = date.year.."/"..date.month.."/"..date.day
-    --DOCVARS:date `LOCALDATE`::
+    --DOCVARS:date {vardef('LOCALDATE')}
     --DOCVARS:date   Current date in current locale format
     DOCVARS.LOCALDATE = os.date ("%c", time)
   end
@@ -1160,18 +1160,18 @@ local function process_line (line, comment, filecontext)
   CONTEXT=context
 
   --context:
-  --:pre `PRE`::
+  --:pre {vardef('PRE')}
   --:pre   Contains the sourcecode in before the linecomment.
-  --:comment `COMMENT`::
+  --:comment {vardef('COMMENT')}
   --:comment   Character sequence which was used as line comment.
-  --:section `SECTION`::
+  --:section {vardef('SECTION')}
   --:section   Section where the documentation should appear.
-  --:op `OP`::
+  --:op {vardef('OP')}
   --:op   Single punctuation Operator defining how to process this line.
-  --:arg `ARG`::
+  --:arg {vardef('ARG')}
   --:arg   Optional argument to the operator. This can be the sort key
   --:arg   (alphabetic or numeric) or another section name for pasting.
-  --:text `TEXT`::
+  --:text {vardef('TEXT')}
   --:text   The actual Documentation Text.
 
   -- special case for plaintext files
@@ -1703,6 +1703,13 @@ end
 --:
 --: Nevertheless, when you make any improvements to pipadoc please consider to contact
 --: Christian Thäter <ct@pipapo.org> for including them into the mainline.
+--:
+--: [index]
+--: Index
+--: -----
+--:
+--@INDEX
+--:
 --:
 --ISSUES:
 --:

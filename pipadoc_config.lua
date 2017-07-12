@@ -17,13 +17,72 @@ preprocessor_register ("^lua$",
                        end
 )
 
---TODO: generate function index
 --: * Generate asciidoc formatted documentation for Lua functions.
 preprocessor_register ("^lua$",
                        function (str)
-                         return str:gsub("^(.*function%s+([^)]*%)).*%-%-%w*:%w*)", '%1 +*%2*+::{NL} ', 1)
+                         local fn = str:match("function%s+([^(%s]*).*%-%-%w*:%w*")
+                         if fn then
+                           section_append("INDEX", fn:lower(), {
+                                            FILE=CONTEXT.FILE,
+                                            LINE=CONTEXT.LINE,
+                                            TEXT="{indexref('"..fn.."')}"
+                           })
+                           return str:gsub("^(.*function%s+([^)]*%)).*%-%-%w*:%w*)",
+                                           '%1 {fndef("'..fn..'","%2")}', 1)
+                         end
+                         return str
                        end
 )
+
+
+function fndef(id, text)
+  text = text or id
+  return "anchor:index_"..id.."[]+*"..text.."*+::"..DOCVARS.NL.." "
+end
+
+function indexdef(id, text)
+  section_append("INDEX", id:lower(), {
+                   FILE=CONTEXT.FILE,
+                   LINE=CONTEXT.LINE,
+                   TEXT="{indexref('"..id.."')}"
+  })
+
+  text = text or id
+  return "anchor:index_"..id.."[]`"..text.."`::"..DOCVARS.NL
+end
+
+function vardef(id, text)
+  local anchors = ""
+  for ix in id:gmatch("([^%s,]*)[,%s]*") do
+    if #ix > 0 then
+      section_append("INDEX", ix:lower(), {
+                       FILE=CONTEXT.FILE,
+                       LINE=CONTEXT.LINE,
+                       TEXT="{indexref('"..ix.."')}"
+      })
+
+      anchors=anchors.."anchor:index_"..ix.."[]"
+    end
+  end
+
+  text = text or id
+  return anchors.."`"..text.."`::"..DOCVARS.NL
+end
+
+local lastfirstchar= nil
+
+function indexref(id, text)
+  local firstchar=id:sub(1,1):lower()
+
+  text = text or id
+
+  if lastfirstchar ~= firstchar then
+    lastfirstchar = firstchar
+    return firstchar:upper().." :: \n  <<index_"..id..","..id..">>,"
+  else
+    return "  <<index_"..id..","..id..">>,"
+  end
+end
 
 
 --: * Keep track of original file:line as asciidoc comments in the output.
