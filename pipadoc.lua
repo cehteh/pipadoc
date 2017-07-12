@@ -591,11 +591,14 @@ end
 
 
 local function postprocessors_run (text)
+  local textout = text
   for i=1,#active_postprocessors do
-    trace ("postprocess:", text)
-    text = active_postprocessors[i](text) or ""
+    textout = active_postprocessors[i](textout) or ""
   end
-  trace ("postprocess done:", text)
+  if textout ~= text then
+    trace ("postprocess:", text, "->", textout)
+    return textout
+  end
   return text
 end
 
@@ -1081,7 +1084,7 @@ local function setup()
         warn("no section named:", which) --cwarn: {STRING} ::
         --cwarn:  Using '=', '@' or '#' on a section which as never defined.
       end
-      return text
+      return postprocessors_run (text)
     end
   )
 
@@ -1140,7 +1143,7 @@ local function setup()
       else
         warn("no section named:", which)
       end
-      return text
+      return postprocessors_run (text)
     end
   )
 
