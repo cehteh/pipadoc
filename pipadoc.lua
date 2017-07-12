@@ -46,10 +46,12 @@ DOCVARS = {
 
 local args_done = false
 local opt_verbose = 1
+local opt_safe = false
 local opt_nodefaults = false
 local opt_toplevel = "MAIN"
 local opt_inputs = {}
 local opt_config = "pipadoc_config.lua"
+local opt_config_set = false
 
 
 --PLANNED: log to PIPADOC_LOG section, later hooked in here
@@ -214,7 +216,7 @@ end
 --:
 --: WARNING: String evaluation may execute Lua code which is embedded in the documentation
 --:          comments. This may lead to unsafe operation when the source is not trusted.
---PLANNED: safe/unsafe mode for disabling string evaluation, function calls only, not vars expansion
+--:          Use the <<_safe_mode,Safe Mode>> to prevent this.
 --:
 
 -- for lua 5.1 compatibility
@@ -253,15 +255,16 @@ function streval (str) --: evaluate Lua code inside curly braces in str.
           inbraced = streval_intern(inbraced)
           if #inbraced > 0 then
 
-            --PLANNED: execute only when safe
-            local success,result = pcall(loadlua ("return ("..inbraced..")"))
+            if not opt_safe or inbraced:match("^[%w_]+$") then
+              local success,result = pcall(loadlua ("return ("..inbraced..")"))
 
-            if success and result then
-              braced = result or ""
-            else
-              success,result = pcall(loadlua (inbraced))
-              if success then
+              if success and result then
                 braced = result or ""
+              else
+                success,result = pcall(loadlua (inbraced))
+                if success then
+                  braced = result or ""
+                end
               end
             end
           end
@@ -714,6 +717,7 @@ local options = {
   ["--config"] = function (arg, i)
     assert(type(arg[i+1]))
     opt_config = arg[i+1]
+    opt_config_set = true
     dbg("config:", opt_config)
     return 1
   end,
@@ -725,6 +729,20 @@ local options = {
   ["--no-defaults"] = function ()
     opt_nodefaults = true
     dbg("nodefaults")
+  end,
+  "", --:  {STRING}
+
+
+  "    --safe", --:  {STRING}
+  "                        Enables safe mode (see <<safe_mode,Safe Mode>>).", --:  {STRING}
+  "                        Safe mode disables the default config file and", --:  {STRING}
+  "                        other facilities which may execute untrusted code", --:  {STRING}
+  ["--safe"] = function ()
+    opt_safe = true
+    if not opt_config_set then
+      opt_config = nil
+    end
+    dbg("safe")
   end,
   "", --:  {STRING}
 
@@ -1577,13 +1595,17 @@ end
 --:
 --=default_config
 --:
---: Common Warnings
---: ---------------
 --:
---: Pipadoc emits warnings on problems. These are mostly harmless but may need some attention.
---: Warnings are supressed with the '-q' option.
+--: Safe Mode
+--: ---------
 --:
---=cwarn
+--: This mode is when one wants to run pipadoc on marginally trusted source repositories.
+--: It disables unsafe Lua code evaluation in 'streval()' and disables the default
+--: configuration file. Thus no code from a non trusted source will be executed.
+--:
+--: Plain variables are still expanded in 'streval()' and an user supplied configuration file
+--: will be loaded. Care must be taken that this file can not be exploited.
+--:
 --:
 --: Programming API for Extensions
 --: ------------------------------
@@ -1607,6 +1629,17 @@ end
 --=api_various
 --:
 --:
+--: <<<<<<<<<<
+--: [appendix]
+--: Common Warnings
+--: ---------------
+--:
+--: Pipadoc emits warnings on problems. These are mostly harmless but may need some attention.
+--: Warnings are supressed with the '-q' option.
+--:
+--=cwarn
+--:
+--: <<<<<<<<<<
 --: [appendix]
 --: Generate the Pipadoc Documentation
 --: ----------------------------------
