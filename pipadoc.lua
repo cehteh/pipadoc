@@ -1456,21 +1456,21 @@ end
 --:
 --: .The formal syntax looks like:
 --: ....
---: pipadoc = [source] <linecomment> opspec [..space.. [documentationtext]]
+--: <pipadoc> ::= [source] <linecomment> <opspec> [ <space> [documentationtext]]
 --:
---: source = ..any source code text..
+--: <source> ::= <any source code text>
 --:
---: linecomment = ..the linecomment sequence chosen by the filetype..
+--: <linecomment> ::= <the filetypes linecomment sequence>
 --:
---: opspec = [section] <operator> [argument]
+--: <opspec> ::= [section] <operator> [argument]
 --:
---: section = ..alphanumeric text including underscore and dots..
+--: <section> ::= <alphanumeric text including underscore and dots>
 --:
---: operator = [:=@#]
+--: <operator> ::= ":" | "=" | "@" | "#" | <user defined operators>
 --:
---: argument = ..alphanumeric text including underscore and dots..
+--: <argument> ::= <alphanumeric text including underscore and dots>
 --:
---: documentationtext = ..rest of the line..
+--: <documentationtext> ::= <rest of the line>
 --: ....
 --:
 --: There config shipped with pipadoc gives an example to drop a line when it end with "NODOC".
