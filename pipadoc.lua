@@ -1239,7 +1239,7 @@ local function process_file(file)
       for i=1,#preprocessors do
         local linepp = preprocessors[i](line)
         --PLANNED: preprocessors may expand to multiple lines? return table
-        if to_text (linepp) and line ~= lineppw then
+        if to_text (linepp) and line ~= linepp then
           line = linepp
           trace("preprocessed:", line)
         end
