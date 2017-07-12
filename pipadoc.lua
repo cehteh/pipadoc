@@ -485,7 +485,7 @@ local preprocessors = {}
 --:
 --: One can register multiple preprocessors for different filetypes. A preprocessor can modify
 --: the line prior it is parsed and further processed. By default pipadoc has no preprocessors
---: defined. The user may define these in a config file. See the <<_config_files,
+--: defined. The user may define these in a config file. See the <<_configuration_file,
 --: 'pipadoc_config.lua'>> which ships with the pipadoc distribution.
 --:
 function preprocessor_register (langpat, preprocess) --: register a preprocessor
@@ -741,9 +741,9 @@ local options = {
 
 
   "    --safe", --:  {STRING}
-  "                        Enables safe mode (see <<safe_mode,Safe Mode>>).", --:  {STRING}
-  "                        Safe mode disables the default config file and", --:  {STRING}
-  "                        other facilities which may execute untrusted code", --:  {STRING}
+  "                        Enables safe mode. Safe mode disables the default ", --:  {STRING}
+  "                        config file and other facilities which may execute", --:  {STRING}
+  "                        untrusted code", --:  {STRING}
   ["--safe"] = function ()
     opt_safe = true
     if not opt_config_set then
@@ -1074,7 +1074,6 @@ local function setup()
         end
 
         for i=1,#sorted do
-          context.LINE=sorted[i]
           for j=1,#section[sorted[i]] do
             text = text..section[sorted[i]][j].TEXT..'\n'
           end
@@ -1224,8 +1223,6 @@ local function process_file(file)
     filecontext.FILE = file
   end
 
-  --context:section `SECTION`::
-  --context:section   stores the current section name
   block_section = filecontext.FILE:match("[^./]+%f[.%z]")
   dbg("section:", block_section)
 
@@ -1479,7 +1476,7 @@ end
 --: There config shipped with pipadoc gives an example to drop a line when it end with "NODOC".
 --:
 --: IMPORTANT: Pipadoc does not know anything except the line comment characters about the source
---:            programming languages syntax. This includes Literal strings and any other
+--:            programming languages syntax. This includes literal strings and any other
 --:            syntactic form which may look like a line comment, but is not. Such lines need to
 --:            be dropped by a preprocessor to make them unambiguous.
 --:
@@ -1575,8 +1572,8 @@ end
 --:
 --: The 'DOCVARS' Lua table holds key/value pairs of variables with the global state
 --: of pipadoc. These can be used by the core and plugins in various ways. Debugging
---: for example prints the FILE:LINE processed and there is the 'varsubst' processor
---: to substitute them in the documentation text. The user can set arbitrary DOCVARS
+--: for example prints the FILE:LINE processed and there is a post processor to
+--: substitute them in the documentation text. The user can set arbitrary DOCVARS
 --: from command line.
 --:
 --: Predefined DOCVARS
@@ -1641,7 +1638,6 @@ end
 --=api_various
 --:
 --:
---: <<<<<<<<<<
 --: [appendix]
 --: Common Warnings
 --: ---------------
@@ -1651,7 +1647,6 @@ end
 --:
 --=cwarn
 --:
---: <<<<<<<<<<
 --: [appendix]
 --: Generate the Pipadoc Documentation
 --: ----------------------------------
@@ -1676,7 +1671,6 @@ end
 --: There is a '--make-doc' option which calls the above commands. For convinience
 --:
 --:
---: <<<<<<<<<<
 --: [appendix]
 --: GNU General Public License
 --: --------------------------
