@@ -33,9 +33,13 @@ CONTEXT = {
 
 DOCVARS = {
   --DOCVARS:nl `NL`::
-  --DOCVARS:nl   The line-break character sequence, usually '\n' on unix systems but
-  --DOCVARS:nl   can be changed with a command-line option
+  --DOCVARS:nl   The line-break character sequence, defaults to '\n' and
+  --DOCVARS:nl   can be changed with the '--define' command-line option.
   NL = "\n",
+
+  --DOCVARS:nil `NIL`::
+  --DOCVARS:nil   Expands to an empty string.
+  NIL = "",
 
   --DOCVARS:markup `MARKUP`::
   --DOCVARS:markup   The markup syntax (--markup option). This information only used by pipadoc
@@ -862,7 +866,8 @@ local function setup()
   --posix = request "posix"
 
   do
-    local date = os.date ("*t")
+    local time = os.time()
+    local date = os.date ("*t", time)
     --DOCVARS:date `YEAR, MONTH, DAY, HOUR, MINUTE`::
     --DOCVARS:date   Current date information
     DOCVARS.YEAR = date.year
@@ -873,6 +878,9 @@ local function setup()
     --DOCVARS:date `DATE`::
     --DOCVARS:date   Current date in YEAR/MONTH/DAY format
     DOCVARS.DATE = date.year.."/"..date.month.."/"..date.day
+    --DOCVARS:date `LOCALDATE`::
+    --DOCVARS:date   Current date in current locale format
+    DOCVARS.LOCALDATE = os.date ("%c", time)
   end
 
   if not opt_nodefaults then
@@ -1363,9 +1371,10 @@ end
 --: =================================
 --: :author:   Christian Thaeter
 --: :email:    ct@pipapo.org
---: :date:     {os.date()}
+--: :date:     {LOCALDATE}
 --:
 --:
+--: [preface]
 --: Introduction
 --: ------------
 --:
@@ -1469,10 +1478,10 @@ end
 --: IMPORTANT: Pipadoc does not know anything except the line comment characters about the source
 --:            programming languages syntax. This includes Literal strings and any other
 --:            syntactic form which may look like a line comment, but is not. Such lines need to
---:            be dropped by a preprocessor to make them unambigous.
+--:            be dropped by a preprocessor to make them unambiguous.
 --:
 --: ----
---: const char* example = "//MAIN: this is a C string and not documentation"; //NODOC{NL}
+--: const char* example = "//MAIN: this is a C string and not documentation"; //NODOC{NIL}
 --: ----
 --:
 --: Documentation can be either blocked or oneline. Blocks start with a documentation comment
@@ -1663,6 +1672,8 @@ end
 --:
 --: There is a '--make-doc' option which calls the above commands. For convinience
 --:
+--:
+--: <<<<<<<<<<
 --: [appendix]
 --: GNU General Public License
 --: --------------------------
