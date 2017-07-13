@@ -860,6 +860,72 @@ end
 local block_section
 local block_arg
 
+
+local function builtin_filetypes()
+  --PLANNED: write preprocessor macro to expand filetype_register() as documentation
+  --filetypes_builtin:scons SCons,
+  filetype_register("scons", "^SConstuct$", "#")
+
+  --filetypes_builtin:cmake CMake,
+  filetype_register("cmake", {"^CMakeLists.txt$","%.cmake$"}, {"#", "#[["})
+
+  --filetypes_builtin:c C, C++, Headerfiles,
+  filetype_register("c", {"%.c$","%.cpp$", "%.C$", "%.cxx$", "%.h$", "%.hpp$", "%.hxx$"},
+                    {"//", "/*"})
+
+  --filetypes_builtin:lua Lua,
+  filetype_register("lua", {"%.lua$"}, "--")
+
+  --filetypes_builtin:automake Autoconf, Automake,
+  filetype_register("automake", {"%.am$", "%.in$", "^configure.ac$"}, {"#", "dnl"})
+
+  --filetypes_builtin:make Makefiles,
+  filetype_register("makefile", {"^Makefile$", "%.mk$", "%.make$"}, "#")
+
+  --filetypes_builtin:shell Shell,
+  filetype_register("shell", {"%.sh$", "%.pl$", "%.awk$", }, "#")
+
+  --filetypes_builtin:perl Perl,
+  filetype_register("perl", {"%.pl$", }, "#")
+
+  --filetypes_builtin:awk AWK,
+  filetype_register("awk", {"%.awk$", }, "#")
+
+  --filetypes_builtin:prolog Prolog,
+  filetype_register("prolog", {"%.yap$", "%.pro$", "%.P$"}, "%")
+
+  --filetypes_builtin:text Textfiles, Pipadoc (`.pdoc`),
+  filetype_register("text", {"%.txt$", "%.TXT$", "%.pdoc$", "^-$"}, {"PIPADOC:", ""})
+
+  --filetypes_builtin:java Java, C#,
+  filetype_register("java", {"%.java$", "%.cs$"}, {"//", "/*"})
+
+  --filetypes_builtin:objective_c Objective-C,
+  filetype_register("objc", {"%.h$", "%.m$", "%.mm$"}, {"//", "/*"})
+
+  --filetypes_builtin:python Python,
+  filetype_register("python", "%.py$", "#")
+
+  --filetypes_builtin:visualbasic Visual Basic,
+  filetype_register("visualbasic", "%.vb$", "'")
+
+  --filetypes_builtin:php PHP,
+  filetype_register("php", "%.php%d?$", {"#", "//", "/*"})
+
+  --filetypes_builtin:javascript Javascript,
+  filetype_register("javascript", "%.js$", "//", "/*")
+
+  --filetypes_builtin:delphi Delphi, Pascal,
+  filetype_register("delphi", {"%.p$", "%.pp$", "^%.pas$"}, {"//", "{", "(*"})
+
+  --filetypes_builtin:ruby Ruby,
+  filetype_register("ruby", "%.rb$", "#")
+
+  --filetypes_builtin:sql SQL,
+  filetype_register("sql", {"%.sql$", "%.SQL$"}, {"#", "--", "/*"})
+end
+
+
 local function setup()
   --PLANNED: os.setlocale by option
   parse_args(arg)
@@ -892,6 +958,7 @@ local function setup()
   if not opt_nodefaults then
     --PLANNED: read style file like a config, lower priority, different paths (./ /etc/ ~/ ...)
     --PLANNED: for each language/markup (pipadoc_ascidoc.lua) etc
+    builtin_filetypes()
     if opt_config then
       dbg ("load config:", opt_config)
       local config = loadfile(opt_config)
@@ -902,70 +969,7 @@ local function setup()
         warn ("can't load config file:", opt_config) --cwarn: {STRING} ::
         --cwarn:  The config file ('--config' option) could not be loaded.
       end
-
     end
-
-    --PLANNED: write preprocessor macro to expand filetype_register() as documentation
-    --filetypes_builtin:scons SCons,
-    filetype_register("scons", "^SConstuct$", "#")
-
-    --filetypes_builtin:cmake CMake,
-    filetype_register("cmake", {"^CMakeLists.txt$","%.cmake$"}, {"#", "#[["})
-
-    --filetypes_builtin:c C, C++, Headerfiles,
-    filetype_register("c", {"%.c$","%.cpp$", "%.C$", "%.cxx$", "%.h$", "%.hpp$", "%.hxx$"},
-                      {"//", "/*"})
-
-    --filetypes_builtin:lua Lua,
-    filetype_register("lua", {"%.lua$"}, "--")
-
-    --filetypes_builtin:automake Autoconf, Automake,
-    filetype_register("automake", {"%.am$", "%.in$", "^configure.ac$"}, {"#", "dnl"})
-
-    --filetypes_builtin:make Makefiles,
-    filetype_register("makefile", {"^Makefile$", "%.mk$", "%.make$"}, "#")
-
-    --filetypes_builtin:shell Shell,
-    filetype_register("shell", {"%.sh$", "%.pl$", "%.awk$", }, "#")
-
-    --filetypes_builtin:perl Perl,
-    filetype_register("perl", {"%.pl$", }, "#")
-
-    --filetypes_builtin:awk AWK,
-    filetype_register("awk", {"%.awk$", }, "#")
-
-    --filetypes_builtin:prolog Prolog,
-    filetype_register("prolog", {"%.yap$", "%.pro$", "%.P$"}, "%")
-
-    --filetypes_builtin:text Textfiles, Pipadoc (`.pdoc`),
-    filetype_register("text", {"%.txt$", "%.TXT$", "%.pdoc$", "^-$"}, {"PIPADOC:", ""})
-
-    --filetypes_builtin:java Java, C#,
-    filetype_register("java", {"%.java$", "%.cs$"}, {"//", "/*"})
-
-    --filetypes_builtin:objective_c Objective-C,
-    filetype_register("objc", {"%.h$", "%.m$", "%.mm$"}, {"//", "/*"})
-
-    --filetypes_builtin:python Python,
-    filetype_register("python", "%.py$", "#")
-
-    --filetypes_builtin:visualbasic Visual Basic,
-    filetype_register("visualbasic", "%.vb$", "'")
-
-    --filetypes_builtin:php PHP,
-    filetype_register("php", "%.php%d?$", {"#", "//", "/*"})
-
-    --filetypes_builtin:javascript Javascript,
-    filetype_register("javascript", "%.js$", "//", "/*")
-
-    --filetypes_builtin:delphi Delphi, Pascal,
-    filetype_register("delphi", {"%.p$", "%.pp$", "^%.pas$"}, {"//", "{", "(*"})
-
-    --filetypes_builtin:ruby Ruby,
-    filetype_register("ruby", "%.rb$", "#")
-
-    --filetypes_builtin:sql SQL,
-    filetype_register("sql", {"%.sql$", "%.SQL$"}, {"#", "--", "/*"})
   end
 
   --op_builtin:
