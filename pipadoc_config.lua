@@ -34,7 +34,7 @@ preprocessor_register ("^lua$",
                        end
 )
 
-
+--: * Generate an alphabetic index of all public functions and variables.
 function fndef(id, text)
   text = text or id
   return "anchor:index_"..id.."[]+*"..text.."*+::"..DOCVARS.NL.." "

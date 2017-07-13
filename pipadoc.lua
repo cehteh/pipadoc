@@ -733,7 +733,7 @@ local options = {
 
 
   "    --no-defaults", --:  {STRING}
-  "                        disables default filetypes and processors", --:  {STRING}
+  "                        disables default filetypes and configfile", --:  {STRING}
   ["--no-defaults"] = function ()
     opt_nodefaults = true
     dbg("nodefaults")
@@ -1379,7 +1379,7 @@ end
 --: =================================
 --: :author:   Christian Thaeter
 --: :email:    ct@pipapo.org
---: :date:     {LOCALDATE}
+--: :date:     {os.date("%A %d. %B %Y")}
 --:
 --:
 --: [preface]
@@ -1651,7 +1651,7 @@ end
 --: ---------------
 --:
 --: Pipadoc emits warnings on problems. These are mostly harmless but may need some attention.
---: Warnings are supressed with the '-q' option.
+--: Warnings are supressed with the '--quiet' option.
 --:
 --=cwarn
 --:
