@@ -1005,7 +1005,7 @@ local function setup()
         return ""
       else
         trace ("generate:"..context.FILE..":"..context.LINE, ret)
-        return ret.."\n"
+        return ret..DOCVARS.NL
       end
     end
   )
@@ -1757,5 +1757,5 @@ end
 
 --- Local Variables:
 --- mode: lua
---- compile-command: "lua pipadoc.lua -t ISSUES -q pipadoc.lua pipadoc_config.lua pipadoc.install pipadoc.test"
+--- compile-command: "lua pipadoc.lua -t ISSUES pipadoc.lua pipadoc_config.lua pipadoc.install pipadoc.test"
 --- End:

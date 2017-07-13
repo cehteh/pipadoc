@@ -78,9 +78,10 @@ function indexref(id, text)
 
   if lastfirstchar ~= firstchar then
     lastfirstchar = firstchar
-    return firstchar:upper().." :: \n  <<index_"..id..","..id..">>,"
+    return "{nbsp} :: "..DOCVARS.NL.."[big]#"..firstchar:upper().."# :: "..DOCVARS.NL..
+      "<<index_"..id..","..id..">>{nbsp}{nbsp}{nbsp}{nbsp}{nbsp}"
   else
-    return "  <<index_"..id..","..id..">>,"
+    return "<<index_"..id..","..id..">>{nbsp}{nbsp}{nbsp}{nbsp}{nbsp}"
   end
 end
 
@@ -220,5 +221,5 @@ preprocessor_register ("",
 
 --- Local Variables:
 --- mode: lua
---- compile-command: "lua pipadoc.lua -t ISSUES -q pipadoc.lua pipadoc_config.lua pipadoc.install pipadoc.test"
+--- compile-command: "lua pipadoc.lua -t ISSUES pipadoc.lua pipadoc_config.lua pipadoc.install pipadoc.test"
 --- End:
