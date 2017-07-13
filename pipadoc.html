@@ -736,7 +736,7 @@ asciidoc.install(2);
 <h1>pipadoc - Documentation extractor</h1>
 <span id="author">Christian Thaeter</span><br />
 <span id="email"><code>&lt;<a href="mailto:ct@pipapo.org">ct@pipapo.org</a>&gt;</code></span><br />
-<span id="revdate">Wed Jul 12 22:15:37 2017</span>
+<span id="revdate">Friday 14. July 2017</span>
 <div id="toc">
   <div id="toctitle">Table of Contents</div>
   <noscript><p><b>JavaScript must be enabled in your browser to display the table of contents.</b></p></noscript>
@@ -837,7 +837,7 @@ One can ship the <code>pipadoc.lua</code> and <code>pipadoc.install</code> and d
                          selects a config file [pipadoc_config.lua]
 
      --no-defaults
-                         disables default filetypes and processors
+                         disables default filetypes and configfile
 
      --safe
                          Enables safe mode. Safe mode disables the default
@@ -876,21 +876,21 @@ argument. Only lines qualify this syntax are processed as pipadoc documentation.
 <div class="literalblock">
 <div class="title">The formal syntax looks like:</div>
 <div class="content">
-<pre><code>pipadoc = [source] &lt;linecomment&gt; opspec [..space.. [documentationtext]]
+<pre><code>&lt;pipadoc&gt; ::= [source] &lt;linecomment&gt; &lt;opspec&gt; [ &lt;space&gt; [documentationtext]]
 
-source = ..any source code text..
+&lt;source&gt; ::= &lt;any source code text&gt;
 
-linecomment = ..the linecomment sequence chosen by the filetype..
+&lt;linecomment&gt; ::= &lt;the filetypes linecomment sequence&gt;
 
-opspec = [section] &lt;operator&gt; [argument]
+&lt;opspec&gt; ::= [section] &lt;operator&gt; [argument]
 
-section = ..alphanumeric text including underscore and dots..
+&lt;section&gt; ::= &lt;alphanumeric text including underscore and dots&gt;
 
-operator = [:=@#]
+&lt;operator&gt; ::= ":" | "=" | "@" | "#" | &lt;user defined operators&gt;
 
-argument = ..alphanumeric text including underscore and dots..
+&lt;argument&gt; ::= &lt;alphanumeric text including underscore and dots&gt;
 
-documentationtext = ..rest of the line..</code></pre>
+&lt;documentationtext&gt; ::= &lt;rest of the line&gt;</code></pre>
 </div></div>
 <div class="paragraph"><p>There config shipped with pipadoc gives an example to drop a line when it end with "NODOC".</p></div>
 <div class="admonitionblock">
@@ -1307,6 +1307,11 @@ Replace {STRING} in pipadoc comments with the first literal string from the code
 <li>
 <p>
 Generate asciidoc formatted documentation for Lua functions.
+</p>
+</li>
+<li>
+<p>
+Generate an alphabetic index of all public functions and variables.
 </p>
 </li>
 <li>
@@ -1760,7 +1765,7 @@ context
 <h2 id="_common_warnings">Appendix A: Common Warnings</h2>
 <div class="sectionbody">
 <div class="paragraph"><p>Pipadoc emits warnings on problems. These are mostly harmless but may need some attention.
-Warnings are supressed with the <em>-q</em> option.</p></div>
+Warnings are supressed with the <em>--quiet</em> option.</p></div>
 <div class="dlist"><dl>
 <dt class="hdlist1">
 can&#8217;t load module: 
@@ -1951,152 +1956,200 @@ Christian Thäter &lt;<a href="mailto:ct@pipapo.org">ct@pipapo.org</a>&gt; for i
 <div class="sectionbody">
 <div class="dlist"><dl>
 <dt class="hdlist1">
-A 
+&#160; 
+</dt>
+<dt class="hdlist1">
+<span class="big">A</span> 
 </dt>
 <dd>
 <p>
-  <a href="#index_add_inputfile">add_inputfile</a>,
-  <a href="#index_ARG">ARG</a>,
-  <a href="#index_assert_char">assert_char</a>,
-  <a href="#index_assert_notnil">assert_notnil</a>,
-  <a href="#index_assert_type">assert_type</a>,
+<a href="#index_add_inputfile">add_inputfile</a>&#160;&#160;&#160;&#160;&#160;
+<a href="#index_ARG">ARG</a>&#160;&#160;&#160;&#160;&#160;
+<a href="#index_assert_char">assert_char</a>&#160;&#160;&#160;&#160;&#160;
+<a href="#index_assert_notnil">assert_notnil</a>&#160;&#160;&#160;&#160;&#160;
+<a href="#index_assert_type">assert_type</a>&#160;&#160;&#160;&#160;&#160;
 </p>
 </dd>
 <dt class="hdlist1">
-C 
+&#160; 
+</dt>
+<dt class="hdlist1">
+<span class="big">C</span> 
 </dt>
 <dd>
 <p>
-  <a href="#index_COMMENT">COMMENT</a>,
+<a href="#index_COMMENT">COMMENT</a>&#160;&#160;&#160;&#160;&#160;
 </p>
 </dd>
 <dt class="hdlist1">
-D 
+&#160; 
+</dt>
+<dt class="hdlist1">
+<span class="big">D</span> 
 </dt>
 <dd>
 <p>
-  <a href="#index_DATE">DATE</a>,
-  <a href="#index_DAY">DAY</a>,
-  <a href="#index_dbg">dbg</a>,
-  <a href="#index_die">die</a>,
+<a href="#index_DATE">DATE</a>&#160;&#160;&#160;&#160;&#160;
+<a href="#index_DAY">DAY</a>&#160;&#160;&#160;&#160;&#160;
+<a href="#index_dbg">dbg</a>&#160;&#160;&#160;&#160;&#160;
+<a href="#index_die">die</a>&#160;&#160;&#160;&#160;&#160;
 </p>
 </dd>
 <dt class="hdlist1">
-F 
+&#160; 
+</dt>
+<dt class="hdlist1">
+<span class="big">F</span> 
 </dt>
 <dd>
 <p>
-  <a href="#index_FILE">FILE</a>,
-  <a href="#index_filetype_register">filetype_register</a>,
+<a href="#index_FILE">FILE</a>&#160;&#160;&#160;&#160;&#160;
+<a href="#index_filetype_register">filetype_register</a>&#160;&#160;&#160;&#160;&#160;
 </p>
 </dd>
 <dt class="hdlist1">
-H 
+&#160; 
+</dt>
+<dt class="hdlist1">
+<span class="big">H</span> 
 </dt>
 <dd>
 <p>
-  <a href="#index_HOUR">HOUR</a>,
+<a href="#index_HOUR">HOUR</a>&#160;&#160;&#160;&#160;&#160;
 </p>
 </dd>
 <dt class="hdlist1">
-I 
+&#160; 
+</dt>
+<dt class="hdlist1">
+<span class="big">I</span> 
 </dt>
 <dd>
 <p>
-  <a href="#index_info">info</a>,
+<a href="#index_info">info</a>&#160;&#160;&#160;&#160;&#160;
 </p>
 </dd>
 <dt class="hdlist1">
-L 
+&#160; 
+</dt>
+<dt class="hdlist1">
+<span class="big">L</span> 
 </dt>
 <dd>
 <p>
-  <a href="#index_LINE">LINE</a>,
-  <a href="#index_LOCALDATE">LOCALDATE</a>,
+<a href="#index_LINE">LINE</a>&#160;&#160;&#160;&#160;&#160;
+<a href="#index_LOCALDATE">LOCALDATE</a>&#160;&#160;&#160;&#160;&#160;
 </p>
 </dd>
 <dt class="hdlist1">
-M 
+&#160; 
+</dt>
+<dt class="hdlist1">
+<span class="big">M</span> 
 </dt>
 <dd>
 <p>
-  <a href="#index_MARKUP">MARKUP</a>,
-  <a href="#index_maybe_type">maybe_type</a>,
-  <a href="#index_MINUTE">MINUTE</a>,
-  <a href="#index_MONTH">MONTH</a>,
+<a href="#index_MARKUP">MARKUP</a>&#160;&#160;&#160;&#160;&#160;
+<a href="#index_maybe_type">maybe_type</a>&#160;&#160;&#160;&#160;&#160;
+<a href="#index_MINUTE">MINUTE</a>&#160;&#160;&#160;&#160;&#160;
+<a href="#index_MONTH">MONTH</a>&#160;&#160;&#160;&#160;&#160;
 </p>
 </dd>
 <dt class="hdlist1">
-N 
+&#160; 
+</dt>
+<dt class="hdlist1">
+<span class="big">N</span> 
 </dt>
 <dd>
 <p>
-  <a href="#index_NIL">NIL</a>,
-  <a href="#index_NL">NL</a>,
+<a href="#index_NIL">NIL</a>&#160;&#160;&#160;&#160;&#160;
+<a href="#index_NL">NL</a>&#160;&#160;&#160;&#160;&#160;
 </p>
 </dd>
 <dt class="hdlist1">
-O 
+&#160; 
+</dt>
+<dt class="hdlist1">
+<span class="big">O</span> 
 </dt>
 <dd>
 <p>
-  <a href="#index_OP">OP</a>,
-  <a href="#index_operator_register">operator_register</a>,
+<a href="#index_OP">OP</a>&#160;&#160;&#160;&#160;&#160;
+<a href="#index_operator_register">operator_register</a>&#160;&#160;&#160;&#160;&#160;
 </p>
 </dd>
 <dt class="hdlist1">
-P 
+&#160; 
+</dt>
+<dt class="hdlist1">
+<span class="big">P</span> 
 </dt>
 <dd>
 <p>
-  <a href="#index_postprocessor_register">postprocessor_register</a>,
-  <a href="#index_PRE">PRE</a>,
-  <a href="#index_preprocessor_register">preprocessor_register</a>,
+<a href="#index_postprocessor_register">postprocessor_register</a>&#160;&#160;&#160;&#160;&#160;
+<a href="#index_PRE">PRE</a>&#160;&#160;&#160;&#160;&#160;
+<a href="#index_preprocessor_register">preprocessor_register</a>&#160;&#160;&#160;&#160;&#160;
 </p>
 </dd>
 <dt class="hdlist1">
-R 
+&#160; 
+</dt>
+<dt class="hdlist1">
+<span class="big">R</span> 
 </dt>
 <dd>
 <p>
-  <a href="#index_request">request</a>,
+<a href="#index_request">request</a>&#160;&#160;&#160;&#160;&#160;
 </p>
 </dd>
 <dt class="hdlist1">
-S 
+&#160; 
+</dt>
+<dt class="hdlist1">
+<span class="big">S</span> 
 </dt>
 <dd>
 <p>
-  <a href="#index_SECTION">SECTION</a>,
-  <a href="#index_section_append">section_append</a>,
-  <a href="#index_streval">streval</a>,
+<a href="#index_SECTION">SECTION</a>&#160;&#160;&#160;&#160;&#160;
+<a href="#index_section_append">section_append</a>&#160;&#160;&#160;&#160;&#160;
+<a href="#index_streval">streval</a>&#160;&#160;&#160;&#160;&#160;
 </p>
 </dd>
 <dt class="hdlist1">
-T 
+&#160; 
+</dt>
+<dt class="hdlist1">
+<span class="big">T</span> 
 </dt>
 <dd>
 <p>
-  <a href="#index_TEXT">TEXT</a>,
-  <a href="#index_to_table">to_table</a>,
-  <a href="#index_to_text">to_text</a>,
-  <a href="#index_trace">trace</a>,
+<a href="#index_TEXT">TEXT</a>&#160;&#160;&#160;&#160;&#160;
+<a href="#index_to_table">to_table</a>&#160;&#160;&#160;&#160;&#160;
+<a href="#index_to_text">to_text</a>&#160;&#160;&#160;&#160;&#160;
+<a href="#index_trace">trace</a>&#160;&#160;&#160;&#160;&#160;
 </p>
 </dd>
 <dt class="hdlist1">
-W 
+&#160; 
+</dt>
+<dt class="hdlist1">
+<span class="big">W</span> 
 </dt>
 <dd>
 <p>
-  <a href="#index_warn">warn</a>,
+<a href="#index_warn">warn</a>&#160;&#160;&#160;&#160;&#160;
 </p>
 </dd>
 <dt class="hdlist1">
-Y 
+&#160; 
+</dt>
+<dt class="hdlist1">
+<span class="big">Y</span> 
 </dt>
 <dd>
 <p>
-  <a href="#index_YEAR">YEAR</a>,
+<a href="#index_YEAR">YEAR</a>&#160;&#160;&#160;&#160;&#160;
 </p>
 </dd>
 </dl></div>
@@ -2107,7 +2160,7 @@ Y
 <div id="footer">
 <div id="footer-text">
 Last updated
- 2017-07-12 22:15:37 CEST
+ 2017-07-14 01:50:06 CEST
 </div>
 </div>
 </body>
