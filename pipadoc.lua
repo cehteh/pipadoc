@@ -157,6 +157,7 @@ end
 --: otherwise an assertion error is raised.
 --:
 
+--PLANNED: assert_type(var, ...) list of strings
 function assert_type(var, expected) --: checks that the 'var' is of type 'expected'
   assert(type(var) == expected, "type error: "..expected.." expected, got "..type(var))
   return var
@@ -810,6 +811,7 @@ local options = {
   --PLANNED: wordwrap
   --PLANNED: some flags get defaults from the config file
   --PLANNED: source indent with prettyprinting --indent columns
+  --PLANNED: strip option (pre/postprocessor?) to remove all pipadoc
 
   "", --:  {STRING}
   "  inputs are file names or a '-' which indicates standard input", --:  {STRING}
@@ -859,6 +861,7 @@ local block_section
 local block_arg
 
 local function setup()
+  --PLANNED: os.setlocale by option
   parse_args(arg)
   CONTEXT = {
     FILE="<setup>"
@@ -888,6 +891,7 @@ local function setup()
 
   if not opt_nodefaults then
     --PLANNED: read style file like a config, lower priority, different paths (./ /etc/ ~/ ...)
+    --PLANNED: for each language/markup (pipadoc_ascidoc.lua) etc
     if opt_config then
       dbg ("load config:", opt_config)
       local config = loadfile(opt_config)
@@ -1705,6 +1709,7 @@ end
 --@INDEX
 --:
 --:
+--PLANNED: DOCME, example section about one source can be used to generate different docs
 --ISSUES:
 --:
 --: ISSUES
@@ -1744,6 +1749,7 @@ end
 --PLANNED: CONFIG:POST
 --PLANNED: CONFIG:GENERATE
 --PLANNED: manpage
+--PLANNED: call operators/processors in a pcall
 
 --- Local Variables:
 --- mode: lua
