@@ -1021,7 +1021,7 @@ local function setup()
     function (context)
       context.SECTION = context.SECTION or block_section
 
-      if #context.ARG > 0 then
+      if context.ARG and #context.ARG > 0 then
         section_append(context.SECTION, nil, context)
       else
         warn("paste argument missing")  --cwarn: {STRING} ::
@@ -1045,7 +1045,7 @@ local function setup()
     function (context)
       context.SECTION = context.SECTION or block_section
 
-      if #context.ARG > 0 then
+      if context.ARG and #context.ARG > 0 then
         section_append(context.SECTION, nil, context)
       else
         warn("sort argument missing") --cwarn: {STRING} ::
@@ -1060,8 +1060,7 @@ local function setup()
       local text = ""
 
       if section ~= nil then
-        --FIXME: bug when section has no keys
-        sections_keys_usecnt[which] = sections_keys_usecnt[which] + 1
+        sections_keys_usecnt[which] = (sections_keys_usecnt[which] or 0) + 1
 
         local oldfile = context.FILE
         context.FILE ='<output>:'..which
@@ -1107,7 +1106,7 @@ local function setup()
     function (context)
       context.SECTION = context.SECTION or block_section
 
-      if #context.ARG > 0 then
+      if context.ARG and #context.ARG > 0 then
         section_append(context.SECTION, nil, context)
       else
         warn("sort argument missing:")
@@ -1121,8 +1120,7 @@ local function setup()
       local text = ""
 
       if section ~= nil then
-        --FIXME: bug when section has no keys
-        sections_keys_usecnt[which] = sections_keys_usecnt[which] + 1
+        sections_keys_usecnt[which] = (sections_keys_usecnt[which] or 0) + 1
 
         local oldfile = context.FILE
         context.FILE ='<output>:'..which

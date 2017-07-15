@@ -70,6 +70,10 @@ echo TESTPP becomes a docline
 #:
 #=streval
 #:
+#=
+#@
+##
+#:
 #=doesnotexist
 #@doesnotexist
 ##doesnotexist
@@ -142,6 +146,9 @@ echo TESTPP becomes a docline
 #> {undefined}
 #> foobarbaz
 #> {"foo".."{"bar".."baz"}"}
+#>
+#>
+#>
 #>
 #> END
 
