@@ -1060,6 +1060,7 @@ local function setup()
       local text = ""
 
       if section ~= nil then
+        --FIXME: bug when section has no keys
         sections_keys_usecnt[which] = sections_keys_usecnt[which] + 1
 
         local oldfile = context.FILE
@@ -1120,6 +1121,7 @@ local function setup()
       local text = ""
 
       if section ~= nil then
+        --FIXME: bug when section has no keys
         sections_keys_usecnt[which] = sections_keys_usecnt[which] + 1
 
         local oldfile = context.FILE
