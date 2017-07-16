@@ -591,16 +591,19 @@ local function postprocessors_attach ()
 end
 
 
-local function postprocessors_run (text)
-  local textout = text
+local function postprocessors_run (context, output)
+  CONTEXT=context
+  local textout = context.TEXT
   for i=1,#active_postprocessors do
-    textout = active_postprocessors[i](textout) or ""
+    textout = active_postprocessors[i](textout)
+    if not textout then
+      break
+    end
   end
-  if textout ~= text then
-    trace ("postprocess:", text, "->", textout)
-    return textout
+  if textout ~= context.TEXT then
+    trace ("postprocess:", context.TEXT, "->", textout)
+    context.TEXT = textout
   end
-  return text
 end
 
 --op:
@@ -999,14 +1002,8 @@ local function setup()
       end
     end,
 
-    function (context)
-      local ret = postprocessors_run (context.TEXT)
-      if ret == "" and to_text (context.TEXT) then
-        return ""
-      else
-        trace ("generate:"..context.FILE..":"..context.LINE, ret)
-        return ret..DOCVARS.NL
-      end
+    function (context, output)
+      table.insert(output, context)
     end
   )
 
@@ -1029,8 +1026,8 @@ local function setup()
       end
     end,
 
-    function (context)
-      return generate_output(context.ARG)
+    function (context, output)
+      return generate_output(context.ARG, output)
     end
   )
 
@@ -1053,7 +1050,7 @@ local function setup()
       end
     end,
 
-    function (context)
+    function (context, output)
       dbg("generate_output_alphasorted:"..context.FILE..":"..context.LINE)
       local which = context.ARG
       local section = sections[which] and sections[which].keys
@@ -1083,7 +1080,7 @@ local function setup()
 
         for i=1,#sorted do
           for j=1,#section[sorted[i]] do
-            text = text..section[sorted[i]][j].TEXT..'\n'
+            table.insert(output, section[sorted[i]][j])
           end
         end
         context.FILE = oldfile
@@ -1091,7 +1088,6 @@ local function setup()
         warn("no section named:", which) --cwarn: {STRING} ::
         --cwarn:  Using '=', '@' or '#' on a section which as never defined.
       end
-      return postprocessors_run (text)
     end
   )
 
@@ -1113,7 +1109,7 @@ local function setup()
       end
     end,
 
-    function (context)
+    function (context, output)
       dbg("generate_output_numsorted:"..context.FILE..":"..context.LINE)
       local which = context.ARG
       local section = sections[which] and sections[which].keys
@@ -1143,14 +1139,13 @@ local function setup()
         for i=1,#sorted do
           context.LINE=sorted[i]
           for j=1,#section[sorted[i]] do
-            text = text..section[sorted[i]][j].TEXT..'\n'
+            table.insert(output, section[sorted[i]][j])
           end
         end
         context.FILE = oldfile
       else
         warn("no section named:", which)
       end
-      return postprocessors_run (text)
     end
   )
 
@@ -1275,7 +1270,7 @@ end
 
 local sofar_rec={}
 
-function generate_output(which)
+function generate_output(which, output)
   local context = {
     FILE = "<output>"
   }
@@ -1297,7 +1292,7 @@ function generate_output(which)
       return ""
     end
     sofar_rec[which] = true
-    sections_usecnt[which] = sections_usecnt[which] + 1
+    sections_usecnt[which] = (sections_usecnt[which] or 0) + 1
 
     context.FILE = '<output>:'..which
     for i=1,#section do
@@ -1305,7 +1300,7 @@ function generate_output(which)
       local genfunc = genfuncs[section[i].OP]
       if genfunc then
         CONTEXT=section[i]
-        text = text .. genfunc(section[i])
+        genfunc(section[i], output)
         CONTEXT=context
       else
         warn("no generator function for:", section[i].OP)
@@ -1319,58 +1314,51 @@ function generate_output(which)
 end
 
 
-setup()
-process_inputs()
-
---PLANNED: document doublete/orphan checker
---PLANNED: refactor doublete/orphan into function
-
--- initialize orphans / doublets checker
-for k,_ in pairs(sections) do
-  if #sections[k] > 0 then
-    sections_usecnt[k] = 0
+--PLANNED: some way to hint the checker to supress these warnings
+function report_orphan_doubletes()
+  local orphan = {FILE = "<orphan>"}
+  local doublette = {FILE = "<doublette>"}
+  for k,v in pairs(sections_usecnt) do
+    if v == 0 then
+      CONTEXT = orphan
+      warn("section unused:", k) --cwarn: {STRING} ::
+      --cwarn:  The printed section was not used. This might be intentional when generating
+      --cwarn:  only partial outputs.
+    elseif v > 1 then
+      CONTEXT = doublette
+      warn("section multiple times used:", k, v) --cwarn: {STRING} ::
+      --cwarn:  Section was pasted multiple times in the output.
+    end
   end
 
-  if next(sections[k].keys) then
-    sections_keys_usecnt[k] = 0
-  end
-end
-
-io.write(generate_output(opt_toplevel))
-
--- orphans / doublets
-local orphan = {
-  FILE = "<orphan>"
-}
-
-local doublette = {
-  FILE = "<doublette>"
-}
-
-for k,v in pairs(sections_usecnt) do
-  if v == 0 then
-    CONTEXT = orphan
-    warn("section unused:", k) --cwarn: {STRING} ::
-    --cwarn:  The printed section was not used. This might be intentional when generating
-    --cwarn:  only partial outputs.
-  elseif v > 1 then
-    CONTEXT = doublette
-    warn("section multiple times used:", k, v) --cwarn: {STRING} ::
-    --cwarn:  Section was pasted multiple times in the output.
+  for k,v in pairs(sections_keys_usecnt) do
+    if v == 0 then
+      CONTEXT = orphan
+      warn("section w/ keys unused:", k) --cwarn: {STRING} ::
+      --cwarn:  Section with keys (numeric or alphabetic) was not used.
+    elseif v > 1 then
+      CONTEXT = doublette
+      warn("section w/ keys multiple times used:", k, v) --cwarn: {STRING} ::
+      --cwarn:  Section was used multiple times in the output ('@' or '#' operator).
+    end
   end
 end
 
 
-for k,v in pairs(sections_keys_usecnt) do
-  if v == 0 then
-    CONTEXT = orphan
-    warn("section w/ keys unused:", k) --cwarn: {STRING} ::
-    --cwarn:  Section with keys (numeric or alphabetic) was not used.
-  elseif v > 1 then
-    CONTEXT = doublette
-    warn("section w/ keys multiple times used:", k, v) --cwarn: {STRING} ::
-    --cwarn:  Section was used multiple times in the output ('@' or '#' operator).
+do
+  setup()
+  process_inputs()
+
+  --FIXME: DOC new generators, order of operation etc
+  local output = {}
+  generate_output(opt_toplevel,output)
+
+  for i=1,#output do
+    postprocessors_run(output[i])
+    io.write(output[i]. TEXT,DOCVARS.NL)
   end
+
+  report_orphan_doubletes()
 end
 
 
@@ -1504,24 +1492,32 @@ end
 --: Order of operations
 --: ~~~~~~~~~~~~~~~~~~~
 --:
---: Pipadoc reads all files line by line, when a line contains a pipadoc comment (see <<_syntax,syntax>>
---: above) it is processed in the following order:
+--: Pipadoc reads all files line by line, when a line contains a pipadoc comment (see
+--: <<_syntax,syntax>>  above) it is processed in the following order:
 --:
 --: Preprocessing ::
 --:   One can register preprocessors for each filetype. This preprocessors are
 --:   Lua functions who may alter the entire content of a line before any further processing.
+--:   The intended use is for generating and augmenting documentation
 --:
 --: Parsing ::
---:   The line is broken down into its components and appended to its Section/Key store.
+--:   The line is broken down into it's components (context). Then the operators processing
+--:   function will be called which is responsible for storing the context into a store.
 --:
---: Ordering ::
---:   After all files are read the output is generated by starting assembling the toplevel
---:   section ('MAIN' if not otherwise defined). The paste and sorting operators on the toplevel
---:   and included sections define the order of the document.
+--: Output Ordering ::
+--:   The output order is generated by assembling the toplevel section ('MAIN' if not otherwise
+--:   defined). The paste and sorting operators on the toplevel and included sections define the
+--:   order of the document.
 --:
---: Postprocessing ::
---:   Finally postprocessors are used to format lines possibly to impement some special markup
+--: Postprocessing and Writeout ::
+--:   For each output line the postprocessors run and the resulting text is printed.
+--:   Preprocessors are used to format lines possibly to impement some special markup
 --:   features. This is also the place where <<_string_evaluation,'streval()'>> should be called.
+--:
+--: Report Orphans and Doubletes ::
+--:   Pipadoc keeps stats on how each section was used. Finally it gives a report (as warning)
+--:   on sections which appear to be unused or used more than once. These warnings may be ok, but
+--:   sometimes they give useful hints about typing errors.
 --:
 --: It is important to know that reading happens only line by line, operations can not span
 --: lines. The processing steps may be stateful and thus preserve information for further
