@@ -1723,21 +1723,21 @@ end
 --: FIXME
 --: ~~~~~
 --:
---=FIXME
+--@FIXME
 --:
 --PLANNED: only generate FIXME Section when there are FIXME's
 --:
 --: TODO
 --: ~~~~
 --:
---=TODO
+--@TODO
 --:
 --PLANNED: only generate TODO section when there are TODO's
 --:
 --: PLANNED
 --: ~~~~~~~
 --:
---=PLANNED
+--@PLANNED
 --:
 --PLANNED: only generate PLANNED section when there are PLANNED's
 --:

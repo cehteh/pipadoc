@@ -207,25 +207,37 @@ function git_blame_context ()
   end
 end
 
-preprocessor_register ("",
+
+
+local issues_keywords = {"FIXME", "TODO", "PLANNED"}
+
+-- nobug annotations
+preprocessor_register ("^c$",
                        function (str)
-                         return str:gsub("--FIXME:([^ ]*) (.*)", --NODOC
-                                         '--FIXME:%1 {FILE}:{LINE}::{NL}  %2{git_blame_context ()}{NL}') --NODOC
+                         local ret, rep
+                         for _,word in ipairs(issues_keywords) do
+                           ret, rep = str:gsub('(%s*'..word..'%s*%("([^"]*).*)',
+                                                '%1 //'..word..': %2', 1)
+                           if rep > 0 then
+                             return ret
+                           end
+                         end
+                         return str
                        end
 )
 
-
 preprocessor_register ("",
                        function (str)
-                         return str:gsub("--TODO:([^ ]*) (.*)", --NODOC
-                                         '--TODO:%1 {FILE}:{LINE}::{NL}  %2{git_blame_context ()}{NL}') --NODOC
-                       end
-)
+                         local ret, rep
+                         for _,word in ipairs(issues_keywords) do
+                           ret, rep = str:gsub("("..word.."):([^%s]*)%s?(.*)",
+                                               '%1:%2zzz {FILE}:{LINE}::{NL}  %3{git_blame_context ()}{NL}', 1)
 
-preprocessor_register ("",
-                       function (str)
-                         return str:gsub("--PLANNED:([^ ]*) (.*)", --NODOC
-                                         '--PLANNED:%1 {FILE}:{LINE}::{NL}  %2{git_blame_context ()}{NL}') --NODOC
+                           if rep > 0 then
+                             return ret
+                           end
+                         end
+                         return str
                        end
 )
 
