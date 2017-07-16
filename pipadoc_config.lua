@@ -10,6 +10,9 @@ preprocessor_register ("",
                        end
 )
 
+
+--TODO: use <STRING>
+
 --: *  Replace +++\{STRING\}+++ in pipadoc comments with the first literal string from the code.
 preprocessor_register ("^lua$",
                        function (str)
@@ -135,6 +138,7 @@ postprocessor_register ("",
 
 
 -- for the testsuite
+--PLANNED: only activate when -DTESTSUIT=true
 preprocessor_register ("^test",
                        function (str)
                          local ret,num = str:gsub("TESTPP", '#: TESTFOO')
@@ -225,6 +229,7 @@ preprocessor_register ("",
                        end
 )
 
+--TODO: file given twice as input warn and drop (registry of already read files)
 --PLANNED: offer different sort orders for issues (date / line)
 --PLANNED: noweb like preprocessing syntax for chapter substitutions in textfiles
 

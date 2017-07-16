@@ -500,6 +500,7 @@ function preprocessor_register (langpat, preprocess) --: register a preprocessor
   --:     +{pattern, repl [, n]}+ ::::
   --:       Generates a function calling 'string.gsub(pattern, repl [, n])' for preprocessing.
   --:
+  --PLANNED: langpat as list of patterns
   assert_type (langpat, "string")
   dbg ("register preprocessor:", langpat, preprocess)
 
@@ -560,6 +561,7 @@ function postprocessor_register (markuppat, postprocess) --: register a postproc
   --:     +{pattern, repl [, n]}+ ::::
   --:       Generates a function calling 'string.gsub(pattern, repl [, n])' for postprocessing.
   --:
+  --PLANNED: markuppat as list of patterns
   assert_type (markuppat, "string")
   dbg ("register postprocessor:", markuppat, postprocess)
 
@@ -1153,6 +1155,7 @@ local function setup()
   postprocessors_attach ()
 end
 
+--TODO: alnum sort operator $
 
 local function process_line (line, comment, filecontext)
   local context = {
@@ -1349,7 +1352,6 @@ do
   setup()
   process_inputs()
 
-  --FIXME: DOC new generators, order of operation etc
   local output = {}
   generate_output(opt_toplevel,output)
 
@@ -1742,7 +1744,7 @@ end
 --PLANNED: control language/conditionals?  //section?key {condition}  else becomes DROPPED:section_key
 --PLANNED: not only pipadoc.conf but also pipadoc.sty templates, conf are local only configurations, .sty are global styles
 --PLANNED: how to join (and then wordwrap) lines?
---PLANNED: bash like parameter expansion, how to apply that to sections/keys too --%{section}:%{key} .. how about streval on SECTION and ARG //{SECTION}:{ARG}
+--PLANNED: bash like parameter expansion, how to apply that to sections/keys too --%{section}:%{key} .. how about streval on SECTION and ARG //{SECTION}:{ARG} NODOC
 --PLANNED: org-mode processor
 --PLANNED: INIT section for configuration
 

@@ -49,6 +49,7 @@ lua_interpreters="luajit ravi lua5.3 lua-5.3 lua5.2 lua-5.2 lua lua-5.1 lua5.1"
 dependencies=""
 #:
 #PLANNED: use luarocks for installing dependencies
+#PLANNED: uninstall option, figure out what would be installed with given options and delete it when exist
 
 #: The name of the programm to be installed is guessed from this install script name
 name="${0%.install}"; name="${name##*/}"
