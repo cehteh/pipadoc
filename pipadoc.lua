@@ -1355,7 +1355,9 @@ do
 
   for i=1,#output do
     postprocessors_run(output[i])
-    io.write(output[i]. TEXT,DOCVARS.NL)
+    if output[i].TEXT then
+      io.write(output[i].TEXT, DOCVARS.NL)
+    end
   end
 
   report_orphan_doubletes()

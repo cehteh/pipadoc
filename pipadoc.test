@@ -78,12 +78,15 @@ echo TESTPP becomes a docline
 #@doesnotexist
 ##doesnotexist
 #:
+#=notext
 #@nokeys
 ##nokeys
 #:
+#: drop the TESTDROP
 #: END
 
 #nokeys: has no keys
+#notext:0 has no normal text
 
 #oneline: oneline test
 #oneline:b oneline w/ arg b

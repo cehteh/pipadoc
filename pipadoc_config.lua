@@ -156,6 +156,15 @@ preprocessor_register ("^test",
 )
 
 
+postprocessor_register ("",
+                        function (text)
+                          if text:match("TESTDROP") then
+                            warn("TESTDROP")
+                            return
+                          end
+                          return text
+                        end
+)
 
 --PLANNED: ldoc/doxygen/javadoc compatible macros @param @return @see etc.
 
