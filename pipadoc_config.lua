@@ -159,7 +159,6 @@ preprocessor_register ("^test",
                        end
 )
 
-
 postprocessor_register ("",
                         function (text)
                           if text:match("TESTDROP") then
@@ -169,6 +168,7 @@ postprocessor_register ("",
                           return text
                         end
 )
+
 
 --PLANNED: ldoc/doxygen/javadoc compatible macros @param @return @see etc.
 
@@ -235,5 +235,5 @@ preprocessor_register ("",
 
 --- Local Variables:
 --- mode: lua
---- compile-command: "lua pipadoc.lua -t ISSUES pipadoc.lua pipadoc_config.lua pipadoc.install pipadoc.test"
+--- compile-command: "lua pipadoc.lua -t ISSUES pipadoc.lua pipadoc_config.lua pipadoc.install"
 --- End:

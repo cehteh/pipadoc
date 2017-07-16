@@ -592,8 +592,7 @@ local function postprocessors_attach ()
   end
 end
 
-
-local function postprocessors_run (context, output)
+local function postprocessors_run (context)
   CONTEXT=context
   local textout = context.TEXT
   for i=1,#active_postprocessors do
@@ -1290,6 +1289,7 @@ function generate_output(which, output)
       --cwarn:  include themself.
       return ""
     end
+
     if #section == 0 then
       warn("section is empty:",which)
       return ""
@@ -1364,6 +1364,7 @@ do
 
   report_orphan_doubletes()
 end
+
 
 
 --MAIN:
@@ -1741,6 +1742,7 @@ end
 --PLANNED: only generate PLANNED section when there are PLANNED's
 --:
 
+--TODO: document pre/post processors in own chapters
 --PLANNED: control language/conditionals?  //section?key {condition}  else becomes DROPPED:section_key
 --PLANNED: not only pipadoc.conf but also pipadoc.sty templates, conf are local only configurations, .sty are global styles
 --PLANNED: how to join (and then wordwrap) lines?
@@ -1757,5 +1759,5 @@ end
 
 --- Local Variables:
 --- mode: lua
---- compile-command: "lua pipadoc.lua -t ISSUES pipadoc.lua pipadoc_config.lua pipadoc.install pipadoc.test"
+--- compile-command: "lua pipadoc.lua -t ISSUES pipadoc.lua pipadoc_config.lua pipadoc.install"
 --- End:
