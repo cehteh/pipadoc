@@ -213,7 +213,6 @@ else
 end
 
 
-
 local issues_keywords = {"FIXME", "TODO", "PLANNED"}
 
 -- nobug annotations
@@ -236,7 +235,7 @@ preprocessor_register ("",
                          local ret, rep
                          for _,word in ipairs(issues_keywords) do
                            ret, rep = str:gsub("("..word.."):([^%s]*)%s?(.*)",
-                                               '%1:%2zzz {FILE}:{LINE}::{NL}  %3{git_blame_context ()}{NL}', 1)
+                                               '%1:0%2 {FILE}:{LINE}::{NL}  %3{git_blame_context ()}{NL}', 1)
 
                            if rep > 0 then
                              return ret
