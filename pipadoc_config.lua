@@ -173,34 +173,41 @@ end
 --: * Generate asciidoc formatted lists for doc comments in FIXME/TODO/PLANNED sections.
 --:   Each such item includes information gathered from the git commit which touched
 --:   that line last.
-function git_blame (file, line)
-  dbg("blame",file, line)
-  local result = {}
-  local git = io.popen("git blame '"..file.."' -L "..tostring(line)..",+1 -p 2>/dev/null")
 
-  for line in git:lines() do
-    local k,v = line:match("^([%a-]+) (.*)")
-    if line:match("^([%w]+) (%d+) ") then
-      k = 'revision'
-      v = line:match("^(%w*)")
-    elseif line:match("^\t") then
-      k = 'line'
-      v = line:match("^\t(.*)")
+if DOCVARS.GIT then
+  function git_blame (file, line)
+    dbg("blame",file, line)
+    local result = {}
+    local git = io.popen("git blame '"..file.."' -L "..tostring(line)..",+1 -p 2>/dev/null")
+
+    for line in git:lines() do
+      local k,v = line:match("^([%a-]+) (.*)")
+      if line:match("^([%w]+) (%d+) ") then
+        k = 'revision'
+        v = line:match("^(%w*)")
+      elseif line:match("^\t") then
+        k = 'line'
+        v = line:match("^\t(.*)")
+      end
+      result[k] = v
     end
-    result[k] = v
+    local _,_,exitcode = git:close()
+    return exitcode == 0 and result or nil
   end
-  local _,_,exitcode = git:close()
-  return exitcode == 0 and result or nil
-end
 
-function git_blame_context ()
-  local blame = git_blame (CONTEXT.FILE, CONTEXT.LINE)
-  if blame then
-    return " +"..DOCVARS.NL..
-      "  _"..blame.summary.."_ +"..DOCVARS.NL..
-      "  "..blame.author.." "..os.date("%c", tonumber(blame["author-time"])).." +"..DOCVARS.NL..
-      "  +"..tostring(blame.revision).."+"
-  else
+  function git_blame_context ()
+    local blame = git_blame (CONTEXT.FILE, CONTEXT.LINE)
+    if blame then
+      return " +"..DOCVARS.NL..
+        "  _"..blame.summary.."_ +"..DOCVARS.NL..
+        "  "..blame.author.." "..os.date("%c", tonumber(blame["author-time"])).." +"..DOCVARS.NL..
+        "  +"..tostring(blame.revision).."+"
+    else
+      return ""
+    end
+  end
+else
+  function git_blame_context ()
     return ""
   end
 end
@@ -245,5 +252,5 @@ preprocessor_register ("",
 
 --- Local Variables:
 --- mode: lua
---- compile-command: "lua pipadoc.lua -t ISSUES pipadoc.lua pipadoc_config.lua pipadoc.install"
+--- compile-command: "lua pipadoc.lua -D GIT -t ISSUES pipadoc.lua pipadoc_config.lua pipadoc.install"
 --- End:
