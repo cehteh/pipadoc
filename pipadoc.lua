@@ -54,6 +54,7 @@ local opt_safe = false
 local opt_nodefaults = false
 local opt_toplevel = "MAIN"
 local opt_inputs = {}
+local opt_output = nil
 local opt_config = "pipadoc_config.lua"
 local opt_config_set = false
 
@@ -774,6 +775,19 @@ local options = {
   end,
   "", --:  <STRING>
 
+
+  "    -o, --output <file>", --:  <STRING>
+  "                        writes output to 'file' [stdout]", --:  <STRING>
+  ["-o"] = "--output",
+  ["--output"] = function (arg, i)
+    check_args(arg, i+1)
+    opt_output = arg[i+1]
+    dbg("output:", opt_output)
+    return 1
+  end,
+  "", --:  <STRING>
+
+
   "    -D, --define <name>[=<value>]", --:  <STRING>
   "                        define a DOCVAR to value or 'true'", --:  <STRING>
   "    -D, --define -<name>", --:  <STRING>
@@ -816,7 +830,6 @@ local options = {
   ["--"] = function () args_done=true end,
 
   --PLANNED: --alias match pattern --file-as match filename
-  --PLANNED: -o --output
   --PLANNED: --features  show a report which features (using optional Lua modules) are available
   --PLANNED: list-sections
   --PLANNED: force filetype variant  foo.lua:.txt
@@ -1356,13 +1369,23 @@ do
   process_inputs()
 
   local output = {}
-  generate_output(opt_toplevel,output)
+  generate_output(opt_toplevel, output)
+
+  local outfd = io.stdout
+
+  if opt_output then
+    outfd = io.open(opt_output, "w+")
+  end
 
   for i=1,#output do
     postprocessors_run(output[i])
     if output[i].TEXT then
-      io.write(output[i].TEXT, DOCVARS.NL)
+      outfd:write(output[i].TEXT, DOCVARS.NL)
     end
+  end
+
+  if opt_output then
+    outfd:close()
   end
 
   report_orphan_doubletes()
