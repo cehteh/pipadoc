@@ -774,8 +774,8 @@ local options = {
   end,
   "", --:  {STRING}
 
-  "    -D, --define <name>=<value>", --:  {STRING}
-  "                        define a DOCVAR", --:  {STRING}
+  "    -D, --define <name>[=<value>]", --:  {STRING}
+  "                        define a DOCVAR to value or 'true'", --:  {STRING}
   "    -D, --define -<name>", --:  {STRING}
   "                        undefine a DOCVAR", --:  {STRING}
   ["-D"] = "--define",
@@ -787,6 +787,9 @@ local options = {
       dbg("undef:", undef)
       DOCVARS[undef] = nil
     elseif key then
+      if has_value == "" then
+        value = 'true'
+      end
       dbg("define:", key, value)
       DOCVARS[key] = value
     end
