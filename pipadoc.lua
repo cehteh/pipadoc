@@ -798,12 +798,16 @@ local options = {
   "", --:  <STRING>
 
 
-  -- intentionally undocumented option
+  -- intentionally here undocumented
   ["--make-doc"] = function (arg, i)
-    os.execute("lua pipadoc.lua -m asciidoc pipadoc.lua pipadoc_config.lua >pipadoc.txt")
-    os.execute("asciidoc -a toc pipadoc.txt")
-    os.execute('a2x -L -k -v --dblatex-opts "-P latex.output.revhistory=0" pipadoc.txt')
-    return 1
+    os.execute [[
+        lua pipadoc.lua -m asciidoc pipadoc.lua pipadoc_config.lua >.pipadoc.txt
+        if ! cmp .pipadoc.txt pipadoc.txt; then
+          mv .pipadoc.txt pipadoc.txt
+          asciidoc -a toc pipadoc.txt
+          a2x -L -k -v --dblatex-opts "-P latex.output.revhistory=0" pipadoc.txt
+        fi
+    ]]
   end,
 
   "    --", --:  <STRING>
@@ -1751,5 +1755,5 @@ end
 
 --- Local Variables:
 --- mode: lua
---- compile-command: "lua pipadoc.lua -D GIT -t ISSUES pipadoc.lua pipadoc_config.lua pipadoc.install"
+--- compile-command: "lua pipadoc.lua --make-doc -D GIT -t ISSUES pipadoc.lua pipadoc_config.lua pipadoc.install"
 --- End:
