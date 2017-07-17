@@ -11,12 +11,10 @@ preprocessor_register ("",
 )
 
 
---TODO: use <STRING>
-
---: *  Replace +++\{STRING\}+++ in pipadoc comments with the first literal string from the code.
-preprocessor_register ("^lua$",
+--: *  Replace '<STRING>' in pipadoc comments with the first literal string from the code.
+preprocessor_register ("",
                        function (str)
-                         return str:gsub('^([^"]*"([^"]*)".*--%w*:%w*)(.*){STRING}(.*)', '%1%3%2%4', 1)
+                         return str:gsub('^([^"]*"([^"]*)".*%p+%w*:%w*)(.*)<STRING>(.*)', '%1%3%2%4', 1)
                        end
 )
 

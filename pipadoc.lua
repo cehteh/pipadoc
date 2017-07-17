@@ -141,7 +141,7 @@ function request(name) --: try to load optional modules
     dbg("loaded:", name, handle._VERSION)
     return handle
   else
-    warn("can't load module:", name) --cwarn: {STRING} ::
+    warn("can't load module:", name) --cwarn: <STRING> ::
     --cwarn:  'request()' failed to load a module.
     return nil
   end
@@ -513,7 +513,7 @@ function preprocessor_register (langpat, preprocess) --: register a preprocessor
   if type (preprocess) == "function" then
     table.insert(preprocessors, {pattern=langpat, preprocessor=preprocess})
   else
-    warn ("unsupported preprocessor type") --cwarn: {STRING} ::
+    warn ("unsupported preprocessor type") --cwarn: <STRING> ::
     --cwarn:  Tried to 'preprocessor_register()' something that is not a function or table.
   end
 end
@@ -574,7 +574,7 @@ function postprocessor_register (markuppat, postprocess) --: register a postproc
   if type (postprocess) == "function" then
     table.insert(postprocessors, {pattern=markuppat, postprocessor=postprocess})
   else
-    warn ("unsupported postprocessor type") --cwarn: {STRING} ::
+    warn ("unsupported postprocessor type") --cwarn: <STRING> ::
     --cwarn:  Tried to 'postprocessor_register()' something that is not a function or table.
   end
 end
@@ -668,56 +668,56 @@ end
 
 --usage:
 local options = {
-  "pipadoc [options...] [inputs..]",  --:  {STRING}
-  "  options are:", --:  {STRING}
+  "pipadoc [options...] [inputs..]",  --:  <STRING>
+  "  options are:", --:  <STRING>
 
-  "    -v, --verbose", --:  {STRING}
-  "                        increment verbosity level", --:  {STRING}
+  "    -v, --verbose", --:  <STRING>
+  "                        increment verbosity level", --:  <STRING>
   ["-v"] = "--verbose",
   ["--verbose"] = function ()
     opt_verbose = opt_verbose+1
     dbg("verbose:", opt_verbose)
   end,
-  "", --:  {STRING}
+  "", --:  <STRING>
 
-  "    -q, --quiet", --:  {STRING}
-  "                        suppresses any messages", --:  {STRING}
+  "    -q, --quiet", --:  <STRING>
+  "                        suppresses any messages", --:  <STRING>
   ["-q"] = "--quiet",
   ["--quiet"] = function () opt_verbose = 0 end,
-  "", --:  {STRING}
+  "", --:  <STRING>
 
-  "    -d, --debug", --:  {STRING}
-  "                        set verbosity to maximum", --:  {STRING}
+  "    -d, --debug", --:  <STRING>
+  "                        set verbosity to maximum", --:  <STRING>
   ["-d"] = "--debug",
   ["--debug"] = function ()
     opt_verbose = 3
     dbg("verbose:", opt_verbose)
   end,
-  "", --:  {STRING}
+  "", --:  <STRING>
 
-  "    -h, --help", --:  {STRING}
-  "                        show this help", --:  {STRING}
+  "    -h, --help", --:  <STRING>
+  "                        show this help", --:  <STRING>
   ["-h"] = "--help",
   ["--help"] = function ()
     usage()
   end,
-  "", --:  {STRING}
+  "", --:  <STRING>
 
 
-  "    -r, --register <name> <file> <comment>", --:  {STRING}
-  "                        register a filetype pattern", --:  {STRING}
-  "                        for files matching a file pattern", --:  {STRING}
+  "    -r, --register <name> <file> <comment>", --:  <STRING>
+  "                        register a filetype pattern", --:  <STRING>
+  "                        for files matching a file pattern", --:  <STRING>
   ["-r"] = "--register",
   ["--register"] = function (arg,i)
     check_args(arg, i+3)
     filetype_register(arg[i+1], arg[i+2], arg[i+3])
     return 3
   end,
-  "", --:  {STRING}
+  "", --:  <STRING>
 
 
-  "    -t, --toplevel <name>", --:  {STRING}
-  "                        sets 'name' as toplevel node [MAIN]", --:  {STRING}
+  "    -t, --toplevel <name>", --:  <STRING>
+  "                        sets 'name' as toplevel node [MAIN]", --:  <STRING>
   ["-t"] = "--toplevel",
   ["--toplevel"] = function (arg, i)
     check_args(arg, i+3)
@@ -725,10 +725,10 @@ local options = {
     dbg("toplevel:", opt_toplevel)
     return 1
   end,
-  "", --:  {STRING}
+  "", --:  <STRING>
 
-  "    -c, --config <name>", --:  {STRING}
-  "                        selects a config file [pipadoc_config.lua]", --:  {STRING}
+  "    -c, --config <name>", --:  <STRING>
+  "                        selects a config file [pipadoc_config.lua]", --:  <STRING>
   ["-c"] = "--config",
   ["--config"] = function (arg, i)
     check_args(arg, i+1)
@@ -737,22 +737,22 @@ local options = {
     dbg("config:", opt_config)
     return 1
   end,
-  "", --:  {STRING}
+  "", --:  <STRING>
 
 
-  "    --no-defaults", --:  {STRING}
-  "                        disables default filetypes and configfile", --:  {STRING}
+  "    --no-defaults", --:  <STRING>
+  "                        disables default filetypes and configfile", --:  <STRING>
   ["--no-defaults"] = function ()
     opt_nodefaults = true
     dbg("nodefaults")
   end,
-  "", --:  {STRING}
+  "", --:  <STRING>
 
 
-  "    --safe", --:  {STRING}
-  "                        Enables safe mode. Safe mode disables the default ", --:  {STRING}
-  "                        config file and other facilities which may execute", --:  {STRING}
-  "                        untrusted code", --:  {STRING}
+  "    --safe", --:  <STRING>
+  "                        Enables safe mode. Safe mode disables the default ", --:  <STRING>
+  "                        config file and other facilities which may execute", --:  <STRING>
+  "                        untrusted code", --:  <STRING>
   ["--safe"] = function ()
     opt_safe = true
     if not opt_config_set then
@@ -760,11 +760,11 @@ local options = {
     end
     dbg("safe")
   end,
-  "", --:  {STRING}
+  "", --:  <STRING>
 
 
-  "    -m, --markup <name>", --:  {STRING}
-  "                        selects the markup engine for the output [text]", --:  {STRING}
+  "    -m, --markup <name>", --:  <STRING>
+  "                        selects the markup engine for the output [text]", --:  <STRING>
   ["-m"] = "--markup",
   ["--markup"] = function (arg, i)
     check_args(arg, i+1)
@@ -772,12 +772,12 @@ local options = {
     dbg("markup:", DOCVARS.MARKUP)
     return 1
   end,
-  "", --:  {STRING}
+  "", --:  <STRING>
 
-  "    -D, --define <name>[=<value>]", --:  {STRING}
-  "                        define a DOCVAR to value or 'true'", --:  {STRING}
-  "    -D, --define -<name>", --:  {STRING}
-  "                        undefine a DOCVAR", --:  {STRING}
+  "    -D, --define <name>[=<value>]", --:  <STRING>
+  "                        define a DOCVAR to value or 'true'", --:  <STRING>
+  "    -D, --define -<name>", --:  <STRING>
+  "                        undefine a DOCVAR", --:  <STRING>
   ["-D"] = "--define",
   ["--define"] = function (arg,i)
     check_args(arg, i+1)
@@ -795,7 +795,7 @@ local options = {
     end
     return 1
   end,
-  "", --:  {STRING}
+  "", --:  <STRING>
 
 
   -- intentionally undocumented option
@@ -806,9 +806,9 @@ local options = {
     return 1
   end,
 
-  "    --", --:  {STRING}
-  "                        stops parsing the options and treats each", --:  {STRING}
-  "                        following argument as input file", --:  {STRING}
+  "    --", --:  <STRING>
+  "                        stops parsing the options and treats each", --:  <STRING>
+  "                        following argument as input file", --:  <STRING>
   ["--"] = function () args_done=true end,
 
   --PLANNED: --alias match pattern --file-as match filename
@@ -824,8 +824,8 @@ local options = {
   --PLANNED: source indent with prettyprinting --indent columns
   --PLANNED: strip option (pre/postprocessor?) to remove all pipadoc
 
-  "", --:  {STRING}
-  "  inputs are file names or a '-' which indicates standard input", --:  {STRING}
+  "", --:  <STRING>
+  "  inputs are file names or a '-' which indicates standard input", --:  <STRING>
 }
 
 function usage()
@@ -981,7 +981,7 @@ local function setup()
         if opt_config_set then
           fn = die
         end
-        fn ("can't load config file:", opt_config) --cwarn: {STRING} ::
+        fn ("can't load config file:", opt_config) --cwarn: <STRING> ::
         --cwarn:  The config file ('--config' option) could not be loaded.
       end
     end
@@ -1033,7 +1033,7 @@ local function setup()
       if context.ARG and #context.ARG > 0 then
         section_append(context.SECTION, nil, context)
       else
-        warn("paste argument missing")  --cwarn: {STRING} ::
+        warn("paste argument missing")  --cwarn: <STRING> ::
         --cwarn:  Using the '=' operator without an argument.
       end
     end,
@@ -1050,7 +1050,7 @@ local function setup()
     if context.ARG and #context.ARG > 0 then
       section_append(context.SECTION, nil, context)
     else
-      warn("sort argument missing") --cwarn: {STRING} ::
+      warn("sort argument missing") --cwarn: <STRING> ::
       ---cwarn:  Using the '@', '$' or '#' operator without an argument.
     end
   end
@@ -1086,7 +1086,7 @@ local function setup()
       end
 
       if #sorted == 0 then
-        warn("section is empty:",which) --cwarn: {STRING} ::
+        warn("section is empty:",which) --cwarn: <STRING> ::
         --cwarn:  Using '=', '@' or '#' on a section which has no data (under respective keys).
         return ""
       end
@@ -1098,7 +1098,7 @@ local function setup()
       end
       context.FILE = oldfile
     else
-      warn("no section named:", which) --cwarn: {STRING} ::
+      warn("no section named:", which) --cwarn: <STRING> ::
       --cwarn:  Using '=', '@' or '#' on a section which as never defined.
     end
   end
@@ -1109,6 +1109,7 @@ local function setup()
   --: `@` ::
   --:   Alphabetic sorting operator. Takes a section name as argument and will paste section
   --:   text alphabetically sorted by its keys.
+  --:
   --PLANNED: option for sorting locale
   --PLANNED: option for sorting (up/down)
   operator_register(
@@ -1122,6 +1123,7 @@ local function setup()
   --: `$` ::
   --:   Alphanumeric sorting operator. Takes a section name as argument and will paste section text
   --:   alphanumerically sorted by its keys.
+  --:
   --PLANNED: option for sorting locale
   --PLANNED: option for sorting (up/down)
   operator_register(
@@ -1134,6 +1136,7 @@ local function setup()
   --: `#` ::
   --:   Numerical sorting operator. Takes a section name as argument and will paste section text
   --:   numerically sorted by its keys.
+  --:
   --PLANNED: option for sorting (up/down)
   operator_register(
     "#",
@@ -1190,7 +1193,7 @@ end
 local function process_file(file)
   local filetype = filetype_get (file)
   if not filetype then
-    warn("unknown file type:", file) --cwarn: {STRING} ::
+    warn("unknown file type:", file) --cwarn: <STRING> ::
     --cwarn:  The type of the given file was not recongized (see <<_usage,'--register'>> option).
     return
   end
@@ -1210,7 +1213,7 @@ local function process_file(file)
   else
     fh = io.open(file)
     if not fh then
-      warn("file not found:", file) --cwarn: {STRING} ::
+      warn("file not found:", file) --cwarn: <STRING> ::
       --cwarn:  A given File can not be opened (wrong path or typo?).
       return
     end
@@ -1273,7 +1276,7 @@ function generate_output(which, output)
 
   if section ~= nil then
     if sofar_rec[which] then
-      warn("recursive paste:",which) --cwarn: {STRING} ::
+      warn("recursive paste:",which) --cwarn: <STRING> ::
       --cwarn:  Pasted sections (see <<_built_in_operators,paste operator>>) can not recursively
       --cwarn:  include themself.
       return ""
@@ -1313,12 +1316,12 @@ function report_orphan_doubletes()
   for k,v in pairs(sections_usecnt) do
     if v == 0 then
       CONTEXT = orphan
-      warn("section unused:", k) --cwarn: {STRING} ::
+      warn("section unused:", k) --cwarn: <STRING> ::
       --cwarn:  The printed section was not used. This might be intentional when generating
       --cwarn:  only partial outputs.
     elseif v > 1 then
       CONTEXT = doublette
-      warn("section multiple times used:", k, v) --cwarn: {STRING} ::
+      warn("section multiple times used:", k, v) --cwarn: <STRING> ::
       --cwarn:  Section was pasted multiple times in the output.
     end
   end
@@ -1326,11 +1329,11 @@ function report_orphan_doubletes()
   for k,v in pairs(sections_keys_usecnt) do
     if v == 0 then
       CONTEXT = orphan
-      warn("section w/ keys unused:", k) --cwarn: {STRING} ::
+      warn("section w/ keys unused:", k) --cwarn: <STRING> ::
       --cwarn:  Section with keys (numeric or alphabetic) was not used.
     elseif v > 1 then
       CONTEXT = doublette
-      warn("section w/ keys multiple times used:", k, v) --cwarn: {STRING} ::
+      warn("section w/ keys multiple times used:", k, v) --cwarn: <STRING> ::
       --cwarn:  Section was used multiple times in the output ('@', '$' or '#' operator).
     end
   end
