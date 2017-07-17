@@ -138,37 +138,37 @@ postprocessor_register ("",
 
 
 -- for the testsuite
---PLANNED: only activate when -DTESTSUIT=true
-preprocessor_register ("^test",
-                       function (str)
-                         local ret,num = str:gsub("TESTPP", '#: TESTFOO')
-                         if num > 0 then
-                           warn("Test-Substitute TESTPP with #: TESTFOO")
+if DOCVARS.TESTSUITE then
+  preprocessor_register ("^test",
+                         function (str)
+                           local ret,num = str:gsub("TESTPP", '#: TESTFOO')
+                           if num > 0 then
+                             warn("Test-Substitute TESTPP with #: TESTFOO")
+                           end
+                           return ret
                          end
-                         return ret
-                       end
-)
+  )
 
-preprocessor_register ("^test",
-                       function (str)
-                         local ret,num = str:gsub("TESTFOO", 'TESTBAR')
-                         if num > 0 then
-                           warn("Test-Substitute TESTFOO with TESTBAR")
+  preprocessor_register ("^test",
+                         function (str)
+                           local ret,num = str:gsub("TESTFOO", 'TESTBAR')
+                           if num > 0 then
+                             warn("Test-Substitute TESTFOO with TESTBAR")
+                           end
+                           return ret
                          end
-                         return ret
-                       end
-)
+  )
 
-postprocessor_register ("",
-                        function (text)
-                          if text:match("TESTDROP") then
-                            warn("TESTDROP")
-                            return
+  postprocessor_register ("",
+                          function (text)
+                            if text:match("TESTDROP") then
+                              warn("TESTDROP")
+                              return
+                            end
+                            return text
                           end
-                          return text
-                        end
-)
-
+  )
+end
 
 --PLANNED: ldoc/doxygen/javadoc compatible macros @param @return @see etc.
 
