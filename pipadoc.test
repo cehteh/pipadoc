@@ -56,11 +56,15 @@ return $error
 #:
 ##oneline
 #:
+#$oneline
+#:
 #=block
 #:
 #@block
 #:
 ##block
+#:
+#$block
 #:
 #@argonly
 #: not a docline NODOC
@@ -129,6 +133,11 @@ echo TESTPP becomes a docline
 #> oneline w/ arg 1
 #> oneline w/ arg 2
 #>
+#> oneline w/ arg 1
+#> oneline w/ arg 2
+#> oneline w/ arg a
+#> oneline w/ arg b
+#>
 #> block test
 #>
 #> block w/ arg a
@@ -136,6 +145,11 @@ echo TESTPP becomes a docline
 #>
 #> block w/ arg 1
 #> block w/ arg 2
+#>
+#> block w/ arg 1
+#> block w/ arg 2
+#> block w/ arg a
+#> block w/ arg b
 #>
 #> 1. arg oneline
 #> 2. arg block

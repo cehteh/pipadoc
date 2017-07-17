@@ -1043,6 +1043,68 @@ local function setup()
     end
   )
 
+
+  local function sortprocess(context)
+    context.SECTION = context.SECTION or block_section
+
+    if context.ARG and #context.ARG > 0 then
+      section_append(context.SECTION, nil, context)
+    else
+      warn("sort argument missing") --cwarn: {STRING} ::
+      ---cwarn:  Using the '@', '$' or '#' operator without an argument.
+    end
+  end
+
+  local function sortgenerate(context, output)
+    dbg("generate_output_sorted:"..context.FILE..":"..context.LINE)
+    local which = context.ARG
+    local section = sections[which] and sections[which].keys
+    local text = ""
+
+    if section ~= nil then
+      sections_keys_usecnt[which] = (sections_keys_usecnt[which] or 0) + 1
+
+      local oldfile = context.FILE
+      context.FILE ='<output>:'..which
+
+      local sorted = {}
+
+      for k in pairs(section) do
+        if context.OP == '@' and not tonumber (k) then
+          table.insert(sorted, k)
+        elseif context.OP == '#' and tonumber (k) then
+          table.insert(sorted, k)
+        elseif context.OP == '$' then
+          table.insert(sorted, k)
+        end
+      end
+
+      if context.OP == '@' or context.OP == '$' then
+        table.sort(sorted, function(a,b) return tostring(a) < tostring(b) end)
+      elseif context.OP == '#' then
+        table.sort(sorted, function(a,b) return (tonumber(a) or 0) < (tonumber(b) or 0) end)
+      end
+
+      if #sorted == 0 then
+        warn("section is empty:",which) --cwarn: {STRING} ::
+        --cwarn:  Using '=', '@' or '#' on a section which has no data (under respective keys).
+        return ""
+      end
+
+      for i=1,#sorted do
+        for j=1,#section[sorted[i]] do
+          table.insert(output, section[sorted[i]][j])
+        end
+      end
+      context.FILE = oldfile
+    else
+      warn("no section named:", which) --cwarn: {STRING} ::
+      --cwarn:  Using '=', '@' or '#' on a section which as never defined.
+    end
+  end
+
+
+
   --op_builtin:
   --: `@` ::
   --:   Alphabetic sorting operator. Takes a section name as argument and will paste section
@@ -1051,58 +1113,22 @@ local function setup()
   --PLANNED: option for sorting (up/down)
   operator_register(
     "@",
-    function (context)
-      context.SECTION = context.SECTION or block_section
-
-      if context.ARG and #context.ARG > 0 then
-        section_append(context.SECTION, nil, context)
-      else
-        warn("sort argument missing") --cwarn: {STRING} ::
-        ---cwarn:  Using the '@' or '#' operator without an argument.
-      end
-    end,
-
-    function (context, output)
-      dbg("generate_output_alphasorted:"..context.FILE..":"..context.LINE)
-      local which = context.ARG
-      local section = sections[which] and sections[which].keys
-      local text = ""
-
-      if section ~= nil then
-        sections_keys_usecnt[which] = (sections_keys_usecnt[which] or 0) + 1
-
-        local oldfile = context.FILE
-        context.FILE ='<output>:'..which
-
-        local sorted = {}
-
-        for k in pairs(section) do
-          if not tonumber (k) then
-            table.insert(sorted, k)
-          end
-        end
-
-        table.sort(sorted, function(a,b) return tostring(a) < tostring(b) end)
-
-        if #sorted == 0 then
-          warn("section is empty:",which) --cwarn: {STRING} ::
-          --cwarn:  Using '=', '@' or '#' on a section which has no data (under respective keys).
-          return ""
-        end
-
-        for i=1,#sorted do
-          for j=1,#section[sorted[i]] do
-            table.insert(output, section[sorted[i]][j])
-          end
-        end
-        context.FILE = oldfile
-      else
-        warn("no section named:", which) --cwarn: {STRING} ::
-        --cwarn:  Using '=', '@' or '#' on a section which as never defined.
-      end
-    end
+    sortprocess,
+    sortgenerate
   )
 
+
+  --op_builtin:
+  --: `$` ::
+  --:   Alphanumeric sorting operator. Takes a section name as argument and will paste section text
+  --:   alphanumerically sorted by its keys.
+  --PLANNED: option for sorting locale
+  --PLANNED: option for sorting (up/down)
+  operator_register(
+    "$",
+    sortprocess,
+    sortgenerate
+  )
 
   --op_builtin:
   --: `#` ::
@@ -1111,61 +1137,13 @@ local function setup()
   --PLANNED: option for sorting (up/down)
   operator_register(
     "#",
-    function (context)
-      context.SECTION = context.SECTION or block_section
-
-      if context.ARG and #context.ARG > 0 then
-        section_append(context.SECTION, nil, context)
-      else
-        warn("sort argument missing:")
-      end
-    end,
-
-    function (context, output)
-      dbg("generate_output_numsorted:"..context.FILE..":"..context.LINE)
-      local which = context.ARG
-      local section = sections[which] and sections[which].keys
-      local text = ""
-
-      if section ~= nil then
-        sections_keys_usecnt[which] = (sections_keys_usecnt[which] or 0) + 1
-
-        local oldfile = context.FILE
-        context.FILE ='<output>:'..which
-
-        local sorted = {}
-
-        for k in pairs(section) do
-          if tonumber (k) then
-            table.insert(sorted, k)
-          end
-        end
-
-        table.sort(sorted, function(a,b) return (tonumber(a) or 0) < (tonumber(b) or 0) end)
-
-        if #sorted == 0 then
-          warn("section is empty:",which)
-          return ""
-        end
-
-        for i=1,#sorted do
-          context.LINE=sorted[i]
-          for j=1,#section[sorted[i]] do
-            table.insert(output, section[sorted[i]][j])
-          end
-        end
-        context.FILE = oldfile
-      else
-        warn("no section named:", which)
-      end
-    end
+    sortprocess,
+    sortgenerate
   )
 
   preprocessors_attach ()
   postprocessors_attach ()
 end
-
---TODO: alnum sort operator $
 
 local function process_line (line, comment, filecontext)
   local context = {
@@ -1353,7 +1331,7 @@ function report_orphan_doubletes()
     elseif v > 1 then
       CONTEXT = doublette
       warn("section w/ keys multiple times used:", k, v) --cwarn: {STRING} ::
-      --cwarn:  Section was used multiple times in the output ('@' or '#' operator).
+      --cwarn:  Section was used multiple times in the output ('@', '$' or '#' operator).
     end
   end
 end
@@ -1478,7 +1456,7 @@ end
 --:
 --: <section> ::= <alphanumeric text including underscore and dots>
 --:
---: <operator> ::= ":" | "=" | "@" | "#" | <user defined operators>
+--: <operator> ::= ":" | "=" | "@" | "$" | "#" | <user defined operators>
 --:
 --: <argument> ::= <alphanumeric text including underscore and dots>
 --:
@@ -1734,21 +1712,21 @@ end
 --: FIXME
 --: ~~~~~
 --:
---@FIXME
+--$FIXME
 --:
 --PLANNED: only generate FIXME Section when there are FIXME's
 --:
 --: TODO
 --: ~~~~
 --:
---@TODO
+--$TODO
 --:
 --PLANNED: only generate TODO section when there are TODO's
 --:
 --: PLANNED
 --: ~~~~~~~
 --:
---@PLANNED
+--$PLANNED
 --:
 --PLANNED: only generate PLANNED section when there are PLANNED's
 --:
