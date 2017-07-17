@@ -977,7 +977,11 @@ local function setup()
       if config then
         config ()
       else
-        warn ("can't load config file:", opt_config) --cwarn: {STRING} ::
+        local fn = warn
+        if opt_config_set then
+          fn = die
+        end
+        fn ("can't load config file:", opt_config) --cwarn: {STRING} ::
         --cwarn:  The config file ('--config' option) could not be loaded.
       end
     end
