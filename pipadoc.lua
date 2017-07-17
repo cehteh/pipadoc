@@ -801,7 +801,7 @@ local options = {
   -- intentionally here undocumented
   ["--make-doc"] = function (arg, i)
     os.execute [[
-        lua pipadoc.lua -m asciidoc pipadoc.lua pipadoc_config.lua >.pipadoc.txt
+        lua pipadoc.lua -m asciidoc pipadoc.lua pipadoc_config.lua -o .pipadoc.txt
         if ! cmp .pipadoc.txt pipadoc.txt; then
           mv .pipadoc.txt pipadoc.txt
           asciidoc -a toc pipadoc.txt
@@ -1259,9 +1259,16 @@ local function process_file(file)
   fh:close()
 end
 
+
 local function process_inputs()
-  for i in ipairs(opt_inputs) do
-      process_file(opt_inputs[i])
+  local processed_files = {}
+  for _, filename in ipairs(opt_inputs) do
+    if processed_files[filename] then
+      warn("input file given twice:", filename)
+    else
+      process_file(filename)
+      processed_files[filename] = true
+    end
   end
 end
 

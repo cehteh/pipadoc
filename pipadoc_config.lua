@@ -245,7 +245,6 @@ preprocessor_register ("",
                        end
 )
 
---TODO: file given twice as input warn and drop (registry of already read files)
 --PLANNED: offer different sort orders for issues (date / line)
 --PLANNED: noweb like preprocessing syntax for chapter substitutions in textfiles
 
