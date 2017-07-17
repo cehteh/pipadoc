@@ -662,6 +662,10 @@ function add_inputfile(filename) --: Add a 'filename' to the list of files to pr
   opt_inputs[#opt_inputs+1] = filename
 end
 
+local function check_args(arg, n)
+  assert(#arg >= n, "missing arg: "..arg[n-1])
+end
+
 --usage:
 local options = {
   "pipadoc [options...] [inputs..]",  --:  {STRING}
@@ -705,7 +709,7 @@ local options = {
   "                        for files matching a file pattern", --:  {STRING}
   ["-r"] = "--register",
   ["--register"] = function (arg,i)
-    assert(type(arg[i+3]))
+    check_args(arg, i+3)
     filetype_register(arg[i+1], arg[i+2], arg[i+3])
     return 3
   end,
@@ -716,7 +720,7 @@ local options = {
   "                        sets 'name' as toplevel node [MAIN]", --:  {STRING}
   ["-t"] = "--toplevel",
   ["--toplevel"] = function (arg, i)
-    assert(type(arg[i+1]))
+    check_args(arg, i+3)
     opt_toplevel = arg[i+1]
     dbg("toplevel:", opt_toplevel)
     return 1
@@ -727,7 +731,7 @@ local options = {
   "                        selects a config file [pipadoc_config.lua]", --:  {STRING}
   ["-c"] = "--config",
   ["--config"] = function (arg, i)
-    assert(type(arg[i+1]))
+    check_args(arg, i+1)
     opt_config = arg[i+1]
     opt_config_set = true
     dbg("config:", opt_config)
@@ -763,7 +767,7 @@ local options = {
   "                        selects the markup engine for the output [text]", --:  {STRING}
   ["-m"] = "--markup",
   ["--markup"] = function (arg, i)
-    assert(type(arg[i+1]))
+    check_args(arg, i+1)
     DOCVARS.MARKUP = arg[i+1]
     dbg("markup:", DOCVARS.MARKUP)
     return 1
@@ -776,9 +780,9 @@ local options = {
   "                        undefine a DOCVAR", --:  {STRING}
   ["-D"] = "--define",
   ["--define"] = function (arg,i)
-    assert(type(arg[i+1]))
-    local key,value = arg[i+1]:match("^([%w_]+)=(.+)")
-    local undef = arg[i+1]:match("^[!-]([%w_]+)")
+    check_args(arg, i+1)
+    local key,has_value,value = arg[i+1]:match("^([%w_]+)(=?)(.*)")
+    local undef = arg[i+1]:match("^[-]([%w_]+)")
     if undef then
       dbg("undef:", undef)
       DOCVARS[undef] = nil
