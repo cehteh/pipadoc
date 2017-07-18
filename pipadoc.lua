@@ -53,6 +53,7 @@ local opt_verbose = 1
 local opt_safe = false
 local opt_nodefaults = false
 local opt_toplevel = "MAIN"
+local opt_aliases = {}
 local opt_inputs = {}
 local opt_output = nil
 local opt_config = "pipadoc_config.lua"
@@ -663,6 +664,14 @@ function add_inputfile(filename) --: Add a 'filename' to the list of files to pr
   opt_inputs[#opt_inputs+1] = filename
 end
 
+function register_alias(from, to) --: Register a new alias
+  assert_type(from, "string")
+  assert_type(to, "string")
+  dbg("register alias:", from, "->", to)
+  opt_aliases[#opt_aliases+1] = {from, to}
+end
+
+
 local function check_args(arg, n)
   assert(#arg >= n, "missing arg: "..arg[n-1])
 end
@@ -787,6 +796,17 @@ local options = {
   end,
   "", --:  <STRING>
 
+  "    -a, --alias <pattern> <as>", --:  <STRING>
+  "                        aliases filenames to another filetype.", --:  <STRING>
+  "                        force example, treat .install files as shell files:", --:  <STRING>
+  "                         --a '(.*)%.install' '%1.sh'", --:  <STRING>
+  ["-a"] = "--alias",
+  ["--alias"] = function (arg, i)
+    check_args(arg, i+2)
+    register_alias (arg[i+1], arg[i+2])
+    return 2
+  end,
+  "", --:  <STRING>
 
   "    -D, --define <name>[=<value>]", --:  <STRING>
   "                        define a DOCVAR to value or 'true'", --:  <STRING>
@@ -829,10 +849,8 @@ local options = {
   "                        following argument as input file", --:  <STRING>
   ["--"] = function () args_done=true end,
 
-  --PLANNED: --alias match pattern --file-as match filename
   --PLANNED: --features  show a report which features (using optional Lua modules) are available
   --PLANNED: list-sections
-  --PLANNED: force filetype variant  foo.lua:.txt
   --PLANNED: eat (double, triple, ..) empty lines (do this in a postprocessor)
   --PLANNED: add debug report (warnings/errors) to generated document PIPADOC_LOG section
   --PLANNED: wrap at blank/intelligent
@@ -1207,19 +1225,26 @@ local function process_line (line, comment, filecontext)
   end
 end
 
-local function process_file(file)
-  local filetype = filetype_get (file)
-  if not filetype then
-    warn("unknown file type:", file) --cwarn: <STRING> ::
-    --cwarn:  The type of the given file was not recongized (see <<_usage,'--register'>> option).
-    return
-  end
 
+local function file_alias(filename)
+  for i=1,#opt_aliases do
+    local ok, alias, n = pcall(string.gsub, filename, opt_aliases[i][1], opt_aliases[i][2], 1)
+    if ok and n>0 then
+      dbg ("alias:", filename, alias)
+      return alias
+    elseif not ok then
+      warn ("alias pattern error:", alias, opt_aliases[i][1], opt_aliases[i][2])
+    end
+  end
+  return filename
+end
+
+
+local function process_file(file)
   -- filecontext is a partial context storing data
   -- of the current file processed
   local filecontext = {
     FILE="<process_file>",
-    filetype=filetype
   }
   CONTEXT=filecontext
 
@@ -1229,6 +1254,7 @@ local function process_file(file)
     fh = io.stdin
   else
     fh = io.open(file)
+
     if not fh then
       warn("file not found:", file) --cwarn: <STRING> ::
       --cwarn:  A given File can not be opened (wrong path or typo?).
@@ -1236,6 +1262,16 @@ local function process_file(file)
     end
     filecontext.FILE = file
   end
+
+  local filetype = filetype_get (file_alias(file))
+
+  if not filetype then
+    warn("unknown file type:", file) --cwarn: <STRING> ::
+    --cwarn:  The type of the given file was not recongized (see <<_usage,'--register'>> option).
+    return
+  end
+
+  filecontext.filetype=filetype
 
   block_section = filecontext.FILE:match("[^./]+%f[.%z]")
   dbg("section:", block_section)
@@ -1786,5 +1822,5 @@ end
 
 --- Local Variables:
 --- mode: lua
---- compile-command: "lua pipadoc.lua --make-doc -D GIT -t ISSUES pipadoc.lua pipadoc_config.lua pipadoc.install"
+--- compile-command: "lua pipadoc.lua --make-doc -a '(.*).install$' '%1.txt' -D GIT -t ISSUES pipadoc.lua pipadoc_config.lua pipadoc.install"
 --- End:

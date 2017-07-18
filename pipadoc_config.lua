@@ -250,5 +250,5 @@ preprocessor_register ("",
 
 --- Local Variables:
 --- mode: lua
---- compile-command: "lua pipadoc.lua --make-doc -D GIT -t ISSUES pipadoc.lua pipadoc_config.lua pipadoc.install"
+--- compile-command: "lua pipadoc.lua --make-doc -a '(.*).install$' '%1.txt' -D GIT -t ISSUES pipadoc.lua pipadoc_config.lua pipadoc.install"
 --- End:
