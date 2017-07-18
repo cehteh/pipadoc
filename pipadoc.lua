@@ -271,6 +271,9 @@ function streval (str) --: evaluate Lua code inside curly braces in str.
                 success,result = pcall(loadlua (inbraced))
                 if success then
                   braced = result or ""
+                else
+                  warn("streval failed:", inbraced, result) --cwarn: <STRING> ::
+                  --cwarn:  call to streval failed.
                 end
               end
             end
@@ -598,7 +601,13 @@ local function postprocessors_run (context)
   CONTEXT=context
   local textout = context.TEXT
   for i=1,#active_postprocessors do
-    textout = active_postprocessors[i](textout)
+    local ok, result = pcall(active_postprocessors[i],textout)
+    if not ok then
+      warn("postprocessor failed:", result) --cwarn: <STRING> ::
+      --cwarn:  error in postprocessor.
+    else
+      textout = result
+    end
     if not textout then
       break
     end
@@ -1221,7 +1230,11 @@ local function process_line (line, comment, filecontext)
   local op = context.OP
   if op then
     dbg("pre:", context.PRE, "section:", context.SECTION, "op:", op, "arg:", context.ARG, "text:", context.TEXT)
-    procfuncs[op](context)
+    local ok,err = pcall(procfuncs[op], context)
+    if not ok then
+      warn ("operator processing failed", op, err) --cwarn: <STRING> ::
+      --cwarn:  error executing a operators processor.
+    end
   end
 end
 
@@ -1287,9 +1300,12 @@ local function process_file(file)
     local preprocessors = filecontext.filetype.preprocessors
     if preprocessors then
       for i=1,#preprocessors do
-        local linepp = preprocessors[i](line)
-        --PLANNED: preprocessors may expand to multiple lines? return table
-        if to_text (linepp) and line ~= linepp then
+        local ok,linepp = pcall(preprocessors[i],line)
+        if not ok then
+          warn("preprocessor failed:", linepp) --cwarn: <STRING> ::
+          --cwarn:  error in preprocessor.
+          --PLANNED: preprocessors may expand to multiple lines? return table
+        elseif to_text (linepp) and line ~= linepp then
           line = linepp
           trace("preprocessed:", line)
         end
@@ -1355,7 +1371,11 @@ function generate_output(which, output)
       local genfunc = genfuncs[section[i].OP]
       if genfunc then
         CONTEXT=section[i]
-        genfunc(section[i], output)
+        local ok, err = pcall(genfunc, section[i], output)
+        if not ok then
+          warn("generator failed:", err) --cwarn: <STRING> ::
+          --cwarn:  error in operators generator function.
+        end
         CONTEXT=context
       else
         warn("no generator function for:", section[i].OP)
@@ -1823,7 +1843,6 @@ end
 --PLANNED: CONFIG:POST
 --PLANNED: CONFIG:GENERATE
 --PLANNED: manpage
---PLANNED: call operators/processors in a pcall
 
 --- Local Variables:
 --- mode: lua
