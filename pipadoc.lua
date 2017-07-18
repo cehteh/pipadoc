@@ -721,7 +721,7 @@ local options = {
   "                        sets 'name' as toplevel node [MAIN]", --:  <STRING>
   ["-t"] = "--toplevel",
   ["--toplevel"] = function (arg, i)
-    check_args(arg, i+3)
+    check_args(arg, i+1)
     opt_toplevel = arg[i+1]
     dbg("toplevel:", opt_toplevel)
     return 1
@@ -1775,6 +1775,7 @@ end
 --PLANNED: bash like parameter expansion, how to apply that to sections/keys too --%{section}:%{key} .. how about streval on SECTION and ARG //{SECTION}:{ARG} NODOC
 --PLANNED: org-mode processor
 --PLANNED: INIT section for configuration
+--PLANNED: test expected stderr in testsuite
 
 --PLANNED: special sections
 --PLANNED: CONFIG:PRE

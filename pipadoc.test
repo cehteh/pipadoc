@@ -28,7 +28,7 @@ for i in $test_lua_interpreters; do
     sh pipadoc.install -i "$i" -x "_test_$i" || continue
 
     echo "./pipadoc_test_$i -D TESTSUITE -t TEST -r test '%.test$' '#' pipadoc.test pipadoc.lua"
-    if ./pipadoc_test_$i  -D TESTSUITE -t TEST -r test '%.test$' '#' pipadoc.test pipadoc.lua >test_out_$i; then
+    if ./pipadoc_test_$i  -D TESTSUITE -t TEST -r test '%.test$' '#' pipadoc.test pipadoc.lua -o test_out_$i; then
 
             if cmp test_out_$i test_expected; then
                     echo "SUCCESS: pipadoc_test_$i"
@@ -170,4 +170,3 @@ echo TESTPP becomes a docline
 #> END
 
 
-#TODO: test expected stderr
