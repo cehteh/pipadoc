@@ -272,8 +272,8 @@ function streval (str) --: evaluate Lua code inside curly braces in str.
                 if success then
                   braced = result or ""
                 else
-                  warn("streval failed:", inbraced, result) --cwarn: <STRING> ::
-                  --cwarn:  call to streval failed.
+                  warn("streval failed:", braced, result) --cwarn: <STRING> ::
+                  --cwarn:  call to streval failed (forgotten to escape braces?).
                 end
               end
             end
