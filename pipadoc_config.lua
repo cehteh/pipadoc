@@ -213,7 +213,7 @@ else
 end
 
 
-local issues_keywords = {"FIXME", "TODO", "PLANNED"}
+local issues_keywords = {"WIP", "FIXME", "TODO", "PLANNED"}
 
 -- nobug annotations
 preprocessor_register ("^c$",
