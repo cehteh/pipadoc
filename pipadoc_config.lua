@@ -197,11 +197,21 @@ if DOCVARS.GIT then
 
   function git_blame_context ()
     local blame = git_blame (CONTEXT.FILE, CONTEXT.LINE)
+
     if blame then
+      local blame_date
+      if blame.revision == "0000000000000000000000000000000000000000" then
+        blame_date = ""
+      else
+        blame_date = os.date("%c", blame["author-time"])
+        --blame_date = os.date("%c", tonumber(blame["author-time"]))
+      end
+
+
       return " +"..DOCVARS.NL..
         "  _"..blame.summary.."_ +"..DOCVARS.NL..
-        "  "..blame.author.." "..os.date("%c", tonumber(blame["author-time"])).." +"..DOCVARS.NL..
-        "  +"..tostring(blame.revision).."+"
+        "  "..blame.author.." "..blame_date.." +"..DOCVARS.NL..
+        "  +"..blame.revision.."+"
     else
       return ""
     end

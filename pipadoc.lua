@@ -844,10 +844,11 @@ local options = {
   -- intentionally here undocumented
   ["--make-doc"] = function (arg, i)
     os.execute [[
-        lua pipadoc.lua -m asciidoc pipadoc.lua pipadoc_config.lua -o .pipadoc.txt
-        if ! cmp .pipadoc.txt pipadoc.txt; then
-          mv .pipadoc.txt pipadoc.txt
+        lua pipadoc.lua -m asciidoc pipadoc.lua pipadoc_config.lua -o pipadoc.txt
+        if test ! -e  pipadoc.html -o pipadoc.txt -nt pipadoc.html; then
           asciidoc -a toc pipadoc.txt
+        fi
+        if test ! -e  pipadoc.pdf -o pipadoc.txt -nt pipadoc.pdf; then
           a2x -L -k -v --dblatex-opts "-P latex.output.revhistory=0" pipadoc.txt
         fi
     ]]
@@ -1419,6 +1420,22 @@ function report_orphan_doubletes()
   end
 end
 
+function cmp_files(aname,bname)
+  local a_fd = io.open(aname)
+  local b_fd = io.open(bname)
+
+  local a,b = true,false
+
+  if a_fd and b_fd then
+    a = a_fd:read("*a")
+    b = b_fd:read("*a")
+  end
+
+  if a_fd then a_fd:close () end
+  if b_fd then b_fd:close () end
+
+  return a == b
+end
 
 do
   setup()
@@ -1429,8 +1446,11 @@ do
 
   local outfd = io.stdout
 
+  local tmpfile
   if opt_output then
-    outfd = io.open(opt_output, "w+")
+    local dir,name = opt_output:match("(.-)([^/]*)$")
+    tmpfile = dir.."."..name
+    outfd = io.open(tmpfile, "w+")
   end
 
   for i=1,#output do
@@ -1439,9 +1459,20 @@ do
       outfd:write(output[i].TEXT, DOCVARS.NL)
     end
   end
+  -- free memory
+  sections = nil
+  output = nil
 
   if opt_output then
     outfd:close()
+
+    if not cmp_files(tmpfile, opt_output) then
+      dbg("rename:",tmpfile, opt_output)
+      os.rename(tmpfile, opt_output)
+    else
+      dbg("remove:",tmpfile)
+      os.remove(tmpfile)
+    end
   end
 
   report_orphan_doubletes()
