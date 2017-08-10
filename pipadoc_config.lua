@@ -268,6 +268,7 @@ preprocessor_register ("",
 
 
 
+--TODO: docmument, postprocessor cant section_append
 --PLANNED: offer different sort orders for issues (date / line)
 --PLANNED: noweb like preprocessing syntax for chapter substitutions in textfiles
 

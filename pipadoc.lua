@@ -19,6 +19,8 @@
 --PLANNED: include operator, add a file to the processing list
 --PLANNED: merge lines, '+' operator?
 --+        like this, note about indentation, no newline
+--PLANNED: Version check for documents \{VERSION 2} ...
+--PLANNED: --disable-strsubst option
 
 DOCVARS = {
   --DOCVARS:nl {VARDEF NL}
@@ -68,6 +70,7 @@ local opt_toplevel = "MAIN"
 local opt_aliases = {}
 local opt_inputs = {}
 local opt_output = nil
+--PLANNED: make opt_config a list
 local opt_config = "pipadoc_config.lua"
 local opt_config_set = false
 
@@ -680,6 +683,7 @@ local function postprocessors_attach ()
   end
 end
 
+--PLANNNED: wrap pcall for debugging purpose
 local function postprocessors_run (context)
   local textin = context.TEXT
   for i=1,#active_postprocessors do
@@ -1116,7 +1120,6 @@ local function setup()
   operator_register(
     ":",
     function (context)
-
       if context.TEXT ~= "" and (context.SECTION or context.ARG) then
         --oneline
         context.SECTION = context.SECTION or block_section
@@ -1527,6 +1530,7 @@ do
     local dir,name = opt_output:match("(.-)([^/]*)$")
     tmpfile = dir.."."..name
     outfd = io.open(tmpfile, "w+")
+    --FIXME: -o /dev/null ... handle error when tmpfile cant be opened
   end
 
 
@@ -1741,7 +1745,7 @@ end
 --: Operators
 --: ---------
 --:
---=op
+--TODO: DOC Operators are used to define what is a pipadoc comment and how to order the resulting document
 --:
 --: Built in operators
 --: ~~~~~~~~~~~~~~~~~~
@@ -1752,6 +1756,8 @@ end
 --: [[CONTEXT]]
 --: The Context
 --: -----------
+--:
+--TODO: document hierarchy docvars->filecontext->context
 --:
 --: The current state and parsed information is stored in 'context' tables.
 --: There is on global +CONTEXT+ variable which always references the current
@@ -1784,6 +1790,7 @@ end
 --@DOCVARS
 --:
 --:
+--TODO: DOCME document 2 ways to modify text strsubst/processors
 --: Configuration File
 --: ------------------
 --:
@@ -1838,6 +1845,7 @@ end
 --: Pipadoc emits warnings on problems. These are mostly harmless but may need some attention.
 --: Warnings are supressed with the '--quiet' option.
 --:
+--TODO: sort warnings
 --=cwarn
 --:
 --: [appendix]
@@ -1931,15 +1939,20 @@ end
 --PLANNED: only generate PLANNED section when there are PLANNED's
 --:
 
---TODO: document pre/post processors in own chapters
---PLANNED: control language/conditionals?  //section?key {condition}  else becomes DROPPED:section_key
+--TODO: context->filecontext->docvars metatable
+--TODO: DOCME read line into context.SOURCE pass only contexts around to processors and operators
+--TODO: functions local, global as links, enable/disable on processing phase
+--PLANNED: processors get a name, define processing chains
+--PLANNED: document pre/post processors in own chapters
+--PLANNED: control language/conditionals?  //section?key \{condition\}  else becomes DROPPED:section_key
 --PLANNED: not only pipadoc.conf but also pipadoc.sty templates, conf are local only configurations, .sty are global styles
 --PLANNED: how to join (and then wordwrap) lines?
---PLANNED: bash like parameter expansion, how to apply that to sections/keys too --%{section}:%{key} .. how about streval on SECTION and ARG //{SECTION}:{ARG} NODOC
+--PLANNED: insert empty lines on dedent
+--PLANNED: bash like parameter expansion, how to apply that to sections/keys too --%{section}:%{key} .. how about strsubst on SECTION and ARG //{SECTION}:{ARG} NODOC
 --PLANNED: org-mode processor
 --PLANNED: INIT section for configuration
 --PLANNED: test expected stderr in testsuite
-
+--PLANNED: DOCME documentation is usually only for one markup designed, dispatch on strsubst make only maintaining easier
 --PLANNED: special sections
 --PLANNED: CONFIG:PRE
 --PLANNED: CONFIG:POST
