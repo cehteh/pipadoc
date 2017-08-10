@@ -3,9 +3,9 @@
 --default_config:
 --: * Remove any line which ends in 'NODOC'.
 preprocessor_register ("",
-                       function (str)
-                         if not str:match("NODOC$") then
-                           return str
+                       function (context)
+                         if context.SOURCE:match("NODOC$") then
+                           context.SOURCE = nil
                          end
                        end
 )
@@ -13,25 +13,30 @@ preprocessor_register ("",
 
 --: *  Replace '<STRING>' in pipadoc comments with the first literal string from the code.
 preprocessor_register ("",
-                       function (str)
-                         return str:gsub('^([^"]*"([^"]*)".*%p+%w*:%w*)(.*)<STRING>(.*)', '%1%3%2%4', 1)
+                       function (context)
+                         context.SOURCE =
+                           context.SOURCE:gsub('^([^"]*"([^"]*)".*%p+%w*:%w*)(.*)<STRING>(.*)',
+                                               '%1%3%2%4', 1)
                        end
 )
 
+
 --: * Generate asciidoc formatted documentation for Lua functions.
 preprocessor_register ("^lua$",
-                       function (str)
-                         local fn = str:match("function%s+([^(%s]*).*%-%-%w*:%w*")
+                       function (context)
+                         local proto,fn = context.SOURCE:match(
+                           "^[^\"']*function%s+(([^(%s]*)[^)]*%)).*%-%-%w*:%w*")
+
                          if fn then
-                           section_append("INDEX", fn:lower(), {
-                                            FILE=CONTEXT.FILE,
-                                            LINE=CONTEXT.LINE,
-                                            TEXT="{indexref('"..fn.."')}"
-                           })
-                           return str:gsub("^(.*function%s+([^)]*%)).*%-%-%w*:%w*)",
-                                           '%1 {fndef("'..fn..'","%2")}', 1)
+                           section_append("INDEX", fn:lower(),
+                                          make_context( context, {TEXT="{INDEXREF "..fn.."}"})
+                           )
+                           context.FUNCTION = fn
+                           context.FUNCTION_PROTO = proto
+                           context.SOURCE =
+                             context.SOURCE:gsub("^(.*function%s+([^)]*%)).*%-%-%w*:%w*)",
+                                                 '%1 {FNDEF}', 1)
                          end
-                         return str
                        end
 )
 
@@ -110,77 +115,68 @@ local file
 local line=0
 local origin=true
 
-postprocessor_register ("^asciidoc$",
-                        function (text)
-                          if text:match("^NOORIGIN") then
-                            origin=false
-                          else
-                            return text
-                          end
-                        end
-)
-
-postprocessor_register ("^asciidoc$",
-                        function (text)
-                          if text:match("^ORIGIN") then
-                            origin=true
-                          else
-                            return text
-                          end
-                        end
-)
-
-
-postprocessor_register ("^asciidoc$",
-                        function (text)
-                          if origin and ( CONTEXT.FILE ~= file or math.abs(CONTEXT.LINE - line) > 4) then
-                            text = "// {FILE}:{LINE} //{NL}"..text
-                          end
-
-                          file = CONTEXT.FILE
-                          line = CONTEXT.LINE
-                          return text
-                        end
-)
-
---: * Do string evaluation on all output lines.
 postprocessor_register ("",
-                        function (text)
-                          return streval(text)
+                        function (context)
+                          if context.TEXT:match("^NOORIGIN") then
+                            origin=false
+                            context.TEXT = nil
+                          end
                         end
 )
+
+postprocessor_register ("",
+                        function (context)
+                          if context.TEXT:match("^ORIGIN") then
+                            origin=true
+                            context.TEXT = nil
+                          end
+                        end
+)
+
+postprocessor_register ("^asciidoc$",
+                        function (context)
+                          if origin and ( context.FILE ~= file or math.abs(context.LINE - line) > 4) then
+                            context.TEXT = "// {FILE}:{LINE} //{NL}"..context.TEXT
+                          end
+
+                          file = context.FILE
+                          line = context.LINE
+                       end
+)
+
 
 
 -- for the testsuite
 if DOCVARS.TESTSUITE then
+  DOCVARS.STRING = "example string"
+  DOCVARS.STR = "{STRING}"
+  DOCVARS.ING = "ING"
+  DOCVARS.UPR = "{UPPER}"
+  DOCVARS.PING = "{PONG}"
+  DOCVARS.PONG = "{PING}"
+  DOCVARS.UPPER = function(context, arg)
+    return arg:upper()
+  end
+
   preprocessor_register ("^test",
-                         function (str)
-                           local ret,num = str:gsub("TESTPP", '#: TESTFOO')
+                         function (context)
+                           local sub,num = context.SOURCE:gsub("TESTPP", '#: TESTFOO')
                            if num > 0 then
-                             warn("Test-Substitute TESTPP with #: TESTFOO")
+                             context.SOURCE = sub
+                             warn(context, "Test-Substitute TESTPP with #: TESTFOO")
                            end
-                           return ret
                          end
   )
 
-  preprocessor_register ("^test",
-                         function (str)
-                           local ret,num = str:gsub("TESTFOO", 'TESTBAR')
-                           if num > 0 then
-                             warn("Test-Substitute TESTFOO with TESTBAR")
-                           end
-                           return ret
-                         end
-  )
 
-  postprocessor_register ("",
-                          function (text)
-                            if text:match("TESTDROP") then
-                              warn("TESTDROP")
-                              return
-                            end
-                            return text
-                          end
+  preprocessor_register ("^test",
+                         function (context)
+                           local sub,num = context.SOURCE:gsub("TESTFOO", 'TESTBAR')
+                           if num > 0 then
+                             context.SOURCE = sub
+                             warn(context, "Test-Substitute TESTFOO with TESTBAR")
+                           end
+                         end
   )
 end
 
@@ -235,7 +231,7 @@ else
 end
 
 
-local issues_keywords = {"WIP", "FIXME", "TODO", "PLANNED"}
+local issues_keywords = {"WIP", "FIXME", "TODO", "PLANNED", "DONE"}
 
 -- nobug annotations
 preprocessor_register ("^c$",
@@ -259,13 +255,18 @@ preprocessor_register ("",
                            ret, rep = str:gsub("("..word.."):([^%s]*)%s?(.*)",
                                                '%1:0%2 {FILE}:{LINE}::{NL}  %3{git_blame_context ()}{NL}', 1)
 
-                           if rep > 0 then
-                             return ret
-                           end
+preprocessor_register ("",
+                       function (context)
+                         for _,word in ipairs(issues_keywords) do
+                           context.SOURCE = context.SOURCE:gsub(
+                             "("..word.."):([^%s]*)%s?(.*)",
+                             '%1:0%2 {FILE}:{LINE}::{NL}  %3{GIT_BLAME}{NL}', 1)
                          end
-                         return str
                        end
 )
+
+
+
 
 --PLANNED: offer different sort orders for issues (date / line)
 --PLANNED: noweb like preprocessing syntax for chapter substitutions in textfiles

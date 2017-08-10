@@ -20,17 +20,6 @@
 --PLANNED: merge lines, '+' operator?
 --+        like this, note about indentation, no newline
 
-CONTEXT = {
-  --context:file {vardef('FILE')}
-  --Context:file   The file or section name currently processed or some special annotation
-  --context:file   in angle brackets (eg '<startup>') on other processing phases
-  --context:line {vardef('LINE')}
-  --context:line   Current line number of input or section, or indexing key
-  --context:line   Lines start at 1
-
-  FILE = "<startup>"
-}
-
 DOCVARS = {
   --DOCVARS:nl {VARDEF NL}
   --DOCVARS:nl   The line-break character sequence, defaults to '\n' and
@@ -47,6 +36,30 @@ DOCVARS = {
   --DOCVARS:markup   well.
   MARKUP = "text",
 }
+
+--FIXME: docme
+DOCVARS_POST = {}
+
+
+--TODO: DOCME CONTEXT is only fake
+local CONTEXT = setmetatable (
+  {
+    --context:file {VARDEF FILE}
+    --Context:file   The file or section name currently processed or some special annotation
+    --context:file   in angle brackets (eg '<startup>') on other processing phases
+    --context:line {VARDEF LINE}
+    --context:line   Current line number of input or section, or indexing key
+    --context:line   Lines start at 1
+    FILE = "<startup>"
+  }, {__index = DOCVARS})
+
+
+--TODO: DOCME
+function set_gcontext(file, line)
+  assert_type(file, 'string')
+  CONTEXT.FILE = file
+  CONTEXT.LINE = line
+end
 
 local args_done = false
 local opt_verbose = 1
@@ -79,9 +92,11 @@ local function printerr(...)
   end
 end
 
-local function printlvl(lvl,...)
+local function printlvl(context,lvl,...)
+  maybe_type (context, 'table')
   if lvl <= opt_verbose then
-    printerr(CONTEXT.FILE..":"..(CONTEXT.LINE and CONTEXT.LINE..":" or ""), ...)
+    context = context or CONTEXT
+    printerr(context.FILE..":"..(context.LINE and context.LINE..":" or ""), ...)
   end
 end
 
@@ -95,28 +110,42 @@ end
 --: list. Any argument passed to them will be converted to a string and printed to stderr when
 --: the verbosity level is high enough.
 --:
-function warn(...) printlvl(1, ...) end  --: report a important but non fatal failure
-function info(...) printlvl(2, ...) end  --: report normal progress
-function dbg(...) printlvl(3, ...) end   --: show debugging information
-function trace(...) printlvl(4, ...) end --: show more detailed progress information
+function warn(context,...) --: report a important but non fatal failure
+  printlvl(context,1, ...)
+end
+
+--TODO: info is not used
+function info(context,...) --: report normal progress
+  printlvl(context,2, ...)
+end
+
+function dbg(context,...) --: show debugging information
+  printlvl(context,3, ...)
+end
+
+function trace(context,...) --: show more detailed progress information
+  printlvl(context,4, ...)
+end
 
 
-function die(...) --: report a fatal error and exit the program
-  printerr(...)
+function die(context, ...) --: report a fatal error and exit the program
+  context = context or CONTEXT
+  printerr(context.FILE..":"..(context.LINE and context.LINE..":" or ""), ...)
   os.exit(1)
 end
 
 
 
 -- debugging only
-function dump_table(p,t)
+function dump_table(context, p,t)
   for k,v in pairs(t) do
-    dbg(p,k,v)
+    dbg(context, p,k,v)
     if type(v) == 'table' then
-      dump_table(p.."/"..k, v)
+      dump_table(context, p.."/"..k, v)
     end
   end
 end
+
 
 
 --api_load:
@@ -139,10 +168,10 @@ function request(name) --: try to load optional modules
   --:    rather than a error.
   local ok,handle = pcall(require, name)
   if ok then
-    dbg("loaded:", name, handle._VERSION)
+    dbg(nil, "loaded:", name, handle._VERSION)
     return handle
   else
-    warn("can't load module:", name) --cwarn: <STRING> ::
+    warn(nil, "can't load module:", name) --cwarn: <STRING> ::
     --cwarn:  'request()' failed to load a module.
     return nil
   end
@@ -433,7 +462,7 @@ function section_append(section, key, context) --: Append data to the given sect
   --:     The source line broken down into its components and additional pipadoc metadata
   assert_type(context, "table")
   --:
-  trace("append:", section, key, context.TEXT)
+  trace(context, "append:", section, key, context.TEXT)
   sections[section] = sections[section] or {keys = {}}
   if key and #key > 0 then
     sections[section].keys[key] = sections[section].keys[key] or {}
@@ -511,7 +540,7 @@ function filetype_register(name, filep, linecommentseqs) --: Register a new file
   for i=1,#filep do
     filetypes[filep[i]] = filetypes[filep[i]] or {language = name}
     for j=1,#linecommentseqs do
-      dbg("register filetype:", name, filep[i], pattern_escape (linecommentseqs[j]))
+      dbg(nil, "register filetype:", name, filep[i], pattern_escape(linecommentseqs[j]))
       filetypes[filep[i]][#filetypes[filep[i]]+1] = pattern_escape(linecommentseqs[j])
     end
   end
@@ -559,7 +588,7 @@ function preprocessor_register (langpat, preprocess) --: register a preprocessor
   --:
   --PLANNED: langpat as list of patterns
   assert_type (langpat, "string")
-  dbg ("register preprocessor:", langpat, preprocess)
+  dbg (nil, "register preprocessor:", langpat, preprocess)
 
   if type (preprocess) == "table" then
     preprocess = function (str)
@@ -570,7 +599,7 @@ function preprocessor_register (langpat, preprocess) --: register a preprocessor
   if type (preprocess) == "function" then
     table.insert(preprocessors, {pattern=langpat, preprocessor=preprocess})
   else
-    warn ("unsupported preprocessor type") --cwarn: <STRING> ::
+    warn (nil, "unsupported preprocessor type") --cwarn: <STRING> ::
     --cwarn:  Tried to 'preprocessor_register()' something that is not a function or table.
   end
 end
@@ -590,7 +619,7 @@ local function preprocessors_attach ()
           end
         end
         if not skip then
-          trace ("add preprocessor for:", k, ppdesc.preprocessor)
+          trace (nil, "add preprocessor for:", k, ppdesc.preprocessor)
           table.insert(filetype_preprocessors, ppdesc.preprocessor)
           v.preprocessors = filetype_preprocessors
         end
@@ -620,7 +649,7 @@ function postprocessor_register (markuppat, postprocess) --: register a postproc
   --:
   --PLANNED: markuppat as list of patterns
   assert_type (markuppat, "string")
-  dbg ("register postprocessor:", markuppat, postprocess)
+  dbg (nil, "register postprocessor:", markuppat, postprocess)
 
   if type (postprocess) == "table" then
     postprocess = function (str)
@@ -631,7 +660,7 @@ function postprocessor_register (markuppat, postprocess) --: register a postproc
   if type (postprocess) == "function" then
     table.insert(postprocessors, {pattern=markuppat, postprocessor=postprocess})
   else
-    warn ("unsupported postprocessor type") --cwarn: <STRING> ::
+    warn (nil, "unsupported postprocessor type") --cwarn: <STRING> ::
     --cwarn:  Tried to 'postprocessor_register()' something that is not a function or table.
   end
 end
@@ -643,30 +672,31 @@ local function postprocessors_attach ()
   for i=1,#postprocessors do
     local ppdesc = postprocessors[i]
     if DOCVARS.MARKUP:match(ppdesc.pattern) then
-      trace ("add postprocessor for:", DOCVARS.MARKUP, ppdesc.postprocessor)
+      trace (nil, "add postprocessor for:", DOCVARS.MARKUP, ppdesc.postprocessor)
       table.insert(active_postprocessors, ppdesc.postprocessor)
     end
   end
 end
 
 local function postprocessors_run (context)
-  CONTEXT=context
-  local textout = context.TEXT
+  local textin = context.TEXT
   for i=1,#active_postprocessors do
-    local ok, result = pcall(active_postprocessors[i],textout)
+    local ok, msg = pcall(active_postprocessors[i], context)
     if not ok then
-      warn("postprocessor failed:", result) --cwarn: <STRING> ::
+      warn(context, "postprocessor failed:", msg) --cwarn: <STRING> ::
       --cwarn:  error in postprocessor.
-    else
-      textout = result
     end
-    if not textout then
+    if not context.TEXT then
       break
     end
   end
-  if textout ~= context.TEXT then
-    trace ("postprocess:", context.TEXT, "->", textout)
-    context.TEXT = textout
+
+  if context.TEXT then
+    context.TEXT = strsubst(context, context.TEXT, nil, escapes_back)
+  end
+
+  if context.TEXT ~= textin then
+    trace (context, "postprocess:", textin, "->",  context.TEXT)
   end
 end
 
@@ -700,7 +730,7 @@ function operator_register(char, procfunc, genfunc) --: Register a new operator
   assert(string.match(char, "^%p$") == char)
   assert_type(procfunc, 'function')
   assert_type(genfunc, 'function')
-  dbg("register operator:", char)
+  dbg(nil, "register operator:", char)
   procfuncs[char] = procfunc
   genfuncs[char] = genfunc
 end
@@ -728,7 +758,7 @@ end
 function register_alias(from, to) --: Register a new alias
   assert_type(from, "string")
   assert_type(to, "string")
-  dbg("register alias:", from, "->", to)
+  dbg(nil, "register alias:", from, "->", to)
   opt_aliases[#opt_aliases+1] = {from, to}
 end
 
@@ -747,7 +777,7 @@ local options = {
   ["-v"] = "--verbose",
   ["--verbose"] = function ()
     opt_verbose = opt_verbose+1
-    dbg("verbose:", opt_verbose)
+    dbg(nil, "verbose:", opt_verbose)
   end,
   "", --:  <STRING>
 
@@ -762,7 +792,7 @@ local options = {
   ["-d"] = "--debug",
   ["--debug"] = function ()
     opt_verbose = 3
-    dbg("verbose:", opt_verbose)
+    dbg(nil, "verbose:", opt_verbose)
   end,
   "", --:  <STRING>
 
@@ -793,7 +823,7 @@ local options = {
   ["--toplevel"] = function (arg, i)
     check_args(arg, i+1)
     opt_toplevel = arg[i+1]
-    dbg("toplevel:", opt_toplevel)
+    dbg(nil, "toplevel:", opt_toplevel)
     return 1
   end,
   "", --:  <STRING>
@@ -805,7 +835,7 @@ local options = {
     check_args(arg, i+1)
     opt_config = arg[i+1]
     opt_config_set = true
-    dbg("config:", opt_config)
+    dbg(nil, "config:", opt_config)
     return 1
   end,
   "", --:  <STRING>
@@ -826,7 +856,7 @@ local options = {
   ["--markup"] = function (arg, i)
     check_args(arg, i+1)
     DOCVARS.MARKUP = arg[i+1]
-    dbg("markup:", DOCVARS.MARKUP)
+    dbg(nil, "markup:", DOCVARS.MARKUP)
     return 1
   end,
   "", --:  <STRING>
@@ -838,7 +868,7 @@ local options = {
   ["--output"] = function (arg, i)
     check_args(arg, i+1)
     opt_output = arg[i+1]
-    dbg("output:", opt_output)
+    dbg(nil, "output:", opt_output)
     return 1
   end,
   "", --:  <STRING>
@@ -865,19 +895,18 @@ local options = {
     local key,has_value,value = arg[i+1]:match("^([%w_]+)(=?)(.*)")
     local undef = arg[i+1]:match("^[-]([%w_]+)")
     if undef then
-      dbg("undef:", undef)
+      dbg(nil, "undef:", undef)
       DOCVARS[undef] = nil
     elseif key then
       if has_value == "" then
         value = 'true'
       end
-      dbg("define:", key, value)
+      dbg(nil, "define:", key, value)
       DOCVARS[key] = value
     end
     return 1
   end,
   "", --:  <STRING>
-
 
   -- intentionally here undocumented
   ["--make-doc"] = function (arg, i)
@@ -921,9 +950,7 @@ end
 
 
 function parse_args(arg)
-  CONTEXT = {
-    FILE="<parse_args>"
-  }
+  set_gcontext "<parse_args>"
 
   local i = 1
   while i <= #arg do
@@ -943,7 +970,7 @@ function parse_args(arg)
       if type(f) == 'function' then
         i = i + (f(arg, i) or 0)
       else
-        die("optarg error")
+        die(nil, "optarg error")
       end
     end
     i = i+1
@@ -1023,9 +1050,8 @@ end
 local function setup()
   --PLANNED: os.setlocale by option
   parse_args(arg)
-  CONTEXT = {
-    FILE="<setup>"
-  }
+  set_gcontext "<setup>"
+
   request "luarocks.loader"
   --PLANNED: for pattern matching etc
   --lfs = request "lfs"
@@ -1061,7 +1087,9 @@ local function setup()
     --PLANNED: for each language/markup (pipadoc_ascidoc.lua) etc
     builtin_filetypes()
     if opt_config then
-      dbg ("load config:", opt_config)
+      set_gcontext "<loadconfig>"
+
+      dbg (nil, "load config:", opt_config)
       local config = loadfile(opt_config)
 
       if config then
@@ -1071,7 +1099,7 @@ local function setup()
         if opt_config_set then
           fn = die
         end
-        fn ("can't load config file:", opt_config) --cwarn: <STRING> ::
+        fn (nil, "can't load config file:", opt_config) --cwarn: <STRING> ::
         --cwarn:  The config file ('--config' option) could not be loaded.
       end
     end
@@ -1091,6 +1119,7 @@ local function setup()
         --oneline
         context.SECTION = context.SECTION or block_section
         context.ARG = context.ARG or block_arg
+        context.TEXT = strsubst(context, context.TEXT, escapes)
         section_append(context.SECTION, context.ARG, context)
       elseif context.TEXT == "" and (context.SECTION or context.ARG) then
         --block head
@@ -1100,6 +1129,7 @@ local function setup()
         --block cont
         context.SECTION = context.SECTION or block_section
         context.ARG = context.ARG or block_arg
+        context.TEXT = strsubst(context, context.TEXT, escapes)
         section_append(context.SECTION, context.ARG, context)
       end
     end,
@@ -1123,7 +1153,7 @@ local function setup()
       if context.ARG and #context.ARG > 0 then
         section_append(context.SECTION, nil, context)
       else
-        warn("paste argument missing")  --cwarn: <STRING> ::
+        warn(context, "paste argument missing")  --cwarn: <STRING> ::
         --cwarn:  Using the '=' operator without an argument.
       end
     end,
@@ -1140,22 +1170,19 @@ local function setup()
     if context.ARG and #context.ARG > 0 then
       section_append(context.SECTION, nil, context)
     else
-      warn("sort argument missing") --cwarn: <STRING> ::
+      warn(context, "sort argument missing") --cwarn: <STRING> ::
       ---cwarn:  Using the '@', '$' or '#' operator without an argument.
     end
   end
 
   local function sortgenerate(context, output)
-    dbg("generate_output_sorted:"..context.FILE..":"..context.LINE)
+    dbg(context, "generate_output_sorted")
     local which = context.ARG
     local section = sections[which] and sections[which].keys
     local text = ""
 
     if section ~= nil then
       sections_keys_usecnt[which] = (sections_keys_usecnt[which] or 0) + 1
-
-      local oldfile = context.FILE
-      context.FILE ='<output>:'..which
 
       local sorted = {}
 
@@ -1176,7 +1203,7 @@ local function setup()
       end
 
       if #sorted == 0 then
-        warn("section is empty:",which) --cwarn: <STRING> ::
+        warn(context, "section is empty:",which) --cwarn: <STRING> ::
         --cwarn:  Using '=', '@' or '#' on a section which has no data (under respective keys).
         return ""
       end
@@ -1186,9 +1213,8 @@ local function setup()
           table.insert(output, section[sorted[i]][j])
         end
       end
-      context.FILE = oldfile
     else
-      warn("no section named:", which) --cwarn: <STRING> ::
+      warn(context, "no section named:", which) --cwarn: <STRING> ::
       --cwarn:  Using '=', '@' or '#' on a section which as never defined.
     end
   end
@@ -1238,13 +1264,7 @@ local function setup()
   postprocessors_attach ()
 end
 
-local function process_line (line, comment, filecontext)
-  local context = {
-    FILE = filecontext.FILE,
-    LINE = filecontext.LINE,
-  }
-  CONTEXT=context
-
+local function process_line (context, comment)
   --context:
   --:pre {VARDEF PRE}
   --:pre   Contains the sourcecode in before the linecomment.
@@ -1263,22 +1283,25 @@ local function process_line (line, comment, filecontext)
   -- special case for plaintext files
   if comment == "" then
     context.PRE, context.COMMENT, context.SECTION, context.OP, context.ARG, context.TEXT =
-      "", " ", nil, ":", nil, line
+      "", " ", nil, ":", nil, context.SOURCE
   else
     local pattern = "^(.-)("..comment..")([%w_.]*)("..operator_pattern()..")([%w_.]*)%s?(.*)$"
-    dbg("pattern:", pattern)
+    dbg(context, "pattern:", pattern)
     context.PRE, context.COMMENT, context.SECTION, context.OP, context.ARG, context.TEXT =
-      string.match(line,pattern)
+      string.match(context.SOURCE, pattern)
     context.SECTION = to_text(context.SECTION)
     context.ARG = to_text(context.ARG)
   end
 
   local op = context.OP
   if op then
-    dbg("pre:", context.PRE, "section:", context.SECTION, "op:", op, "arg:", context.ARG, "text:", context.TEXT)
+    dbg(context, "pre:", context.PRE, "section:", context.SECTION, "op:", op, "arg:", context.ARG, "text:", context.TEXT)
+
+    context.SOURCE = nil
+
     local ok,err = pcall(procfuncs[op], context)
     if not ok then
-      warn ("operator processing failed", op, err) --cwarn: <STRING> ::
+      warn (context, "operator processing failed", op, err) --cwarn: <STRING> ::
       --cwarn:  error executing a operators processor.
     end
   end
@@ -1289,23 +1312,28 @@ local function file_alias(filename)
   for i=1,#opt_aliases do
     local ok, alias, n = pcall(string.gsub, filename, opt_aliases[i][1], opt_aliases[i][2], 1)
     if ok and n>0 then
-      dbg ("alias:", filename, alias)
+      dbg (nil, "alias:", filename, alias)
       return alias
     elseif not ok then
-      warn ("alias pattern error:", alias, opt_aliases[i][1], opt_aliases[i][2])
+      warn (nil, "alias pattern error:", alias, opt_aliases[i][1], opt_aliases[i][2])
     end
   end
   return filename
 end
 
+--TODO: DOCME
+function make_context(parent, new)
+  return setmetatable(new or {}, {__index = parent})
+end
+
+
 
 local function process_file(file)
   -- filecontext is a partial context storing data
   -- of the current file processed
-  local filecontext = {
-    FILE="<process_file>",
-  }
-  CONTEXT=filecontext
+  local filecontext = make_context(DOCVARS, {
+                                     FILE="<process_file>",
+  })
 
   local fh
   if file == '-' then
@@ -1315,7 +1343,7 @@ local function process_file(file)
     fh = io.open(file)
 
     if not fh then
-      warn("file not found:", file) --cwarn: <STRING> ::
+      warn(filecontext, "file not found:", file) --cwarn: <STRING> ::
       --cwarn:  A given File can not be opened (wrong path or typo?).
       return
     end
@@ -1325,45 +1353,57 @@ local function process_file(file)
   local filetype = filetype_get (file_alias(file))
 
   if not filetype then
-    warn("unknown file type:", file) --cwarn: <STRING> ::
+    warn(filecontext, "unknown file type:", file) --cwarn: <STRING> ::
     --cwarn:  The type of the given file was not recongized (see <<_usage,'--register'>> option).
     return
   end
 
-  filecontext.filetype=filetype
-
   block_section = filecontext.FILE:match("[^./]+%f[.%z]")
-  dbg("section:", block_section)
+  dbg(filecontext, "section:", block_section)
 
   filecontext.LANGUAGE = filetype.language
-  dbg("language:", filecontext.LANGUAGE)
+  dbg(filecontext, "language:", filecontext.LANGUAGE)
 
-  filecontext.LINE=0
+  filecontext.COMMENT = filetype[1] --TODO: docme first one already set for construction in pp
+
+  local lineno = 0
   for line in fh:lines() do
-    filecontext.LINE = filecontext.LINE +1
-    trace("input:", line)
+    lineno = lineno + 1
+    trace(filecontext, "input:", lineno)
 
-    local preprocessors = filecontext.filetype.preprocessors
+    --context:
+    --:source {VARDEF SOURCE}
+    --:source   The line read from the input file, used for preprocessing and will be erased
+    --:source   afterward preprocessing is done.
+    local context = make_context(filecontext, {
+                                   LINE = lineno,
+                                   SOURCE = line,
+    })
+
+    local preprocessors = filetype.preprocessors
     if preprocessors then
       for i=1,#preprocessors do
-        local ok,linepp = pcall(preprocessors[i],line)
+        local oldsource = context.SOURCE
+        local ok,msg = pcall(preprocessors[i], context)
         if not ok then
-          warn("preprocessor failed:", linepp) --cwarn: <STRING> ::
+          warn(context, "preprocessor failed:", msg) --cwarn: <STRING> ::
           --cwarn:  error in preprocessor.
           --PLANNED: preprocessors may expand to multiple lines? return table
-        elseif to_text (linepp) and line ~= linepp then
-          line = linepp
-          trace("preprocessed:", line)
+        elseif context.SOURCE ~= oldsource then
+          trace(context, "preprocessed:", oldsource, "->", context.SOURCE)
         end
-        if not line then break end
+        if not context.SOURCE then
+          break
+        end
       end
     end
 
-    if line then
-      local comment = comment_select(line, filetype)
+    if context.SOURCE then
+      local comment = comment_select(context.SOURCE, filetype)
 
       if comment then
-        process_line(line, comment, filecontext)
+--        context.SOURCE = strsubst(context, context.SOURCE, escapes)
+        process_line(context, comment)
       end
     end
   end
@@ -1372,10 +1412,12 @@ end
 
 
 local function process_inputs()
+  set_gcontext "<process_inputs>"
+
   local processed_files = {}
   for _, filename in ipairs(opt_inputs) do
     if processed_files[filename] then
-      warn("input file given twice:", filename)
+      warn(nil, "input file given twice:", filename)
     else
       process_file(filename)
       processed_files[filename] = true
@@ -1387,51 +1429,42 @@ end
 local sofar_rec={}
 
 function generate_output(which, output)
-  local context = {
-    FILE = "<output>"
-  }
-  CONTEXT = context
-
-  dbg("generate_output:", which)
+  set_gcontext "<output>"
+  dbg(nil, "generate_output:", which)
   local section = sections[which]
-  local text = ""
 
   if section ~= nil then
     if sofar_rec[which] then
-      warn("recursive paste:",which) --cwarn: <STRING> ::
+      warn(nil, "recursive paste:",which) --cwarn: <STRING> ::
       --cwarn:  Pasted sections (see <<_built_in_operators,paste operator>>) can not recursively
       --cwarn:  include themself.
       return ""
     end
 
     if #section == 0 then
-      warn("section is empty:",which)
+      warn(nil, "section is empty:",which)
       return ""
     end
     sofar_rec[which] = true
     sections_usecnt[which] = (sections_usecnt[which] or 0) + 1
 
-    context.FILE = '<output>:'..which
     for i=1,#section do
-      context.LINE=i
+      CONTEXT.LINE=i
       local genfunc = genfuncs[section[i].OP]
       if genfunc then
-        CONTEXT=section[i]
         local ok, err = pcall(genfunc, section[i], output)
         if not ok then
-          warn("generator failed:", err) --cwarn: <STRING> ::
+          warn(section[i], "generator failed:", err) --cwarn: <STRING> ::
           --cwarn:  error in operators generator function.
         end
-        CONTEXT=context
       else
-        warn("no generator function for:", section[i].OP)
+        warn(nil, "no generator function for:", section[i].OP)
       end
     end
     sofar_rec[which] = nil
   else
-    warn("no section named:", which)
+    warn(nil, "no section named:", which)
   end
-  return text
 end
 
 
@@ -1441,25 +1474,21 @@ function report_orphan_doubletes()
   local doublette = {FILE = "<doublette>"}
   for k,v in pairs(sections_usecnt) do
     if v == 0 then
-      CONTEXT = orphan
-      warn("section unused:", k) --cwarn: <STRING> ::
+      warn(orphan, "section unused:", k) --cwarn: <STRING> ::
       --cwarn:  The printed section was not used. This might be intentional when generating
       --cwarn:  only partial outputs.
     elseif v > 1 then
-      CONTEXT = doublette
-      warn("section multiple times used:", k, v) --cwarn: <STRING> ::
+      warn(doublette, "section multiple times used:", k, v) --cwarn: <STRING> ::
       --cwarn:  Section was pasted multiple times in the output.
     end
   end
 
   for k,v in pairs(sections_keys_usecnt) do
     if v == 0 then
-      CONTEXT = orphan
-      warn("section w/ keys unused:", k) --cwarn: <STRING> ::
+      warn(orphan, "section w/ keys unused:", k) --cwarn: <STRING> ::
       --cwarn:  Section with keys (numeric or alphabetic) was not used.
     elseif v > 1 then
-      CONTEXT = doublette
-      warn("section w/ keys multiple times used:", k, v) --cwarn: <STRING> ::
+      warn(doublette, "section w/ keys multiple times used:", k, v) --cwarn: <STRING> ::
       --cwarn:  Section was used multiple times in the output ('@', '$' or '#' operator).
     end
   end
@@ -1498,6 +1527,10 @@ do
     outfd = io.open(tmpfile, "w+")
   end
 
+
+  set_gcontext "<postprocessing>"
+  section_append = function () die(nil, "section_append() not available after generating output") end
+
   for i=1,#output do
     postprocessors_run(output[i])
     if output[i].TEXT then
@@ -1512,10 +1545,10 @@ do
     outfd:close()
 
     if not cmp_files(tmpfile, opt_output) then
-      dbg("rename:",tmpfile, opt_output)
+      dbg(nil, "rename:",tmpfile, opt_output)
       os.rename(tmpfile, opt_output)
     else
-      dbg("remove:",tmpfile)
+      dbg(nil, "remove:",tmpfile)
       os.remove(tmpfile)
     end
   end

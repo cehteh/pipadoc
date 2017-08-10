@@ -28,7 +28,7 @@ for i in $test_lua_interpreters; do
     sh pipadoc.install -i "$i" -x "_test_$i" || continue
 
     echo "./pipadoc_test_$i -D TESTSUITE -t TEST -r test '%.test$' '#' pipadoc.test pipadoc.lua"
-    if ./pipadoc_test_$i  -D TESTSUITE -t TEST -r test '%.test$' '#' pipadoc.test pipadoc.lua -o test_out_$i; then
+    if ./pipadoc_test_$i "$@" -D TESTSUITE -t TEST -r test '%.test$' '#' pipadoc.test pipadoc.lua -o test_out_$i; then
 
             if cmp test_out_$i test_expected; then
                     echo "SUCCESS: pipadoc_test_$i"
@@ -47,6 +47,7 @@ done
 return $error
 
 # tests
+#TEST: NOORIGIN
 #TEST: Pipadoc Testsuite
 #TEST:
 #:
@@ -72,7 +73,7 @@ return $error
 #: TESTFOO
 echo TESTPP becomes a docline
 #:
-#=streval
+#=strsubst
 #:
 #=
 #@
@@ -86,7 +87,7 @@ echo TESTPP becomes a docline
 #@nokeys
 ##nokeys
 #:
-#: drop the TESTDROP
+#: drop the NODOC
 #: END
 
 #nokeys: has no keys
@@ -114,13 +115,19 @@ echo TESTPP becomes a docline
 #: 2. arg block
 #:aa 1. arg oneline
 
-#streval:
-#: {123}
-#: {"foo".."bar"}
-#: {123+{11+22}}
+#strsubst:
+#: {STRING}
+#: {STRING example}
+#: {STR}
+#: {STR{ING}}
+#: {UPPER arg}
+#: {UPPER {STR}}
+#: {UPR {STR}}
+#: {PING PONG}
 #: {undefined}
-#: {"foo".."{"bar".."baz"}"}
-#: \{"foo".."`{"bar".."baz"\}"`}
+#: {undefined arg}
+
+
 
 # expected results
 #> Pipadoc Testsuite
@@ -157,12 +164,16 @@ echo TESTPP becomes a docline
 #> TESTBAR
 #> TESTBAR becomes a docline
 #>
-#> 123
-#> foobar
-#> 156
+#> example string
+#> example stringexample
+#> example string
+#> example string
+#> ARG
+#> EXAMPLE STRING
+#> EXAMPLE STRING
+#> {PING}PONG
 #> {undefined}
-#> foobarbaz
-#> {"foo".."{"bar".."baz"}"}
+#> {undefined arg}
 #>
 #>
 #>
