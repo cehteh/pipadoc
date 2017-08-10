@@ -15,7 +15,7 @@
 --:
 --: You should have received a copy of the GNU General Public License
 --: along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
+-------------------------------------------------------------------------------------------------
 --PLANNED: include operator, add a file to the processing list
 --PLANNED: merge lines, '+' operator?
 --+        like this, note about indentation, no newline
@@ -194,7 +194,7 @@ function assert_type(var, expected) --: checks that the 'var' is of type 'expect
 end
 
 function maybe_type(var, expected) --: checks that the 'var' is of type 'expected' or nil
-  assert(var == nil or type(var) == expected, "type error: "..expected.." or nil expected, got "..type(var))
+  assert(var == nil or type(var) == expected, "type error: "..expected.." or nil expected, got "..type(var).. " >>>"..tostring(var).."<<<")
   return var
 end
 
@@ -522,7 +522,7 @@ function filetype_register(name, filep, linecommentseqs) --: Register a new file
   --: For example, C and C++ Filetypes are registered like:
   --:
   --: ----
-  --: filetype_register("C", {"%.c$","%.cpp$","%.C$", "%.cxx$", "%.h$"}, {"//", "/*"})
+  --: filetype_register("C", \{"%.c$","%.cpp$","%.C$", "%.cxx$", "%.h$"\}, \{"//", "/*"\})
   --: ----
   --:
   assert_type(name, "string")
@@ -555,10 +555,10 @@ local function filetype_get(filename)
   end
 end
 
-local function comment_select (line, linecommentseqs)
-  for i=1,#linecommentseqs do
-    if string.match(line, linecommentseqs[i]) then
-      return linecommentseqs[i]
+local function comment_select (line, filetype)
+  for i=1,#filetype do
+    if string.match(line, filetype[i]) then
+      return filetype[i]
     end
   end
 end
@@ -583,7 +583,7 @@ function preprocessor_register (langpat, preprocess) --: register a preprocessor
   --:     `function (line) ... end` ::::
   --:       Takes a string (the source line) and shall return the preprocessed line or 'nil' to
   --:       drop the line.
-  --:     +{pattern, repl [, n]}+ ::::
+  --:     +\{pattern, repl [, n]\}+ ::::
   --:       Generates a function calling 'string.gsub(pattern, repl [, n])' for preprocessing.
   --:
   --PLANNED: langpat as list of patterns
@@ -628,6 +628,8 @@ local function preprocessors_attach ()
   end
 end
 
+
+
 local postprocessors = {}
 --api_postproc:
 --:
@@ -644,7 +646,7 @@ function postprocessor_register (markuppat, postprocess) --: register a postproc
   --:     `function (line) ... end` ::::
   --:       Takes a string (the source line) and shall return the postprocessed line or 'nil' to
   --:       drop the line.
-  --:     +{pattern, repl [, n]}+ ::::
+  --:     +\{pattern, repl [, n]\}+ ::::
   --:       Generates a function calling 'string.gsub(pattern, repl [, n])' for postprocessing.
   --:
   --PLANNED: markuppat as list of patterns
@@ -1237,8 +1239,8 @@ local function setup()
 
   --op_builtin:
   --: `$` ::
-  --:   Alphanumeric sorting operator. Takes a section name as argument and will paste section text
-  --:   alphanumerically sorted by its keys.
+  --:   Generic Sorting operator. Takes a section name as argument and will paste section text
+  --:   sorted by its keys.
   --:
   --PLANNED: option for sorting locale
   --PLANNED: option for sorting (up/down)
@@ -1563,7 +1565,7 @@ end
 --: =================================
 --: :author:   Christian Thaeter
 --: :email:    ct@pipapo.org
---: :date:     {os.date("%A %d. %B %Y")}
+--: :date:     {DAYNAME} {DAY}. {MONTHNAME} {YEAR}
 --:
 --:
 --: [preface]
@@ -1893,7 +1895,7 @@ end
 --: Index
 --: -----
 --:
---@INDEX
+--$INDEX
 --:
 --:
 --PLANNED: DOCME, example section about one source can be used to generate different docs
