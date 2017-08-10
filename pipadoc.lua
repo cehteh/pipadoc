@@ -32,16 +32,16 @@ CONTEXT = {
 }
 
 DOCVARS = {
-  --DOCVARS:nl {vardef('NL')}
+  --DOCVARS:nl {VARDEF NL}
   --DOCVARS:nl   The line-break character sequence, defaults to '\n' and
   --DOCVARS:nl   can be changed with the '--define' command-line option.
   NL = "\n",
 
-  --DOCVARS:nil {vardef('NIL')}
+  --DOCVARS:nil {VARDEF NIL}
   --DOCVARS:nil   Expands to an empty string.
   NIL = "",
 
-  --DOCVARS:markup {vardef('MARKUP')}
+  --DOCVARS:markup {VARDEF MARKUP}
   --DOCVARS:markup   The markup syntax (--markup option). This information only used by pipadoc
   --DOCVARS:markup   for selecting postprocessors. Other user defined extensions may use it as
   --DOCVARS:markup   well.
@@ -1034,17 +1034,24 @@ local function setup()
   do
     local time = os.time()
     local date = os.date ("*t", time)
-    --DOCVARS:date {vardef('YEAR, MONTH, DAY, HOUR, MINUTE')}
+    --DOCVARS:date {VARDEF YEAR, MONTH, DAY, HOUR, MINUTE}
     --DOCVARS:date   Current date information
     DOCVARS.YEAR = date.year
     DOCVARS.MONTH = date.month
     DOCVARS.DAY = date.day
     DOCVARS.HOUR = date.hour
     DOCVARS.MINUTE = date.min
-    --DOCVARS:date {vardef('DATE')}
+
+    --PLANNED: locale support for dates
+    --DOCVARS:date {VARDEF DAYNAME, MONTHNAME}
+    --DOCVARS:date   The name of the day of week or month
+    DOCVARS.DAYNAME = os.date ("%A", time)
+    DOCVARS.MONTHNAME = os.date ("%B", time)
+
+    --DOCVARS:date {VARDEF DATE}
     --DOCVARS:date   Current date in YEAR/MONTH/DAY format
     DOCVARS.DATE = date.year.."/"..date.month.."/"..date.day
-    --DOCVARS:date {vardef('LOCALDATE')}
+    --DOCVARS:date {VARDEF LOCALDATE}
     --DOCVARS:date   Current date in current locale format
     DOCVARS.LOCALDATE = os.date ("%c", time)
   end
@@ -1239,18 +1246,18 @@ local function process_line (line, comment, filecontext)
   CONTEXT=context
 
   --context:
-  --:pre {vardef('PRE')}
+  --:pre {VARDEF PRE}
   --:pre   Contains the sourcecode in before the linecomment.
-  --:comment {vardef('COMMENT')}
+  --:comment {VARDEF COMMENT}
   --:comment   Character sequence which was used as line comment.
-  --:section {vardef('SECTION')}
+  --:section {VARDEF SECTION}
   --:section   Section where the documentation should appear.
-  --:op {vardef('OP')}
+  --:op {VARDEF OP}
   --:op   Single punctuation Operator defining how to process this line.
-  --:arg {vardef('ARG')}
+  --:arg {VARDEF ARG}
   --:arg   Optional argument to the operator. This can be the sort key
   --:arg   (alphabetic or numeric) or another section name for pasting.
-  --:text {vardef('TEXT')}
+  --:text {VARDEF TEXT}
   --:text   The actual Documentation Text.
 
   -- special case for plaintext files

@@ -36,53 +36,69 @@ preprocessor_register ("^lua$",
 )
 
 --: * Generate an alphabetic index of all public functions and variables.
-function fndef(id, text)
-  text = text or id
-  return "anchor:index_"..id.."[]+*"..text.."*+::"..DOCVARS.NL.." "
+
+DOCVARS.FNDEF = "{FNDEF_{MARKUP}}"
+
+DOCVARS.FNDEF_asciidoc = function (context, arg)
+  return "anchor:index_"..context.FUNCTION.."[] +*"..context.FUNCTION_PROTO.."*+::{NL}"
 end
 
-function indexdef(id, text)
-  section_append("INDEX", id:lower(), {
-                   FILE=CONTEXT.FILE,
-                   LINE=CONTEXT.LINE,
-                   TEXT="{indexref('"..id.."')}"
-  })
-
-  text = text or id
-  return "anchor:index_"..id.."[]`"..text.."`::"..DOCVARS.NL
+DOCVARS.FNDEF_text = function (context)
+  return context.FUNCTION_PROTO..":{NL}"
 end
 
-function vardef(id, text)
+DOCVARS.VARDEF = "{VARDEF_{MARKUP}}"
+
+DOCVARS.VARDEF_asciidoc = function (context, arg)
   local anchors = ""
-  for ix in id:gmatch("([^%s,]*)[,%s]*") do
+  for ix in arg:gmatch("([^%s%p]*)[%p%s]*") do
     if #ix > 0 then
-      section_append("INDEX", ix:lower(), {
-                       FILE=CONTEXT.FILE,
-                       LINE=CONTEXT.LINE,
-                       TEXT="{indexref('"..ix.."')}"
-      })
+      section_append("INDEX", ix:lower(),
+                     make_context (context,{TEXT="{INDEXREF "..ix.."}"})
+      )
 
       anchors=anchors.."anchor:index_"..ix.."[]"
     end
   end
 
-  text = text or id
-  return anchors.."`"..text.."`::"..DOCVARS.NL
+  return anchors.."`"..arg.."`::"
+end
+
+DOCVARS.VARDEF_text = function (context, arg)
+  for ix in arg:gmatch("([^%s%p]*)[%p%s]*") do
+    if #ix > 0 then
+      section_append("INDEX", ix:lower(),
+                     make_context (context,{TEXT="{INDEXREF "..ix.."}"})
+      )
+    end
+  end
+
+  return arg..":"
 end
 
 local lastfirstchar= nil
 
-function indexref(id, text)
-  local firstchar=id:sub(1,1):lower()
+DOCVARS.INDEXREF = "{INDEXREF_{MARKUP}}"
 
-  text = text or id
+DOCVARS.INDEXREF_asciidoc = function (context, arg)
+  local firstchar = arg:sub(1,1):lower()
 
   if lastfirstchar ~= firstchar then
     lastfirstchar = firstchar
-    return "{nbsp} :: "..DOCVARS.NL.."[big]#"..firstchar:upper().."# :: "..DOCVARS.NL..
-      "<<index_"..id..","..id..">>{nbsp}{nbsp}{nbsp}{nbsp}{nbsp}"
+    return "{NL}[big]#"..firstchar:upper().."# :: {NL}  <<index_"..arg..","..arg..">> +"
   else
-    return "<<index_"..id..","..id..">>{nbsp}{nbsp}{nbsp}{nbsp}{nbsp}"
+    return "  <<index_"..arg..","..arg..">> +"
+  end
+end
+
+DOCVARS.INDEXREF_text = function (context, arg)
+  local firstchar=arg:sub(1,1):lower()
+
+  if lastfirstchar ~= firstchar then
+    lastfirstchar = firstchar
+    return firstchar:upper()..":{NL}  "..arg
+  else
+    return "  "..arg
   end
 end
 
@@ -170,16 +186,14 @@ end
 
 --PLANNED: ldoc/doxygen/javadoc compatible macros @param @return @see etc.
 
---: * Generate asciidoc formatted lists for doc comments in FIXME/TODO/PLANNED sections.
+--: * Generate formatted lists for doc comments in WIP/FIXME/TODO/PLANNED/DONE sections.
 --:   Each such item includes information gathered from the git commit which touched
 --:   that line last.
-
 if DOCVARS.GIT then
-  function git_blame (file, line)
-    dbg("blame",file, line)
-    local result = {}
-    local git = io.popen("git blame '"..file.."' -L "..tostring(line)..",+1 -p 2>/dev/null")
+  DOCVARS.GIT_BLAME = function (context)
+    local git = io.popen("git blame '"..context.FILE.."' -L "..tostring(context.LINE)..",+1 -p 2>/dev/null")
 
+    local blame = {}
     for line in git:lines() do
       local k,v = line:match("^([%a-]+) (.*)")
       if line:match("^([%w]+) (%d+) ") then
@@ -189,37 +203,35 @@ if DOCVARS.GIT then
         k = 'line'
         v = line:match("^\t(.*)")
       end
-      result[k] = v
+      blame[k] = v
     end
-    local _,_,exitcode = git:close()
-    return exitcode == 0 and result or nil
-  end
+    local ok,_,exitcode = git:close()
 
-  function git_blame_context ()
-    local blame = git_blame (CONTEXT.FILE, CONTEXT.LINE)
-
-    if blame then
-      local blame_date
-      if blame.revision == "0000000000000000000000000000000000000000" then
-        blame_date = ""
-      else
-        blame_date = os.date("%c", blame["author-time"])
-        --blame_date = os.date("%c", tonumber(blame["author-time"]))
-      end
-
-
-      return " +"..DOCVARS.NL..
-        "  _"..blame.summary.."_ +"..DOCVARS.NL..
-        "  "..blame.author.." "..blame_date.." +"..DOCVARS.NL..
-        "  +"..blame.revision.."+"
-    else
+    if not ok then
+      warn(context, "git blame failed:", exitcode)
       return ""
     end
+
+    local blame_date
+    if blame.revision == "0000000000000000000000000000000000000000" then
+      blame_date = ""
+    else
+      blame_date = os.date("%c", blame["author-time"])
+    end
+
+    context.GIT_BLAME_SUMMARY = blame.summary
+    context.GIT_BLAME_AUTHOR = blame.author
+    context.GIT_BLAME_DATE = blame_date
+    context.GIT_BLAME_REVISION = blame.revision
+
+    return "{GIT_BLAME_{MARKUP}}"
   end
+
+  DOCVARS.GIT_BLAME_asciidoc = " +{NL}  _{GIT_BLAME_SUMMARY}_ +{NL}  {GIT_BLAME_AUTHOR}, {GIT_BLAME_DATE} +{NL}  +{GIT_BLAME_REVISION}+"
+  DOCVARS.GIT_BLAME_text = " {NL}  {GIT_BLAME_SUMMARY}{NL}  {GIT_BLAME_AUTHOR},  {GIT_BLAME_DATE} {NL}  {GIT_BLAME_REVISION}"
+
 else
-  function git_blame_context ()
-    return ""
-  end
+  DOCVARS.GIT_BLAME = ""
 end
 
 
