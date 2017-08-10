@@ -50,7 +50,6 @@ DOCVARS = {
 
 local args_done = false
 local opt_verbose = 1
-local opt_safe = false
 local opt_nodefaults = false
 local opt_toplevel = "MAIN"
 local opt_aliases = {}
@@ -206,101 +205,154 @@ function to_text(v) --: convert 'v' to a string, returns 'nil' when that string 
 end
 
 
---api_streval:
+--api_strsubst:
 --:
---: String Evaluation
---: ~~~~~~~~~~~~~~~~~
+--: String Substitution
+--: ~~~~~~~~~~~~~~~~~~~
 --:
---: Documentation-text can be passed to the streval() function which recursively evaluates Lua
---: expression inside curly braces. This can be used to retrieve the value of variables, call or
---: define functions. When the text inside curly braces can not be evaluated it is retained
---: verbatim. One can escape curly braces with a backslash or a back-tick. Backslash and
---: backtick can be escaped by them self. By default pipadoc does not include 'streval()', but
---: this can easily be archived in a postprocessor.
+--: Documentation-text is be passed to the strsubst() function which recursively substitutes
+--: expressions within curly braces. The substitutions are taken from the passed context.
+--: Strings are replaced, functions become evaluated, everything else is translated with Luas
+--: 'tostring()' function.
 --:
---: 'streval' tries first to do simple variable substitutions from the `CONTEXT` and `DOCVARS`
---: tables. This is always a safe operation and CONTEXT/DOCVARS does not need to be qualified.
+--: The Names for substitituions must start with an alphabetic character or underline and can
+--: be followed by alphanumeric characters or underlines. It may be followed with a space and --: an optional argument string which gets passed to functions or retained verbatim on
+--: everyting else.
 --:
---: WARNING: String evaluation may execute Lua code which is embedded in the documentation
---:          comments. This may lead to unsafe operation when the source is not trusted.
---:          Use the <<_safe_mode,Safe Mode>> to prevent this.
+--: Curly braces, can be escaped with backslashes or backtick characters. These
+--: characters can be escaped by themself.
+--:
+--api_strsubst_example:
+--:
+--: .Examples
+--: ----
+--: context = {
+--:   STRING = "example string",
+--:   STR = "\{STRING}",
+--:   ING = "ING",
+--:   UPPER = function(context, arg)
+--:             return arg:upper()
+--:           end
+--:  }
+--:
+--: -- simple substitution
+--: assert(strsubst(context, "\{STRING}") == "example string")
+--:
+--: -- arguments on stringish substitutions are retained
+--: assert(strsubst(context, "\{STRING example}") == "example stringexample")
+--:
+--: -- substitution is recursively applied
+--: assert(strsubst(context, "\{STR}") == "example string")
+--:
+--: -- that can be used to create names dynamically
+--: assert(strsubst(context, "\{STR\{ING}}") == "example string")
+--:
+--: -- functions are called with the argument and their return is substituted
+--: assert(strsubst(context, "\{UPPER arg}") == "ARG")
+--:
+--: -- now together
+--: assert(strsubst(context, "\{UPPER \{STR}}") == "EXAMPLE STRING")
+--:
+--: -- undefined names are kept verbatim
+--: assert(strsubst(context, "\{undefined}") == "\{undefined}")
+--: ----
 --:
 
--- for lua 5.1 compatibility
-local loadlua
-if _VERSION == "Lua 5.1" then
-  loadlua = loadstring
-else
-  loadlua = load
+local function table_inverse (t)
+  local ret = {}
+  for k,v in pairs(t) do
+    ret[v] = k
+  end
+  return ret
 end
 
 local escapes = {
-  __BACKSLASH__ = "\\",
-  __BACKTICK__ = "`",
-  __BRACEOPEN__ = "{",
-  __BRACECLOSE__ = "}",
+  ["\\"] = "{__BACKSLASH__}",
+  ["`"] = "{__BACKTICK__}",
+  ["{"] = "{__BRACEOPEN__}",
+  ["}"] = "{__BRACECLOSE__}",
 }
 
-function streval (str) --: evaluate Lua code inside curly braces in str.
+local escapes_back = table_inverse(escapes)
+
+
+--api_strsubst:
+function strsubst (context, str) --: substitute text in curly braces in str.
+  --TODO: doc parameters
+  trace (context, "strsubst:", str)
+  maybe_type (context, "table")
   assert_type (str, "string")
 
-  local function streval_intern (str)
-    local ret= ""
+  context = context or CONTEXT
+  local sofar = {}
 
-    for pre,braced,post in str:gmatch("([^{]*)(%b{})([^{]*)") do
-      local inbraced=braced:sub(2,-2)
+  local function strsubst_intern (str)
+    trace(context, "strsubst_intern:", str)
 
-      if #inbraced > 0 then
+    return str:gsub("%b{}",
+                    function (capture)
+                      local ret = capture
+                      local subst = false
 
-        if escapes[inbraced] then
-          braced=escapes[inbraced]
-        elseif CONTEXT[inbraced] then
-          braced=CONTEXT[inbraced]
-        elseif DOCVARS[inbraced] then
-          braced=DOCVARS[inbraced]
-        else
-          inbraced = streval_intern(inbraced)
-          if #inbraced > 0 then
+                      local var,arg = capture:match("^{(%a[%w_{}]*).?(.*)}$")
 
-            if not opt_safe or inbraced:match("^[%w_]+$") then
-              local success,result = pcall(loadlua ("return ("..inbraced..")"))
+                      if not var then return "" end
+                      var = strsubst_intern (var)
 
-              if success and result then
-                braced = result or ""
-              else
-                success,result = pcall(loadlua (inbraced))
-                if success then
-                  braced = result or ""
-                else
-                  warn("streval failed:", braced, result) --cwarn: <STRING> ::
-                  --cwarn:  call to streval failed (forgotten to escape braces?).
-                end
-              end
-            end
-          end
-        end
-      end
-      ret = ret..pre..tostring(braced)..post
-    end
+                      -- recursively dereferrence names when braced
+                      do
+                        local sofar = {}
+                        while not sofar[var] and type(context[var]) == "string" and context[var]:match("^(%b{})$") do
+                          subst = true
+                          sofar[var] = true
+                          var = strsubst_intern (context[var]:sub(2,-2))
+                        end
+                      end
+                      if context[var] then
+                        subst = true
+                        var = context[var]
+                      end
 
-    return ret == "" and str or ret
+                      arg = strsubst_intern (arg)
+
+                      if subst then
+                        if not sofar[var] then
+                          sofar[var] = true
+                          if type(var) == 'function' then
+                            local ok, result = pcall(var, context, arg)
+                            if ok then
+                              ret = tostring(result)
+                            else
+                              warn (context, "strsubst function failed:", var, result) --cwarn: <STRING> ::
+                              --cwarn:  strsubst tried to call a custom function which failed.
+                            end
+                          else
+                            ret = tostring(var)..arg
+                          end
+                        ret = strsubst_intern(ret)
+                          sofar[var] = nil
+                        else
+                          warn (context, "strsubst recursive expansion:", var)  --cwarn: <STRING> ::
+                          --cwarn:  cyclic substititution.
+                        end
+                      else
+                        if not ret:match "^{__.*__}$" then
+                          warn (context, "strsubst no expansion", capture)  --cwarn: <STRING> ::
+                          --cwarn:  no substitution defined.
+                        end
+                      end
+
+                      return ret
+                    end
+    )
   end
 
-  return streval_intern(str:gsub("[`\\]([{}\\])",
-                                 {
-                                   ["\\"] = "{__BACKSLASH__}",
-                                   ["`"] = "{__BACKTICK__}",
-                                   ["{"] = "{__BRACEOPEN__}",
-                                   ["}"] = "{__BRACECLOSE__}",
-                                 }
-                                ))
+  return (strsubst_intern(str:gsub("[`\\]([{}\\])", escapes)):gsub("%b{}", escapes_back))
 end
-
 
 local function pattern_escape (p)
   return (p:gsub("%W", "%%%1"))
 end
-
 
 --sections:
 --: Text in pipadoc is appended to named 'sections'. Text can be associated with some
@@ -764,20 +816,6 @@ local options = {
   ["--no-defaults"] = function ()
     opt_nodefaults = true
     dbg("nodefaults")
-  end,
-  "", --:  <STRING>
-
-
-  "    --safe", --:  <STRING>
-  "                        Enables safe mode. Safe mode disables the default ", --:  <STRING>
-  "                        config file and other facilities which may execute", --:  <STRING>
-  "                        untrusted code", --:  <STRING>
-  ["--safe"] = function ()
-    opt_safe = true
-    if not opt_config_set then
-      opt_config = nil
-    end
-    dbg("safe")
   end,
   "", --:  <STRING>
 
@@ -1725,17 +1763,7 @@ end
 --: There are pre- and post- processors defined for:
 --:
 --=default_config
---:
---:
---: Safe Mode
---: ---------
---:
---: This mode is when one wants to run pipadoc on marginally trusted source repositories.
---: It disables unsafe Lua code evaluation in 'streval()' and disables the default
---: configuration file. Thus no code from a non trusted source will be executed.
---:
---: Plain variables are still expanded in 'streval()' and an user supplied configuration file
---: will be loaded. Care must be taken that this file can not be exploited.
+--TODO: document that safe operation needs a custom config file
 --:
 --:
 --: Programming API for Extensions
@@ -1747,7 +1775,8 @@ end
 --=api_logging
 --=api_typecheck
 --=api_typeconv
---=api_streval
+--=api_strsubst
+--=api_strsubst_example
 --=api_filetypes
 --=api_op
 --=api_preproc
