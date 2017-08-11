@@ -1520,6 +1520,10 @@ do
   setup()
   process_inputs()
 
+  -- free memory
+  --PLANNED: memory profile whats faster?
+  collectgarbage()
+
   local output = {}
   generate_output(opt_toplevel, output)
 
@@ -1546,6 +1550,7 @@ do
   -- free memory
   sections = nil
   output = nil
+  collectgarbage()
 
   if opt_output then
     outfd:close()
