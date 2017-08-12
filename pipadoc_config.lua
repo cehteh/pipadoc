@@ -52,9 +52,10 @@ DOCVARS.FNDEF_text = function (context)
   return context.FUNCTION_PROTO..":{NL}"
 end
 
-DOCVARS.VARDEF = "{VARDEF_{MARKUP}}"
+--: * Generate documentaton for DOCVARS and CONTEXT variables (pipadoc's own documentation).
+DOCVARS.DVARDEF = "{DVARDEF_{MARKUP}}"
 
-DOCVARS.VARDEF_asciidoc = function (context, arg)
+DOCVARS.DVARDEF_asciidoc = function (context, arg)
   local anchors = ""
   for ix in arg:gmatch("([^%s%p]*)[%p%s]*") do
     if #ix > 0 then
@@ -69,7 +70,7 @@ DOCVARS.VARDEF_asciidoc = function (context, arg)
   return anchors.."`"..arg.."`::"
 end
 
-DOCVARS.VARDEF_text = function (context, arg)
+DOCVARS.DVARDEF_text = function (context, arg)
   for ix in arg:gmatch("([^%s%p]*)[%p%s]*") do
     if #ix > 0 then
       section_append("INDEX", ix:lower(),

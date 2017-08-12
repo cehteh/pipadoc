@@ -23,16 +23,16 @@
 --PLANNED: --disable-strsubst option
 
 DOCVARS = {
-  --DOCVARS:nl {VARDEF NL}
+  --DOCVARS:nl {DVARDEF NL}
   --DOCVARS:nl   The line-break character sequence, defaults to '\n' and
   --DOCVARS:nl   can be changed with the '--define' command-line option.
   NL = "\n",
 
-  --DOCVARS:nil {VARDEF NIL}
+  --DOCVARS:nil {DVARDEF NIL}
   --DOCVARS:nil   Expands to an empty string.
   NIL = "",
 
-  --DOCVARS:markup {VARDEF MARKUP}
+  --DOCVARS:markup {DVARDEF MARKUP}
   --DOCVARS:markup   The markup syntax (--markup option). This information only used by pipadoc
   --DOCVARS:markup   for selecting postprocessors. Other user defined extensions may use it as
   --DOCVARS:markup   well.
@@ -46,10 +46,10 @@ DOCVARS_POST = {}
 --TODO: DOCME CONTEXT is only fake
 local CONTEXT = setmetatable (
   {
-    --context:file {VARDEF FILE}
+    --context:file {DVARDEF FILE}
     --Context:file   The file or section name currently processed or some special annotation
     --context:file   in angle brackets (eg '<startup>') on other processing phases
-    --context:line {VARDEF LINE}
+    --context:line {DVARDEF LINE}
     --context:line   Current line number of input or section, or indexing key
     --context:line   Lines start at 1
     FILE = "<startup>"
@@ -1083,7 +1083,7 @@ local function setup()
   do
     local time = os.time()
     local date = os.date ("*t", time)
-    --DOCVARS:date {VARDEF YEAR, MONTH, DAY, HOUR, MINUTE}
+    --DOCVARS:date {DVARDEF YEAR, MONTH, DAY, HOUR, MINUTE}
     --DOCVARS:date   Current date information
     DOCVARS.YEAR = date.year
     DOCVARS.MONTH = date.month
@@ -1092,15 +1092,15 @@ local function setup()
     DOCVARS.MINUTE = date.min
 
     --PLANNED: locale support for dates
-    --DOCVARS:date {VARDEF DAYNAME, MONTHNAME}
+    --DOCVARS:date {DVARDEF DAYNAME, MONTHNAME}
     --DOCVARS:date   The name of the day of week or month
     DOCVARS.DAYNAME = os.date ("%A", time)
     DOCVARS.MONTHNAME = os.date ("%B", time)
 
-    --DOCVARS:date {VARDEF DATE}
+    --DOCVARS:date {DVARDEF DATE}
     --DOCVARS:date   Current date in YEAR/MONTH/DAY format
     DOCVARS.DATE = date.year.."/"..date.month.."/"..date.day
-    --DOCVARS:date {VARDEF LOCALDATE}
+    --DOCVARS:date {DVARDEF LOCALDATE}
     --DOCVARS:date   Current date in current locale format
     DOCVARS.LOCALDATE = os.date ("%c", time)
   end
@@ -1288,18 +1288,18 @@ end
 
 local function process_line (context, comment)
   --context:
-  --:pre {VARDEF PRE}
+  --:pre {DVARDEF PRE}
   --:pre   Contains the sourcecode in before the linecomment.
-  --:comment {VARDEF COMMENT}
+  --:comment {DVARDEF COMMENT}
   --:comment   Character sequence which was used as line comment.
-  --:section {VARDEF SECTION}
+  --:section {DVARDEF SECTION}
   --:section   Section where the documentation should appear.
-  --:op {VARDEF OP}
+  --:op {DVARDEF OP}
   --:op   Single punctuation Operator defining how to process this line.
-  --:arg {VARDEF ARG}
+  --:arg {DVARDEF ARG}
   --:arg   Optional argument to the operator. This can be the sort key
   --:arg   (alphabetic or numeric) or another section name for pasting.
-  --:text {VARDEF TEXT}
+  --:text {DVARDEF TEXT}
   --:text   The actual Documentation Text.
 
   -- special case for plaintext files
@@ -1394,7 +1394,7 @@ local function process_file(file)
     trace(filecontext, "input:", lineno)
 
     --context:
-    --:source {VARDEF SOURCE}
+    --:source {DVARDEF SOURCE}
     --:source   The line read from the input file, used for preprocessing and will be erased
     --:source   afterward preprocessing is done.
     local context = make_context(filecontext, {
