@@ -260,7 +260,7 @@ end
 --: ----
 --: context = {
 --:   STRING = "example string",
---:   STR = "\{STRING}",
+--:   STR = "\{STRING\}",
 --:   ING = "ING",
 --:   UPPER = function(context, arg)
 --:             return arg:upper()
@@ -268,25 +268,25 @@ end
 --:  }
 --:
 --: -- simple substitution
---: assert(strsubst(context, "\{STRING}") == "example string")
+--: assert(strsubst(context, "\{STRING\}") == "example string")
 --:
 --: -- arguments on stringish substitutions are retained
---: assert(strsubst(context, "\{STRING example}") == "example stringexample")
+--: assert(strsubst(context, "\{STRING example\}") == "example stringexample")
 --:
 --: -- substitution is recursively applied
---: assert(strsubst(context, "\{STR}") == "example string")
+--: assert(strsubst(context, "\{STR\}") == "example string")
 --:
 --: -- that can be used to create names dynamically
---: assert(strsubst(context, "\{STR\{ING}}") == "example string")
+--: assert(strsubst(context, "\{STR\{ING\}\}") == "example string")
 --:
 --: -- functions are called with the argument and their return is substituted
---: assert(strsubst(context, "\{UPPER arg}") == "ARG")
+--: assert(strsubst(context, "\{UPPER arg\}") == "ARG")
 --:
 --: -- now together
---: assert(strsubst(context, "\{UPPER \{STR}}") == "EXAMPLE STRING")
+--: assert(strsubst(context, "\{UPPER \{STR\}\}") == "EXAMPLE STRING")
 --:
 --: -- undefined names are kept verbatim
---: assert(strsubst(context, "\{undefined}") == "\{undefined}")
+--: assert(strsubst(context, "\{undefined\}") == "\{undefined\}")
 --: ----
 --:
 
@@ -328,7 +328,7 @@ function strsubst (context, str) --: substitute text in curly braces in str.
 
                       local var,arg = capture:match("^{(%a[%w_{}]*).?(.*)}$")
 
-                      if not var then return "" end
+                      if not var then return capture end
                       var = strsubst_intern (var)
 
                       -- recursively dereferrence names when braced
@@ -368,7 +368,7 @@ function strsubst (context, str) --: substitute text in curly braces in str.
                           --cwarn:  cyclic substititution.
                         end
                       else
-                        if not ret:match "^{__.*__}$" then
+                        if escapes_back and not ret:match "^{__.*__}$" then
                           warn (context, "strsubst no expansion", capture)  --cwarn: <STRING> ::
                           --cwarn:  no substitution defined.
                         end
@@ -379,7 +379,17 @@ function strsubst (context, str) --: substitute text in curly braces in str.
     )
   end
 
-  return (strsubst_intern(str:gsub("[`\\]([{}\\])", escapes)):gsub("%b{}", escapes_back))
+  if escapes then
+    str =  str:gsub("[`\\]([{}\\])", escapes)
+  end
+
+  str = strsubst_intern(str)
+
+  if escapes_back then
+    str = str:gsub("%b{}", escapes_back)
+  end
+
+  return str
 end
 
 local function pattern_escape (p)

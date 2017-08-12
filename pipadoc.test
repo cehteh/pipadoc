@@ -27,8 +27,8 @@ for i in $test_lua_interpreters; do
     echo "checking $i"
     sh pipadoc.install -i "$i" -x "_test_$i" || continue
 
-    echo "./pipadoc_test_$i -D TESTSUITE -t TEST -r test '%.test$' '#' pipadoc.test pipadoc.lua"
-    if ./pipadoc_test_$i "$@" -D TESTSUITE -t TEST -r test '%.test$' '#' pipadoc.test pipadoc.lua -o test_out_$i; then
+    echo "./pipadoc_test_$i -D TESTSUITE -t TEST -r test '%.test$' '#' pipadoc.test"
+    if ./pipadoc_test_$i "$@" -D TESTSUITE -t TEST -r test '%.test$' '#' pipadoc.test -o test_out_$i; then
 
             if cmp test_out_$i test_expected; then
                     echo "SUCCESS: pipadoc_test_$i"
@@ -126,6 +126,10 @@ echo TESTPP becomes a docline
 #: {PING PONG}
 #: {undefined}
 #: {undefined arg}
+#: \{STRING\}
+#: \{STRING example\}
+#: \{STR\}
+#: \{STR{ING}\}
 
 
 
@@ -174,6 +178,10 @@ echo TESTPP becomes a docline
 #> {PING}PONG
 #> {undefined}
 #> {undefined arg}
+#> {STRING}
+#> {STRING example}
+#> {STR}
+#> {STRING}
 #>
 #>
 #>
