@@ -274,5 +274,5 @@ preprocessor_register ("",
 
 --- Local Variables:
 --- mode: lua
---- compile-command: "lua pipadoc.lua --make-doc -m asciidoc -D GIT -t ISSUES pipadoc.lua pipadoc_config.lua"
+--- compile-command: "lua pipadoc.lua --issues --make-doc"
 --- End:

@@ -924,7 +924,7 @@ local options = {
   end,
   "", --:  <STRING>
 
-  -- intentionally here undocumented
+  -- intentionally here undocumented, only works in development tree
   ["--make-doc"] = function (arg, i)
     os.execute [[
         lua pipadoc.lua -m asciidoc pipadoc.lua pipadoc_config.lua -o pipadoc.txt
@@ -934,6 +934,13 @@ local options = {
         if test ! -e  pipadoc.pdf -o pipadoc.txt -nt pipadoc.pdf; then
           a2x -L -k -v --dblatex-opts "-P latex.output.revhistory=0" pipadoc.txt
         fi
+    ]]
+  end,
+
+  ["--issues"] = function (arg, i)
+    --PLANNED: run univerally
+    os.execute [[
+        lua pipadoc.lua -m asciidoc -D GIT -t ISSUES pipadoc.lua pipadoc_config.lua
     ]]
   end,
 
@@ -1978,5 +1985,5 @@ end
 
 --- Local Variables:
 --- mode: lua
---- compile-command: "lua pipadoc.lua --make-doc -a '(.*).install$' '%1.txt' -D GIT -t ISSUES pipadoc.lua pipadoc_config.lua pipadoc.install"
+--- compile-command: "lua pipadoc.lua --issues --make-doc"
 --- End:
