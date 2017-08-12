@@ -309,7 +309,7 @@ local escapes_back = table_inverse(escapes)
 
 
 --api_strsubst:
-function strsubst (context, str) --: substitute text in curly braces in str.
+function strsubst (context, str, escapes, escapes_back) --: substitute text in
   --TODO: doc parameters
   trace (context, "strsubst:", str)
   maybe_type (context, "table")
