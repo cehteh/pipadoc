@@ -1558,6 +1558,9 @@ do
   set_gcontext "<postprocessing>"
   section_append = function () die(nil, "section_append() not available after generating output") end
 
+  --activate DOCVARS_POST for postprocessing
+  setmetatable (DOCVARS, {__index = DOCVARS_POST})
+
   for i=1,#output do
     postprocessors_run(output[i])
     if output[i].TEXT then
