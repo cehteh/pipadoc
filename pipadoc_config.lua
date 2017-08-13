@@ -313,7 +313,6 @@ end
 
 local issues_keywords = {"WIP", "FIXME", "TODO", "PLANNED", "DONE"}
 
---FIXME: wrong matches in text containig WIP: etc
 if DOCVARS.NOBUG then
   preprocessor_register ("^c$",
                          function (context)
@@ -327,11 +326,12 @@ if DOCVARS.NOBUG then
   )
 end
 
+--FIXME: pass comments in filecontext, match all instead %p
 preprocessor_register ("",
                        function (context)
                          for _,word in ipairs(issues_keywords) do
                            context.SOURCE = context.SOURCE:gsub(
-                             "("..word.."):([^%s]*)%s?(.*)",
+                             "(%p"..word.."):([^%s]*)%s?(.*)",
                              '%1:0%2 {FILE}:{LINE}::{NL}  %3{GIT_BLAME}{NL}', 1)
                          end
                        end
