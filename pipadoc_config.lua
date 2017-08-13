@@ -1,6 +1,6 @@
 --PLANNED: make preprocessors markup agnostic? (needs postprocessors)
 
---default_config:
+--shipped_config:
 --: * Remove any line which ends in 'NODOC'.
 preprocessor_register ("",
                        function (context)

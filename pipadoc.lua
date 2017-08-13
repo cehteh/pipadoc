@@ -47,7 +47,7 @@ DOCVARS_POST = {}
 local CONTEXT = setmetatable (
   {
     --context:file {DVARDEF FILE}
-    --Context:file   The file or section name currently processed or some special annotation
+    --context:file   The file or section name currently processed or some special annotation
     --context:file   in angle brackets (eg '<startup>') on other processing phases
     --context:line {DVARDEF LINE}
     --context:line   Current line number of input or section, or indexing key
@@ -1289,18 +1289,18 @@ end
 local function process_line (context, comment)
   --context:
   --:pre {DVARDEF PRE}
-  --:pre   Contains the sourcecode in before the linecomment.
+  --:pre   Contains the sourcecode in font of the line comment.
   --:comment {DVARDEF COMMENT}
-  --:comment   Character sequence which was used as line comment.
+  --:comment   Character sequence which is used as line comment.
   --:section {DVARDEF SECTION}
   --:section   Section where the documentation should appear.
   --:op {DVARDEF OP}
-  --:op   Single punctuation Operator defining how to process this line.
+  --:op   Single punctuation operator defining how to process this line.
   --:arg {DVARDEF ARG}
   --:arg   Optional argument to the operator. This can be the sort key
   --:arg   (alphabetic or numeric) or another section name for pasting.
   --:text {DVARDEF TEXT}
-  --:text   The actual Documentation Text.
+  --:text  The actual Documentation Text.
 
   -- special case for plaintext files
   if comment == "" then
@@ -1424,7 +1424,6 @@ local function process_file(file)
       local comment = comment_select(context.SOURCE, filetype)
 
       if comment then
---        context.SOURCE = strsubst(context, context.SOURCE, escapes)
         process_line(context, comment)
       end
     end
@@ -1542,11 +1541,12 @@ do
   collectgarbage()
 
   local output = {}
+
   generate_output(opt_toplevel, output)
 
   local outfd = io.stdout
-
   local tmpfile
+
   if opt_output then
     local dir,name = opt_output:match("(.-)([^/]*)$")
     tmpfile = dir.."."..name
@@ -1591,7 +1591,7 @@ end
 --: =================================
 --: :author:   Christian Thaeter
 --: :email:    ct@pipapo.org
---: :date:     {DAYNAME} {DAY}. {MONTHNAME} {YEAR}
+--: :date:     {DAY}. {MONTHNAME} {YEAR}
 --:
 --:
 --: [preface]
@@ -1781,20 +1781,22 @@ end
 --: The Context
 --: -----------
 --:
---TODO: document hierarchy docvars->filecontext->context
+--: Processors, operators and string substitution calls and diagnostics get a context passed
+--: along. This context represents the state for the actual processed line. It is defined as
+--: stack of tables inheriting from each other.
 --:
---: The current state and parsed information is stored in 'context' tables.
---: There is on global +CONTEXT+ variable which always references the current
---: context. In some execution phases this may be a partial/fake context which
---: is only instantiated with necessary information for debugging/logging.
---: Usually the +FILE+ member is then put into angle brakets. Each cocumentation line
---: has its own context.
+--: On the lowest layer is are the 'DOCVARS' and 'DOCVARS_POST' tables. For each file an
+--: immediate 'filecontext' is created and then on top and each line has it's own context.
+--: This later per-line context is what gets passed around. The 'DOCVARS_POST' table is only
+--: available after postprocessors ran for a final 'strsubst()' pass.
 --:
---: CONTEXT members
+--: In a few cases a fake-context is passed around for diagnostic functions.
+--:
+--: Context Members
 --: ~~~~~~~~~~~~~~~
 --:
---: The following members are used in 'contexts'. `FILE` is always set to something
---: meaningful. The other members are optional.
+--: The following members are used/defined in 'contexts'. Some come from the immediate
+--: filecontext, which is normally not exposed.
 --:
 --@context
 --:
@@ -1802,11 +1804,11 @@ end
 --: Documentation Variables
 --: -----------------------
 --:
---: The 'DOCVARS' Lua table holds key/value pairs of variables with the global state
---: of pipadoc. These can be used by the core and plugins in various ways. Debugging
---: for example prints the FILE:LINE processed and there is a post processor to
---: substitute them in the documentation text. The user can set arbitrary DOCVARS
---: from command line.
+--: The 'DOCVARS' and 'DOCVARS_POST' Lua tables holds key/value pairs of variables
+--: with the global definitions. These are used by the core and processors/'strsubst().'
+--: Simple substitutions can be set from the command line. Configuration files may define
+--: more complex lua functions for string substitutions. By default there are no values defined
+--: in 'DOCVARS_POST'
 --:
 --: Predefined DOCVARS
 --: ~~~~~~~~~~~~~~~~~~
@@ -1835,7 +1837,7 @@ end
 --:
 --: There are pre- and post- processors defined for:
 --:
---=default_config
+--=shipped_config
 --TODO: document that safe operation needs a custom config file
 --:
 --:
