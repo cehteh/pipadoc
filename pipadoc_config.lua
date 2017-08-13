@@ -12,6 +12,7 @@ preprocessor_register ("",
 
 
 --: *  Replace '<STRING>' in pipadoc comments with the first literal string from the code.
+--:    Lifts string literals from sourcecode to documentation.
 preprocessor_register ("",
                        function (context)
                          context.SOURCE =
@@ -21,7 +22,8 @@ preprocessor_register ("",
 )
 
 
---: * Generate asciidoc formatted documentation for Lua functions.
+--: * Automatic generation of documentation for Lua functions.
+--:   Generates an index entry and a prototype documentation from a function definition
 preprocessor_register ("^lua$",
                        function (context)
                          local proto,fn = context.SOURCE:match(
@@ -40,7 +42,6 @@ preprocessor_register ("^lua$",
                        end
 )
 
---: * Generate an alphabetic index of all public functions and variables.
 
 DOCVARS.FNDEF = "{FNDEF_{MARKUP}}"
 
@@ -82,6 +83,7 @@ DOCVARS.DVARDEF_text = function (context, arg)
   return arg..":"
 end
 
+--: * Generate a sorted index of functions and doc variables.
 local lastfirstchar= nil
 
 DOCVARS.INDEXREF = "{INDEXREF_{MARKUP}}"
@@ -93,7 +95,7 @@ DOCVARS.INDEXREF_asciidoc = function (context, arg)
     lastfirstchar = firstchar
     return "{NL}[big]#"..firstchar:upper().."# :: {NL}  <<index_"..arg..","..arg..">> +"
   else
-    return "  <<index_"..arg..","..arg..">> +"
+    return "  <<index_"..arg:gsub("%W","_")..","..arg..">> +"
   end
 end
 
@@ -105,6 +107,117 @@ DOCVARS.INDEXREF_text = function (context, arg)
     return firstchar:upper()..":{NL}  "..arg
   else
     return "  "..arg
+  end
+end
+
+
+
+--: *  Asciidoc helpers for paragraphs, and headers.
+--:    Replace '\{PARA <title>;[index];[description]\}' and
+--:    '\{HEAD [level] <title>;[index];[description]\}' with asciidoc entities.
+--:    When 'index' is given an entry in the index will be generated.
+--:
+--:    For headers 'level' can be one of:
+--:
+--:    empty ::
+--:      Header on the same level as the current remembered level
+--:    -,~,^,+ ::
+--:      The corresponding asciidoc header.
+--:      Remembers the level.
+--:    >.. ::
+--:      Temporary deeper level by the number of '>' signs.
+--:    <.. ::
+--:      Temporary higher level by the number of '<' signs.
+--:    ++ ::
+--:      Increase the remembered header level by one.
+--:    -- ::
+--:      Decrease the remembered header level by one.
+--:
+--:    The reason for these elaborate definitions is that when pasting documentation together
+--:    it is not always clear what the header level of the surrounding environment is.
+--:
+--TODO: if DOCVARS.ASCIIDOCHELP
+if DOCVARS.MARKUP == "asciidoc" then
+  DOCVARS.PARA = function (context, arg)
+    local title, index, descr = arg:match("([^;]*); *([^;]*); *(.*)")
+    --TODO: descr is dropped
+    if title and title ~= "" then
+
+      if index ~= "" then
+        local id = index:gsub("%W","_")
+        title = "[[index_"..id.."]]{NL}."..title
+        section_append("INDEX", id:lower(),
+                       make_context (context,
+                                     {TEXT="{INDEXREF "..index.."}"}
+                       )
+        )
+      else
+        title = "."..title
+      end
+
+      return title
+    end
+  end
+
+  local asciidoc_levels = { "=","-", "~", "^", "+",
+                            ["="]=1, ["-"]=2, ["~"]=3, ["^"]=4, ["+"]=5
+  }
+  local asciidoc_lastlevel = "-"
+
+
+  DOCVARS.HEAD = function (context, arg)
+    local title, index, descr = arg:match("^%p* *([^;]*); *([^;]*); *(.*)")
+    --TODO: descr is dropped
+
+    if title and title ~= "" then
+      if index ~= "" then
+        local id = index:gsub("%W","_")
+        title = "[[index_"..id.."]]{NL}"..title
+        section_append("INDEX", id:lower(),
+                       make_context (context,
+                                     {TEXT="{INDEXREF "..index.."}"}
+                       )
+        )
+      end
+    end
+
+    return "{HEAD_POST "..arg.."}"
+  end
+
+
+  DOCVARS_POST.HEAD_POST = function (context, arg)
+    local level, title = arg:match("^(%p*) *([^;]*).*")
+
+    if level == '' then
+      level = asciidoc_lastlevel
+    elseif asciidoc_levels[level] then
+      asciidoc_lastlevel = level
+    elseif level:sub(1,1) == '>' then
+      local l = asciidoc_levels[asciidoc_lastlevel]+#level
+      l = l > 5 and 5 or l
+      level = asciidoc_levels[l]
+    elseif level:sub(1,1) == '<' then
+      local l = asciidoc_levels[asciidoc_lastlevel]-#level
+      l = l < 2 and 2 or l
+      level = asciidoc_levels[l]
+    elseif level == '++' then
+      local l = asciidoc_levels[asciidoc_lastlevel]+1
+      l = l > 5 and 5 or l
+      level = asciidoc_levels[l]
+      asciidoc_lastlevel = level
+    elseif level == '--' then
+      local l = asciidoc_levels[asciidoc_lastlevel]-1
+      l = l < 2 and 2 or l
+      level = asciidoc_levels[l]
+      asciidoc_lastlevel = level
+    else
+      warn(context, "unknown header level", level) --cwarn: <STRING> ::
+      --cwarn:  Asciidoc helper "HEAD" with unknown level.
+    end
+
+    level = title:gsub(".", level)
+
+    return title.."{NL}"..level
   end
 end
 
@@ -147,45 +260,12 @@ postprocessor_register ("^asciidoc$",
 
 
 
--- for the testsuite
-if DOCVARS.TESTSUITE then
-  DOCVARS.STRING = "example string"
-  DOCVARS.STR = "{STRING}"
-  DOCVARS.ING = "ING"
-  DOCVARS.UPR = "{UPPER}"
-  DOCVARS.PING = "{PONG}"
-  DOCVARS.PONG = "{PING}"
-  DOCVARS.UPPER = function(context, arg)
-    return arg:upper()
-  end
-
-  preprocessor_register ("^test",
-                         function (context)
-                           local sub,num = context.SOURCE:gsub("TESTPP", '#: TESTFOO')
-                           if num > 0 then
-                             context.SOURCE = sub
-                             warn(context, "Test-Substitute TESTPP with #: TESTFOO")
-                           end
-                         end
-  )
-
-
-  preprocessor_register ("^test",
-                         function (context)
-                           local sub,num = context.SOURCE:gsub("TESTFOO", 'TESTBAR')
-                           if num > 0 then
-                             context.SOURCE = sub
-                             warn(context, "Test-Substitute TESTFOO with TESTBAR")
-                           end
-                         end
-  )
-end
-
---PLANNED: ldoc/doxygen/javadoc compatible macros @param @return @see etc.
 
 --: * Generate formatted lists for doc comments in WIP/FIXME/TODO/PLANNED/DONE sections.
---:   Each such item includes information gathered from the git commit which touched
---:   that line last.
+--:   When DOCVARS.GIT is defined ('-D GIT') then each such item includes information gathered
+--:   from the git commit which touched that line the last.
+--:   When DOCVARS.NOBUG is defined it reaps http://nobug.pipapo.org[NoBug] annotations from
+--:   C source files as well.
 if DOCVARS.GIT then
   DOCVARS.GIT_BLAME = function (context)
     local git = io.popen("git blame '"..context.FILE.."' -L "..tostring(context.LINE)..",+1 -p 2>/dev/null")
@@ -231,30 +311,21 @@ else
   DOCVARS.GIT_BLAME = ""
 end
 
-
 local issues_keywords = {"WIP", "FIXME", "TODO", "PLANNED", "DONE"}
 
--- nobug annotations
-preprocessor_register ("^c$",
-                       function (str)
-                         local ret, rep
-                         for _,word in ipairs(issues_keywords) do
-                           ret, rep = str:gsub('(%s*'..word..'%s*%("([^"]*).*)',
-                                                '%1 //'..word..': %2', 1)
-                           if rep > 0 then
-                             return ret
+--FIXME: wrong matches in text containig WIP: etc
+if DOCVARS.NOBUG then
+  preprocessor_register ("^c$",
+                         function (context)
+                           for _,word in ipairs(issues_keywords) do
+                             context.SOURCE = context.SOURCE:gsub(
+                               '(%s*'..word..'%s*%("([^"]*).*)',
+                               '%1 //'..word..': %2', 1)
                            end
+                           return context
                          end
-                         return str
-                       end
-)
-
-preprocessor_register ("",
-                       function (str)
-                         local ret, rep
-                         for _,word in ipairs(issues_keywords) do
-                           ret, rep = str:gsub("("..word.."):([^%s]*)%s?(.*)",
-                                               '%1:0%2 {FILE}:{LINE}::{NL}  %3{git_blame_context ()}{NL}', 1)
+  )
+end
 
 preprocessor_register ("",
                        function (context)
@@ -267,7 +338,39 @@ preprocessor_register ("",
 )
 
 
+-- for the testsuite
+if DOCVARS.TESTSUITE then
+  DOCVARS.STRING = "example string"
+  DOCVARS.STR = "{STRING}"
+  DOCVARS.ING = "ING"
+  DOCVARS.UPR = "{UPPER}"
+  DOCVARS.PING = "{PONG}"
+  DOCVARS.PONG = "{PING}"
+  DOCVARS.UPPER = function(context, arg)
+    return arg:upper()
+  end
 
+  preprocessor_register ("^test",
+                         function (context)
+                           local sub,num = context.SOURCE:gsub("TESTPP", '#: TESTFOO')
+                           if num > 0 then
+                             context.SOURCE = sub
+                             warn(context, "Test-Substitute TESTPP with #: TESTFOO")
+                           end
+                         end
+  )
+
+
+  preprocessor_register ("^test",
+                         function (context)
+                           local sub,num = context.SOURCE:gsub("TESTFOO", 'TESTBAR')
+                           if num > 0 then
+                             context.SOURCE = sub
+                             warn(context, "Test-Substitute TESTFOO with TESTBAR")
+                           end
+                         end
+  )
+end
 
 --TODO: docmument, postprocessor cant section_append
 --PLANNED: offer different sort orders for issues (date / line)
