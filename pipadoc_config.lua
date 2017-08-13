@@ -375,6 +375,8 @@ end
 --TODO: docmument, postprocessor cant section_append
 --PLANNED: offer different sort orders for issues (date / line)
 --PLANNED: noweb like preprocessing syntax for chapter substitutions in textfiles
+--PLANNED: check that issues are unique
+--PLANNED: ldoc/doxygen/javadoc compatible macros @param @return @see etc.
 
 --- Local Variables:
 --- mode: lua

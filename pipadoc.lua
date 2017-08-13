@@ -19,8 +19,9 @@
 --PLANNED: include operator, add a file to the processing list
 --PLANNED: merge lines, '+' operator?
 --+        like this, note about indentation, no newline
---PLANNED: Version check for documents \{VERSION 2} ...
+--PLANNED: Version check for documents \{VERSION 2\} ...
 --PLANNED: --disable-strsubst option
+--PLANNED: merge sections for sorting --#foo+bar+baz or something like this
 
 DOCVARS = {
   --DOCVARS:nl {DVARDEF NL}
@@ -39,11 +40,9 @@ DOCVARS = {
   MARKUP = "text",
 }
 
---FIXME: docme
 DOCVARS_POST = {}
 
 
---TODO: DOCME CONTEXT is only fake
 local CONTEXT = setmetatable (
   {
     --context:file {DVARDEF FILE}
@@ -901,6 +900,7 @@ local options = {
   end,
   "", --:  <STRING>
 
+  --PLANNED: define for DOCVARS_POST --define-post -P
   "    -D, --define <name>[=<value>]", --:  <STRING>
   "                        define a DOCVAR to value or 'true'", --:  <STRING>
   "    -D, --define -<name>", --:  <STRING>
@@ -1157,6 +1157,7 @@ local function setup()
     end,
 
     function (context, output)
+      --PLANNED: link prev/next context
       table.insert(output, context)
     end
   )
@@ -1803,6 +1804,7 @@ end
 --:
 --@context
 --:
+--:
 --: [[DOCVARS]]
 --: Documentation Variables
 --: -----------------------
@@ -1874,7 +1876,7 @@ end
 --: Pipadoc emits warnings on problems. These are mostly harmless but may need some attention.
 --: Warnings are supressed with the '--quiet' option.
 --:
---TODO: sort warnings
+--PLANNED: sort warnings
 --=cwarn
 --:
 --: [appendix]
@@ -1967,10 +1969,15 @@ end
 --:
 --PLANNED: only generate PLANNED section when there are PLANNED's
 --:
+--: DONE
+--: ~~~~
+--:
+--$DONE
+--:
+--PLANNED: only generate DONE section when there are DONE's
+--:
 
---TODO: context->filecontext->docvars metatable
---TODO: DOCME read line into context.SOURCE pass only contexts around to processors and operators
---TODO: functions local, global as links, enable/disable on processing phase
+
 --PLANNED: processors get a name, define processing chains
 --PLANNED: document pre/post processors in own chapters
 --PLANNED: control language/conditionals?  //section?key \{condition\}  else becomes DROPPED:section_key
