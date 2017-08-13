@@ -736,7 +736,7 @@ asciidoc.install(2);
 <h1>pipadoc - Documentation extractor</h1>
 <span id="author">Christian Thaeter</span><br />
 <span id="email"><code>&lt;<a href="mailto:ct@pipapo.org">ct@pipapo.org</a>&gt;</code></span><br />
-<span id="revdate">Friday 11. August 2017</span>
+<span id="revdate">13. August 2017</span>
 <div id="toc">
   <div id="toctitle">Table of Contents</div>
   <noscript><p><b>JavaScript must be enabled in your browser to display the table of contents.</b></p></noscript>
@@ -1183,16 +1183,18 @@ Visual Basic,</p></div>
 <div class="sect1">
 <h2 id="CONTEXT">The Context</h2>
 <div class="sectionbody">
-<div class="paragraph"><p>The current state and parsed information is stored in <em>context</em> tables.
-There is on global <code>CONTEXT</code> variable which always references the current
-context. In some execution phases this may be a partial/fake context which
-is only instantiated with necessary information for debugging/logging.
-Usually the <code>FILE</code> member is then put into angle brakets. Each cocumentation line
-has its own context.</p></div>
+<div class="paragraph"><p>Processors, operators and string substitution calls and diagnostics get a context passed
+along. This context represents the state for the actual processed line. It is defined as
+stack of tables inheriting from each other.</p></div>
+<div class="paragraph"><p>On the lowest layer is are the <em>DOCVARS</em> and <em>DOCVARS_POST</em> tables. For each file an
+immediate <em>filecontext</em> is created and then on top and each line has it&#8217;s own context.
+This later per-line context is what gets passed around. The <em>DOCVARS_POST</em> table is only
+available after postprocessors ran for a final <em>strsubst()</em> pass.</p></div>
+<div class="paragraph"><p>In a few cases a fake-context is passed around for diagnostic functions.</p></div>
 <div class="sect2">
-<h3 id="_context_members">CONTEXT members</h3>
-<div class="paragraph"><p>The following members are used in <em>contexts</em>. <code>FILE</code> is always set to something
-meaningful. The other members are optional.</p></div>
+<h3 id="_context_members">Context Members</h3>
+<div class="paragraph"><p>The following members are used/defined in <em>contexts</em>. Some come from the immediate
+filecontext, which is normally not exposed.</p></div>
 <div class="dlist"><dl>
 <dt class="hdlist1">
 <a id="index_ARG"></a><code>ARG</code>
@@ -1208,7 +1210,7 @@ meaningful. The other members are optional.</p></div>
 </dt>
 <dd>
 <p>
-  Character sequence which was used as line comment.
+  Character sequence which is used as line comment.
 </p>
 </dd>
 <dt class="hdlist1">
@@ -1216,6 +1218,7 @@ meaningful. The other members are optional.</p></div>
 </dt>
 <dd>
 <p>
+  The file or section name currently processed or some special annotation
   in angle brackets (eg <em>&lt;startup&gt;</em>) on other processing phases
 </p>
 </dd>
@@ -1233,7 +1236,7 @@ meaningful. The other members are optional.</p></div>
 </dt>
 <dd>
 <p>
-  Single punctuation Operator defining how to process this line.
+  Single punctuation operator defining how to process this line.
 </p>
 </dd>
 <dt class="hdlist1">
@@ -1241,7 +1244,7 @@ meaningful. The other members are optional.</p></div>
 </dt>
 <dd>
 <p>
-  Contains the sourcecode in before the linecomment.
+  Contains the sourcecode in font of the line comment.
 </p>
 </dd>
 <dt class="hdlist1">
@@ -1266,7 +1269,7 @@ meaningful. The other members are optional.</p></div>
 </dt>
 <dd>
 <p>
-  The actual Documentation Text.
+ The actual Documentation Text.
 </p>
 </dd>
 </dl></div>
@@ -1276,11 +1279,11 @@ meaningful. The other members are optional.</p></div>
 <div class="sect1">
 <h2 id="DOCVARS">Documentation Variables</h2>
 <div class="sectionbody">
-<div class="paragraph"><p>The <em>DOCVARS</em> Lua table holds key/value pairs of variables with the global state
-of pipadoc. These can be used by the core and plugins in various ways. Debugging
-for example prints the FILE:LINE processed and there is a post processor to
-substitute them in the documentation text. The user can set arbitrary DOCVARS
-from command line.</p></div>
+<div class="paragraph"><p>The <em>DOCVARS</em> and <em>DOCVARS_POST</em> Lua tables holds key/value pairs of variables
+with the global definitions. These are used by the core and processors/<em>strsubst().</em>
+Simple substitutions can be set from the command line. Configuration files may define
+more complex lua functions for string substitutions. By default there are no values defined
+in <em>DOCVARS_POST</em></p></div>
 <div class="sect2">
 <h3 id="_predefined_docvars">Predefined DOCVARS</h3>
 <div class="dlist"><dl>
@@ -1370,23 +1373,95 @@ Remove any line which ends in <em>NODOC</em>.
 <li>
 <p>
 Replace <em>&lt;STRING&gt;</em> in pipadoc comments with the first literal string from the code.
+   Lifts string literals from sourcecode to documentation.
 </p>
 </li>
 <li>
 <p>
-Generate asciidoc formatted documentation for Lua functions.
+Automatic generation of documentation for Lua functions.
+  Generates an index entry and a prototype documentation from a function definition
 </p>
 </li>
 <li>
 <p>
-Generate an alphabetic index of all public functions and variables.
+Generate documentaton for DOCVARS and CONTEXT variables (pipadoc&#8217;s own documentation).
 </p>
 </li>
 <li>
 <p>
-Asciidoc helpers for paragraphs, replace <em>PARA &lt;title&gt;;[index];[description]</em>, create index
+Generate a sorted index of functions and doc variables.
 </p>
 </li>
+<li>
+<p>
+Asciidoc helpers for paragraphs, and headers.
+   Replace <em>{PARA &lt;title&gt;;[index];[description]}</em> and
+   <em>{HEAD [level] &lt;title&gt;;[index];[description]}</em> with asciidoc entities.
+   When <em>index</em> is given an entry in the index will be generated.
+</p>
+<div class="literalblock">
+<div class="content">
+<pre><code>For headers 'level' can be one of:</code></pre>
+</div></div>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+empty 
+</dt>
+<dd>
+<p>
+     Header on the same level as the current remembered level
+</p>
+</dd>
+<dt class="hdlist1">
+-,~,^,+ 
+</dt>
+<dd>
+<p>
+     The corresponding asciidoc header.
+     Remembers the level.
+</p>
+</dd>
+<dt class="hdlist1">
+&gt;.. 
+</dt>
+<dd>
+<p>
+     Temporary deeper level by the number of <em>&gt;</em> signs.
+</p>
+</dd>
+<dt class="hdlist1">
+&lt;.. 
+</dt>
+<dd>
+<p>
+     Temporary higher level by the number of <em>&lt;</em> signs.
+</p>
+</dd>
+<dt class="hdlist1">
+++ 
+</dt>
+<dd>
+<p>
+     Increase the remembered header level by one.
+</p>
+</dd>
+<dt class="hdlist1">
+&#8212;&#8201;
+</dt>
+<dd>
+<p>
+     Decrease the remembered header level by one.
+</p>
+<div class="literalblock">
+<div class="content">
+<pre><code>The reason for these elaborate definitions is that when pasting documentation together
+it is not always clear what the header level of the surrounding environment is.</code></pre>
+</div></div>
+</dd>
+</dl></div>
+</li>
+</ul></div>
+<div class="ulist"><ul>
 <li>
 <p>
 Keep track of original file:line as asciidoc comments in the output.
@@ -1397,8 +1472,10 @@ Keep track of original file:line as asciidoc comments in the output.
 <li>
 <p>
 Generate formatted lists for doc comments in WIP/FIXME/TODO/PLANNED/DONE sections.
-  Each such item includes information gathered from the git commit which touched
-  that line last.
+  When DOCVARS.GIT is defined (<em>-D GIT</em>) then each such item includes information gathered
+  from the git commit which touched that line the last.
+  When DOCVARS.NOBUG is defined it reaps <a href="http://nobug.pipapo.org">NoBug</a> annotations from
+  C source files as well.
 </p>
 </li>
 </ul></div>
@@ -1528,7 +1605,7 @@ otherwise an assertion error is raised.</p></div>
 </dt>
 <dd>
 <p>
- if <em>v</em> is not a table then return v
+ if <em>v</em> is not a table then return {v}
 </p>
 </dd>
 <dt class="hdlist1">
@@ -1554,11 +1631,11 @@ everyting else.</p></div>
 characters can be escaped by themself.</p></div>
 <div class="dlist"><dl>
 <dt class="hdlist1">
-<a id="index_strsubst"></a> <code><strong>strsubst (context, str)</strong></code>
+<a id="index_strsubst"></a> <code><strong>strsubst (context, str, escapes, escapes_back)</strong></code>
 </dt>
 <dd>
 <p>
- substitute text in curly braces in str.
+ substitute text in
 </p>
 </dd>
 </dl></div>
@@ -1567,7 +1644,7 @@ characters can be escaped by themself.</p></div>
 <div class="content">
 <pre><code>context = {
   STRING = "example string",
-  STR = "STRING}",
+  STR = "{STRING}",
   ING = "ING",
   UPPER = function(context, arg)
             return arg:upper()
@@ -1575,25 +1652,25 @@ characters can be escaped by themself.</p></div>
  }
 
 -- simple substitution
-assert(strsubst(context, "STRING}") == "example string")
+assert(strsubst(context, "{STRING}") == "example string")
 
 -- arguments on stringish substitutions are retained
-assert(strsubst(context, "STRING example}") == "example stringexample")
+assert(strsubst(context, "{STRING example}") == "example stringexample")
 
 -- substitution is recursively applied
-assert(strsubst(context, "STR}") == "example string")
+assert(strsubst(context, "{STR}") == "example string")
 
 -- that can be used to create names dynamically
-assert(strsubst(context, "STRING}}") == "example string")
+assert(strsubst(context, "{STR{ING}}") == "example string")
 
 -- functions are called with the argument and their return is substituted
-assert(strsubst(context, "UPPER arg}") == "ARG")
+assert(strsubst(context, "{UPPER arg}") == "ARG")
 
 -- now together
-assert(strsubst(context, "UPPER STR}}") == "EXAMPLE STRING")
+assert(strsubst(context, "{UPPER {STR}}") == "EXAMPLE STRING")
 
 -- undefined names are kept verbatim
-assert(strsubst(context, "undefined}") == "undefined}")</code></pre>
+assert(strsubst(context, "{undefined}") == "{undefined}")</code></pre>
 </div></div>
 </div>
 <div class="sect2">
@@ -1637,7 +1714,7 @@ linecommentseqs
 <div class="paragraph"><p>For example, C and C++ Filetypes are registered like:</p></div>
 <div class="listingblock">
 <div class="content">
-<pre><code>filetype_register("C", "%.c$","%.cpp$","%.C$", "%.cxx$", "%.h$", "//", "/*")</code></pre>
+<pre><code>filetype_register("C", {"%.c$","%.cpp$","%.C$", "%.cxx$", "%.h$"}, {"//", "/*"})</code></pre>
 </div></div>
 </div>
 <div class="sect2">
@@ -1724,7 +1801,7 @@ preprocess
 </p>
 </dd>
 <dt class="hdlist1">
-<code>pattern, repl [, n]</code> 
+<code>{pattern, repl [, n]}</code> 
 </dt>
 <dd>
 <p>
@@ -1776,7 +1853,7 @@ postprocess
 </p>
 </dd>
 <dt class="hdlist1">
-<code>pattern, repl [, n]</code> 
+<code>{pattern, repl [, n]}</code> 
 </dt>
 <dd>
 <p>
@@ -2035,6 +2112,14 @@ section w/ keys multiple times used:
  Section was used multiple times in the output (<em>@</em>, <em>$</em> or <em>#</em> operator).
 </p>
 </dd>
+<dt class="hdlist1">
+unknown header level 
+</dt>
+<dd>
+<p>
+ Asciidoc helper "HEAD" with unknown level.
+</p>
+</dd>
 </dl></div>
 </div>
 </div>
@@ -2286,7 +2371,7 @@ Christian Thäter &lt;<a href="mailto:ct@pipapo.org">ct@pipapo.org</a>&gt; for i
 <div id="footer">
 <div id="footer-text">
 Last updated
- 2017-08-11 00:07:51 CEST
+ 2017-08-13 05:01:48 CEST
 </div>
 </div>
 </body>
