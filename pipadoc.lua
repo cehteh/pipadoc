@@ -1560,13 +1560,21 @@ do
   generate_output(opt_toplevel, output)
 
   local outfd = io.stdout
-  local tmpfile
+  local tmpfile, err
 
   if opt_output then
     local dir,name = opt_output:match("(.-)([^/]*)$")
     tmpfile = dir.."."..name
-    outfd = io.open(tmpfile, "w+")
-    --FIXME: -o /dev/null ... handle error when tmpfile cant be opened
+    outfd, err = io.open(tmpfile, "w+")
+
+    if not outfd then
+      tmpfile = dir..name
+      outfd, err = io.open(tmpfile, "w+")
+    end
+
+    if not outfd then
+      die (nil, "failed to open:", err)
+    end
   end
 
 
