@@ -122,6 +122,7 @@ echo TESTPP becomes a docline
 #strsubst:
 #: {STRING}
 #: {STRING example}
+#: {STRING  example}
 #: {STR}
 #: {STR{ING}}
 #: {UPPER arg}
@@ -130,6 +131,9 @@ echo TESTPP becomes a docline
 #: {PING PONG}
 #: {undefined}
 #: {undefined arg}
+#: { STRING}
+#: { STRING }
+#: {STRING }.
 #: \{STRING\}
 #: \{STRING example\}
 #: \{STR\}
@@ -174,6 +178,7 @@ echo TESTPP becomes a docline
 #>
 #> example string
 #> example stringexample
+#> example string example
 #> example string
 #> example string
 #> ARG
@@ -182,6 +187,9 @@ echo TESTPP becomes a docline
 #> {PING}PONG
 #> {undefined}
 #> {undefined arg}
+#> { STRING}
+#> { STRING }
+#> example string.
 #> {STRING}
 #> {STRING example}
 #> {STR}

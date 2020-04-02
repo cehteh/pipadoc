@@ -1,7 +1,7 @@
 --license:
 --: pipadoc - Documentation extractor
 --: Copyright (C)                        Pipapo Project
---:  2015, 2016, 2017                    Christian Thaeter <ct@pipapo.org>
+--:  2015, 2016, 2017, 2020              Christian Thaeter <ct@pipapo.org>
 --:
 --: This program is free software: you can redistribute it and/or modify
 --: it under the terms of the GNU General Public License as published by
@@ -232,14 +232,15 @@ end
 --: ^^^^^^^^^^^^^^^^^^^
 --:
 --: Documentation-text is be passed to the strsubst() function which recursively substitutes
---: expressions within curly braces. The substitutions are taken from the passed context.
---: Strings are replaced, functions become evaluated, everything else is translated with Luas
---: 'tostring()' function.
+--: expressions within curly braces. The substitutions are taken from the passed context
+--: (and GLOBAL's). Strings are replaced, functions become evaluated, everything else is
+--: translated with Luas 'tostring()' function.
 --:
 --: The Names for substitituions must start with an alphabetic character or underline and can
---: be followed by alphanumeric characters or underlines. It may be followed with a space and
---: an optional argument string which gets passed to functions or retained verbatim on
---: everyting else.
+--: be followed by alphanumeric characters or underlines. It may be followed with a delimiting
+--: characterspace (space) and an optional argument string which gets passed to functions or
+--: retained verbatim on everyting else. Names starting and ending with 2 underscores are
+--: reserved to the implementation.
 --:
 --: Curly braces, can be escaped with backslashes or backtick characters. These
 --: characters can be escaped by themself.
@@ -257,6 +258,7 @@ end
 --:           end
 --:  }
 --:
+--  Note: curly braces are esacaped here to be kept in the generated documentation
 --: -- simple substitution
 --: assert(strsubst(context, "\{STRING\}") == "example string")
 --:
@@ -1681,8 +1683,16 @@ end
 --: denominator between almost all programming languages.
 --:
 --: To make a line comment recognized as pipadoc comment it needs to be followed immediately
---: by a operator sequence. Which in the simplest case is just a single punctuation character,
---: but may have a 'section' name left and a argument right of it. This operators defines how
+--: by a operator sequence. Which in the simplest case is just a single punctuation character.
+--: One can give a section name left of the operator and an argument/key rigt of the operator.
+--:
+--: To add special functionality and extend the semantics one can define pre and post processors.
+--:
+--: Preprocessors are defined per programming language and process all source lines.
+--:
+--: Postprocessors are defined per output markup and process every line to be outputed.
+--:
+--: Finally there is a string substitution/template engine which processes text in curly braces.
 --:
 --: Syntax
 --: ~~~~~~
@@ -1839,6 +1849,7 @@ end
 --: Programming API for Extensions
 --: ------------------------------
 --:
+--:
 --: [[GLOBAL]]
 --: Documentation Variables
 --: ~~~~~~~~~~~~~~~~~~~~~~~
@@ -1847,8 +1858,6 @@ end
 --: with global definitions. These are used by the core and processors/'strsubst()'.
 --: Simple string assigments can be set from the command line. Configuration files may define
 --: more complex lua functions for string substitutions.
---:
---FIXME: describe format of keys  __IMPL__ etc
 --:
 --:
 --: Predefined Variables

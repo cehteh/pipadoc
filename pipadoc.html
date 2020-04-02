@@ -871,8 +871,12 @@ One can ship the <code>pipadoc.lua</code> and <code>pipadoc.install</code> and d
 <div class="paragraph"><p>Pipadoc is controlled by special line comments. This is chosen because it is the most common
 denominator between almost all programming languages.</p></div>
 <div class="paragraph"><p>To make a line comment recognized as pipadoc comment it needs to be followed immediately
-by a operator sequence. Which in the simplest case is just a single punctuation character,
-but may have a <em>section</em> name left and a argument right of it. This operators defines how</p></div>
+by a operator sequence. Which in the simplest case is just a single punctuation character.
+One can give a section name left of the operator and an argument/key rigt of the operator.</p></div>
+<div class="paragraph"><p>To add special functionality and extend the semantics one can define pre and post processors.</p></div>
+<div class="paragraph"><p>Preprocessors are defined per programming language and process all source lines.</p></div>
+<div class="paragraph"><p>Postprocessors are defined per output markup and process every line to be outputed.</p></div>
+<div class="paragraph"><p>Finally there is a string substitution/template engine which processes text in curly braces.</p></div>
 <div class="sect2">
 <h3 id="_syntax">Syntax</h3>
 <div class="paragraph"><p>Any <em>line-comment</em> of the programming language directly (without spaces) followed by a
@@ -1519,13 +1523,14 @@ otherwise an assertion error is raised.</p></div>
 <div class="sect3">
 <h4 id="_string_substitution">String Substitution</h4>
 <div class="paragraph"><p>Documentation-text is be passed to the strsubst() function which recursively substitutes
-expressions within curly braces. The substitutions are taken from the passed context.
-Strings are replaced, functions become evaluated, everything else is translated with Luas
-<em>tostring()</em> function.</p></div>
+expressions within curly braces. The substitutions are taken from the passed context
+(and GLOBAL&#8217;s). Strings are replaced, functions become evaluated, everything else is
+translated with Luas <em>tostring()</em> function.</p></div>
 <div class="paragraph"><p>The Names for substitituions must start with an alphabetic character or underline and can
-be followed by alphanumeric characters or underlines. It may be followed with a space and
-an optional argument string which gets passed to functions or retained verbatim on
-everyting else.</p></div>
+be followed by alphanumeric characters or underlines. It may be followed with a delimiting
+characterspace (space) and an optional argument string which gets passed to functions or
+retained verbatim on everyting else. Names starting and ending with 2 underscores are
+reserved to the implementation.</p></div>
 <div class="paragraph"><p>Curly braces, can be escaped with backslashes or backtick characters. These
 characters can be escaped by themself.</p></div>
 <div class="dlist"><dl>
@@ -2101,7 +2106,7 @@ a2x -L -k -v --dblatex-opts "-P latex.output.revhistory=0" pipadoc.txt</code></p
 <div class="content">
 <pre><code>pipadoc - Documentation extractor
 Copyright (C)                        Pipapo Project
- 2015, 2016, 2017                    Christian Thaeter &lt;ct@pipapo.org&gt;
+ 2015, 2016, 2017, 2020              Christian Thaeter &lt;ct@pipapo.org&gt;
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -2141,11 +2146,11 @@ Christian Thäter &lt;<a href="mailto:ct@pipapo.org">ct@pipapo.org</a>&gt; for i
 </dt>
 <dd>
 <p>
-  <a href="#index_add_inputfile">add_inputfile</a> +// pipadoc.lua:1305 //
+  <a href="#index_add_inputfile">add_inputfile</a> +// pipadoc.lua:1307 //
   <a href="#index_ARG">ARG</a> +// pipadoc.lua:193 //
   <a href="#index_assert_char">assert_char</a> +// pipadoc.lua:198 //
   <a href="#index_assert_notnil">assert_notnil</a> +// pipadoc.lua:183 //
-  <a href="#index_assert_type">assert_type</a> +// pipadoc.lua:1299 //
+  <a href="#index_assert_type">assert_type</a> +// pipadoc.lua:1301 //
 </p>
 </dd>
 <dt class="hdlist1">
@@ -2153,7 +2158,7 @@ Christian Thäter &lt;<a href="mailto:ct@pipapo.org">ct@pipapo.org</a>&gt; for i
 </dt>
 <dd>
 <p>
-  <a href="#index_COMMENT">COMMENT</a> +// pipadoc.lua:1104 //
+  <a href="#index_COMMENT">COMMENT</a> +// pipadoc.lua:1106 //
 </p>
 </dd>
 <dt class="hdlist1">
@@ -2161,8 +2166,8 @@ Christian Thäter &lt;<a href="mailto:ct@pipapo.org">ct@pipapo.org</a>&gt; for i
 </dt>
 <dd>
 <p>
-  <a href="#index_DATE">DATE</a> +// pipadoc.lua:1090 //
-  <a href="#index_DAY">DAY</a> +// pipadoc.lua:1099 //
+  <a href="#index_DATE">DATE</a> +// pipadoc.lua:1092 //
+  <a href="#index_DAY">DAY</a> +// pipadoc.lua:1101 //
   <a href="#index_DAYNAME">DAYNAME</a> +// pipadoc.lua:124 //
   <a href="#index_dbg">dbg</a> +// pipadoc.lua:133 //
   <a href="#index_die">die</a> +// pipadoc.lua:48 //
@@ -2173,8 +2178,8 @@ Christian Thäter &lt;<a href="mailto:ct@pipapo.org">ct@pipapo.org</a>&gt; for i
 </dt>
 <dd>
 <p>
-  <a href="#index_FILE">FILE</a> +// pipadoc.lua:514 //
-  <a href="#index_filetype_register">filetype_register</a> +// pipadoc.lua:1090 //
+  <a href="#index_FILE">FILE</a> +// pipadoc.lua:516 //
+  <a href="#index_filetype_register">filetype_register</a> +// pipadoc.lua:1092 //
 </p>
 </dd>
 <dt class="hdlist1">
@@ -2198,7 +2203,7 @@ Christian Thäter &lt;<a href="mailto:ct@pipapo.org">ct@pipapo.org</a>&gt; for i
 </dt>
 <dd>
 <p>
-  <a href="#index_LINE">LINE</a> +// pipadoc.lua:1107 //
+  <a href="#index_LINE">LINE</a> +// pipadoc.lua:1109 //
   <a href="#index_LOCALDATE">LOCALDATE</a> +// pipadoc.lua:36 //
 </p>
 </dd>
@@ -2209,8 +2214,8 @@ Christian Thäter &lt;<a href="mailto:ct@pipapo.org">ct@pipapo.org</a>&gt; for i
 <p>
   <a href="#index_MARKUP">MARKUP</a> +// pipadoc.lua:219 //
   <a href="#index_maybe_text">maybe_text</a> +// pipadoc.lua:188 //
-  <a href="#index_maybe_type">maybe_type</a> +// pipadoc.lua:1090 //
-  <a href="#index_MINUTE">MINUTE</a> +  <a href="#index_MONTH">MONTH</a> +// pipadoc.lua:1099 //
+  <a href="#index_maybe_type">maybe_type</a> +// pipadoc.lua:1092 //
+  <a href="#index_MINUTE">MINUTE</a> +  <a href="#index_MONTH">MONTH</a> +// pipadoc.lua:1101 //
   <a href="#index_MONTHNAME">MONTHNAME</a> +// pipadoc.lua:32 //
 </p>
 </dd>
@@ -2220,7 +2225,7 @@ Christian Thäter &lt;<a href="mailto:ct@pipapo.org">ct@pipapo.org</a>&gt; for i
 <dd>
 <p>
   <a href="#index_NIL">NIL</a> +// pipadoc.lua:27 //
-  <a href="#index_NL">NL</a> +// pipadoc.lua:1303 //
+  <a href="#index_NL">NL</a> +// pipadoc.lua:1305 //
 </p>
 </dd>
 <dt class="hdlist1">
@@ -2228,8 +2233,8 @@ Christian Thäter &lt;<a href="mailto:ct@pipapo.org">ct@pipapo.org</a>&gt; for i
 </dt>
 <dd>
 <p>
-  <a href="#index_OP">OP</a> +// pipadoc.lua:738 //
-  <a href="#index_operator_register">operator_register</a> +// pipadoc.lua:645 //
+  <a href="#index_OP">OP</a> +// pipadoc.lua:740 //
+  <a href="#index_operator_register">operator_register</a> +// pipadoc.lua:647 //
 </p>
 </dd>
 <dt class="hdlist1">
@@ -2237,9 +2242,9 @@ Christian Thäter &lt;<a href="mailto:ct@pipapo.org">ct@pipapo.org</a>&gt; for i
 </dt>
 <dd>
 <p>
-  <a href="#index_postprocessor_register">postprocessor_register</a> +// pipadoc.lua:1297 //
-  <a href="#index_PRE">PRE</a> +// pipadoc.lua:578 //
-  <a href="#index_preprocessor_register">preprocessor_register</a> +// pipadoc.lua:776 //
+  <a href="#index_postprocessor_register">postprocessor_register</a> +// pipadoc.lua:1299 //
+  <a href="#index_PRE">PRE</a> +// pipadoc.lua:580 //
+  <a href="#index_preprocessor_register">preprocessor_register</a> +// pipadoc.lua:778 //
 </p>
 </dd>
 <dt class="hdlist1">
@@ -2248,7 +2253,7 @@ Christian Thäter &lt;<a href="mailto:ct@pipapo.org">ct@pipapo.org</a>&gt; for i
 <dd>
 <p>
   <a href="#index_register_alias">register_alias</a> +// pipadoc.lua:158 //
-  <a href="#index_request">request</a> +// pipadoc.lua:1301 //
+  <a href="#index_request">request</a> +// pipadoc.lua:1303 //
 </p>
 </dd>
 <dt class="hdlist1">
@@ -2256,10 +2261,10 @@ Christian Thäter &lt;<a href="mailto:ct@pipapo.org">ct@pipapo.org</a>&gt; for i
 </dt>
 <dd>
 <p>
-  <a href="#index_SECTION">SECTION</a> +// pipadoc.lua:454 //
-  <a href="#index_section_append">section_append</a> +// pipadoc.lua:1403 //
-  <a href="#index_SOURCE">SOURCE</a> +// pipadoc.lua:302 //
-  <a href="#index_strsubst">strsubst</a> +// pipadoc.lua:1308 //
+  <a href="#index_SECTION">SECTION</a> +// pipadoc.lua:456 //
+  <a href="#index_section_append">section_append</a> +// pipadoc.lua:1405 //
+  <a href="#index_SOURCE">SOURCE</a> +// pipadoc.lua:304 //
+  <a href="#index_strsubst">strsubst</a> +// pipadoc.lua:1310 //
 </p>
 </dd>
 <dt class="hdlist1">
@@ -2277,7 +2282,7 @@ Christian Thäter &lt;<a href="mailto:ct@pipapo.org">ct@pipapo.org</a>&gt; for i
 </dt>
 <dd>
 <p>
-  <a href="#index_warn">warn</a> +// pipadoc.lua:1090 //
+  <a href="#index_warn">warn</a> +// pipadoc.lua:1092 //
 </p>
 </dd>
 <dt class="hdlist1">
@@ -2285,7 +2290,7 @@ Christian Thäter &lt;<a href="mailto:ct@pipapo.org">ct@pipapo.org</a>&gt; for i
 </dt>
 <dd>
 <p>
-  <a href="#index_YEAR">YEAR</a> +// pipadoc.lua:1971 //
+  <a href="#index_YEAR">YEAR</a> +// pipadoc.lua:1980 //
 </p>
 </dd>
 </dl></div>
@@ -2296,7 +2301,7 @@ Christian Thäter &lt;<a href="mailto:ct@pipapo.org">ct@pipapo.org</a>&gt; for i
 <div id="footer">
 <div id="footer-text">
 Last updated
- 2020-04-02 20:19:49 CEST
+ 2020-04-02 20:59:42 CEST
 </div>
 </div>
 </body>
