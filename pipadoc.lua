@@ -23,43 +23,43 @@
 --PLANNED: --disable-strsubst option
 --PLANNED: merge sections for sorting --#foo+bar+baz or something like this
 
-DOCVARS = {
-  --DOCVARS:nl {DVARDEF NL}
-  --DOCVARS:nl   The line-break character sequence, defaults to '\n' and
-  --DOCVARS:nl   can be changed with the '--define' command-line option.
+GLOBAL = {
+  --GLOBAL:nl {VARDEF NL}
+  --GLOBAL:nl   The line-break character sequence, defaults to '\n' and
+  --GLOBAL:nl   can be changed with the '--define' command-line option.
   NL = "\n",
 
-  --DOCVARS:nil {DVARDEF NIL}
-  --DOCVARS:nil   Expands to an empty string.
+  --GLOBAL:nil {VARDEF NIL}
+  --GLOBAL:nil   Expands to an empty string.
   NIL = "",
 
-  --DOCVARS:markup {DVARDEF MARKUP}
-  --DOCVARS:markup   The markup syntax (--markup option). This information only used by pipadoc
-  --DOCVARS:markup   for selecting postprocessors. Other user defined extensions may use it as
-  --DOCVARS:markup   well.
+  --GLOBAL:markup {VARDEF MARKUP}
+  --GLOBAL:markup   The markup syntax (--markup option). This information only used by pipadoc
+  --GLOBAL:markup   for selecting postprocessors. Other user defined extensions may use it as
+  --GLOBAL:markup   well.
   MARKUP = "text",
 }
 
-DOCVARS_POST = {}
+GLOBAL_POST = {}
 
 
-local CONTEXT = setmetatable (
+local gcontext = setmetatable (
   {
-    --context:file {DVARDEF FILE}
+    --context:file {VARDEF FILE}
     --context:file   The file or section name currently processed or some special annotation
     --context:file   in angle brackets (eg '<startup>') on other processing phases
-    --context:line {DVARDEF LINE}
+    --context:line {VARDEF LINE}
     --context:line   Current line number of input or section, or indexing key
     --context:line   Lines start at 1
     FILE = "<startup>"
-  }, {__index = DOCVARS})
+  }, {__index = GLOBAL})
 
 
 --TODO: DOCME
 function set_gcontext(file, line)
   assert_type(file, 'string')
-  CONTEXT.FILE = file
-  CONTEXT.LINE = line
+  gcontext.FILE = file
+  gcontext.LINE = line
 end
 
 local args_done = false
@@ -97,7 +97,7 @@ end
 local function printlvl(context,lvl,...)
   maybe_type (context, 'table')
   if lvl <= opt_verbose then
-    context = context or CONTEXT
+    context = context or gcontext
     printerr(context.FILE..":"..(context.LINE and context.LINE..":" or ""), ...)
   end
 end
@@ -106,7 +106,7 @@ end
 --api_logging:
 --:
 --: Logging Progress and Errors
---: ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+--: ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 --:
 --: Functions for to log progress and report errors. All this functions take a variable argument
 --: list. Any argument passed to them will be converted to a string and printed to stderr when
@@ -131,7 +131,7 @@ end
 
 
 function die(context, ...) --: report a fatal error and exit the program
-  context = context or CONTEXT
+  context = context or gcontext
   printerr(context.FILE..":"..(context.LINE and context.LINE..":" or ""), ...)
   os.exit(1)
 end
@@ -152,18 +152,8 @@ end
 
 --api_load:
 --:
---: Dependencies
---: ~~~~~~~~~~~~
---:
---: 'pipadoc' does not depend on any external Lua libraries. The intention is to, by default,
---: make documentation build able on minimal target systems. Nevertheless modules can be loaded
---: optionally to augment pipadocs behavior and provide extra features. Plugin-writers should
---: try to adhere to this practice if possible and use the 'request()' function instead the Lua
---: 'require()'. Falling back to simpler but usable functionality when some library is not
---: available or call 'die()' when a reasonable fallback won't be available.
---:
---: Pipadoc already calls 'request "luarocks.loader"' to make rocks modules available when
---: installed.
+--: Library Loading
+--: ^^^^^^^^^^^^^^^
 --:
 function request(name) --: try to load optional modules
   --:    wraps Lua 'require' in a pcall so that failure to load module 'name' results in 'nil'
@@ -178,12 +168,12 @@ function request(name) --: try to load optional modules
     return nil
   end
 end
-
+--:
 
 --api_typecheck:
 --:
 --: Type Checks
---: ~~~~~~~~~~~
+--: ^^^^^^^^^^^
 --:
 --: Wrappers around 'assert' to check externally supplied data. On success 'var' will be returned
 --: otherwise an assertion error is raised.
@@ -213,9 +203,9 @@ end
 --api_typeconv:
 --:
 --: Type Conversions
---: ~~~~~~~~~~~~~~~~
+--: ^^^^^^^^^^^^^^^^
 --:
---: Functions which do specific type conversions.
+--: Functions which do specific conversions.
 --:
 
 function to_table(v) --: if 'v' is not a table then return +++\{v\}+++
@@ -226,7 +216,7 @@ function to_table(v) --: if 'v' is not a table then return +++\{v\}+++
   end
 end
 
-function to_text(v) --: convert 'v' to a string, returns 'nil' when that string would be empty
+function maybe_text(v) --: convert 'v' to a string, returns 'nil' when that string would be empty
   v = tostring (v)
   if v ~= "" then
     return v
@@ -239,7 +229,7 @@ end
 --api_strsubst:
 --:
 --: String Substitution
---: ~~~~~~~~~~~~~~~~~~~
+--: ^^^^^^^^^^^^^^^^^^^
 --:
 --: Documentation-text is be passed to the strsubst() function which recursively substitutes
 --: expressions within curly braces. The substitutions are taken from the passed context.
@@ -247,7 +237,8 @@ end
 --: 'tostring()' function.
 --:
 --: The Names for substitituions must start with an alphabetic character or underline and can
---: be followed by alphanumeric characters or underlines. It may be followed with a space and --: an optional argument string which gets passed to functions or retained verbatim on
+--: be followed by alphanumeric characters or underlines. It may be followed with a space and
+--: an optional argument string which gets passed to functions or retained verbatim on
 --: everyting else.
 --:
 --: Curly braces, can be escaped with backslashes or backtick characters. These
@@ -314,7 +305,7 @@ function strsubst (context, str, escapes, escapes_back) --: substitute text in
   maybe_type (context, "table")
   assert_type (str, "string")
 
-  context = context or CONTEXT
+  context = context or gcontext
   local sofar = {}
 
   local function strsubst_intern (str)
@@ -326,7 +317,6 @@ function strsubst (context, str, escapes, escapes_back) --: substitute text in
                       local subst = false
 
                       local var,arg = capture:match("^{(%a[%w_{}]*).?(.*)}$")
-
                       if not var then return capture end
                       var = strsubst_intern (var)
 
@@ -397,20 +387,19 @@ end
 
 --sections:
 --: Text in pipadoc is appended to named 'sections'. Text can be associated with some
---: alphanumeric key under that section. This enables later sorting for indexes and glossaries.
+--: alphanumeric key under that section. This enables later sorting for indices and glossaries.
 --:
 --: Sections can be one line or span a block of lines.
 --:
---: One line sections are defined when a section and maybe a key is followed by documentation
+--: Oneline sections are defined when a section and maybe a key is followed by documentation
 --: text. Block sections start with the section definition but no documentation text on the same
---: line. A block stays active until the next block section definition. One line doctext can be
+--: line. A block stays active until the next block section definition. Oneline doctext can be
 --: interleaved into Blocks.
 --:
---: When no section is set in a file, then the block section name defaults to the files name up,
---: but excluding to the first dot.
+--: The default block section name is the files name up, but excluding to the first dot.
 --:
 --: Sections are later brought into the desired order by pasting them into a 'toplevel' section.
---: This default name for the 'toplevel' section is'MAIN'.
+--: This default name for the 'toplevel' section is 'MAIN'.
 --:
 --: .An example document (example.sh)
 --: ----
@@ -450,8 +439,7 @@ end
 --: ----
 --:
 --: The pipadoc documentation you are just reading here is made and embedded in 'pipadoc.lua'
---: itself using 'asciidoc' as markup. Refer to it's source to see a bigger example about
---: how it is done.
+--: itself using 'asciidoc' as markup. Refer to the source itself to see how it is done.
 --:
 local sections = {}
 local sections_usecnt = {}
@@ -460,7 +448,7 @@ local sections_keys_usecnt = {}
 --api_sections:
 --:
 --: Sections
---: ~~~~~~~~
+--: ^^^^^^^^
 --:
 
 function section_append(section, key, context) --: Append data to the given section/key
@@ -485,13 +473,13 @@ function section_append(section, key, context) --: Append data to the given sect
 end
 
 --filetypes:
---: Pipadoc needs (only) to know about the syntax of line comments of the files it is reading.
---: For this patterns are registered to be matched against the file name together with a list of
---: line comment characters.
+--: Pipadoc needs to know about the syntax of line comments of the files it is reading.
+--: For this patterns are registered to be matched against the file name together with a
+--: list of line comment characters.
 --:
---: There are many definitions included for common filetypes already. For languages which
---: support block comments the opening (but not the closing) commenting characters are
---: registered as well. This allows one to define section blocks right away. Using the
+--: Definitions for a lot common programming languages are already included. For languages
+--: that support block comments the opening (but not the closing) commenting characters are
+--: registered as well. This allows one to define section blocks right away. But using the
 --: comment closing sequence right on the line will clobber the output, don't do that!
 --:
 --: .Example in C
@@ -521,7 +509,7 @@ local filetypes = {}
 --api_filetypes:
 --:
 --: Filetypes
---: ~~~~~~~~~
+--: ^^^^^^^^^
 --:
 function filetype_register(name, filep, linecommentseqs) --: Register a new filetype
   --:     name:::
@@ -580,7 +568,7 @@ local preprocessors = {}
 --api_preproc:
 --:
 --: Preprocessors
---: ~~~~~~~~~~~~~
+--: ^^^^^^^^^^^^^
 --:
 --: One can register multiple preprocessors for different filetypes. A preprocessor can modify
 --: the line prior it is parsed and further processed. By default pipadoc has no preprocessors
@@ -592,19 +580,23 @@ function preprocessor_register (langpat, preprocess) --: register a preprocessor
   --:     Register preprocessor to all filetypes whose mnemonic matches 'langpat'.
   --:   preprocess:::
   --:     The preprocesor to register. Can be one of:
-  --:     `function (line) ... end` ::::
-  --:       Takes a string (the source line) and shall return the preprocessed line or 'nil' to
-  --:       drop the line.
+  --:     `function (context) ... end` ::::
+  --:       Takes the context of the current source line and shall return:
+  --:       *  the preprocessed line
+  --:       *  false to drop the line
+  --:       *  true to keep the line unaltered
+  --:       Preprocessors may store state or have other side effect using API functions.
   --:     +\{pattern, repl [, n]\}+ ::::
-  --:       Generates a function calling 'string.gsub(pattern, repl [, n])' for preprocessing.
+  --:       Generates a function calling 'context.SOURCE:gsub(pattern, repl [, n])' for preprocessing.
   --:
   --PLANNED: langpat as list of patterns
   assert_type (langpat, "string")
   dbg (nil, "register preprocessor:", langpat, preprocess)
 
   if type (preprocess) == "table" then
-    preprocess = function (str)
-      return str:gsub (preprocess, preprocess[1], preprocess[2], preprocess[3])
+    local params = preprocess
+    preprocess = function (context)
+      return context.SOURCE:gsub (params[1], params[2], params[3])
     end
   end
 
@@ -646,7 +638,7 @@ local postprocessors = {}
 --api_postproc:
 --:
 --: Postprocessors
---: ~~~~~~~~~~~~~~
+--: ^^^^^^^^^^^^^^
 --: Postprocessors run at output generation time. They are registered per markup types.
 --: Processors are called in order of their definition.
 --:
@@ -655,19 +647,24 @@ function postprocessor_register (markuppat, postprocess) --: register a postproc
   --:     Register postprocessor to all markups whose name matche 'markuppat'.
   --:   postprocess:::
   --:     The postprocesor to register. Can be one of:
-  --:     `function (line) ... end` ::::
-  --:       Takes a string (the source line) and shall return the postprocessed line or 'nil' to
-  --:       drop the line.
+  --:     `function (context) ... end` ::::
+  --:       Takes the context of the current source line and shall return:
+  --:       *  the postprocessed line (context.TEXT)
+  --:       *  false to drop the line
+  --:       *  true to keep the line unaltered
+  --:       Postprocessors may store state or have other side effect using API functions.
   --:     +\{pattern, repl [, n]\}+ ::::
-  --:       Generates a function calling 'string.gsub(pattern, repl [, n])' for postprocessing.
+  --:       Generates a function calling 'context.TEXT:gsub(pattern, repl [, n])' for postprocessing.
   --:
   --PLANNED: markuppat as list of patterns
   assert_type (markuppat, "string")
   dbg (nil, "register postprocessor:", markuppat, postprocess)
 
+
   if type (postprocess) == "table" then
-    postprocess = function (str)
-      return str:gsub (postprocess, postprocess[1], postprocess[2], postprocess[3])
+    local params = postprocess
+    postprocess = function (context)
+      return context.TEXT:gsub (params[1], params[2], params[3])
     end
   end
 
@@ -685,8 +682,8 @@ local active_postprocessors = {}
 local function postprocessors_attach ()
   for i=1,#postprocessors do
     local ppdesc = postprocessors[i]
-    if DOCVARS.MARKUP:match(ppdesc.pattern) then
-      trace (nil, "add postprocessor for:", DOCVARS.MARKUP, ppdesc.postprocessor)
+    if GLOBAL.MARKUP:match(ppdesc.pattern) then
+      trace (nil, "add postprocessor for:", GLOBAL.MARKUP, ppdesc.postprocessor)
       table.insert(active_postprocessors, ppdesc.postprocessor)
     end
   end
@@ -694,15 +691,24 @@ end
 
 --PLANNNED: wrap pcall for debugging purpose
 local function postprocessors_run (context)
-  local textin = context.TEXT
   for i=1,#active_postprocessors do
-    local ok, msg = pcall(active_postprocessors[i], context)
+    local ok, result = pcall(active_postprocessors[i], context)
     if not ok then
-      warn(context, "postprocessor failed:", msg) --cwarn: <STRING> ::
-      --cwarn:  error in postprocessor.
-    end
-    if not context.TEXT then
+      warn(context, "postprocessor failed:", result) --cwarn: <STRING> ::
+      --cwarn:  postprocessor function errored out.
+      --PLANNED: postprocessors may expand to multiple lines? return table
+    elseif type(result) == 'string' then
+      trace(context, "postprocessed:", context.TEXT, "->", result)
+      context.TEXT = result
+    elseif result == true then
+      trace(context, "preprocessed keep:", context.TEXT)
+    elseif result == false then
+      trace(context, "preprocessed drop:", context.TEXT)
+      context.TEXT = nil
       break
+    else
+      warn(context, "postprocessor returned wrong type:", active_postprocessors[i], type(result)) --cwarn: <STRING> ::
+      --cwarn:  postprocessor returned unsupported type (or nil).
     end
   end
 
@@ -710,9 +716,6 @@ local function postprocessors_run (context)
     context.TEXT = strsubst(context, context.TEXT, nil, escapes_back)
   end
 
-  if context.TEXT ~= textin then
-    trace (context, "postprocess:", textin, "->",  context.TEXT)
-  end
 end
 
 --op:
@@ -726,7 +729,7 @@ local genfuncs = {}
 --api_op:
 --:
 --: Operators
---: ~~~~~~~~~
+--: ^^^^^^^^^
 --:
 --: Operators have 2 functions associated. The first one is the processing function which
 --: defines how a documentation comment gets stored. The second one is the generator function
@@ -736,11 +739,11 @@ function operator_register(char, procfunc, genfunc) --: Register a new operator
   --:   char:::
   --:     single punctuation character defining this operator.
   --:   procfunc +function(context)+:::
-  --:     a function which receives a table of the 'context' parsed from the pipadoc comment
-  --:     line. It is responsible for storing the context under the approbiate section/key and
-  --:     keep a state for further processing.
-  --:   genfunc +function(context)+:::
-  --:     the a function generating the output from given context.
+  --:     a function which receives a CONTEXT table of the current line.
+  --:     The procfunc processes and store the context in aprobiate
+  --:     fashion.
+   --:   genfunc +function(context)+:::
+  --:     a function generating the (sequential) output from given context.
   --:
   assert(string.match(char, "^%p$") == char)
   assert_type(procfunc, 'function')
@@ -803,7 +806,8 @@ local options = {
   "", --:  <STRING>
 
   "    -d, --debug", --:  <STRING>
-  "                        set verbosity to maximum", --:  <STRING>
+  "                        set verbosity to debug level", --:  <STRING>
+  "                        one additional -v enables tracing", --:  <STRING>
   ["-d"] = "--debug",
   ["--debug"] = function ()
     opt_verbose = 3
@@ -818,7 +822,7 @@ local options = {
     usage()
   end,
   "", --:  <STRING>
-
+  --PLANNED: --help --verbose or --doc extracts the full documentations
 
   "    -r, --register <name> <file> <comment>", --:  <STRING>
   "                        register a filetype pattern", --:  <STRING>
@@ -857,7 +861,7 @@ local options = {
 
 
   "    --no-defaults", --:  <STRING>
-  "                        disables default filetypes and configfile", --:  <STRING>
+  "                        disables default filetypes and configfile loading", --:  <STRING>
   ["--no-defaults"] = function ()
     opt_nodefaults = true
     dbg("nodefaults")
@@ -870,8 +874,8 @@ local options = {
   ["-m"] = "--markup",
   ["--markup"] = function (arg, i)
     check_args(arg, i+1)
-    DOCVARS.MARKUP = arg[i+1]
-    dbg(nil, "markup:", DOCVARS.MARKUP)
+    GLOBAL.MARKUP = arg[i+1]
+    dbg(nil, "markup:", GLOBAL.MARKUP)
     return 1
   end,
   "", --:  <STRING>
@@ -891,7 +895,7 @@ local options = {
   "    -a, --alias <pattern> <as>", --:  <STRING>
   "                        aliases filenames to another filetype.", --:  <STRING>
   "                        force example, treat .install files as shell files:", --:  <STRING>
-  "                         --a '(.*)%.install' '%1.sh'", --:  <STRING>
+  "                         --alias '(.*)%.install' '%1.sh'", --:  <STRING>
   ["-a"] = "--alias",
   ["--alias"] = function (arg, i)
     check_args(arg, i+2)
@@ -900,11 +904,11 @@ local options = {
   end,
   "", --:  <STRING>
 
-  --PLANNED: define for DOCVARS_POST --define-post -P
+  --PLANNED: define for GLOBAL_POST --define-post -P
   "    -D, --define <name>[=<value>]", --:  <STRING>
-  "                        define a DOCVAR to value or 'true'", --:  <STRING>
+  "                        define a GLOBAL variable to value or 'true'", --:  <STRING>
   "    -D, --define -<name>", --:  <STRING>
-  "                        undefine a DOCVAR", --:  <STRING>
+  "                        undefine a GLOBAL variable", --:  <STRING>
   ["-D"] = "--define",
   ["--define"] = function (arg,i)
     check_args(arg, i+1)
@@ -912,13 +916,13 @@ local options = {
     local undef = arg[i+1]:match("^[-]([%w_]+)")
     if undef then
       dbg(nil, "undef:", undef)
-      DOCVARS[undef] = nil
+      GLOBAL[undef] = nil
     elseif key then
       if has_value == "" then
         value = 'true'
       end
       dbg(nil, "define:", key, value)
-      DOCVARS[key] = value
+      GLOBAL[key] = value
     end
     return 1
   end,
@@ -949,6 +953,7 @@ local options = {
   "                        following argument as input file", --:  <STRING>
   ["--"] = function () args_done=true end,
 
+  --PLANNED: --list-filetypes
   --PLANNED: --features  show a report which features (using optional Lua modules) are available
   --PLANNED: list-sections
   --PLANNED: eat (double, triple, ..) empty lines (do this in a postprocessor)
@@ -960,11 +965,10 @@ local options = {
   --PLANNED: strip option (pre/postprocessor?) to remove all pipadoc
 
   "", --:  <STRING>
-  "  inputs are file names or a '-' which indicates standard input", --:  <STRING>
+  "  inputs are file names or a '-' that indicates standard input", --:  <STRING>
 }
 
 function usage()
-  print("usage:")
   for i=1,#options do
     print(options[i])
   end
@@ -977,7 +981,7 @@ function parse_args(arg)
 
   local i = 1
   while i <= #arg do
-    CONTEXT.LINE=i
+    gcontext.LINE=i
     while string.match(arg[i], "^%-%a%a+") do
       parse_args {"-"..string.sub(arg[i],2,2)}
       arg[i] = "-"..string.sub(arg[i],3)
@@ -1083,49 +1087,32 @@ local function setup()
   do
     local time = os.time()
     local date = os.date ("*t", time)
-    --DOCVARS:date {DVARDEF YEAR, MONTH, DAY, HOUR, MINUTE}
-    --DOCVARS:date   Current date information
-    DOCVARS.YEAR = date.year
-    DOCVARS.MONTH = date.month
-    DOCVARS.DAY = date.day
-    DOCVARS.HOUR = date.hour
-    DOCVARS.MINUTE = date.min
+    --GLOBAL:date {VARDEF YEAR, MONTH, DAY, HOUR, MINUTE}
+    --GLOBAL:date   Current date information
+    GLOBAL.YEAR = date.year
+    GLOBAL.MONTH = date.month
+    GLOBAL.DAY = date.day
+    GLOBAL.HOUR = date.hour
+    GLOBAL.MINUTE = date.min
 
     --PLANNED: locale support for dates
-    --DOCVARS:date {DVARDEF DAYNAME, MONTHNAME}
-    --DOCVARS:date   The name of the day of week or month
-    DOCVARS.DAYNAME = os.date ("%A", time)
-    DOCVARS.MONTHNAME = os.date ("%B", time)
+    --GLOBAL:date {VARDEF DAYNAME, MONTHNAME}
+    --GLOBAL:date   The name of the day of week or month
+    GLOBAL.DAYNAME = os.date ("%A", time)
+    GLOBAL.MONTHNAME = os.date ("%B", time)
 
-    --DOCVARS:date {DVARDEF DATE}
-    --DOCVARS:date   Current date in YEAR/MONTH/DAY format
-    DOCVARS.DATE = date.year.."/"..date.month.."/"..date.day
-    --DOCVARS:date {DVARDEF LOCALDATE}
-    --DOCVARS:date   Current date in current locale format
-    DOCVARS.LOCALDATE = os.date ("%c", time)
+    --GLOBAL:date {VARDEF DATE}
+    --GLOBAL:date   Current date in YEAR/MONTH/DAY format
+    GLOBAL.DATE = date.year.."/"..date.month.."/"..date.day
+    --GLOBAL:date {VARDEF LOCALDATE}
+    --GLOBAL:date   Current date in current locale format
+    GLOBAL.LOCALDATE = os.date ("%c", time)
   end
 
   if not opt_nodefaults then
     --PLANNED: read style file like a config, lower priority, different paths (./ /etc/ ~/ ...)
     --PLANNED: for each language/markup (pipadoc_ascidoc.lua) etc
     builtin_filetypes()
-    if opt_config then
-      set_gcontext "<loadconfig>"
-
-      dbg (nil, "load config:", opt_config)
-      local config = loadfile(opt_config)
-
-      if config then
-        config ()
-      else
-        local fn = warn
-        if opt_config_set then
-          fn = die
-        end
-        fn (nil, "can't load config file:", opt_config) --cwarn: <STRING> ::
-        --cwarn:  The config file ('--config' option) could not be loaded.
-      end
-    end
   end
 
   --op_builtin:
@@ -1141,7 +1128,7 @@ local function setup()
         --oneline
         context.SECTION = context.SECTION or block_section
         context.ARG = context.ARG or block_arg
-        context.TEXT = strsubst(context, context.TEXT, escapes)
+        context.TEXT = strsubst(context, context.TEXT, escapes) .. GLOBAL.NL
         section_append(context.SECTION, context.ARG, context)
       elseif context.TEXT == "" and (context.SECTION or context.ARG) then
         --block head
@@ -1151,7 +1138,7 @@ local function setup()
         --block cont
         context.SECTION = context.SECTION or block_section
         context.ARG = context.ARG or block_arg
-        context.TEXT = strsubst(context, context.TEXT, escapes)
+        context.TEXT = strsubst(context, context.TEXT, escapes) .. GLOBAL.NL
         section_append(context.SECTION, context.ARG, context)
       end
     end,
@@ -1283,24 +1270,42 @@ local function setup()
     sortgenerate
   )
 
+  if opt_config_set or not opt_nodefaults then
+    set_gcontext "<loadconfig>"
+
+    dbg (nil, "load config:", opt_config)
+    local config = loadfile(opt_config)
+
+    if config then
+      config ()
+    else
+      local fn = warn
+      if opt_config_set then
+        fn = die
+      end
+      fn (nil, "can't load config file:", opt_config) --cwarn: <STRING> ::
+      --cwarn:  The config file ('--config' option) could not be loaded.
+    end
+  end
+
   preprocessors_attach ()
   postprocessors_attach ()
 end
 
 local function process_line (context, comment)
   --context:
-  --:pre {DVARDEF PRE}
+  --:pre {VARDEF PRE}
   --:pre   Contains the sourcecode in font of the line comment.
-  --:comment {DVARDEF COMMENT}
+  --:comment {VARDEF COMMENT}
   --:comment   Character sequence which is used as line comment.
-  --:section {DVARDEF SECTION}
+  --:section {VARDEF SECTION}
   --:section   Section where the documentation should appear.
-  --:op {DVARDEF OP}
+  --:op {VARDEF OP}
   --:op   Single punctuation operator defining how to process this line.
-  --:arg {DVARDEF ARG}
+  --:arg {VARDEF ARG}
   --:arg   Optional argument to the operator. This can be the sort key
   --:arg   (alphabetic or numeric) or another section name for pasting.
-  --:text {DVARDEF TEXT}
+  --:text {VARDEF TEXT}
   --:text  The actual Documentation Text.
 
   -- special case for plaintext files
@@ -1312,8 +1317,8 @@ local function process_line (context, comment)
     dbg(context, "pattern:", pattern)
     context.PRE, context.COMMENT, context.SECTION, context.OP, context.ARG, context.TEXT =
       string.match(context.SOURCE, pattern)
-    context.SECTION = to_text(context.SECTION)
-    context.ARG = to_text(context.ARG)
+    context.SECTION = maybe_text(context.SECTION)
+    context.ARG = maybe_text(context.ARG)
   end
 
   local op = context.OP
@@ -1354,7 +1359,7 @@ end
 local function process_file(file)
   -- filecontext is a partial context storing data
   -- of the current file processed
-  local filecontext = make_context(DOCVARS, {
+  local filecontext = make_context(GLOBAL, {
                                      FILE="<process_file>",
   })
 
@@ -1395,7 +1400,7 @@ local function process_file(file)
     trace(filecontext, "input:", lineno)
 
     --context:
-    --:source {DVARDEF SOURCE}
+    --:source {VARDEF SOURCE}
     --:source   The line read from the input file, used for preprocessing and will be erased
     --:source   afterward preprocessing is done.
     local context = make_context(filecontext, {
@@ -1404,19 +1409,26 @@ local function process_file(file)
     })
 
     local preprocessors = filetype.preprocessors
+
     if preprocessors then
       for i=1,#preprocessors do
-        local oldsource = context.SOURCE
-        local ok,msg = pcall(preprocessors[i], context)
+        local ok,result = pcall(preprocessors[i], context)
         if not ok then
-          warn(context, "preprocessor failed:", msg) --cwarn: <STRING> ::
-          --cwarn:  error in preprocessor.
+          warn(context, "preprocessor failed:", result) --cwarn: <STRING> ::
+          --cwarn:  preprocessor function errored out.
           --PLANNED: preprocessors may expand to multiple lines? return table
-        elseif context.SOURCE ~= oldsource then
-          trace(context, "preprocessed:", oldsource, "->", context.SOURCE)
-        end
-        if not context.SOURCE then
+        elseif type(result) == 'string' then
+          trace(context, "preprocessed:", context.SOURCE, "->", result)
+          context.SOURCE = result
+        elseif result == true then
+          trace(context, "preprocessed keep:", context.SOURCE)
+        elseif result == false then
+          trace(context, "preprocessed drop:", context.SOURCE)
+          context.SOURCE = nil
           break
+        else
+          warn(context, "preprocessor returned wrong type:", preprocessors[i], type(result)) --cwarn: <STRING> ::
+          --cwarn:  preprocessor returned unsupported type (or nil).
         end
       end
     end
@@ -1471,7 +1483,7 @@ function generate_output(which, output)
     sections_usecnt[which] = (sections_usecnt[which] or 0) + 1
 
     for i=1,#section do
-      CONTEXT.LINE=i
+      gcontext.LINE=i
       local genfunc = genfuncs[section[i].OP]
       if genfunc then
         local ok, err = pcall(genfunc, section[i], output)
@@ -1559,13 +1571,14 @@ do
   set_gcontext "<postprocessing>"
   section_append = function () die(nil, "section_append() not available after generating output") end
 
-  --activate DOCVARS_POST for postprocessing
-  setmetatable (DOCVARS, {__index = DOCVARS_POST})
+  --activate GLOBAL_POST for postprocessing
+  setmetatable (GLOBAL, {__index = GLOBAL_POST})
 
   for i=1,#output do
     postprocessors_run(output[i])
     if output[i].TEXT then
-      outfd:write(output[i].TEXT, DOCVARS.NL)
+--      outfd:write(output[i].TEXT, GLOBAL.NL)
+      outfd:write(output[i].TEXT)
     end
   end
   -- free memory
@@ -1602,7 +1615,7 @@ end
 --: Introduction
 --: ------------
 --:
---: Embedding documentation in program source files often yields the problem that the
+--: Embedding documentation in program source files often results in the problem that the
 --: structure of a program is not the optimal structure for the associated documentation.
 --: Still there are many good reasons to maintain documentation together with the source right
 --: within the code which defines the documented functionality. Pipadoc addresses this problem
@@ -1697,24 +1710,28 @@ end
 --: <documentationtext> ::= <rest of the line>
 --: ....
 --:
---: There config shipped with pipadoc gives an example to drop a line when it end with "NODOC".
---:
 --: IMPORTANT: Pipadoc does not know anything except the line comment characters about the source
 --:            programming languages syntax. This includes literal strings and any other
 --:            syntactic form which may look like a line comment, but is not. Such lines need to
 --:            be dropped by a preprocessor to make them unambiguous.
 --:
+--: There config shipped with pipadoc gives an example to drop a line when it end with "NODOC".
+--:
 --: ----
 --: const char* example = "//MAIN: this is a C string and not documentation"; //NODOC{NIL}
 --: ----
 --:
---: Documentation can be either blocked or oneline. Blocks start with a documentation comment
---: including a section or argument specifier but have no documentation text. The text block then
---: follows in documentation commant where section and argument are empty. They span unti a new
---: documentation block is set. Oneline documentation is defined by a documentation comment which
---: sets either section or argument and has a non empty documentation text. They can be
---: interleaved within blocks, after a oneline documentation the preceeding block continues.
---: This is used to define index and glosary items right within block documentation.
+--: Documentation can be either blocked or oneline.
+--:
+--: Block::
+--:   Start with a documentation comment including a section or argument specifier but are not
+--:   followed by documentation text on the same line.
+--:   The text block then follows in documentation comments where section and
+--:   argument are empty. Blocks span unti a new documentation block is started.
+--: Oneline::
+--:   Is defined by a documentation comment which sets section and/or argument followed by
+--:   documentation text on the same line. They can be interleaved within blocks.
+--:   This is used to define index and glosary items right within block documentation.
 --:
 --:
 --: Order of operations
@@ -1728,8 +1745,8 @@ end
 --:   the line read from the input file.
 --:
 --: Parsing ::
---:   The line is broken down into it's components and the operators processing
---:   function will be called which is responsible for storing. The ':' operator also does a first
+--:   The line is broken down into it's components and the operators processing function
+--:   will be called which is responsible for storing. The colon (':') operator also does a first
 --:   string substitution pass to expand variables.
 --:
 --: Output Ordering ::
@@ -1781,46 +1798,6 @@ end
 --=op_builtin
 --:
 --:
---: [[CONTEXT]]
---: The Context
---: -----------
---:
---: Processors, operators and string substitution calls and diagnostics get a context passed
---: along. This context represents the state for the actual processed line. It is defined as
---: stack of tables inheriting from each other.
---:
---: On the lowest layer is are the 'DOCVARS' and 'DOCVARS_POST' tables. For each file an
---: immediate 'filecontext' is created and then on top and each line has it's own context.
---: This later per-line context is what gets passed around. The 'DOCVARS_POST' table is only
---: available after postprocessors ran for a final 'strsubst()' pass.
---:
---: In a few cases a fake-context is passed around for diagnostic functions.
---:
---: Context Members
---: ~~~~~~~~~~~~~~~
---:
---: The following members are used/defined in 'contexts'. Some come from the immediate
---: filecontext, which is normally not exposed.
---:
---@context
---:
---:
---: [[DOCVARS]]
---: Documentation Variables
---: -----------------------
---:
---: The 'DOCVARS' and 'DOCVARS_POST' Lua tables holds key/value pairs of variables
---: with the global definitions. These are used by the core and processors/'strsubst().'
---: Simple substitutions can be set from the command line. Configuration files may define
---: more complex lua functions for string substitutions. By default there are no values defined
---: in 'DOCVARS_POST'
---:
---: Predefined DOCVARS
---: ~~~~~~~~~~~~~~~~~~
---:
---@DOCVARS
---:
---:
 --TODO: DOCME document 2 ways to modify text strsubst/processors
 --: Configuration File
 --: ------------------
@@ -1831,7 +1808,7 @@ end
 --:
 --: The configuration file is used to define additional pre- and post-processors, define states
 --: for those and define custom operators. It is loaded and executed as it own chunk and may only
---: access the global variables (DOCVARS, CONTEXT) and api functions described later.
+--: access the global variables (GLOBAL, CONTEXT) and api functions described later.
 --:
 --:
 --: Example Configuration File
@@ -1840,16 +1817,72 @@ end
 --: Pipadoc itself comes with a configuration file for generating it's own documentation and
 --: assist the testsuite. This is a good starting point for writing your own configuration.
 --:
---: There are pre- and post- processors defined for:
---:
---=shipped_config
+--FIXME: complete below doc
+-- : There are pre- and post- processors defined for:
+-- :
+-- =shipped_config
 --TODO: document that safe operation needs a custom config file
+--:
+--: Dependencies
+--: ~~~~~~~~~~~~
+--:
+--: 'pipadoc' does not depend on any external Lua libraries. Nevertheless modules can be loaded
+--: optionally to augment pipadocs behavior and provide extra features. Plugin-writers should
+--: use the 'request()' function instead the Lua 'require()', falling back to simpler but usable
+--: functionality when some library is not available or call 'die()' when a reasonable fallback
+--: won't do it.
+--:
+--: Pipadoc already calls 'request "luarocks.loader"' to make rocks modules available when
+--: installed.
 --:
 --:
 --: Programming API for Extensions
 --: ------------------------------
 --:
---: Functions pipadoc exports to be used by extensions/config files.
+--: [[GLOBAL]]
+--: Documentation Variables
+--: ~~~~~~~~~~~~~~~~~~~~~~~
+--:
+--: The 'GLOBAL' and 'GLOBAL_POST' Lua tables holds key/value pairs of variables
+--: with global definitions. These are used by the core and processors/'strsubst()'.
+--: Simple string assigments can be set from the command line. Configuration files may define
+--: more complex lua functions for string substitutions.
+--:
+--FIXME: describe format of keys  __IMPL__ etc
+--:
+--:
+--: Predefined Variables
+--: ^^^^^^^^^^^^^^^^^^^^
+--:
+--: The 'GLOBAL' table is initialized with:
+--:
+--@GLOBAL
+--:
+--: The 'GLOBAL_POST' table is used for a final 'strsubst()' pass afer postprocessing.
+--: There are no values defined in 'GLOBAL_POST'.
+--:
+--: [[CONTEXT]]
+--: The Context
+--: ~~~~~~~~~~~
+--:
+--: Processors, operators, string substitution calls and diagnostics get a context
+--: passed along. This context represents the state for the actual processed line plus
+--: everything thats defined in GLOBAL.
+--:
+--: In a few cases a fake-context in angle brakets is passed around for diagnostic functions.
+--:
+--: Context Members
+--: ^^^^^^^^^^^^^^^
+--:
+--: The following members are used/defined in 'contexts'.
+--:
+--@context
+--:
+--:
+--: Exported Functions
+--: ~~~~~~~~~~~~~~~~~~
+--:
+--: pipadoc exports some functions for the use in pre/post processors from config files.
 --:
 --=api_load
 --=api_logging
@@ -1886,7 +1919,7 @@ end
 --: 'pipadoc' documents itself with embedded asciidoc text. This can be extracted with
 --:
 --: ----
---: lua pipadoc.lua -m asciidoc -d pipadoc.lua >pipadoc.txt
+--: lua pipadoc.lua -m asciidoc pipadoc.lua >pipadoc.txt
 --: ----
 --:
 --: The resulting `pipadoc.txt` can then be processed with the asciidoc tool chain to produce

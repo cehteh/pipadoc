@@ -5,7 +5,9 @@
 preprocessor_register ("",
                        function (context)
                          if context.SOURCE:match("NODOC$") then
-                           context.SOURCE = nil
+                           return false
+                         else
+                           return true
                          end
                        end
 )
@@ -14,11 +16,11 @@ preprocessor_register ("",
 --: *  Replace '<STRING>' in pipadoc comments with the first literal string from the code.
 --:    Lifts string literals from sourcecode to documentation.
 preprocessor_register ("",
-                       function (context)
-                         context.SOURCE =
-                           context.SOURCE:gsub('^([^"]*"([^"]*)".*%p+%w*:%w*)(.*)<STRING>(.*)',
-                                               '%1%3%2%4', 1)
-                       end
+                       {
+                         '^([^"]*"([^"]*)".*%p+%w*:%w*)(.*)<STRING>(.*)',
+                         '%1%3%2%4',
+                         1
+                       }
 )
 
 
@@ -35,28 +37,29 @@ preprocessor_register ("^lua$",
                            )
                            context.FUNCTION = fn
                            context.FUNCTION_PROTO = proto
-                           context.SOURCE =
-                             context.SOURCE:gsub("^(.*function%s+([^)]*%)).*%-%-%w*:%w*)",
-                                                 '%1 {FNDEF}', 1)
+                           return context.SOURCE:gsub("^(.*function%s+([^)]*%)).*%-%-%w*:%w*)",
+                                                       '%1 {FNDEF}', 1)
+                         else
+                           return true
                          end
                        end
 )
 
 
-DOCVARS.FNDEF = "{FNDEF_{MARKUP}}"
+GLOBAL.FNDEF = "{FNDEF_{MARKUP}}"
 
-DOCVARS.FNDEF_asciidoc = function (context, arg)
+GLOBAL.FNDEF_asciidoc = function (context, arg)
   return "anchor:index_"..context.FUNCTION.."[] +*"..context.FUNCTION_PROTO.."*+::{NL}"
 end
 
-DOCVARS.FNDEF_text = function (context)
+GLOBAL.FNDEF_text = function (context)
   return context.FUNCTION_PROTO..":{NL}"
 end
 
---: * Generate documentaton for DOCVARS and CONTEXT variables (pipadoc's own documentation).
-DOCVARS.DVARDEF = "{DVARDEF_{MARKUP}}"
+--: * Generate documentaton for GLOBAL and CONTEXT variables (pipadoc's own documentation).
+GLOBAL.VARDEF = "{VARDEF_{MARKUP}}"
 
-DOCVARS.DVARDEF_asciidoc = function (context, arg)
+GLOBAL.VARDEF_asciidoc = function (context, arg)
   local anchors = ""
   for ix in arg:gmatch("([^%s%p]*)[%p%s]*") do
     if #ix > 0 then
@@ -71,7 +74,7 @@ DOCVARS.DVARDEF_asciidoc = function (context, arg)
   return anchors.."`"..arg.."`::"
 end
 
-DOCVARS.DVARDEF_text = function (context, arg)
+GLOBAL.VARDEF_text = function (context, arg)
   for ix in arg:gmatch("([^%s%p]*)[%p%s]*") do
     if #ix > 0 then
       section_append("INDEX", ix:lower(),
@@ -86,9 +89,9 @@ end
 --: * Generate a sorted index of functions and doc variables.
 local lastfirstchar= nil
 
-DOCVARS.INDEXREF = "{INDEXREF_{MARKUP}}"
+GLOBAL.INDEXREF = "{INDEXREF_{MARKUP}}"
 
-DOCVARS.INDEXREF_asciidoc = function (context, arg)
+GLOBAL.INDEXREF_asciidoc = function (context, arg)
   local firstchar = arg:sub(1,1):lower()
 
   if lastfirstchar ~= firstchar then
@@ -99,7 +102,7 @@ DOCVARS.INDEXREF_asciidoc = function (context, arg)
   end
 end
 
-DOCVARS.INDEXREF_text = function (context, arg)
+GLOBAL.INDEXREF_text = function (context, arg)
   local firstchar=arg:sub(1,1):lower()
 
   if lastfirstchar ~= firstchar then
@@ -136,9 +139,9 @@ end
 --:    The reason for these elaborate definitions is that when pasting documentation together
 --:    it is not always clear what the header level of the surrounding environment is.
 --:
---TODO: if DOCVARS.ASCIIDOCHELP
-if DOCVARS.MARKUP == "asciidoc" then
-  DOCVARS.PARA = function (context, arg)
+--TODO: if GLOBAL.ASCIIDOCHELP
+if GLOBAL.MARKUP == "asciidoc" then
+  GLOBAL.PARA = function (context, arg)
     local title, index, descr = arg:match("([^;]*); *([^;]*); *(.*)")
     --TODO: descr is dropped
     if title and title ~= "" then
@@ -165,7 +168,7 @@ if DOCVARS.MARKUP == "asciidoc" then
   local asciidoc_lastlevel = "-"
 
 
-  DOCVARS.HEAD = function (context, arg)
+  GLOBAL.HEAD = function (context, arg)
     local title, index, descr = arg:match("^%p* *([^;]*); *([^;]*); *(.*)")
     --TODO: descr is dropped
 
@@ -185,7 +188,7 @@ if DOCVARS.MARKUP == "asciidoc" then
   end
 
 
-  DOCVARS_POST.HEAD_POST = function (context, arg)
+  GLOBAL_POST.HEAD_POST = function (context, arg)
     local level, title = arg:match("^(%p*) *([^;]*).*")
 
     if level == '' then
@@ -233,8 +236,9 @@ postprocessor_register ("",
                         function (context)
                           if context.TEXT:match("^NOORIGIN") then
                             origin=false
-                            context.TEXT = nil
+                            return false
                           end
+                          return true
                         end
 )
 
@@ -242,19 +246,22 @@ postprocessor_register ("",
                         function (context)
                           if context.TEXT:match("^ORIGIN") then
                             origin=true
-                            context.TEXT = nil
+                            return false
                           end
+                          return true
                         end
 )
 
 postprocessor_register ("^asciidoc$",
                         function (context)
+                          result = context.TEXT
                           if origin and ( context.FILE ~= file or math.abs(context.LINE - line) > 4) then
-                            context.TEXT = "// {FILE}:{LINE} //{NL}"..context.TEXT
+                            result = "// {FILE}:{LINE} //{NL}"..result
                           end
 
                           file = context.FILE
                           line = context.LINE
+                          return result
                        end
 )
 
@@ -262,12 +269,12 @@ postprocessor_register ("^asciidoc$",
 
 
 --: * Generate formatted lists for doc comments in WIP/FIXME/TODO/PLANNED/DONE sections.
---:   When DOCVARS.GIT is defined ('-D GIT') then each such item includes information gathered
+--:   When GLOBAL.GIT is defined ('-D GIT') then each such item includes information gathered
 --:   from the git commit which touched that line the last.
---:   When DOCVARS.NOBUG is defined it reaps http://nobug.pipapo.org[NoBug] annotations from
+--:   When GLOBAL.NOBUG is defined it reaps http://nobug.pipapo.org[NoBug] annotations from
 --:   C source files as well.
-if DOCVARS.GIT then
-  DOCVARS.GIT_BLAME = function (context)
+if GLOBAL.GIT then
+  GLOBAL.GIT_BLAME = function (context)
     local git = io.popen("git blame '"..context.FILE.."' -L "..tostring(context.LINE)..",+1 -p 2>/dev/null")
 
     local blame = {}
@@ -304,16 +311,16 @@ if DOCVARS.GIT then
     return "{GIT_BLAME_{MARKUP}}"
   end
 
-  DOCVARS.GIT_BLAME_asciidoc = " +{NL}  _{GIT_BLAME_SUMMARY}_ +{NL}  {GIT_BLAME_AUTHOR}, {GIT_BLAME_DATE} +{NL}  +{GIT_BLAME_REVISION}+"
-  DOCVARS.GIT_BLAME_text = " {NL}  {GIT_BLAME_SUMMARY}{NL}  {GIT_BLAME_AUTHOR},  {GIT_BLAME_DATE} {NL}  {GIT_BLAME_REVISION}"
+  GLOBAL.GIT_BLAME_asciidoc = " +{NL}  _{GIT_BLAME_SUMMARY}_ +{NL}  {GIT_BLAME_AUTHOR}, {GIT_BLAME_DATE} +{NL}  +{GIT_BLAME_REVISION}+"
+  GLOBAL.GIT_BLAME_text = " {NL}  {GIT_BLAME_SUMMARY}{NL}  {GIT_BLAME_AUTHOR},  {GIT_BLAME_DATE} {NL}  {GIT_BLAME_REVISION}"
 
 else
-  DOCVARS.GIT_BLAME = ""
+  GLOBAL.GIT_BLAME = ""
 end
 
 local issues_keywords = {"WIP", "FIXME", "TODO", "PLANNED", "DONE"}
 
-if DOCVARS.NOBUG then
+if GLOBAL.NOBUG then
   preprocessor_register ("^c$",
                          function (context)
                            for _,word in ipairs(issues_keywords) do
@@ -321,7 +328,7 @@ if DOCVARS.NOBUG then
                                '(%s*'..word..'%s*%("([^"]*).*)',
                                '%1 //'..word..': %2', 1)
                            end
-                           return context
+                           return true
                          end
   )
 end
@@ -334,19 +341,20 @@ preprocessor_register ("",
                              "(%p"..word.."):([^%s]*)%s?(.*)",
                              '%1:0%2 {FILE}:{LINE}::{NL}  %3{GIT_BLAME}{NL}', 1)
                          end
+                         return true
                        end
 )
 
 
 -- for the testsuite
-if DOCVARS.TESTSUITE then
-  DOCVARS.STRING = "example string"
-  DOCVARS.STR = "{STRING}"
-  DOCVARS.ING = "ING"
-  DOCVARS.UPR = "{UPPER}"
-  DOCVARS.PING = "{PONG}"
-  DOCVARS.PONG = "{PING}"
-  DOCVARS.UPPER = function(context, arg)
+if GLOBAL.TESTSUITE then
+  GLOBAL.STRING = "example string"
+  GLOBAL.STR = "{STRING}"
+  GLOBAL.ING = "ING"
+  GLOBAL.UPR = "{UPPER}"
+  GLOBAL.PING = "{PONG}"
+  GLOBAL.PONG = "{PING}"
+  GLOBAL.UPPER = function(context, arg)
     return arg:upper()
   end
 
@@ -357,6 +365,7 @@ if DOCVARS.TESTSUITE then
                              context.SOURCE = sub
                              warn(context, "Test-Substitute TESTPP with #: TESTFOO")
                            end
+                           return true
                          end
   )
 
@@ -368,6 +377,7 @@ if DOCVARS.TESTSUITE then
                              context.SOURCE = sub
                              warn(context, "Test-Substitute TESTFOO with TESTBAR")
                            end
+                           return true
                          end
   )
 end

@@ -1,9 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN"
     "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
 <head>
 <meta http-equiv="Content-Type" content="application/xhtml+xml; charset=UTF-8" />
-<meta name="generator" content="AsciiDoc 8.6.9" />
+<meta name="generator" content="AsciiDoc 8.6.10" />
 <title>pipadoc - Documentation extractor</title>
 <style type="text/css">
 /* Shared CSS for AsciiDoc xhtml11 and html5 backends */
@@ -736,7 +737,7 @@ asciidoc.install(2);
 <h1>pipadoc - Documentation extractor</h1>
 <span id="author">Christian Thaeter</span><br />
 <span id="email"><code>&lt;<a href="mailto:ct@pipapo.org">ct@pipapo.org</a>&gt;</code></span><br />
-<span id="revdate">13. August 2017</span>
+<span id="revdate">2. April 2020</span>
 <div id="toc">
   <div id="toctitle">Table of Contents</div>
   <noscript><p><b>JavaScript must be enabled in your browser to display the table of contents.</b></p></noscript>
@@ -746,7 +747,7 @@ asciidoc.install(2);
 <div class="sect1">
 <h2 id="_introduction">Introduction</h2>
 <div class="sectionbody">
-<div class="paragraph"><p>Embedding documentation in program source files often yields the problem that the
+<div class="paragraph"><p>Embedding documentation in program source files often results in the problem that the
 structure of a program is not the optimal structure for the associated documentation.
 Still there are many good reasons to maintain documentation together with the source right
 within the code which defines the documented functionality. Pipadoc addresses this problem
@@ -821,7 +822,8 @@ One can ship the <code>pipadoc.lua</code> and <code>pipadoc.install</code> and d
                          suppresses any messages
 
      -d, --debug
-                         set verbosity to maximum
+                         set verbosity to debug level
+                         one additional -v enables tracing
 
      -h, --help
                          show this help
@@ -837,7 +839,7 @@ One can ship the <code>pipadoc.lua</code> and <code>pipadoc.install</code> and d
                          selects a config file [pipadoc_config.lua]
 
      --no-defaults
-                         disables default filetypes and configfile
+                         disables default filetypes and configfile loading
 
      -m, --markup &lt;name&gt;
                          selects the markup engine for the output [text]
@@ -848,18 +850,18 @@ One can ship the <code>pipadoc.lua</code> and <code>pipadoc.install</code> and d
      -a, --alias &lt;pattern&gt; &lt;as&gt;
                          aliases filenames to another filetype.
                          force example, treat .install files as shell files:
-                          --a '(.*)%.install' '%1.sh'
+                          --alias '(.*)%.install' '%1.sh'
 
      -D, --define &lt;name&gt;[=&lt;value&gt;]
-                         define a DOCVAR to value or 'true'
+                         define a GLOBAL variable to value or 'true'
      -D, --define -&lt;name&gt;
-                         undefine a DOCVAR
+                         undefine a GLOBAL variable
 
      --
                          stops parsing the options and treats each
                          following argument as input file
 
-   inputs are file names or a '-' which indicates standard input</code></pre>
+   inputs are file names or a '-' that indicates standard input</code></pre>
 </div></div>
 </div>
 </div>
@@ -895,7 +897,6 @@ argument. Only lines qualify this syntax are processed as pipadoc documentation.
 
 &lt;documentationtext&gt; ::= &lt;rest of the line&gt;</code></pre>
 </div></div>
-<div class="paragraph"><p>There config shipped with pipadoc gives an example to drop a line when it end with "NODOC".</p></div>
 <div class="admonitionblock">
 <table><tr>
 <td class="icon">
@@ -907,17 +908,35 @@ argument. Only lines qualify this syntax are processed as pipadoc documentation.
            be dropped by a preprocessor to make them unambiguous.</td>
 </tr></table>
 </div>
+<div class="paragraph"><p>There config shipped with pipadoc gives an example to drop a line when it end with "NODOC".</p></div>
 <div class="listingblock">
 <div class="content">
 <pre><code>const char* example = "//MAIN: this is a C string and not documentation"; //NODOC</code></pre>
 </div></div>
-<div class="paragraph"><p>Documentation can be either blocked or oneline. Blocks start with a documentation comment
-including a section or argument specifier but have no documentation text. The text block then
-follows in documentation commant where section and argument are empty. They span unti a new
-documentation block is set. Oneline documentation is defined by a documentation comment which
-sets either section or argument and has a non empty documentation text. They can be
-interleaved within blocks, after a oneline documentation the preceeding block continues.
-This is used to define index and glosary items right within block documentation.</p></div>
+<div class="paragraph"><p>Documentation can be either blocked or oneline.</p></div>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+Block
+</dt>
+<dd>
+<p>
+  Start with a documentation comment including a section or argument specifier but are not
+  followed by documentation text on the same line.
+  The text block then follows in documentation comments where section and
+  argument are empty. Blocks span unti a new documentation block is started.
+</p>
+</dd>
+<dt class="hdlist1">
+Oneline
+</dt>
+<dd>
+<p>
+  Is defined by a documentation comment which sets section and/or argument followed by
+  documentation text on the same line. They can be interleaved within blocks.
+  This is used to define index and glosary items right within block documentation.
+</p>
+</dd>
+</dl></div>
 </div>
 <div class="sect2">
 <h3 id="_order_of_operations">Order of operations</h3>
@@ -938,8 +957,8 @@ Parsing
 </dt>
 <dd>
 <p>
-  The line is broken down into it&#8217;s components and the operators processing
-  function will be called which is responsible for storing. The <em>:</em> operator also does a first
+  The line is broken down into it&#8217;s components and the operators processing function
+  will be called which is responsible for storing. The colon (<em>:</em>) operator also does a first
   string substitution pass to expand variables.
 </p>
 </dd>
@@ -991,16 +1010,15 @@ processing.</p></div>
 <h2 id="_sections_and_keys">Sections and Keys</h2>
 <div class="sectionbody">
 <div class="paragraph"><p>Text in pipadoc is appended to named <em>sections</em>. Text can be associated with some
-alphanumeric key under that section. This enables later sorting for indexes and glossaries.</p></div>
+alphanumeric key under that section. This enables later sorting for indices and glossaries.</p></div>
 <div class="paragraph"><p>Sections can be one line or span a block of lines.</p></div>
-<div class="paragraph"><p>One line sections are defined when a section and maybe a key is followed by documentation
+<div class="paragraph"><p>Oneline sections are defined when a section and maybe a key is followed by documentation
 text. Block sections start with the section definition but no documentation text on the same
-line. A block stays active until the next block section definition. One line doctext can be
+line. A block stays active until the next block section definition. Oneline doctext can be
 interleaved into Blocks.</p></div>
-<div class="paragraph"><p>When no section is set in a file, then the block section name defaults to the files name up,
-but excluding to the first dot.</p></div>
+<div class="paragraph"><p>The default block section name is the files name up, but excluding to the first dot.</p></div>
 <div class="paragraph"><p>Sections are later brought into the desired order by pasting them into a <em>toplevel</em> section.
-This default name for the <em>toplevel</em> section is&#8217;MAIN'.</p></div>
+This default name for the <em>toplevel</em> section is <em>MAIN</em>.</p></div>
 <div class="listingblock">
 <div class="title">An example document (example.sh)</div>
 <div class="content">
@@ -1039,19 +1057,18 @@ this is appended to the section 'oneline' under key 'a'
 this is appended to the section 'oneline' under key 'o'</code></pre>
 </div></div>
 <div class="paragraph"><p>The pipadoc documentation you are just reading here is made and embedded in <em>pipadoc.lua</em>
-itself using <em>asciidoc</em> as markup. Refer to it&#8217;s source to see a bigger example about
-how it is done.</p></div>
+itself using <em>asciidoc</em> as markup. Refer to the source itself to see how it is done.</p></div>
 </div>
 </div>
 <div class="sect1">
 <h2 id="_filetypes">Filetypes</h2>
 <div class="sectionbody">
-<div class="paragraph"><p>Pipadoc needs (only) to know about the syntax of line comments of the files it is reading.
-For this patterns are registered to be matched against the file name together with a list of
-line comment characters.</p></div>
-<div class="paragraph"><p>There are many definitions included for common filetypes already. For languages which
-support block comments the opening (but not the closing) commenting characters are
-registered as well. This allows one to define section blocks right away. Using the
+<div class="paragraph"><p>Pipadoc needs to know about the syntax of line comments of the files it is reading.
+For this patterns are registered to be matched against the file name together with a
+list of line comment characters.</p></div>
+<div class="paragraph"><p>Definitions for a lot common programming languages are already included. For languages
+that support block comments the opening (but not the closing) commenting characters are
+registered as well. This allows one to define section blocks right away. But using the
 comment closing sequence right on the line will clobber the output, don&#8217;t do that!</p></div>
 <div class="listingblock">
 <div class="title">Example in C</div>
@@ -1181,20 +1198,117 @@ Visual Basic,</p></div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="CONTEXT">The Context</h2>
+<h2 id="_configuration_file">Configuration File</h2>
 <div class="sectionbody">
-<div class="paragraph"><p>Processors, operators and string substitution calls and diagnostics get a context passed
-along. This context represents the state for the actual processed line. It is defined as
-stack of tables inheriting from each other.</p></div>
-<div class="paragraph"><p>On the lowest layer is are the <em>DOCVARS</em> and <em>DOCVARS_POST</em> tables. For each file an
-immediate <em>filecontext</em> is created and then on top and each line has it&#8217;s own context.
-This later per-line context is what gets passed around. The <em>DOCVARS_POST</em> table is only
-available after postprocessors ran for a final <em>strsubst()</em> pass.</p></div>
-<div class="paragraph"><p>In a few cases a fake-context is passed around for diagnostic functions.</p></div>
+<div class="paragraph"><p>Pipadoc tries to load a configuration file on startup. By default it&#8217;s named
+<code>pipadoc_config.lua</code> in the current directory. This name can be changed by the <em>--config</em>
+option.</p></div>
+<div class="paragraph"><p>The configuration file is used to define additional pre- and post-processors, define states
+for those and define custom operators. It is loaded and executed as it own chunk and may only
+access the global variables (GLOBAL, CONTEXT) and api functions described later.</p></div>
 <div class="sect2">
-<h3 id="_context_members">Context Members</h3>
-<div class="paragraph"><p>The following members are used/defined in <em>contexts</em>. Some come from the immediate
-filecontext, which is normally not exposed.</p></div>
+<h3 id="_example_configuration_file">Example Configuration File</h3>
+<div class="paragraph"><p>Pipadoc itself comes with a configuration file for generating it&#8217;s own documentation and
+assist the testsuite. This is a good starting point for writing your own configuration.</p></div>
+</div>
+<div class="sect2">
+<h3 id="_dependencies">Dependencies</h3>
+<div class="paragraph"><p><em>pipadoc</em> does not depend on any external Lua libraries. Nevertheless modules can be loaded
+optionally to augment pipadocs behavior and provide extra features. Plugin-writers should
+use the <em>request()</em> function instead the Lua <em>require()</em>, falling back to simpler but usable
+functionality when some library is not available or call <em>die()</em> when a reasonable fallback
+won&#8217;t do it.</p></div>
+<div class="paragraph"><p>Pipadoc already calls <em>request "luarocks.loader"</em> to make rocks modules available when
+installed.</p></div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_programming_api_for_extensions">Programming API for Extensions</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="GLOBAL">Documentation Variables</h3>
+<div class="paragraph"><p>The <em>GLOBAL</em> and <em>GLOBAL_POST</em> Lua tables holds key/value pairs of variables
+with global definitions. These are used by the core and processors/<em>strsubst()</em>.
+Simple string assigments can be set from the command line. Configuration files may define
+more complex lua functions for string substitutions.</p></div>
+<div class="sect3">
+<h4 id="_predefined_variables">Predefined Variables</h4>
+<div class="paragraph"><p>The <em>GLOBAL</em> table is initialized with:</p></div>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+<a id="index_YEAR"></a><a id="index_MONTH"></a><a id="index_DAY"></a><a id="index_HOUR"></a><a id="index_MINUTE"></a><code>YEAR, MONTH, DAY, HOUR, MINUTE</code>
+</dt>
+<dd>
+<p>
+  Current date information
+</p>
+</dd>
+<dt class="hdlist1">
+<a id="index_DAYNAME"></a><a id="index_MONTHNAME"></a><code>DAYNAME, MONTHNAME</code>
+</dt>
+<dd>
+<p>
+  The name of the day of week or month
+</p>
+</dd>
+<dt class="hdlist1">
+<a id="index_DATE"></a><code>DATE</code>
+</dt>
+<dd>
+<p>
+  Current date in YEAR/MONTH/DAY format
+</p>
+</dd>
+<dt class="hdlist1">
+<a id="index_LOCALDATE"></a><code>LOCALDATE</code>
+</dt>
+<dd>
+<p>
+  Current date in current locale format
+</p>
+</dd>
+<dt class="hdlist1">
+<a id="index_MARKUP"></a><code>MARKUP</code>
+</dt>
+<dd>
+<p>
+  The markup syntax (--markup option). This information only used by pipadoc
+  for selecting postprocessors. Other user defined extensions may use it as
+  well.
+</p>
+</dd>
+<dt class="hdlist1">
+<a id="index_NIL"></a><code>NIL</code>
+</dt>
+<dd>
+<p>
+  Expands to an empty string.
+</p>
+</dd>
+<dt class="hdlist1">
+<a id="index_NL"></a><code>NL</code>
+</dt>
+<dd>
+<p>
+  The line-break character sequence, defaults to <em>\n</em> and
+  can be changed with the <em>--define</em> command-line option.
+</p>
+</dd>
+</dl></div>
+<div class="paragraph"><p>The <em>GLOBAL_POST</em> table is used for a final <em>strsubst()</em> pass afer postprocessing.
+There are no values defined in <em>GLOBAL_POST</em>.</p></div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="CONTEXT">The Context</h3>
+<div class="paragraph"><p>Processors, operators, string substitution calls and diagnostics get a context
+passed along. This context represents the state for the actual processed line plus
+everything thats defined in GLOBAL.</p></div>
+<div class="paragraph"><p>In a few cases a fake-context in angle brakets is passed around for diagnostic functions.</p></div>
+<div class="sect3">
+<h4 id="_context_members">Context Members</h4>
+<div class="paragraph"><p>The following members are used/defined in <em>contexts</em>.</p></div>
 <div class="dlist"><dl>
 <dt class="hdlist1">
 <a id="index_ARG"></a><code>ARG</code>
@@ -1275,227 +1389,11 @@ filecontext, which is normally not exposed.</p></div>
 </dl></div>
 </div>
 </div>
-</div>
-<div class="sect1">
-<h2 id="DOCVARS">Documentation Variables</h2>
-<div class="sectionbody">
-<div class="paragraph"><p>The <em>DOCVARS</em> and <em>DOCVARS_POST</em> Lua tables holds key/value pairs of variables
-with the global definitions. These are used by the core and processors/<em>strsubst().</em>
-Simple substitutions can be set from the command line. Configuration files may define
-more complex lua functions for string substitutions. By default there are no values defined
-in <em>DOCVARS_POST</em></p></div>
 <div class="sect2">
-<h3 id="_predefined_docvars">Predefined DOCVARS</h3>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-<a id="index_YEAR"></a><a id="index_MONTH"></a><a id="index_DAY"></a><a id="index_HOUR"></a><a id="index_MINUTE"></a><code>YEAR, MONTH, DAY, HOUR, MINUTE</code>
-</dt>
-<dd>
-<p>
-  Current date information
-</p>
-</dd>
-<dt class="hdlist1">
-<a id="index_DAYNAME"></a><a id="index_MONTHNAME"></a><code>DAYNAME, MONTHNAME</code>
-</dt>
-<dd>
-<p>
-  The name of the day of week or month
-</p>
-</dd>
-<dt class="hdlist1">
-<a id="index_DATE"></a><code>DATE</code>
-</dt>
-<dd>
-<p>
-  Current date in YEAR/MONTH/DAY format
-</p>
-</dd>
-<dt class="hdlist1">
-<a id="index_LOCALDATE"></a><code>LOCALDATE</code>
-</dt>
-<dd>
-<p>
-  Current date in current locale format
-</p>
-</dd>
-<dt class="hdlist1">
-<a id="index_MARKUP"></a><code>MARKUP</code>
-</dt>
-<dd>
-<p>
-  The markup syntax (--markup option). This information only used by pipadoc
-  for selecting postprocessors. Other user defined extensions may use it as
-  well.
-</p>
-</dd>
-<dt class="hdlist1">
-<a id="index_NIL"></a><code>NIL</code>
-</dt>
-<dd>
-<p>
-  Expands to an empty string.
-</p>
-</dd>
-<dt class="hdlist1">
-<a id="index_NL"></a><code>NL</code>
-</dt>
-<dd>
-<p>
-  The line-break character sequence, defaults to <em>\n</em> and
-  can be changed with the <em>--define</em> command-line option.
-</p>
-</dd>
-</dl></div>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_configuration_file">Configuration File</h2>
-<div class="sectionbody">
-<div class="paragraph"><p>Pipadoc tries to load a configuration file on startup. By default it&#8217;s named
-<code>pipadoc_config.lua</code> in the current directory. This name can be changed by the <em>--config</em>
-option.</p></div>
-<div class="paragraph"><p>The configuration file is used to define additional pre- and post-processors, define states
-for those and define custom operators. It is loaded and executed as it own chunk and may only
-access the global variables (DOCVARS, CONTEXT) and api functions described later.</p></div>
-<div class="sect2">
-<h3 id="_example_configuration_file">Example Configuration File</h3>
-<div class="paragraph"><p>Pipadoc itself comes with a configuration file for generating it&#8217;s own documentation and
-assist the testsuite. This is a good starting point for writing your own configuration.</p></div>
-<div class="paragraph"><p>There are pre- and post- processors defined for:</p></div>
-<div class="ulist"><ul>
-<li>
-<p>
-Remove any line which ends in <em>NODOC</em>.
-</p>
-</li>
-<li>
-<p>
-Replace <em>&lt;STRING&gt;</em> in pipadoc comments with the first literal string from the code.
-   Lifts string literals from sourcecode to documentation.
-</p>
-</li>
-<li>
-<p>
-Automatic generation of documentation for Lua functions.
-  Generates an index entry and a prototype documentation from a function definition
-</p>
-</li>
-<li>
-<p>
-Generate documentaton for DOCVARS and CONTEXT variables (pipadoc&#8217;s own documentation).
-</p>
-</li>
-<li>
-<p>
-Generate a sorted index of functions and doc variables.
-</p>
-</li>
-<li>
-<p>
-Asciidoc helpers for paragraphs, and headers.
-   Replace <em>{PARA &lt;title&gt;;[index];[description]}</em> and
-   <em>{HEAD [level] &lt;title&gt;;[index];[description]}</em> with asciidoc entities.
-   When <em>index</em> is given an entry in the index will be generated.
-</p>
-<div class="literalblock">
-<div class="content">
-<pre><code>For headers 'level' can be one of:</code></pre>
-</div></div>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-empty 
-</dt>
-<dd>
-<p>
-     Header on the same level as the current remembered level
-</p>
-</dd>
-<dt class="hdlist1">
--,~,^,+ 
-</dt>
-<dd>
-<p>
-     The corresponding asciidoc header.
-     Remembers the level.
-</p>
-</dd>
-<dt class="hdlist1">
-&gt;.. 
-</dt>
-<dd>
-<p>
-     Temporary deeper level by the number of <em>&gt;</em> signs.
-</p>
-</dd>
-<dt class="hdlist1">
-&lt;.. 
-</dt>
-<dd>
-<p>
-     Temporary higher level by the number of <em>&lt;</em> signs.
-</p>
-</dd>
-<dt class="hdlist1">
-++ 
-</dt>
-<dd>
-<p>
-     Increase the remembered header level by one.
-</p>
-</dd>
-<dt class="hdlist1">
-&#8212;&#8201;
-</dt>
-<dd>
-<p>
-     Decrease the remembered header level by one.
-</p>
-<div class="literalblock">
-<div class="content">
-<pre><code>The reason for these elaborate definitions is that when pasting documentation together
-it is not always clear what the header level of the surrounding environment is.</code></pre>
-</div></div>
-</dd>
-</dl></div>
-</li>
-</ul></div>
-<div class="ulist"><ul>
-<li>
-<p>
-Keep track of original file:line as asciidoc comments in the output.
-  Disable this tracking when a doc comment starts with <em>NOORIGIN</em> and
-  re-enable it with a doc comment starting with <em>ORGIN</em>.
-</p>
-</li>
-<li>
-<p>
-Generate formatted lists for doc comments in WIP/FIXME/TODO/PLANNED/DONE sections.
-  When DOCVARS.GIT is defined (<em>-D GIT</em>) then each such item includes information gathered
-  from the git commit which touched that line the last.
-  When DOCVARS.NOBUG is defined it reaps <a href="http://nobug.pipapo.org">NoBug</a> annotations from
-  C source files as well.
-</p>
-</li>
-</ul></div>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_programming_api_for_extensions">Programming API for Extensions</h2>
-<div class="sectionbody">
-<div class="paragraph"><p>Functions pipadoc exports to be used by extensions/config files.</p></div>
-<div class="sect2">
-<h3 id="_dependencies">Dependencies</h3>
-<div class="paragraph"><p><em>pipadoc</em> does not depend on any external Lua libraries. The intention is to, by default,
-make documentation build able on minimal target systems. Nevertheless modules can be loaded
-optionally to augment pipadocs behavior and provide extra features. Plugin-writers should
-try to adhere to this practice if possible and use the <em>request()</em> function instead the Lua
-<em>require()</em>. Falling back to simpler but usable functionality when some library is not
-available or call <em>die()</em> when a reasonable fallback won&#8217;t be available.</p></div>
-<div class="paragraph"><p>Pipadoc already calls <em>request "luarocks.loader"</em> to make rocks modules available when
-installed.</p></div>
+<h3 id="_exported_functions">Exported Functions</h3>
+<div class="paragraph"><p>pipadoc exports some functions for the use in pre/post processors from config files.</p></div>
+<div class="sect3">
+<h4 id="_library_loading">Library Loading</h4>
 <div class="dlist"><dl>
 <dt class="hdlist1">
 <a id="index_request"></a> <code><strong>request(name)</strong></code>
@@ -1509,8 +1407,8 @@ installed.</p></div>
 </dd>
 </dl></div>
 </div>
-<div class="sect2">
-<h3 id="_logging_progress_and_errors">Logging Progress and Errors</h3>
+<div class="sect3">
+<h4 id="_logging_progress_and_errors">Logging Progress and Errors</h4>
 <div class="paragraph"><p>Functions for to log progress and report errors. All this functions take a variable argument
 list. Any argument passed to them will be converted to a string and printed to stderr when
 the verbosity level is high enough.</p></div>
@@ -1557,8 +1455,8 @@ the verbosity level is high enough.</p></div>
 </dd>
 </dl></div>
 </div>
-<div class="sect2">
-<h3 id="_type_checks">Type Checks</h3>
+<div class="sect3">
+<h4 id="_type_checks">Type Checks</h4>
 <div class="paragraph"><p>Wrappers around <em>assert</em> to check externally supplied data. On success <em>var</em> will be returned
 otherwise an assertion error is raised.</p></div>
 <div class="dlist"><dl>
@@ -1596,9 +1494,9 @@ otherwise an assertion error is raised.</p></div>
 </dd>
 </dl></div>
 </div>
-<div class="sect2">
-<h3 id="_type_conversions">Type Conversions</h3>
-<div class="paragraph"><p>Functions which do specific type conversions.</p></div>
+<div class="sect3">
+<h4 id="_type_conversions">Type Conversions</h4>
+<div class="paragraph"><p>Functions which do specific conversions.</p></div>
 <div class="dlist"><dl>
 <dt class="hdlist1">
 <a id="index_to_table"></a> <code><strong>to_table(v)</strong></code>
@@ -1609,7 +1507,7 @@ otherwise an assertion error is raised.</p></div>
 </p>
 </dd>
 <dt class="hdlist1">
-<a id="index_to_text"></a> <code><strong>to_text(v)</strong></code>
+<a id="index_maybe_text"></a> <code><strong>maybe_text(v)</strong></code>
 </dt>
 <dd>
 <p>
@@ -1618,14 +1516,15 @@ otherwise an assertion error is raised.</p></div>
 </dd>
 </dl></div>
 </div>
-<div class="sect2">
-<h3 id="_string_substitution">String Substitution</h3>
+<div class="sect3">
+<h4 id="_string_substitution">String Substitution</h4>
 <div class="paragraph"><p>Documentation-text is be passed to the strsubst() function which recursively substitutes
 expressions within curly braces. The substitutions are taken from the passed context.
 Strings are replaced, functions become evaluated, everything else is translated with Luas
 <em>tostring()</em> function.</p></div>
 <div class="paragraph"><p>The Names for substitituions must start with an alphabetic character or underline and can
-be followed by alphanumeric characters or underlines. It may be followed with a space and --: an optional argument string which gets passed to functions or retained verbatim on
+be followed by alphanumeric characters or underlines. It may be followed with a space and
+an optional argument string which gets passed to functions or retained verbatim on
 everyting else.</p></div>
 <div class="paragraph"><p>Curly braces, can be escaped with backslashes or backtick characters. These
 characters can be escaped by themself.</p></div>
@@ -1673,8 +1572,8 @@ assert(strsubst(context, "{UPPER {STR}}") == "EXAMPLE STRING")
 assert(strsubst(context, "{undefined}") == "{undefined}")</code></pre>
 </div></div>
 </div>
-<div class="sect2">
-<h3 id="_filetypes_2">Filetypes</h3>
+<div class="sect3">
+<h4 id="_filetypes_2">Filetypes</h4>
 <div class="dlist"><dl>
 <dt class="hdlist1">
 <a id="index_filetype_register"></a> <code><strong>filetype_register(name, filep, linecommentseqs)</strong></code>
@@ -1717,8 +1616,8 @@ linecommentseqs
 <pre><code>filetype_register("C", {"%.c$","%.cpp$","%.C$", "%.cxx$", "%.h$"}, {"//", "/*"})</code></pre>
 </div></div>
 </div>
-<div class="sect2">
-<h3 id="_operators_2">Operators</h3>
+<div class="sect3">
+<h4 id="_operators_2">Operators</h4>
 <div class="paragraph"><p>Operators have 2 functions associated. The first one is the processing function which
 defines how a documentation comment gets stored. The second one is the generator function
 which will emits the documentation.</p></div>
@@ -1744,9 +1643,9 @@ procfunc <code>function(context)</code>
 </dt>
 <dd>
 <p>
-    a function which receives a table of the <em>context</em> parsed from the pipadoc comment
-    line. It is responsible for storing the context under the approbiate section/key and
-    keep a state for further processing.
+    a function which receives a CONTEXT table of the current line.
+    The procfunc processes and store the context in aprobiate
+    fashion.
 </p>
 </dd>
 <dt class="hdlist1">
@@ -1754,15 +1653,15 @@ genfunc <code>function(context)</code>
 </dt>
 <dd>
 <p>
-    the a function generating the output from given context.
+    a function generating the (sequential) output from given context.
 </p>
 </dd>
 </dl></div>
 </dd>
 </dl></div>
 </div>
-<div class="sect2">
-<h3 id="_preprocessors">Preprocessors</h3>
+<div class="sect3">
+<h4 id="_preprocessors">Preprocessors</h4>
 <div class="paragraph"><p>One can register multiple preprocessors for different filetypes. A preprocessor can modify
 the line prior it is parsed and further processed. By default pipadoc has no preprocessors
 defined. The user may define these in a config file. See the <a href="#_configuration_file"><em>pipadoc_config.lua</em></a> which ships with the pipadoc distribution.</p></div>
@@ -1792,20 +1691,37 @@ preprocess
 </p>
 <div class="dlist"><dl>
 <dt class="hdlist1">
-<code>function (line) ... end</code> 
+<code>function (context) ... end</code> 
 </dt>
 <dd>
 <p>
-      Takes a string (the source line) and shall return the preprocessed line or <em>nil</em> to
-      drop the line.
+      Takes the context of the current source line and shall return:
 </p>
+<div class="ulist"><ul>
+<li>
+<p>
+the preprocessed line
+</p>
+</li>
+<li>
+<p>
+false to drop the line
+</p>
+</li>
+<li>
+<p>
+true to keep the line unaltered
+      Preprocessors may store state or have other side effect using API functions.
+</p>
+</li>
+</ul></div>
 </dd>
 <dt class="hdlist1">
 <code>{pattern, repl [, n]}</code> 
 </dt>
 <dd>
 <p>
-      Generates a function calling <em>string.gsub(pattern, repl [, n])</em> for preprocessing.
+      Generates a function calling <em>context.SOURCE:gsub(pattern, repl [, n])</em> for preprocessing.
 </p>
 </dd>
 </dl></div>
@@ -1814,8 +1730,8 @@ preprocess
 </dd>
 </dl></div>
 </div>
-<div class="sect2">
-<h3 id="_postprocessors">Postprocessors</h3>
+<div class="sect3">
+<h4 id="_postprocessors">Postprocessors</h4>
 <div class="paragraph"><p>Postprocessors run at output generation time. They are registered per markup types.
 Processors are called in order of their definition.</p></div>
 <div class="dlist"><dl>
@@ -1844,20 +1760,37 @@ postprocess
 </p>
 <div class="dlist"><dl>
 <dt class="hdlist1">
-<code>function (line) ... end</code> 
+<code>function (context) ... end</code> 
 </dt>
 <dd>
 <p>
-      Takes a string (the source line) and shall return the postprocessed line or <em>nil</em> to
-      drop the line.
+      Takes the context of the current source line and shall return:
 </p>
+<div class="ulist"><ul>
+<li>
+<p>
+the postprocessed line (context.TEXT)
+</p>
+</li>
+<li>
+<p>
+false to drop the line
+</p>
+</li>
+<li>
+<p>
+true to keep the line unaltered
+      Postprocessors may store state or have other side effect using API functions.
+</p>
+</li>
+</ul></div>
 </dd>
 <dt class="hdlist1">
 <code>{pattern, repl [, n]}</code> 
 </dt>
 <dd>
 <p>
-      Generates a function calling <em>string.gsub(pattern, repl [, n])</em> for postprocessing.
+      Generates a function calling <em>context.TEXT:gsub(pattern, repl [, n])</em> for postprocessing.
 </p>
 </dd>
 </dl></div>
@@ -1866,8 +1799,8 @@ postprocess
 </dd>
 </dl></div>
 </div>
-<div class="sect2">
-<h3 id="_sections">Sections</h3>
+<div class="sect3">
+<h4 id="_sections">Sections</h4>
 <div class="dlist"><dl>
 <dt class="hdlist1">
 <a id="index_section_append"></a> <code><strong>section_append(section, key, context)</strong></code>
@@ -1904,6 +1837,7 @@ context
 </dl></div>
 </dd>
 </dl></div>
+</div>
 </div>
 <div class="sect2">
 <h3 id="_other_functions">Other functions</h3>
@@ -1987,15 +1921,15 @@ postprocessor failed:
 </dt>
 <dd>
 <p>
- error in postprocessor.
+ postprocessor function errored out.
 </p>
 </dd>
 <dt class="hdlist1">
-can&#8217;t load config file: 
+postprocessor returned wrong type: 
 </dt>
 <dd>
 <p>
- The config file (<em>--config</em> option) could not be loaded.
+ postprocessor returned unsupported type (or nil).
 </p>
 </dd>
 <dt class="hdlist1">
@@ -2031,6 +1965,14 @@ no section named:
 </p>
 </dd>
 <dt class="hdlist1">
+can&#8217;t load config file: 
+</dt>
+<dd>
+<p>
+ The config file (<em>--config</em> option) could not be loaded.
+</p>
+</dd>
+<dt class="hdlist1">
 operator processing failed 
 </dt>
 <dd>
@@ -2059,7 +2001,15 @@ preprocessor failed:
 </dt>
 <dd>
 <p>
- error in preprocessor.
+ preprocessor function errored out.
+</p>
+</dd>
+<dt class="hdlist1">
+preprocessor returned wrong type: 
+</dt>
+<dd>
+<p>
+ preprocessor returned unsupported type (or nil).
 </p>
 </dd>
 <dt class="hdlist1">
@@ -2129,7 +2079,7 @@ unknown header level
 <div class="paragraph"><p><em>pipadoc</em> documents itself with embedded asciidoc text. This can be extracted with</p></div>
 <div class="listingblock">
 <div class="content">
-<pre><code>lua pipadoc.lua -m asciidoc -d pipadoc.lua &gt;pipadoc.txt</code></pre>
+<pre><code>lua pipadoc.lua -m asciidoc pipadoc.lua &gt;pipadoc.txt</code></pre>
 </div></div>
 <div class="paragraph"><p>The resulting <code>pipadoc.txt</code> can then be processed with the asciidoc tool chain to produce
 distribution formats:</p></div>
@@ -2191,15 +2141,11 @@ Christian Thäter &lt;<a href="mailto:ct@pipapo.org">ct@pipapo.org</a>&gt; for i
 </dt>
 <dd>
 <p>
-  <a href="#index_add_inputfile">add_inputfile</a><br />
-
-  <a href="#index_ARG">ARG</a><br />
-
-  <a href="#index_assert_char">assert_char</a><br />
-
-  <a href="#index_assert_notnil">assert_notnil</a><br />
-
-  <a href="#index_assert_type">assert_type</a><br />
+  <a href="#index_add_inputfile">add_inputfile</a> +// pipadoc.lua:1305 //
+  <a href="#index_ARG">ARG</a> +// pipadoc.lua:193 //
+  <a href="#index_assert_char">assert_char</a> +// pipadoc.lua:198 //
+  <a href="#index_assert_notnil">assert_notnil</a> +// pipadoc.lua:183 //
+  <a href="#index_assert_type">assert_type</a> +// pipadoc.lua:1299 //
 </p>
 </dd>
 <dt class="hdlist1">
@@ -2207,7 +2153,7 @@ Christian Thäter &lt;<a href="mailto:ct@pipapo.org">ct@pipapo.org</a>&gt; for i
 </dt>
 <dd>
 <p>
-  <a href="#index_COMMENT">COMMENT</a><br />
+  <a href="#index_COMMENT">COMMENT</a> +// pipadoc.lua:1104 //
 </p>
 </dd>
 <dt class="hdlist1">
@@ -2215,15 +2161,11 @@ Christian Thäter &lt;<a href="mailto:ct@pipapo.org">ct@pipapo.org</a>&gt; for i
 </dt>
 <dd>
 <p>
-  <a href="#index_DATE">DATE</a><br />
-
-  <a href="#index_DAY">DAY</a><br />
-
-  <a href="#index_DAYNAME">DAYNAME</a><br />
-
-  <a href="#index_dbg">dbg</a><br />
-
-  <a href="#index_die">die</a><br />
+  <a href="#index_DATE">DATE</a> +// pipadoc.lua:1090 //
+  <a href="#index_DAY">DAY</a> +// pipadoc.lua:1099 //
+  <a href="#index_DAYNAME">DAYNAME</a> +// pipadoc.lua:124 //
+  <a href="#index_dbg">dbg</a> +// pipadoc.lua:133 //
+  <a href="#index_die">die</a> +// pipadoc.lua:48 //
 </p>
 </dd>
 <dt class="hdlist1">
@@ -2231,9 +2173,8 @@ Christian Thäter &lt;<a href="mailto:ct@pipapo.org">ct@pipapo.org</a>&gt; for i
 </dt>
 <dd>
 <p>
-  <a href="#index_FILE">FILE</a><br />
-
-  <a href="#index_filetype_register">filetype_register</a><br />
+  <a href="#index_FILE">FILE</a> +// pipadoc.lua:514 //
+  <a href="#index_filetype_register">filetype_register</a> +// pipadoc.lua:1090 //
 </p>
 </dd>
 <dt class="hdlist1">
@@ -2241,7 +2182,7 @@ Christian Thäter &lt;<a href="mailto:ct@pipapo.org">ct@pipapo.org</a>&gt; for i
 </dt>
 <dd>
 <p>
-  <a href="#index_HOUR">HOUR</a><br />
+  <a href="#index_HOUR">HOUR</a> +// pipadoc.lua:120 //
 </p>
 </dd>
 <dt class="hdlist1">
@@ -2249,7 +2190,7 @@ Christian Thäter &lt;<a href="mailto:ct@pipapo.org">ct@pipapo.org</a>&gt; for i
 </dt>
 <dd>
 <p>
-  <a href="#index_info">info</a><br />
+  <a href="#index_info">info</a> +// pipadoc.lua:51 //
 </p>
 </dd>
 <dt class="hdlist1">
@@ -2257,9 +2198,8 @@ Christian Thäter &lt;<a href="mailto:ct@pipapo.org">ct@pipapo.org</a>&gt; for i
 </dt>
 <dd>
 <p>
-  <a href="#index_LINE">LINE</a><br />
-
-  <a href="#index_LOCALDATE">LOCALDATE</a><br />
+  <a href="#index_LINE">LINE</a> +// pipadoc.lua:1107 //
+  <a href="#index_LOCALDATE">LOCALDATE</a> +// pipadoc.lua:36 //
 </p>
 </dd>
 <dt class="hdlist1">
@@ -2267,14 +2207,11 @@ Christian Thäter &lt;<a href="mailto:ct@pipapo.org">ct@pipapo.org</a>&gt; for i
 </dt>
 <dd>
 <p>
-  <a href="#index_MARKUP">MARKUP</a><br />
-
-  <a href="#index_maybe_type">maybe_type</a><br />
-
-  <a href="#index_MINUTE">MINUTE</a><br />
-  <a href="#index_MONTH">MONTH</a><br />
-
-  <a href="#index_MONTHNAME">MONTHNAME</a><br />
+  <a href="#index_MARKUP">MARKUP</a> +// pipadoc.lua:219 //
+  <a href="#index_maybe_text">maybe_text</a> +// pipadoc.lua:188 //
+  <a href="#index_maybe_type">maybe_type</a> +// pipadoc.lua:1090 //
+  <a href="#index_MINUTE">MINUTE</a> +  <a href="#index_MONTH">MONTH</a> +// pipadoc.lua:1099 //
+  <a href="#index_MONTHNAME">MONTHNAME</a> +// pipadoc.lua:32 //
 </p>
 </dd>
 <dt class="hdlist1">
@@ -2282,9 +2219,8 @@ Christian Thäter &lt;<a href="mailto:ct@pipapo.org">ct@pipapo.org</a>&gt; for i
 </dt>
 <dd>
 <p>
-  <a href="#index_NIL">NIL</a><br />
-
-  <a href="#index_NL">NL</a><br />
+  <a href="#index_NIL">NIL</a> +// pipadoc.lua:27 //
+  <a href="#index_NL">NL</a> +// pipadoc.lua:1303 //
 </p>
 </dd>
 <dt class="hdlist1">
@@ -2292,9 +2228,8 @@ Christian Thäter &lt;<a href="mailto:ct@pipapo.org">ct@pipapo.org</a>&gt; for i
 </dt>
 <dd>
 <p>
-  <a href="#index_OP">OP</a><br />
-
-  <a href="#index_operator_register">operator_register</a><br />
+  <a href="#index_OP">OP</a> +// pipadoc.lua:738 //
+  <a href="#index_operator_register">operator_register</a> +// pipadoc.lua:645 //
 </p>
 </dd>
 <dt class="hdlist1">
@@ -2302,11 +2237,9 @@ Christian Thäter &lt;<a href="mailto:ct@pipapo.org">ct@pipapo.org</a>&gt; for i
 </dt>
 <dd>
 <p>
-  <a href="#index_postprocessor_register">postprocessor_register</a><br />
-
-  <a href="#index_PRE">PRE</a><br />
-
-  <a href="#index_preprocessor_register">preprocessor_register</a><br />
+  <a href="#index_postprocessor_register">postprocessor_register</a> +// pipadoc.lua:1297 //
+  <a href="#index_PRE">PRE</a> +// pipadoc.lua:578 //
+  <a href="#index_preprocessor_register">preprocessor_register</a> +// pipadoc.lua:776 //
 </p>
 </dd>
 <dt class="hdlist1">
@@ -2314,9 +2247,8 @@ Christian Thäter &lt;<a href="mailto:ct@pipapo.org">ct@pipapo.org</a>&gt; for i
 </dt>
 <dd>
 <p>
-  <a href="#index_register_alias">register_alias</a><br />
-
-  <a href="#index_request">request</a><br />
+  <a href="#index_register_alias">register_alias</a> +// pipadoc.lua:158 //
+  <a href="#index_request">request</a> +// pipadoc.lua:1301 //
 </p>
 </dd>
 <dt class="hdlist1">
@@ -2324,13 +2256,10 @@ Christian Thäter &lt;<a href="mailto:ct@pipapo.org">ct@pipapo.org</a>&gt; for i
 </dt>
 <dd>
 <p>
-  <a href="#index_SECTION">SECTION</a><br />
-
-  <a href="#index_section_append">section_append</a><br />
-
-  <a href="#index_SOURCE">SOURCE</a><br />
-
-  <a href="#index_strsubst">strsubst</a><br />
+  <a href="#index_SECTION">SECTION</a> +// pipadoc.lua:454 //
+  <a href="#index_section_append">section_append</a> +// pipadoc.lua:1403 //
+  <a href="#index_SOURCE">SOURCE</a> +// pipadoc.lua:302 //
+  <a href="#index_strsubst">strsubst</a> +// pipadoc.lua:1308 //
 </p>
 </dd>
 <dt class="hdlist1">
@@ -2338,13 +2267,9 @@ Christian Thäter &lt;<a href="mailto:ct@pipapo.org">ct@pipapo.org</a>&gt; for i
 </dt>
 <dd>
 <p>
-  <a href="#index_TEXT">TEXT</a><br />
-
-  <a href="#index_to_table">to_table</a><br />
-
-  <a href="#index_to_text">to_text</a><br />
-
-  <a href="#index_trace">trace</a><br />
+  <a href="#index_TEXT">TEXT</a> +// pipadoc.lua:211 //
+  <a href="#index_to_table">to_table</a> +// pipadoc.lua:128 //
+  <a href="#index_trace">trace</a> +// pipadoc.lua:115 //
 </p>
 </dd>
 <dt class="hdlist1">
@@ -2352,7 +2277,7 @@ Christian Thäter &lt;<a href="mailto:ct@pipapo.org">ct@pipapo.org</a>&gt; for i
 </dt>
 <dd>
 <p>
-  <a href="#index_warn">warn</a><br />
+  <a href="#index_warn">warn</a> +// pipadoc.lua:1090 //
 </p>
 </dd>
 <dt class="hdlist1">
@@ -2360,7 +2285,7 @@ Christian Thäter &lt;<a href="mailto:ct@pipapo.org">ct@pipapo.org</a>&gt; for i
 </dt>
 <dd>
 <p>
-  <a href="#index_YEAR">YEAR</a><br />
+  <a href="#index_YEAR">YEAR</a> +// pipadoc.lua:1971 //
 </p>
 </dd>
 </dl></div>
@@ -2371,7 +2296,7 @@ Christian Thäter &lt;<a href="mailto:ct@pipapo.org">ct@pipapo.org</a>&gt; for i
 <div id="footer">
 <div id="footer-text">
 Last updated
- 2017-08-13 05:01:48 CEST
+ 2020-04-02 20:19:49 CEST
 </div>
 </div>
 </body>
