@@ -933,6 +933,7 @@ local options = {
   -- intentionally here undocumented, only works in development tree
   ["--make-doc"] = function (arg, i)
     os.execute [[
+        lua pipadoc.lua -m text pipadoc.lua pipadoc_config.lua -o README
         lua pipadoc.lua -m asciidoc pipadoc.lua pipadoc_config.lua -o pipadoc.txt
         if test ! -e  pipadoc.html -o pipadoc.txt -nt pipadoc.html; then
           asciidoc -a toc pipadoc.txt
