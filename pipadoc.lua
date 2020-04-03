@@ -972,7 +972,7 @@ local options = {
   end,
 
   ["--issues"] = function (arg, i)
-    --PLANNED: run univerally
+    --PLANNED: run universally
     os.execute [[
         lua pipadoc.lua -m asciidoc -D GIT -D ISSUES -t ISSUES pipadoc.lua pipadoc_config.lua
     ]]
@@ -1389,6 +1389,7 @@ end
 local function process_file(file)
   -- filecontext is a partial context storing data
   -- of the current file processed
+
   local filecontext = make_context(GLOBAL, {
                                      FILE="<process_file>",
   })
@@ -1792,7 +1793,7 @@ end
 --: Writeout ::
 --:   The finished document is written to the output.
 --:
---: Report Orphans and Doubletes ::
+--: Report empty sections, Orphans and Doubletes::
 --:   Pipadoc keeps stats on how each section was used. Finally it gives a report (as warning)
 --:   on sections which appear to be unused or used more than once. These warnings may be ok, but
 --:   sometimes they give useful hints about typing errors.
@@ -1891,7 +1892,7 @@ end
 --: The 'GLOBAL' and 'GLOBAL_POST' Lua tables holds key/value pairs of variables
 --: with global definitions. These are used by the core and processors/'strsubst()'.
 --: Simple string assigments can be set from the command line. Configuration files may define
---: more complex lua functions for string substitutions.
+--: more complex Lua functions for string substitutions.
 --:
 --:
 --: Predefined Variables
@@ -1949,7 +1950,8 @@ end
 --: Common Warnings
 --: ---------------
 --:
---: Pipadoc emits warnings on problems. These are mostly harmless but may need some attention.
+--: Pipadoc emits warnings on problems. Even with warnings processing will go on but the output
+--: may need some attention.
 --: Warnings are supressed with the '--quiet' option.
 --:
 --PLANNED: sort warnings

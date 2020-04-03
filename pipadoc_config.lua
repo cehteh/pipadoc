@@ -49,8 +49,8 @@ preprocessor_register ("^lua$",
 
 
 --shipped_config_subst:
---: * \\{LUA_FNDEF\} Lifts a lua function definition to the documentation text.
---:   Used by the lua documentation preprocessor.
+--: * \\{LUA_FNDEF\} Lifts a Lua function definition to the documentation text.
+--:   Used by the Lua documentation preprocessor.
 GLOBAL.LUA_FNDEF = "{LUA_FNDEF_{MARKUP}}"
 
 GLOBAL.LUA_FNDEF_asciidoc = function (context, arg)
