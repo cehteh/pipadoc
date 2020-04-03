@@ -540,10 +540,10 @@ function filetype_register(name, filep, linecommentseqs) --: Register a new file
   end
 
   for i=1,#filep do
-    filetypes[filep[i]] = filetypes[filep[i]] or {language = name}
+    filetypes[filep[i]] = filetypes[filep[i]] or {language = name, comments = {}}
     for j=1,#linecommentseqs do
-      dbg(nil, "register filetype:", name, filep[i], pattern_escape(linecommentseqs[j]))
-      filetypes[filep[i]][#filetypes[filep[i]]+1] = pattern_escape(linecommentseqs[j])
+      dbg(nil, "register filetype:", name, filep[i], linecommentseqs[j])
+      filetypes[filep[i]].comments[#filetypes[filep[i]].comments + 1] = linecommentseqs[j]
     end
   end
 end
@@ -558,9 +558,10 @@ local function filetype_get(filename)
 end
 
 local function comment_select (line, filetype)
-  for i=1,#filetype do
-    if string.match(line, filetype[i]) then
-      return filetype[i]
+  for i=1,#filetype.comments do
+    local comment = pattern_escape(filetype.comments[i])
+    if string.match(line, comment) then
+      return comment
     end
   end
 end
@@ -1414,13 +1415,21 @@ local function process_file(file)
     return
   end
 
+  --context:
+  --:file {VARDEF COMMENTS_TABLE}
+  --:file   A Lua table with the all possible line comment character sequences
+  --:file   for this filetype. Already available at preprocessing time.
+  filecontext.COMMENTS_TABLE = filetype.comments
+
   block_section = filecontext.FILE:match("[^./]+%f[.%z]")
   dbg(filecontext, "section:", block_section)
 
+  --context:
+  --:language {VARDEF LANGUAGE}
+  --:language   The language name of this file.
   filecontext.LANGUAGE = filetype.language
   dbg(filecontext, "language:", filecontext.LANGUAGE)
 
-  filecontext.COMMENT = filetype[1] --TODO: docme first one already set for construction in pp
 
   local lineno = 0
   for line in fh:lines() do
