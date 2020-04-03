@@ -1836,10 +1836,23 @@ end
 --: Pipadoc itself comes with a configuration file for generating it's own documentation and
 --: assist the testsuite. This is a good starting point for writing your own configuration.
 --:
---FIXME: complete below doc
--- : There are pre- and post- processors defined for:
--- :
--- =shipped_config
+--: This configfile supports 'text' and 'asciidoc' backends.
+--:
+--: Preprocessors
+--: ^^^^^^^^^^^^^
+--:
+--=shipped_config_pre
+--:
+--: Postprocessors
+--: ^^^^^^^^^^^^^^
+--:
+--=shipped_config_post
+--:
+--: Substitutions Macros
+--: ^^^^^^^^^^^^^^^^^^^^
+--:
+--=shipped_config_subst
+--:
 --TODO: document that safe operation needs a custom config file
 --:
 --: Dependencies

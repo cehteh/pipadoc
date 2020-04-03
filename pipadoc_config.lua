@@ -1,7 +1,7 @@
 --PLANNED: make preprocessors markup agnostic? (needs postprocessors)
 
---shipped_config:
---: * Remove any line which ends in 'NODOC'.
+--shipped_config_pre:
+--: * Ignore any line which ends in 'NODOC'.
 preprocessor_register ("",
                        function (context)
                          if context.SOURCE:match("NODOC$") then
@@ -13,8 +13,9 @@ preprocessor_register ("",
 )
 
 
---: *  Replace '<STRING>' in pipadoc comments with the first literal string from the code.
---:    Lifts string literals from sourcecode to documentation.
+--shipped_config_pre:
+--: *  Replace '<STRING>' in pipadoc comments with the first literal doublequoted string from the code.
+--:    Lifts string literals from sourcecode to documentation. The doublequotes are removed.
 preprocessor_register ("",
                        {
                          '^([^"]*"([^"]*)".*%p+%w*:%w*)(.*)<STRING>(.*)',
@@ -24,8 +25,9 @@ preprocessor_register ("",
 )
 
 
+--shipped_config_pre:
 --: * Automatic generation of documentation for Lua functions.
---:   Generates an index entry and a prototype documentation from a function definition
+--:   Generates an index entry and a prototype header from an one line function definition
 preprocessor_register ("^lua$",
                        function (context)
                          local proto,fn = context.SOURCE:match(
@@ -33,12 +35,12 @@ preprocessor_register ("^lua$",
 
                          if fn then
                            section_append("INDEX", fn:lower(),
-                                          make_context( context, {TEXT="{INDEXREF "..fn.."}"})
+                                          make_context( context, {TEXT="{INDEX_ENTRY "..fn.."}"})
                            )
                            context.FUNCTION = fn
                            context.FUNCTION_PROTO = proto
                            return context.SOURCE:gsub("^(.*function%s+([^)]*%)).*%-%-%w*:%w*)",
-                                                       '%1 {FNDEF}', 1)
+                                                       '%1 {LUA_FNDEF}', 1)
                          else
                            return true
                          end
@@ -46,17 +48,24 @@ preprocessor_register ("^lua$",
 )
 
 
-GLOBAL.FNDEF = "{FNDEF_{MARKUP}}"
+--shipped_config_subst:
+--: * \\{LUA_FNDEF\} Lifts a lua function definition to the documentation text.
+--:   Used by the lua documentation preprocessor.
+GLOBAL.LUA_FNDEF = "{LUA_FNDEF_{MARKUP}}"
 
-GLOBAL.FNDEF_asciidoc = function (context, arg)
+GLOBAL.LUA_FNDEF_asciidoc = function (context, arg)
   return "anchor:index_"..context.FUNCTION.."[] +*"..context.FUNCTION_PROTO.."*+::{NL}"
 end
 
-GLOBAL.FNDEF_text = function (context)
+GLOBAL.LUA_FNDEF_text = function (context)
   return context.FUNCTION_PROTO..":{NL}"
 end
 
+
+--shipped_config_subst:
 --: * Generate documentaton for GLOBAL and CONTEXT variables (pipadoc's own documentation).
+--:   \{VARDEF name\} generates a header and index entry for 'name'.
+--:   Defined for asciidoc and text backends.
 GLOBAL.VARDEF = "{VARDEF_{MARKUP}}"
 
 GLOBAL.VARDEF_asciidoc = function (context, arg)
@@ -64,7 +73,7 @@ GLOBAL.VARDEF_asciidoc = function (context, arg)
   for ix in arg:gmatch("([^%s%p]*)[%p%s]*") do
     if #ix > 0 then
       section_append("INDEX", ix:lower(),
-                     make_context (context,{TEXT="{INDEXREF "..ix.."}"})
+                     make_context (context,{TEXT="{INDEX_ENTRY "..ix.."}"})
       )
 
       anchors=anchors.."anchor:index_"..ix.."[]"
@@ -78,7 +87,7 @@ GLOBAL.VARDEF_text = function (context, arg)
   for ix in arg:gmatch("([^%s%p]*)[%p%s]*") do
     if #ix > 0 then
       section_append("INDEX", ix:lower(),
-                     make_context (context,{TEXT="{INDEXREF "..ix.."}"})
+                     make_context (context,{TEXT="{INDEX_ENTRY "..ix.."}"})
       )
     end
   end
@@ -86,23 +95,24 @@ GLOBAL.VARDEF_text = function (context, arg)
   return arg..":"
 end
 
---: * Generate a sorted index of functions and doc variables.
+--shipped_config_subst:
+--: * \{INDEX_ENTRY name\} Entry in the index that refers back to 'name'.
 local lastfirstchar= nil
 
-GLOBAL.INDEXREF = "{INDEXREF_{MARKUP}}"
+GLOBAL.INDEX_ENTRY = "{INDEX_ENTRY_{MARKUP}}"
 
-GLOBAL.INDEXREF_asciidoc = function (context, arg)
+GLOBAL.INDEX_ENTRY_asciidoc = function (context, arg)
   local firstchar = arg:sub(1,1):lower()
 
   if lastfirstchar ~= firstchar then
     lastfirstchar = firstchar
-    return "{NL}[big]#"..firstchar:upper().."# :: {NL}  <<index_"..arg..","..arg..">> +"
+    return "{NL}[big]#"..firstchar:upper().."# :: {NL}   <<index_"..arg..","..arg..">> +{NL}"
   else
-    return "  <<index_"..arg:gsub("%W","_")..","..arg..">> +"
+    return "  <<index_"..arg:gsub("%W","_")..","..arg..">> +{NL}"
   end
 end
 
-GLOBAL.INDEXREF_text = function (context, arg)
+GLOBAL.INDEX_ENTRY_text = function (context, arg)
   local firstchar=arg:sub(1,1):lower()
 
   if lastfirstchar ~= firstchar then
@@ -114,6 +124,7 @@ GLOBAL.INDEXREF_text = function (context, arg)
 end
 
 
+--shipped_config_post:
 --: * Keep track of original file:line as asciidoc comments in the output.
 --:   Disable this tracking when a doc comment starts with 'NOORIGIN' and
 --:   re-enable it with a doc comment starting with 'ORGIN'.
@@ -157,12 +168,17 @@ postprocessor_register ("^asciidoc$",
 
 
 
+--shipped_config_pre:
 --: * Generate formatted lists for doc comments in WIP/FIXME/TODO/PLANNED/DONE sections.
 --:   When GLOBAL.GIT is defined ('-D GIT') then each such item includes information gathered
 --:   from the git commit which touched that line the last.
 --:   When GLOBAL.NOBUG is defined it reaps http://nobug.pipapo.org[NoBug] annotations from
 --:   C source files as well.
 if GLOBAL.GIT then
+
+  --shipped_config_subst:
+  --: * \{GIT_BLAME\} Insert a 'git blame' report about the current line.
+  --:   Refer to the source for details.
   GLOBAL.GIT_BLAME = function (context)
     local git = io.popen("git blame '"..context.FILE.."' -L "..tostring(context.LINE)..",+1 -p 2>/dev/null")
 
