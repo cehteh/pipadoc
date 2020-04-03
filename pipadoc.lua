@@ -1588,7 +1588,6 @@ do
   for i=1,#output do
     postprocessors_run(output[i])
     if output[i].TEXT then
---      outfd:write(output[i].TEXT, GLOBAL.NL)
       outfd:write(output[i].TEXT)
     end
   end
