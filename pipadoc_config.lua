@@ -169,7 +169,8 @@ postprocessor_register ("^asciidoc$",
 
 
 --shipped_config_pre:
---: * Generate formatted lists for doc comments in WIP/FIXME/TODO/PLANNED/DONE sections.
+--: * When GLOBAL.ISSUES is defined, generate formatted lists for doc comments in
+--:   WIP/FIXME/TODO/PLANNED/DONE sections.
 --:   When GLOBAL.GIT is defined ('-D GIT') then each such item includes information gathered
 --:   from the git commit which touched that line the last.
 --:   When GLOBAL.NOBUG is defined it reaps http://nobug.pipapo.org[NoBug] annotations from
@@ -238,18 +239,23 @@ if GLOBAL.NOBUG then
   )
 end
 
---FIXME: pass comments in filecontext, match all instead %p
-preprocessor_register ("",
-                       function (context)
-                         for _,word in ipairs(issues_keywords) do
-                           context.SOURCE = context.SOURCE:gsub(
-                             "(%p"..word.."):([^%s]*)%s?(.*)",
-                             '%1:0%2 {FILE}:{LINE}::{NL}  %3{GIT_BLAME}{NL}', 1)
+if GLOBAL.ISSUES then
+  preprocessor_register ("",
+                         function (context)
+                           for _,word in ipairs(issues_keywords) do
+                             for _,comment in ipairs(context.COMMENTS_TABLE) do
+                               local ret, matches = context.SOURCE:gsub(
+                                 "("..pattern_escape (comment)..word.."):([^%s]*)%s?(.*)",
+                                 '%1:0%2 {FILE}:{LINE}::{NL}  %3{GIT_BLAME}{NL}', 1)
+                               if matches > 0 then
+                                 return ret
+                               end
+                             end
+                           end
+                           return true
                          end
-                         return true
-                       end
-)
-
+  )
+end
 
 -- for the testsuite
 if GLOBAL.TESTSUITE then

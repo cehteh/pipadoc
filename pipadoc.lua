@@ -383,8 +383,9 @@ function strsubst (context, str, escapes, escapes_back) --: substitute text in
   return str
 end
 
-local function pattern_escape (p)
-  return (p:gsub("%W", "%%%1"))
+--api_various:
+function pattern_escape (s)  --: Escape all characters in string 's' so that it cane be used as verbatim pattern.
+  return (s:gsub("%W", "%%%1"))
 end
 
 --sections:
@@ -973,7 +974,7 @@ local options = {
   ["--issues"] = function (arg, i)
     --PLANNED: run univerally
     os.execute [[
-        lua pipadoc.lua -m asciidoc -D GIT -t ISSUES pipadoc.lua pipadoc_config.lua
+        lua pipadoc.lua -m asciidoc -D GIT -D ISSUES -t ISSUES pipadoc.lua pipadoc_config.lua
     ]]
   end,
 
