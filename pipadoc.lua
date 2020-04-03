@@ -635,6 +635,31 @@ local function preprocessors_attach ()
 end
 
 
+local function preprocessors_run (preprocessors, context)
+  if preprocessors then
+    for i=1,#preprocessors do
+      local ok,result = pcall(preprocessors[i], context)
+      if not ok then
+        warn(context, "preprocessor failed:", result) --cwarn: <STRING> ::
+        --cwarn:  preprocessor function errored out.
+        --PLANNED: preprocessors may expand to multiple lines? return table
+      elseif type(result) == 'string' then
+        trace(context, "preprocessed:", context.SOURCE, "->", result)
+        context.SOURCE = result
+      elseif result == true then
+        trace(context, "preprocessed keep:", context.SOURCE)
+      elseif result == false then
+        trace(context, "preprocessed drop:", context.SOURCE)
+        context.SOURCE = nil
+        break
+      else
+        warn(context, "preprocessor returned wrong type:", preprocessors[i], type(result)) --cwarn: <STRING> ::
+        --cwarn:  preprocessor returned unsupported type (or nil).
+      end
+    end
+  end
+end
+
 
 local postprocessors = {}
 --api_postproc:
@@ -1411,30 +1436,8 @@ local function process_file(file)
                                    SOURCE = line,
     })
 
-    local preprocessors = filetype.preprocessors
 
-    if preprocessors then
-      for i=1,#preprocessors do
-        local ok,result = pcall(preprocessors[i], context)
-        if not ok then
-          warn(context, "preprocessor failed:", result) --cwarn: <STRING> ::
-          --cwarn:  preprocessor function errored out.
-          --PLANNED: preprocessors may expand to multiple lines? return table
-        elseif type(result) == 'string' then
-          trace(context, "preprocessed:", context.SOURCE, "->", result)
-          context.SOURCE = result
-        elseif result == true then
-          trace(context, "preprocessed keep:", context.SOURCE)
-        elseif result == false then
-          trace(context, "preprocessed drop:", context.SOURCE)
-          context.SOURCE = nil
-          break
-        else
-          warn(context, "preprocessor returned wrong type:", preprocessors[i], type(result)) --cwarn: <STRING> ::
-          --cwarn:  preprocessor returned unsupported type (or nil).
-        end
-      end
-    end
+    preprocessors_run (filetype.preprocessors, context)
 
     if context.SOURCE then
       local comment = comment_select(context.SOURCE, filetype)
