@@ -55,8 +55,7 @@ local gcontext = setmetatable (
   }, {__index = GLOBAL})
 
 
---TODO: DOCME
-function set_gcontext(file, line)
+local function set_gcontext(file, line)
   assert_type(file, 'string')
   gcontext.FILE = file
   gcontext.LINE = line
