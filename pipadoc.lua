@@ -1383,8 +1383,15 @@ local function file_alias(filename)
   return filename
 end
 
---TODO: DOCME
-function make_context(parent, new)
+--api_various:
+function make_context(parent, new) --: create a new context
+  --:   parent:::
+  --:     The parent context to extend from.
+  --:   new:::
+  --:     A table (or nil) containing the additional members for the
+  --:     new context.
+  assert_type (parent, 'table')
+  maybe_type (new, 'table')
   return setmetatable(new or {}, {__index = parent})
 end
 
