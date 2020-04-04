@@ -284,19 +284,28 @@ local function table_inverse (t)
   return ret
 end
 
-local escapes = {
+local strsubst_escapes = {
   ["\\"] = "{__BACKSLASH__}",
   ["`"] = "{__BACKTICK__}",
   ["{"] = "{__BRACEOPEN__}",
   ["}"] = "{__BRACECLOSE__}",
 }
 
-local escapes_back = table_inverse(escapes)
+local strsubst_escapes_back = table_inverse(strsubst_escapes)
 
 
 --api_strsubst:
-function strsubst (context, str, escapes, escapes_back) --: substitute text in
-  --TODO: doc parameters
+function strsubst (context, str, escape) --: substitute text
+  --:   context:::
+  --:     The current context which defines all variables and
+  --:     macros for the substitution.
+  --:   str:::
+  --:     The string to operate on
+  --:   escape:::
+  --:     Rule for character escaping
+  --:     nil:::: no special escaping
+  --:     'escape':::: handle escaped characters
+  --:     'unescape':::: unescape escaped characters back
   trace (context, "strsubst:", str)
   maybe_type (context, "table")
   assert_type (str, "string")
@@ -353,7 +362,7 @@ function strsubst (context, str, escapes, escapes_back) --: substitute text in
                           --cwarn:  cyclic substititution.
                         end
                       else
-                        if escapes_back and not ret:match "^{__.*__}$" then
+                        if escape == 'unescape' and not ret:match "^{__.*__}$" then
                           warn (context, "strsubst no expansion:", capture)  --cwarn: <STRING> ::
                           --cwarn:  no substitution defined.
                         end
@@ -364,14 +373,14 @@ function strsubst (context, str, escapes, escapes_back) --: substitute text in
     )
   end
 
-  if escapes then
-    str =  str:gsub("[`\\]([{}\\])", escapes)
+  if escape == 'escape' then
+    str =  str:gsub("[`\\]([{}\\])", strsubst_escapes)
   end
 
   str = strsubst_intern(str)
 
-  if escapes_back then
-    str = str:gsub("%b{}", escapes_back)
+  if escape == 'unescape' then
+    str = str:gsub("%b{}", strsubst_escapes_back)
   end
 
   return str
@@ -737,7 +746,7 @@ local function postprocessors_run (context)
   end
 
   if context.TEXT then
-    context.TEXT = strsubst(context, context.TEXT, nil, escapes_back)
+    context.TEXT = strsubst(context, context.TEXT, 'unescape')
   end
 
 end
@@ -1153,7 +1162,7 @@ local function setup()
         --oneline
         context.SECTION = context.SECTION or block_section
         context.ARG = context.ARG or block_arg
-        context.TEXT = strsubst(context, context.TEXT, escapes) .. GLOBAL.NL
+        context.TEXT = strsubst(context, context.TEXT, 'escape') .. GLOBAL.NL
         section_append(context.SECTION, context.ARG, context)
       elseif context.TEXT == "" and (context.SECTION or context.ARG) then
         --block head
@@ -1163,7 +1172,7 @@ local function setup()
         --block cont
         context.SECTION = context.SECTION or block_section
         context.ARG = context.ARG or block_arg
-        context.TEXT = strsubst(context, context.TEXT, escapes) .. GLOBAL.NL
+        context.TEXT = strsubst(context, context.TEXT, 'escape') .. GLOBAL.NL
         section_append(context.SECTION, context.ARG, context)
       end
     end,
