@@ -360,7 +360,7 @@ function strsubst (context, str, escapes, escapes_back) --: substitute text in
                         end
                       else
                         if escapes_back and not ret:match "^{__.*__}$" then
-                          warn (context, "strsubst no expansion", capture)  --cwarn: <STRING> ::
+                          warn (context, "strsubst no expansion:", capture)  --cwarn: <STRING> ::
                           --cwarn:  no substitution defined.
                         end
                       end
@@ -1360,7 +1360,7 @@ local function process_line (context, comment)
 
     local ok,err = pcall(procfuncs[op], context)
     if not ok then
-      warn (context, "operator processing failed", op, err) --cwarn: <STRING> ::
+      warn (context, "operator processing failed:", op, err) --cwarn: <STRING> ::
       --cwarn:  error executing a operators processor.
     end
   end
@@ -1483,6 +1483,7 @@ local sofar_rec={}
 function generate_output(which, output)
   set_gcontext "<output>"
   dbg(nil, "generate_output:", which)
+
   local section = sections[which]
 
   if section ~= nil then
@@ -2076,7 +2077,7 @@ end
 --PLANNED: not only pipadoc.conf but also pipadoc.sty templates, conf are local only configurations, .sty are global styles
 --PLANNED: how to join (and then wordwrap) lines?
 --PLANNED: insert empty lines on dedent
---PLANNED: bash like parameter expansion, how to apply that to sections/keys too --%{section}:%{key} .. how about strsubst on SECTION and ARG //{SECTION}:{ARG} NODOC
+--PLANNED: bash like parameter expansion, how to apply that to sections/keys too --%{section}:%{key} .. how about strsubst on SECTION and ARG //{SECTION}:{ARG}
 --PLANNED: org-mode processor
 --PLANNED: INIT section for configuration
 --PLANNED: test expected stderr in testsuite

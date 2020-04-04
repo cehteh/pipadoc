@@ -49,7 +49,7 @@ preprocessor_register ("^lua$",
 
 
 --shipped_config_subst:
---: * \\{LUA_FNDEF\} Lifts a Lua function definition to the documentation text.
+--: * '\\{LUA_FNDEF\}' Lifts a Lua function definition to the documentation text.
 --:   Used by the Lua documentation preprocessor.
 GLOBAL.LUA_FNDEF = "{LUA_FNDEF_{MARKUP}}"
 
@@ -64,7 +64,7 @@ end
 
 --shipped_config_subst:
 --: * Generate documentaton for GLOBAL and CONTEXT variables (pipadoc's own documentation).
---:   \{VARDEF name\} generates a header and index entry for 'name'.
+--:   '\{VARDEF name\}' generates a header and index entry for 'name'.
 --:   Defined for asciidoc and text backends.
 GLOBAL.VARDEF = "{VARDEF_{MARKUP}}"
 
@@ -96,7 +96,7 @@ GLOBAL.VARDEF_text = function (context, arg)
 end
 
 --shipped_config_subst:
---: * \{INDEX_ENTRY name\} Entry in the index that refers back to 'name'.
+--: * '\{INDEX_ENTRY name\}' Entry in the index that refers back to 'name'.
 local lastfirstchar= nil
 
 GLOBAL.INDEX_ENTRY = "{INDEX_ENTRY_{MARKUP}}"
@@ -178,7 +178,7 @@ postprocessor_register ("^asciidoc$",
 if GLOBAL.GIT then
 
   --shipped_config_subst:
-  --: * \{GIT_BLAME\} Insert a 'git blame' report about the current line.
+  --: * '\{GIT_BLAME\}' Insert a 'git blame' report about the current line.
   --:   Refer to the source for details.
   GLOBAL.GIT_BLAME = function (context)
     local git = io.popen("git blame '"..context.FILE.."' -L "..tostring(context.LINE)..",+1 -p 2>/dev/null")
