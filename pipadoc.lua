@@ -225,20 +225,6 @@ end
 --: String Substitution
 --: ^^^^^^^^^^^^^^^^^^^
 --:
---: Documentation-text is be passed to the strsubst() function which recursively substitutes
---: expressions within curly braces. The substitutions are taken from the passed context
---: (and GLOBAL's). Strings are replaced, functions become evaluated, everything else is
---: translated with Luas 'tostring()' function.
---:
---: The Names for substitituions must start with an alphabetic character or underline and can
---: be followed by alphanumeric characters or underlines. It may be followed with a delimiting
---: characterspace (space) and an optional argument string which gets passed to functions or
---: retained verbatim on everyting else. Names starting and ending with 2 underscores are
---: reserved to the implementation.
---:
---: Curly braces, can be escaped with backslashes or backtick characters. These
---: characters can be escaped by themself.
---:
 --api_strsubst_example:
 --:
 --: .Examples
@@ -459,6 +445,8 @@ local sections_keys_usecnt = {}
 --:
 
 function section_append(section, key, context) --: Append data to the given section/key
+  --:   to be called from preprocessors or macros which generate new content.
+  --:
   --:   section:::
   --:     name of the section to append to, must be a string
   assert_type(section, "string")
@@ -578,11 +566,6 @@ local preprocessors = {}
 --: Preprocessors
 --: ^^^^^^^^^^^^^
 --:
---: One can register multiple preprocessors for different filetypes. A preprocessor can modify
---: the line prior it is parsed and further processed. By default pipadoc has no preprocessors
---: defined. The user may define these in a config file. See the <<_configuration_file,
---: 'pipadoc_config.lua'>> which ships with the pipadoc distribution.
---:
 function preprocessor_register (langpat, preprocess) --: register a preprocessor
   --:   langpat:::
   --:     Register preprocessor to all filetypes whose mnemonic matches 'langpat'.
@@ -672,8 +655,6 @@ local postprocessors = {}
 --:
 --: Postprocessors
 --: ^^^^^^^^^^^^^^
---: Postprocessors run at output generation time. They are registered per markup types.
---: Processors are called in order of their definition.
 --:
 function postprocessor_register (markuppat, postprocess) --: register a postprocessor
   --:   markuppat:::
@@ -1384,7 +1365,8 @@ local function file_alias(filename)
 end
 
 --api_various:
-function make_context(parent, new) --: create a new context
+function make_context(parent, new) --: Create a new context.
+  --: Used whenever preprocessors/macros need to generate new content.
   --:   parent:::
   --:     The parent context to extend from.
   --:   new:::
@@ -1844,15 +1826,11 @@ end
 --: Operators
 --: ---------
 --:
---TODO: DOC Operators are used to define what is a pipadoc comment and how to order the resulting document
---:
---: Built in operators
---: ~~~~~~~~~~~~~~~~~~
+--: Operators define what is considered as pipadoc comment and how to assemble the resulting document.
 --:
 --=op_builtin
 --:
 --:
---TODO: DOCME document 2 ways to modify text strsubst/processors
 --: Configuration File
 --: ------------------
 --:
@@ -1860,18 +1838,58 @@ end
 --: +pipadoc_config.lua+ in the current directory. This name can be changed by the '--config'
 --: option.
 --:
---: The configuration file is used to define additional pre- and post-processors, define states
---: for those and define custom operators. It is loaded and executed as it own chunk and may only
---: access the global variables (GLOBAL, CONTEXT) and api functions described later.
+--: The configuration file is used to define pre- and post- processors, define states
+--: for those, define custom operators and string substitution macros. It is loaded and
+--: executed as it own chunk and may only access the global variables (GLOBAL, CONTEXT) and
+--: API functions described below.
 --:
+--: Preprocessors
+--: ~~~~~~~~~~~~~
+--:
+--: One can register multiple preprocessors for filetypes. A preprocessor can modify any
+--: line prior it is parsed and further processed. By default pipadoc has no preprocessors
+--: defined. The user may define these in a config file.
+--:
+--: Preprocessors are used to autogenerate documentation comments from code. Lifting
+--: parts of the code to the documentation side.
+--:
+--: Postprocessors
+--: ~~~~~~~~~~~~~~
+--:
+--: Postprocessors run at output generation time. They are registered per markup types.
+--: Processors are called in order of their definition.
+--:
+--: They are used to augment the generated output with markup specific things.
+--:
+--: String Substitutions
+--: ~~~~~~~~~~~~~~~~~~~~
+--:
+--: Documentation-text is be passed to the string substitution engine which recursively
+--: substitutes expressions within curly braces. The substitutions are taken from the passed
+--: context (and GLOBAL's). Strings are replaced, functions become evaluated, everything else is
+--: translated with Luas 'tostring()' function.
+--:
+--: The names for substitituions must start with an alphabetic character or underline and can
+--: be followed by alphanumeric characters or underlines. It may be followed with a delimiting
+--: characterspace (space) and an optional argument string which gets passed to functions or
+--: retained verbatim on everyting else. Names starting and ending with 2 underscores are
+--: reserved to the implementation.
+--:
+--: Curly braces, can be escaped with backslashes or backtick characters. These
+--: characters can be escaped by themself.
 --:
 --: Example Configuration File
 --: ~~~~~~~~~~~~~~~~~~~~~~~~~~
+--:
+--: Pipadocs main objective is to scrape documentation comments from a project and generate
+--: output in desired order. Such an basic approach would be insufficient for many common cases.
+--: Thus pipadoc has facilities to generate and modify documentation in an extensible way.
 --:
 --: Pipadoc itself comes with a configuration file for generating it's own documentation and
 --: assist the testsuite. This is a good starting point for writing your own configuration.
 --:
 --: This configfile supports 'text' and 'asciidoc' backends.
+--:
 --:
 --: Preprocessors
 --: ^^^^^^^^^^^^^
@@ -1888,7 +1906,6 @@ end
 --:
 --=shipped_config_subst
 --:
---TODO: document that safe operation needs a custom config file
 --:
 --: Dependencies
 --: ~~~~~~~~~~~~
