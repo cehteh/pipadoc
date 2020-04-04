@@ -1528,22 +1528,6 @@ function report_orphan_doubletes()
   end
 end
 
-function cmp_files(aname,bname)
-  local a_fd = io.open(aname)
-  local b_fd = io.open(bname)
-
-  local a,b = true,false
-
-  if a_fd and b_fd then
-    a = a_fd:read("*a")
-    b = b_fd:read("*a")
-  end
-
-  if a_fd then a_fd:close () end
-  if b_fd then b_fd:close () end
-
-  return a == b
-end
 
 do
   setup()
@@ -1560,18 +1544,10 @@ do
 
   generate_output(topsection, output)
 
-  local outfd = io.stdout
-  local tmpfile, err
+  local outfd, err = io.stdout
 
   if opt_output then
-    local dir,name = opt_output:match("(.-)([^/]*)$")
-    tmpfile = dir.."."..name
-    outfd, err = io.open(tmpfile, "w+")
-
-    if not outfd then
-      tmpfile = dir..name
-      outfd, err = io.open(tmpfile, "w+")
-    end
+    outfd, err = io.open(opt_output, "w+")
 
     if not outfd then
       die (nil, "failed to open:", err)
@@ -1598,14 +1574,6 @@ do
 
   if opt_output then
     outfd:close()
-
-    if not cmp_files(tmpfile, opt_output) then
-      dbg(nil, "rename:",tmpfile, opt_output)
-      os.rename(tmpfile, opt_output)
-    else
-      dbg(nil, "remove:",tmpfile)
-      os.remove(tmpfile)
-    end
   end
 
   report_orphan_doubletes()
