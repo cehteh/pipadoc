@@ -117,9 +117,9 @@ GLOBAL.INDEX_ENTRY_text = function (context, arg)
 
   if lastfirstchar ~= firstchar then
     lastfirstchar = firstchar
-    return firstchar:upper()..":{NL}  "..arg
+    return firstchar:upper()..":{NL}  "..arg.."{NL}"
   else
-    return "  "..arg
+    return "  "..arg.."{NL}"
   end
 end
 
