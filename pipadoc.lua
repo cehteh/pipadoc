@@ -938,6 +938,29 @@ local options = {
   end,
   "", --:  <STRING>
 
+  "    -P, --define-post <name>[=<value>]", --:  <STRING>
+  "                        define a GLOBAL_POST variable to value or 'true'", --:  <STRING>
+  "    -P, --define-POST -<name>", --:  <STRING>
+  "                        undefine a GLOBAL_POST variable", --:  <STRING>
+  ["-P"] = "--define-post",
+  ["--define-post"] = function (arg,i)
+    check_args(arg, i+1)
+    local key,has_value,value = arg[i+1]:match("^([%w_]+)(=?)(.*)")
+    local undef = arg[i+1]:match("^[-]([%w_]+)")
+    if undef then
+      dbg(nil, "undef_post:", undef)
+      GLOBAL_POST[undef] = nil
+    elseif key then
+      if has_value == "" then
+        value = 'true'
+      end
+      dbg(nil, "define_post:", key, value)
+      GLOBAL_POST[key] = value
+    end
+    return 1
+  end,
+  "", --:  <STRING>
+
   -- intentionally here undocumented, only works in development tree
   ["--make-doc"] = function (arg, i)
     os.execute [[
