@@ -115,11 +115,6 @@ function warn(context,...) --: report a important but non fatal failure
   printlvl(context,1, ...)
 end
 
---TODO: info is not used
-function info(context,...) --: report normal progress
-  printlvl(context,2, ...)
-end
-
 function dbg(context,...) --: show debugging information
   printlvl(context,3, ...)
 end
