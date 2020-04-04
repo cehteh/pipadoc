@@ -173,7 +173,6 @@ end
 --: otherwise an assertion error is raised.
 --:
 
---PLANNED: assert_type(var, ...) list of strings
 function assert_type(var, expected) --: checks that the 'var' is of type 'expected'
   assert(type(var) == expected, "type error: "..expected.." expected, got "..type(var))
   return var
@@ -836,8 +835,6 @@ local options = {
     usage()
   end,
   "", --:  <STRING>
-  --PLANNED: --help --verbose or --doc extracts the full documentations
-
   "    -r, --register <name> <file> <comment>", --:  <STRING>
   "                        register a filetype pattern", --:  <STRING>
   "                        for files matching a file pattern", --:  <STRING>
@@ -918,7 +915,6 @@ local options = {
   end,
   "", --:  <STRING>
 
-  --PLANNED: define for GLOBAL_POST --define-post -P
   "    -D, --define <name>[=<value>]", --:  <STRING>
   "                        define a GLOBAL variable to value or 'true'", --:  <STRING>
   "    -D, --define -<name>", --:  <STRING>
@@ -969,15 +965,12 @@ local options = {
   ["--"] = function () args_done=true end,
 
   --PLANNED: --list-filetypes
-  --PLANNED: --features  show a report which features (using optional Lua modules) are available
-  --PLANNED: list-sections
+  --PLANNED: --list-sections
   --PLANNED: eat (double, triple, ..) empty lines (do this in a postprocessor)
   --PLANNED: add debug report (warnings/errors) to generated document PIPADOC_LOG section
-  --PLANNED: wrap at blank/intelligent
+  --PLANNED: wrap at blank/intelligent -> postprocessor
   --PLANNED: wordwrap
-  --PLANNED: some flags get defaults from the config file
   --PLANNED: source indent with prettyprinting --indent columns
-  --PLANNED: strip option (pre/postprocessor?) to remove all pipadoc
 
   "", --:  <STRING>
   "  inputs are file names or a '-' that indicates standard input", --:  <STRING>
@@ -1025,7 +1018,6 @@ local block_arg
 
 
 local function builtin_filetypes()
-  --PLANNED: write preprocessor macro to expand filetype_register() as documentation
   --filetypes_builtin:scons SCons,
   filetype_register("scons", "^SConstuct$", "#")
 
@@ -1095,9 +1087,6 @@ local function setup()
   set_gcontext "<setup>"
 
   request "luarocks.loader"
-  --PLANNED: for pattern matching etc
-  --lfs = request "lfs"
-  --posix = request "posix"
 
   do
     local time = os.time()
@@ -1513,7 +1502,7 @@ function generate_output(which, output)
 end
 
 
---PLANNED: some way to hint the checker to supress these warnings
+--PLANNED: some way to hint the checker to supress these warnings ignore operator --!name
 function report_orphan_doubletes()
   local orphan = {FILE = "<orphan>"}
   local doublette = {FILE = "<doublette>"}
@@ -1560,8 +1549,6 @@ do
   setup()
   process_inputs()
 
-  -- free memory
-  --PLANNED: memory profile whats faster?
   collectgarbage()
 
   local output = {}
@@ -2098,14 +2085,12 @@ end
 --:
 
 
---PLANNED: processors get a name, define processing chains
---PLANNED: document pre/post processors in own chapters
+--PLANNED: named processors, define processing chains or sort by priority
 --PLANNED: control language/conditionals?  //section?key \{condition\}  else becomes DROPPED:section_key
 --PLANNED: not only pipadoc.conf but also pipadoc.sty templates, conf are local only configurations, .sty are global styles
 --PLANNED: how to join (and then wordwrap) lines?
 --PLANNED: insert empty lines on dedent
 --PLANNED: bash like parameter expansion, how to apply that to sections/keys too --%{section}:%{key} .. how about strsubst on SECTION and ARG //{SECTION}:{ARG}
---PLANNED: org-mode processor
 --PLANNED: INIT section for configuration
 --PLANNED: test expected stderr in testsuite
 --PLANNED: DOCME documentation is usually only for one markup designed, dispatch on strsubst make only maintaining easier
