@@ -286,10 +286,11 @@ function strsubst (context, str, escape) --: substitute text
   --:   str:::
   --:     The string to operate on
   --:   escape:::
-  --:     Rule for character escaping
+  --:     Rule for special character escaping
+  --:     true:::: handle escaping in one pass
+  --:     'escape':::: 1st pass
+  --:     'unescape':::: 2nd pass
   --:     nil:::: no special escaping
-  --:     'escape':::: handle escaped characters
-  --:     'unescape':::: unescape escaped characters back
   trace (context, "strsubst:", str)
   maybe_type (context, "table")
   assert_type (str, "string")
@@ -357,16 +358,17 @@ function strsubst (context, str, escape) --: substitute text
     )
   end
 
-  if escape == 'escape' then
+  if escape == true or escape == 'escape' then
     str =  str:gsub("[`\\]([{}\\])", strsubst_escapes)
   end
 
   str = strsubst_intern(str)
 
-  if escape == 'unescape' then
+  if escape == true or escape == 'unescape'then
     str = str:gsub("%b{}", strsubst_escapes_back)
   end
 
+  trace (context, "strsubst done:", str)
   return str
 end
 
