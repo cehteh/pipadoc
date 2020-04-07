@@ -32,6 +32,7 @@ preprocessor_register ("^lua$",
                            "^[^\"']*function%s+(([^(%s]*)[^)]*%)).*%-%-%w*:%w*")
 
                          if fn then
+                           dbg(context, "lua function", fn)
                            section_append("INDEX", fn:lower(),
                                           make_context( context, {TEXT="{INDEX_ENTRY "..fn.."}"})
                            )
@@ -61,8 +62,8 @@ end
 
 
 --shipped_config_subst:
---: * Generate documentaton for GLOBAL and CONTEXT variables (pipadoc's own documentation).
---:   '\{VARDEF name\}' generates a header and index entry for 'name'.
+--: * '\{VARDEF name\}' generates a header and index entry for 'name'.
+--:   Used for documentaton of GLOBAL and CONTEXT variables (pipadoc's own documentation).
 --:   Defined for asciidoc and text backends.
 GLOBAL.VARDEF = "{VARDEF_{MARKUP}}"
 
@@ -176,7 +177,7 @@ postprocessor_register ("^asciidoc$",
 if GLOBAL.GIT then
 
   --shipped_config_subst:
-  --: * '\{GIT_BLAME\}' Insert a 'git blame' report about the current line.
+  --: * '\\{GIT_BLAME\}' Insert a 'git blame' report about the current line.
   --:   Refer to the source for details.
   GLOBAL.GIT_BLAME = function (context)
     local git = io.popen("git blame '"..context.FILE.."' -L "..tostring(context.LINE)..",+1 -p 2>/dev/null")
