@@ -941,7 +941,7 @@ local options = {
 
   "    -P, --define-post <name>[=<value>]", --:  <STRING>
   "                        define a GLOBAL_POST variable to value or 'true'", --:  <STRING>
-  "    -P, --define-POST -<name>", --:  <STRING>
+  "    -P, --define-post -<name>", --:  <STRING>
   "                        undefine a GLOBAL_POST variable", --:  <STRING>
   ["-P"] = "--define-post",
   ["--define-post"] = function (arg,i)
