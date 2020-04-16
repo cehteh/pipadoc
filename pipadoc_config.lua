@@ -52,13 +52,18 @@ preprocessor_register ("^lua$",
 --:   Used by the Lua documentation preprocessor.
 GLOBAL.LUA_FNDEF = "{LUA_FNDEF_{MARKUP}}"
 
+GLOBAL.LUA_FNDEF_text = function (context)
+  return context.FUNCTION_PROTO..":{NL}"
+end
+
 GLOBAL.LUA_FNDEF_asciidoc = function (context, arg)
   return "anchor:index_"..context.FUNCTION.."[] +*"..context.FUNCTION_PROTO.."*+::{NL}"
 end
 
-GLOBAL.LUA_FNDEF_text = function (context)
-  return context.FUNCTION_PROTO..":{NL}"
+GLOBAL.LUA_FNDEF_orgmode = function (context, arg)
+  return "<<index_"..context.FUNCTION..">> - -"..context.FUNCTION_PROTO.."- ::{NL}"
 end
+
 
 
 --shipped_config_subst:
@@ -66,6 +71,18 @@ end
 --:   Used for documentaton of GLOBAL and CONTEXT variables (pipadoc's own documentation).
 --:   Defined for asciidoc and text backends.
 GLOBAL.VARDEF = "{VARDEF_{MARKUP}}"
+
+GLOBAL.VARDEF_text = function (context, arg)
+  for ix in arg:gmatch("([^%s%p]*)[%p%s]*") do
+    if #ix > 0 then
+      section_append("INDEX", ix:lower(),
+                     make_context (context,{TEXT="{INDEX_ENTRY "..ix.."}"})
+      )
+    end
+  end
+
+  return arg..":"
+end
 
 GLOBAL.VARDEF_asciidoc = function (context, arg)
   local anchors = ""
@@ -82,23 +99,39 @@ GLOBAL.VARDEF_asciidoc = function (context, arg)
   return anchors.."`"..arg.."`::"
 end
 
-GLOBAL.VARDEF_text = function (context, arg)
+
+GLOBAL.VARDEF_orgmode = function (context, arg)
+  local anchors = ""
   for ix in arg:gmatch("([^%s%p]*)[%p%s]*") do
     if #ix > 0 then
       section_append("INDEX", ix:lower(),
                      make_context (context,{TEXT="{INDEX_ENTRY "..ix.."}"})
       )
+
+      anchors=anchors.."<<index_"..ix..">>"
     end
   end
 
-  return arg..":"
+  return anchors.."- -"..arg.."- ::"
 end
+
 
 --shipped_config_subst:
 --: * '\{INDEX_ENTRY name\}' Entry in the index that refers back to 'name'.
 local lastfirstchar= nil
 
 GLOBAL.INDEX_ENTRY = "{INDEX_ENTRY_{MARKUP}}"
+
+GLOBAL.INDEX_ENTRY_text = function (context, arg)
+  local firstchar=arg:sub(1,1):lower()
+
+  if lastfirstchar ~= firstchar then
+    lastfirstchar = firstchar
+    return firstchar:upper()..":{NL}  "..arg.."{NL}"
+  else
+    return "  "..arg.."{NL}"
+  end
+end
 
 GLOBAL.INDEX_ENTRY_asciidoc = function (context, arg)
   local firstchar = arg:sub(1,1):lower()
@@ -111,16 +144,17 @@ GLOBAL.INDEX_ENTRY_asciidoc = function (context, arg)
   end
 end
 
-GLOBAL.INDEX_ENTRY_text = function (context, arg)
-  local firstchar=arg:sub(1,1):lower()
+GLOBAL.INDEX_ENTRY_orgmode = function (context, arg)
+  local firstchar = arg:sub(1,1):lower()
 
   if lastfirstchar ~= firstchar then
     lastfirstchar = firstchar
-    return firstchar:upper()..":{NL}  "..arg.."{NL}"
+    return "{NL} - *"..firstchar:upper().."* ::{NL}   <<index_"..arg..">> +{NL}"
   else
-    return "  "..arg.."{NL}"
+    return "  <<index_"..arg:gsub("%W","_")..">> +{NL}"
   end
 end
+
 
 
 --shipped_config_post:
@@ -291,6 +325,8 @@ if GLOBAL.TESTSUITE then
                          end
   )
 end
+
+--PLANNED: standard macros SAFE_MODE, LUA, SHELL, SET
 
 --PLANNED: offer different sort orders for issues (date / line)
 --PLANNED: noweb like preprocessing syntax for chapter substitutions in textfiles

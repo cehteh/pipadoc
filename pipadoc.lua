@@ -1845,7 +1845,7 @@ end
 --: String Substitutions
 --: ~~~~~~~~~~~~~~~~~~~~
 --:
---: Documentation-text is be passed to the string substitution engine which recursively
+--: Documentation text is be passed to the string substitution engine which recursively
 --: substitutes expressions within curly braces. The substitutions are taken from the passed
 --: context (and GLOBAL's). Strings are replaced, functions become evaluated, everything else is
 --: translated with Luas 'tostring()' function.
@@ -1892,12 +1892,12 @@ end
 --: ~~~~~~~~~~~~
 --:
 --: 'pipadoc' does not depend on any external Lua libraries. Nevertheless modules can be loaded
---: optionally to augment pipadocs behavior and provide extra features. Plugin-writers should
+--: optionally to augment the behavior and provide extra features. Plugin-writers should
 --: use the 'request()' function instead the Lua 'require()', falling back to simpler but usable
 --: functionality when some library is not available or call 'die()' when a reasonable fallback
 --: won't do it.
 --:
---: Pipadoc already calls 'request "luarocks.loader"' to make rocks modules available when
+--: Pipadoc calls 'request "luarocks.loader"' to make rocks modules available when
 --: installed.
 --:
 --:
@@ -1990,7 +1990,7 @@ end
 --: The resulting `pipadoc.txt` can then be processed with the asciidoc tool chain to produce
 --: distribution formats:
 --:
---: -----
+--: ----
 --: # generate HTML
 --: asciidoc -a toc pipadoc.txt
 --:
