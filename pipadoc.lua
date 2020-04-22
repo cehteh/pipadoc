@@ -457,7 +457,7 @@ function section_append(section, key, context) --: Append data to the given sect
   --:     The source line broken down into its components and additional pipadoc metadata
   assert_type(context, "table")
   --:
-  trace(context, "append:", section, key, context.TEXT)
+  trace(context, "append:", section..":"..(key or "-"), context.TEXT)
   sections[section] = sections[section] or {keys = {}}
   if key and #key > 0 then
     sections[section].keys[key] = sections[section].keys[key] or {}
@@ -635,12 +635,12 @@ local function preprocessors_run (preprocessors, context)
       elseif type(result) == 'string' then
         trace(context, "preprocessed:", context.SOURCE, "->", result)
         context.SOURCE = result
-      elseif result == true then
-        trace(context, "preprocessed keep:", context.SOURCE)
       elseif result == false then
         trace(context, "preprocessed drop:", context.SOURCE)
         context.SOURCE = nil
         break
+      elseif result == true then
+        -- NOP
       else
         warn(context, "preprocessor returned wrong type:", preprocessors[i], type(result)) --cwarn: <STRING> ::
         --cwarn:  preprocessor returned unsupported type (or nil).
@@ -714,12 +714,12 @@ local function postprocessors_run (context)
     elseif type(result) == 'string' then
       trace(context, "postprocessed:", context.TEXT, "->", result)
       context.TEXT = result
-    elseif result == true then
-      trace(context, "preprocessed keep:", context.TEXT)
     elseif result == false then
       trace(context, "preprocessed drop:", context.TEXT)
       context.TEXT = nil
       break
+    elseif result == true then
+      -- NOP
     else
       warn(context, "postprocessor returned wrong type:", active_postprocessors[i], type(result)) --cwarn: <STRING> ::
       --cwarn:  postprocessor returned unsupported type (or nil).
@@ -1351,7 +1351,13 @@ local function process_line (context, comment)
 
   local op = context.OP
   if op then
-    dbg(context, "parsed:", context.PRE, "section:", context.SECTION, "op:", op, "arg:", context.ARG, "text:", context.TEXT)
+    dbg(context,
+        "parsed:", context.PRE,
+        "section:", context.SECTION,
+        "key:", context.KEY,
+        "op:", op,
+        "arg:", context.ARG,
+        "text:", context.TEXT)
 
     context.SOURCE = nil
 
@@ -1442,7 +1448,6 @@ local function process_file(file)
   local lineno = 0
   for line in fh:lines() do
     lineno = lineno + 1
-    trace(filecontext, "input:", lineno)
 
     --context:
     --:source {VARDEF SOURCE}
