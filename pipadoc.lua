@@ -587,7 +587,11 @@ function preprocessor_register (langpat, preprocess) --: register a preprocessor
   if type (preprocess) == "table" then
     local params = preprocess
     preprocess = function (context)
-      return context.SOURCE:gsub (params[1], params[2], params[3])
+      local result = context.SOURCE:gsub (params[1], params[2], params[3])
+      if result == context.SOURCE then
+        return true
+      end
+      return result
     end
   end
 
@@ -678,7 +682,11 @@ function postprocessor_register (markuppat, postprocess) --: register a postproc
   if type (postprocess) == "table" then
     local params = postprocess
     postprocess = function (context)
-      return context.TEXT:gsub (params[1], params[2], params[3])
+      local result = context.TEXT:gsub (params[1], params[2], params[3])
+      if result == context.TEXT then
+        return true
+      end
+      return result
     end
   end
 
