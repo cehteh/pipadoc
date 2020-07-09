@@ -16,11 +16,17 @@
 --: You should have received a copy of the GNU General Public License
 --: along with this program.  If not, see <http://www.gnu.org/licenses/>.
 -------------------------------------------------------------------------------------------------
+
 --PLANNED: include operator, add a file to the processing list
 --PLANNED: compose/concat operator .. hint: delayed section_append/strsubst
 --PLANNED: Version check for documents \{VERSION 2\} ...
 --PLANNED: --disable-strsubst option .. NOSTRSUBST STRSUBST macros
 --PLANNED: merge sections for sorting --#foo+bar+baz or something like this
+
+
+--------------------------
+-- Variable Definitions --
+--------------------------
 
 GLOBAL = {
   --GLOBAL:nl {VARDEF NL}
@@ -41,7 +47,6 @@ GLOBAL = {
 
 GLOBAL_POST = {}
 
-
 local gcontext = setmetatable (
   {
     --context:file {VARDEF FILE}
@@ -52,13 +57,6 @@ local gcontext = setmetatable (
     --context:line   Lines start at 1
     FILE = "<startup>"
   }, {__index = GLOBAL})
-
-
-local function set_gcontext(file, line)
-  assert_type(file, 'string')
-  gcontext.FILE = file
-  gcontext.LINE = line
-end
 
 local args_done = false
 local opt_verbose = 1
@@ -71,6 +69,101 @@ local opt_output = nil
 local opt_config = "pipadoc_config.lua"
 local opt_config_set = false
 
+
+
+
+
+
+--------------------------------
+-- Type Checks and Conversion --
+--------------------------------
+
+--api_typecheck:
+--:
+--: Type Checks
+--: ^^^^^^^^^^^
+--:
+--: Wrappers around 'assert' to check externally supplied data. On success 'var' will be returned
+--: otherwise an assertion error is raised.
+--:
+
+function assert_type(var, expected) --: checks that the 'var' is of type 'expected'
+  assert(type(var) == expected, "type error: "..expected.." expected, got "..type(var))
+  return var
+end
+
+function maybe_type(var, expected) --: checks that the 'var' is of type 'expected' or nil
+  assert(var == nil or type(var) == expected, "type error: "..expected.." or nil expected, got "..type(var).. " >>>"..tostring(var).."<<<")
+  return var
+end
+
+function assert_char(var) --: checks that 'var' is a single character
+  assert(type(var) == "string" and #var == 1, "type error: single character expected")
+  return var
+end
+
+function assert_notnil(var) --: checks that 'var' is not 'nil'
+  assert(type(var) ~= "nil", "Value expected")
+  return var
+end
+
+--api_typeconv:
+--:
+--: Type Conversions
+--: ^^^^^^^^^^^^^^^^
+--:
+--: Functions which do specific conversions.
+--:
+
+function to_table(v) --: if 'v' is not a table then return +++\{v\}+++
+  if type(v) ~= 'table' then
+    return {v}
+  else
+    return v
+  end
+end
+
+function maybe_text(v) --: convert 'v' to a string, returns 'nil' when that string would be empty
+  v = tostring (v)
+  if v ~= "" then
+    return v
+  else
+    return nil
+  end
+end
+
+
+
+
+
+
+----------------------
+-- Helper Functions --
+----------------------
+
+local function check_args(arg, n)
+  assert(#arg >= n, "missing arg: "..arg[n-1])
+end
+
+local function set_gcontext(file, line)
+  assert_type(file, 'string')
+  gcontext.FILE = file
+  gcontext.LINE = line
+end
+
+--api_various:
+function pattern_escape (s)  --: Escape all characters in string 's' so that it cane be used as verbatim pattern.
+  return (s:gsub("%W", "%%%1"))
+end
+
+
+
+
+
+
+--------------------------------
+-- Error handling and logging --
+--------------------------------
 
 --PLANNED: log to PIPADOC_LOG section, later hooked in here
 local printerr_hook
@@ -143,651 +236,12 @@ end
 
 
 
---api_load:
---:
---: Library Loading
---: ^^^^^^^^^^^^^^^
---:
-function request(name) --: try to load optional modules
-  --:    wraps Lua 'require' in a pcall so that failure to load module 'name' results in 'nil'
-  --:    rather than a error.
-  local ok,handle = pcall(require, name)
-  if ok then
-    dbg(nil, "loaded:", name, handle._VERSION)
-    return handle
-  else
-    warn(nil, "can't load module:", name) --cwarn: <STRING> ::
-    --cwarn:  'request()' failed to load a module.
-    return nil
-  end
-end
---:
-
---api_typecheck:
---:
---: Type Checks
---: ^^^^^^^^^^^
---:
---: Wrappers around 'assert' to check externally supplied data. On success 'var' will be returned
---: otherwise an assertion error is raised.
---:
-
-function assert_type(var, expected) --: checks that the 'var' is of type 'expected'
-  assert(type(var) == expected, "type error: "..expected.." expected, got "..type(var))
-  return var
-end
-
-function maybe_type(var, expected) --: checks that the 'var' is of type 'expected' or nil
-  assert(var == nil or type(var) == expected, "type error: "..expected.." or nil expected, got "..type(var).. " >>>"..tostring(var).."<<<")
-  return var
-end
-
-function assert_char(var) --: checks that 'var' is a single character
-  assert(type(var) == "string" and #var == 1, "type error: single character expected")
-  return var
-end
-
-function assert_notnil(var) --: checks that 'var' is not 'nil'
-  assert(type(var) ~= "nil", "Value expected")
-  return var
-end
-
---api_typeconv:
---:
---: Type Conversions
---: ^^^^^^^^^^^^^^^^
---:
---: Functions which do specific conversions.
---:
-
-function to_table(v) --: if 'v' is not a table then return +++\{v\}+++
-  if type(v) ~= 'table' then
-    return {v}
-  else
-    return v
-  end
-end
-
-function maybe_text(v) --: convert 'v' to a string, returns 'nil' when that string would be empty
-  v = tostring (v)
-  if v ~= "" then
-    return v
-  else
-    return nil
-  end
-end
 
 
---api_strsubst:
---:
---: String Substitution
---: ^^^^^^^^^^^^^^^^^^^
---:
---api_strsubst_example:
---:
---: .Examples
---: ----
---: context = {
---:   STRING = "example string",
---:   STR = "\{STRING\}",
---:   ING = "ING",
---:   UPPER = function(context, arg)
---:             return arg:upper()
---:           end
---:  }
---:
---  Note: curly braces are escaped here to be kept in the generated documentation
---: -- simple substitution
---: assert(strsubst(context, "\{STRING\}") == "example string")
---:
---: -- arguments on stringish substitutions are retained
---: assert(strsubst(context, "\{STRING example\}") == "example stringexample")
---:
---: -- substitution is recursively applied
---: assert(strsubst(context, "\{STR\}") == "example string")
---:
---: -- that can be used to create names dynamically
---: assert(strsubst(context, "\{STR\{ING\}\}") == "example string")
---:
---: -- functions are called with the argument and their return is substituted
---: assert(strsubst(context, "\{UPPER arg\}") == "ARG")
---:
---: -- now together
---: assert(strsubst(context, "\{UPPER \{STR\}\}") == "EXAMPLE STRING")
---:
---: -- undefined names are kept verbatim
---: assert(strsubst(context, "\{undefined\}") == "\{undefined\}")
---: ----
---:
 
-local function table_inverse (t)
-  local ret = {}
-  for k,v in pairs(t) do
-    ret[v] = k
-  end
-  return ret
-end
-
-local strsubst_escapes = {
-  ["\\"] = "{__BACKSLASH__}",
-  ["`"] = "{__BACKTICK__}",
-  ["{"] = "{__BRACEOPEN__}",
-  ["}"] = "{__BRACECLOSE__}",
-}
-
-local strsubst_escapes_back = table_inverse(strsubst_escapes)
-
-
---api_strsubst:
-function strsubst (context, str, escape) --: substitute text
-  --:   context:::
-  --:     The current context which defines all variables and
-  --:     macros for the substitution.
-  --:   str:::
-  --:     The string to operate on
-  --:   escape:::
-  --:     Rule for special character escaping
-  --:     true:::: handle escaping in one pass
-  --:     'escape':::: 1st pass
-  --:     'unescape':::: 2nd pass
-  --:     nil:::: no special escaping
-  trace (context, "strsubst:", str)
-  maybe_type (context, "table")
-  assert_type (str, "string")
-
-  context = context or gcontext
-  local sofar = {}
-
-  local function strsubst_intern (str)
-    trace(context, "strsubst_intern:", str)
-
-    return str:gsub("%b{}",
-                    function (capture)
-                      local ret = capture
-                      local subst = false
-
-                      local var,arg = capture:match("^{(%a[%w_{}]*).?(.*)}$")
-                      if not var then return capture end
-                      var = strsubst_intern (var)
-
-                      -- recursively dereference names when braced
-                      do
-                        local sofar = {}
-                        while not sofar[var] and type(context[var]) == "string" and context[var]:match("^(%b{})$") do
-                          subst = true
-                          sofar[var] = true
-                          var = strsubst_intern (context[var]:sub(2,-2))
-                        end
-                      end
-                      if context[var] then
-                        subst = true
-                        var = context[var]
-                      end
-
-                      arg = strsubst_intern (arg)
-
-                      if subst then
-                        if not sofar[var] then
-                          sofar[var] = true
-                          if type(var) == 'function' then
-                            local ok, result = pcall(var, context, arg)
-                            if ok then
-                              ret = tostring(result)
-                            else
-                              warn (context, "strsubst function failed:", var, result) --cwarn: <STRING> ::
-                              --cwarn:  strsubst tried to call a custom function which failed.
-                            end
-                          else
-                            ret = tostring(var)..arg
-                          end
-                        ret = strsubst_intern(ret)
-                          sofar[var] = nil
-                        else
-                          warn (context, "strsubst recursive expansion:", var)  --cwarn: <STRING> ::
-                          --cwarn:  cyclic substitution.
-                        end
-                      else
-                        if escape == 'unescape' and not ret:match "^{__.*__}$" then
-                          warn (context, "strsubst no expansion:", capture)  --cwarn: <STRING> ::
-                          --cwarn:  no substitution defined.
-                        end
-                      end
-
-                      return ret
-                    end
-    )
-  end
-
-  if escape == true or escape == 'escape' then
-    str =  str:gsub("[`\\]([{}\\])", strsubst_escapes)
-  end
-
-  str = strsubst_intern(str)
-
-  if escape == true or escape == 'unescape'then
-    str = str:gsub("%b{}", strsubst_escapes_back)
-  end
-
-  trace (context, "strsubst done:", str)
-  return str
-end
-
---api_various:
-function pattern_escape (s)  --: Escape all characters in string 's' so that it cane be used as verbatim pattern.
-  return (s:gsub("%W", "%%%1"))
-end
-
---sections:
---: Text in pipadoc is appended to named 'sections'. Text can be associated with some
---: alphanumeric key under that section. This enables later sorting for indices and glossaries.
---:
---: Sections can be one line or span a block of lines.
---:
---: One-line sections are defined when a section and maybe a key is followed by documentation
---: text. Block sections start with the section definition but no documentation text on the same
---: line. A block stays active until the next block section definition. One-line doctext can be
---: interleaved into Blocks.
---:
---: The default block section name is the files name up, but excluding to the first dot.
---:
---: Sections are later brought into the desired order by pasting them into a 'toplevel' section.
---: This default name for the 'toplevel' section is 'MAIN_\{markup\}' or if that does not exist
---: just 'MAIN'.
---:
---: .An example document (example.sh)
---: ----
---: #!/bin/sh
---: #: here the default section is 'example', derived from 'example.sh'
---: #oneline:o this is appended to the section 'oneline' under key 'o'
---: #: back to the 'example' section
---: #newname:
---: #: this starts a new section block named 'newname'
---: #oneline:a this is appended to the section 'oneline' under key 'a'
---: #MAIN:
---: #: Assemble the document
---: #: first the 'newname'
---: #=newname
---: #: then 'example'
---: #=example
---: #: and finally 'oneline' alphabetically sorted by keys
---: #@oneline
---: ----
---:
---: processed by pipadoc
---: ....
---: lua pipadoc.lua example.sh
---: ....
---:
---: Will result in
---: ----
---: Assemble the document
---: first the 'newname'
---: this starts a new section block named 'newname'
---: then 'example'
---: here the default section is 'example', derived from 'example.sh'
---: back to the 'example' section
---: and finally 'oneline' alphabetically sorted by keys
---: this is appended to the section 'oneline' under key 'a'
---: this is appended to the section 'oneline' under key 'o'
---: ----
---:
---: The pipadoc documentation you are just reading here is made and embedded in 'pipadoc.lua'
---: itself using 'asciidoc' as markup. Refer to the source itself to see how it is done.
---:
-local sections = {}
-local sections_usecnt = {}
-local sections_keys_usecnt = {}
-
---api_sections:
---:
---: Sections
---: ^^^^^^^^
---:
-
-function section_append(section, key, context) --: Append data to the given section/key
-  --:   to be called from preprocessors or macros which generate new content.
-  --:
-  --:   section:::
-  --:     name of the section to append to, must be a string
-  assert_type(section, "string")
-  --:   key:::
-  --:     the sub-key for sorting within that section. 'nil' for appending text to normal sections
-  maybe_type(key, "string")
-  --:   context:::
-  --:     The source line broken down into its components and additional pipadoc metadata
-  assert_type(context, "table")
-  --:
-  trace(context, "append:", section..":"..(key or "-"), context.TEXT)
-  sections[section] = sections[section] or {keys = {}}
-  if key and #key > 0 then
-    sections[section].keys[key] = sections[section].keys[key] or {}
-    table.insert(sections[section].keys[key], context)
-  else
-    table.insert(sections[section], context)
-  end
-end
-
---filetypes:
---: Pipadoc needs to know about the syntax of line comments of the files it is reading.
---: For this patterns are registered to be matched against the file name together with a
---: list of line comment characters.
---:
---: Definitions for a lot common programming languages are already included. For languages
---: that support block comments the opening (but not the closing) commenting characters are
---: registered as well. This allows one to define section blocks right away. But using the
---: comment closing sequence right on the line will clobber the output, don't do that!
---:
---: .Example in C
---: ----
---: /*blocksection:
---: //: this is a block-section
---: //: line comment sequences inside the block comment are still required
---: */
---:
---: /*works_too: but looks ugly
---: */
---:
---: // the following will include the closing */ in the documentation
---: /*fail: don't do this, pipadoc comments span to the end of the line */
---: ----
---:
---: A special case is that when a line comment is defined as an empty string ("") then every
---: line of a file is considered as documentation but no special operations apply. This is used
---: for plain text documentation files. Which also uses the "PIPADOC:" keyword to enable special
---: operations within text files.
---:
---: New uncommon filetypes can be added from a config file with 'filetype_register()'  or with
---: the '--register' command-line option.
---:
-local filetypes = {}
-
---api_filetypes:
---:
---: Filetypes
---: ^^^^^^^^^
---:
-function filetype_register(name, filep, linecommentseqs) --: Register a new filetype
-  --:     name:::
-  --:       mnemonic name of the language
-  --:     filep:::
-  --:       a Lua pattern or list of patterns matching filename
-  --:     linecommentseqs:::
-  --:       a string or list of strings matching comments of the registered filetype
-  --:
-  --: For example, C and C++ Filetypes are registered like:
-  --:
-  --: ----
-  --: filetype_register("C", \{"%.c$","%.cpp$","%.C$", "%.cxx$", "%.h$"\}, \{"//", "/*"\})
-  --: ----
-  --:
-  assert_type(name, "string")
-
-  filep = to_table(filep)
-  for _,v in pairs(filep) do
-    assert_type(v, "string")
-  end
-
-  linecommentseqs = to_table(linecommentseqs)
-  for _,v in pairs(linecommentseqs) do
-    assert_type(v, "string")
-  end
-
-  for i=1,#filep do
-    filetypes[filep[i]] = filetypes[filep[i]] or {language = name, comments = {}}
-    for j=1,#linecommentseqs do
-      dbg(nil, "register filetype:", name, filep[i], linecommentseqs[j])
-      filetypes[filep[i]].comments[#filetypes[filep[i]].comments + 1] = linecommentseqs[j]
-    end
-  end
-end
-
-local function filetype_get(filename)
-  assert_type(filename, "string")
-  for k,v in pairs(filetypes) do
-    if filename:match(k) then
-      return v,k
-    end
-  end
-end
-
-local function comment_select (line, filetype)
-  for i=1,#filetype.comments do
-    local comment = pattern_escape(filetype.comments[i])
-    if string.match(line, comment) then
-      return comment
-    end
-  end
-end
-
-
-local preprocessors = {}
---api_preproc:
---:
---: Preprocessors
---: ^^^^^^^^^^^^^
---:
-function preprocessor_register (langpat, preprocess) --: register a preprocessor
-  --:   langpat:::
-  --:     Register preprocessor to all filetypes whose mnemonic matches 'langpat'.
-  --:   preprocess:::
-  --:     The preprocessor to register. Can be one of:
-  --:     `function (context) ... end` ::::
-  --:       Takes the context of the current source line and shall return:
-  --:       *  the preprocessed line
-  --:       *  false to drop the line
-  --:       *  true to keep the line unaltered
-  --:       Preprocessors may store state or have other side effect using API functions.
-  --:     +\{pattern, repl [, n]\}+ ::::
-  --:       Generates a function calling 'context.SOURCE:gsub(pattern, repl [, n])' for preprocessing.
-  --:
-  --PLANNED: langpat as list of patterns
-  assert_type (langpat, "string")
-  dbg (nil, "register preprocessor:", langpat, preprocess)
-
-  if type (preprocess) == "table" then
-    local params = preprocess
-    preprocess = function (context)
-      local result = context.SOURCE:gsub (params[1], params[2], params[3])
-      if result == context.SOURCE then
-        return true
-      end
-      return result
-    end
-  end
-
-  if type (preprocess) == "function" then
-    table.insert(preprocessors, {pattern=langpat, preprocessor=preprocess})
-  else
-    warn (nil, "unsupported preprocessor type") --cwarn: <STRING> ::
-    --cwarn:  Tried to 'preprocessor_register()' something that is not a function or table.
-  end
-end
-
--- internal, hook preprocessors into the filetype descriptors
-local function preprocessors_attach ()
-  for i=1,#preprocessors do
-    local ppdesc = preprocessors[i]
-    for k,v in pairs(filetypes) do
-      if ppdesc.pattern == "" or v.language:match(ppdesc.pattern) then
-        local filetype_preprocessors = v.preprocessors or {}
-        local skip = false
-        for i=1,#filetype_preprocessors do
-          if filetype_preprocessors[i] == ppdesc.preprocess then
-            skip = true
-            break
-          end
-        end
-        if not skip then
-          trace (nil, "add preprocessor for:", k, ppdesc.preprocessor)
-          table.insert(filetype_preprocessors, ppdesc.preprocessor)
-          v.preprocessors = filetype_preprocessors
-        end
-      end
-    end
-  end
-end
-
-
-local function preprocessors_run (preprocessors, context)
-  if preprocessors then
-    for i=1,#preprocessors do
-      local ok,result = pcall(preprocessors[i], context)
-      if not ok then
-        warn(context, "preprocessor failed:", result) --cwarn: <STRING> ::
-        --cwarn:  preprocessor function error.
-        --PLANNED: preprocessors may expand to multiple lines? return table
-      elseif type(result) == 'string' then
-        trace(context, "preprocessed:", context.SOURCE, "->", result)
-        context.SOURCE = result
-      elseif result == false then
-        trace(context, "preprocessed drop:", context.SOURCE)
-        context.SOURCE = nil
-        break
-      elseif result == true then
-        -- NOP
-      else
-        warn(context, "preprocessor returned wrong type:", preprocessors[i], type(result)) --cwarn: <STRING> ::
-        --cwarn:  preprocessor returned unsupported type (or nil).
-      end
-    end
-  end
-end
-
-
-local postprocessors = {}
---api_postproc:
---:
---: Postprocessors
---: ^^^^^^^^^^^^^^
---:
-function postprocessor_register (markuppat, postprocess) --: register a postprocessor
-  --:   markuppat:::
-  --:     Register postprocessor to all markups whose name matches 'markuppat'.
-  --:   postprocess:::
-  --:     The postprocessor to register. Can be one of:
-  --:     `function (context) ... end` ::::
-  --:       Takes the context of the current source line and shall return:
-  --:       *  the postprocessed line (context.TEXT)
-  --:       *  false to drop the line
-  --:       *  true to keep the line unaltered
-  --:       Postprocessors may store state or have other side effect using API functions.
-  --:     +\{pattern, repl [, n]\}+ ::::
-  --:       Generates a function calling 'context.TEXT:gsub(pattern, repl [, n])' for postprocessing.
-  --:
-  --PLANNED: markuppat as list of patterns
-  assert_type (markuppat, "string")
-  dbg (nil, "register postprocessor:", markuppat, postprocess)
-
-
-  if type (postprocess) == "table" then
-    local params = postprocess
-    postprocess = function (context)
-      local result = context.TEXT:gsub (params[1], params[2], params[3])
-      if result == context.TEXT then
-        return true
-      end
-      return result
-    end
-  end
-
-  if type (postprocess) == "function" then
-    table.insert(postprocessors, {pattern=markuppat, postprocessor=postprocess})
-  else
-    warn (nil, "unsupported postprocessor type") --cwarn: <STRING> ::
-    --cwarn:  Tried to 'postprocessor_register()' something that is not a function or table.
-  end
-end
-
-
-local active_postprocessors = {}
-
-local function postprocessors_attach ()
-  for i=1,#postprocessors do
-    local ppdesc = postprocessors[i]
-    if GLOBAL.MARKUP:match(ppdesc.pattern) then
-      trace (nil, "add postprocessor for:", GLOBAL.MARKUP, ppdesc.postprocessor)
-      table.insert(active_postprocessors, ppdesc.postprocessor)
-    end
-  end
-end
-
---PLANNNED: wrap pcall for debugging purpose
-local function postprocessors_run (context)
-  for i=1,#active_postprocessors do
-    local ok, result = pcall(active_postprocessors[i], context)
-    if not ok then
-      warn(context, "postprocessor failed:", result) --cwarn: <STRING> ::
-      --cwarn:  postprocessor function error.
-      --PLANNED: postprocessors may expand to multiple lines? return table
-    elseif type(result) == 'string' then
-      trace(context, "postprocessed:", context.TEXT, "->", result)
-      context.TEXT = result
-    elseif result == false then
-      trace(context, "preprocessed drop:", context.TEXT)
-      context.TEXT = nil
-      break
-    elseif result == true then
-      -- NOP
-    else
-      warn(context, "postprocessor returned wrong type:", active_postprocessors[i], type(result)) --cwarn: <STRING> ::
-      --cwarn:  postprocessor returned unsupported type (or nil).
-    end
-  end
-
-  if context.TEXT then
-    context.TEXT = strsubst(context, context.TEXT, 'unescape')
-  end
-
-end
-
---op:
---: Operators define how documentation comments are evaluated, they are the core functionality
---: of pipadoc and mandatory in the pipadoc syntax to define a pipadoc comment line. It is
---: possible to (re-)define operators. Operators must be a single punctuation character.
---:
-local procfuncs = {}
-local genfuncs = {}
-
---api_op:
---:
---: Operators
---: ^^^^^^^^^
---:
---: Operators have 2 functions associated. The first one is the processing function which
---: defines how a documentation comment gets stored. The second one is the generator function
---: which will emits the documentation.
---:
-function operator_register(char, procfunc, genfunc) --: Register a new operator
-  --:   char:::
-  --:     single punctuation character except '.' defining this operator.
-  --:   procfunc +function(context)+:::
-  --:     a function which receives a CONTEXT table of the current line.
-  --:     The procfunc processes and store the context in appropriate
-  --:     fashion.
-   --:   genfunc +function(context)+:::
-  --:     a function generating the (sequential) output from given context.
-  --:
-  assert(string.match(char, "^%p$") == char)
-  assert_type(procfunc, 'function')
-  assert_type(genfunc, 'function')
-  dbg(nil, "register operator:", char)
-  procfuncs[char] = procfunc
-  genfuncs[char] = genfunc
-end
-
-
-local operator_pattern_cache
-
-function operator_pattern()
-  if not operator_pattern_cache then
-    operator_pattern_cache= "["
-    for k in pairs(procfuncs) do
-      operator_pattern_cache = operator_pattern_cache..k
-    end
-    operator_pattern_cache = operator_pattern_cache.."]"
-  end
-  return operator_pattern_cache
-end
+----------------------------
+-- Commandline Processing --
+----------------------------
 
 --api_various:
 function add_inputfile(filename) --: Add a 'filename' to the list of files to process
@@ -802,9 +256,11 @@ function register_alias(from, to) --: Register a new alias
   opt_aliases[#opt_aliases+1] = {from, to}
 end
 
-
-local function check_args(arg, n)
-  assert(#arg >= n, "missing arg: "..arg[n-1])
+function usage()
+  for i=1,#options do
+    print(options[i])
+  end
+  os.exit(0)
 end
 
 --usage:
@@ -1008,14 +464,6 @@ local options = {
   "  inputs are file names or a '-' that indicates standard input", --:  <STRING>
 }
 
-function usage()
-  for i=1,#options do
-    print(options[i])
-  end
-  os.exit(0)
-end
-
-
 function parse_args(arg)
   set_gcontext "<parse_args>"
 
@@ -1043,6 +491,661 @@ function parse_args(arg)
     i = i+1
   end
 end
+
+
+
+
+
+
+---------------------
+-- Library Loading --
+---------------------
+
+--api_load:
+--:
+--: Library Loading
+--: ^^^^^^^^^^^^^^^
+--:
+function request(name) --: try to load optional modules
+  --:    wraps Lua 'require' in a pcall so that failure to load module 'name' results in 'nil'
+  --:    rather than a error.
+  local ok,handle = pcall(require, name)
+  if ok then
+    dbg(nil, "loaded:", name, handle._VERSION)
+    return handle
+  else
+    warn(nil, "can't load module:", name) --cwarn: <STRING> ::
+    --cwarn:  'request()' failed to load a module.
+    return nil
+  end
+end
+--:
+
+
+
+
+
+
+--------------
+-- Strsubst --
+--------------
+
+--api_strsubst:
+--:
+--: String Substitution
+--: ^^^^^^^^^^^^^^^^^^^
+--:
+--api_strsubst_example:
+--:
+--: .Examples
+--: ----
+--: context = {
+--:   STRING = "example string",
+--:   STR = "\{STRING\}",
+--:   ING = "ING",
+--:   UPPER = function(context, arg)
+--:             return arg:upper()
+--:           end
+--:  }
+--:
+--  Note: curly braces are escaped here to be kept in the generated documentation
+--: -- simple substitution
+--: assert(strsubst(context, "\{STRING\}") == "example string")
+--:
+--: -- arguments on stringish substitutions are retained
+--: assert(strsubst(context, "\{STRING example\}") == "example stringexample")
+--:
+--: -- substitution is recursively applied
+--: assert(strsubst(context, "\{STR\}") == "example string")
+--:
+--: -- that can be used to create names dynamically
+--: assert(strsubst(context, "\{STR\{ING\}\}") == "example string")
+--:
+--: -- functions are called with the argument and their return is substituted
+--: assert(strsubst(context, "\{UPPER arg\}") == "ARG")
+--:
+--: -- now together
+--: assert(strsubst(context, "\{UPPER \{STR\}\}") == "EXAMPLE STRING")
+--:
+--: -- undefined names are kept verbatim
+--: assert(strsubst(context, "\{undefined\}") == "\{undefined\}")
+--: ----
+--:
+
+local function table_inverse (t)
+  local ret = {}
+  for k,v in pairs(t) do
+    ret[v] = k
+  end
+  return ret
+end
+
+local strsubst_escapes = {
+  ["\\"] = "{__BACKSLASH__}",
+  ["`"] = "{__BACKTICK__}",
+  ["{"] = "{__BRACEOPEN__}",
+  ["}"] = "{__BRACECLOSE__}",
+}
+
+local strsubst_escapes_back = table_inverse(strsubst_escapes)
+
+
+--api_strsubst:
+function strsubst (context, str, escape) --: substitute text
+  --:   context:::
+  --:     The current context which defines all variables and
+  --:     macros for the substitution.
+  --:   str:::
+  --:     The string to operate on
+  --:   escape:::
+  --:     Rule for special character escaping
+  --:     true:::: handle escaping in one pass
+  --:     'escape':::: 1st pass
+  --:     'unescape':::: 2nd pass
+  --:     nil:::: no special escaping
+  trace (context, "strsubst:", str)
+  maybe_type (context, "table")
+  assert_type (str, "string")
+
+  context = context or gcontext
+  local sofar = {}
+
+  local function strsubst_intern (str)
+    trace(context, "strsubst_intern:", str)
+
+    return str:gsub("%b{}",
+                    function (capture)
+                      local ret = capture
+                      local subst = false
+
+                      local var,arg = capture:match("^{(%a[%w_{}]*).?(.*)}$")
+                      if not var then return capture end
+                      var = strsubst_intern (var)
+
+                      -- recursively dereference names when braced
+                      do
+                        local sofar = {}
+                        while not sofar[var] and type(context[var]) == "string" and context[var]:match("^(%b{})$") do
+                          subst = true
+                          sofar[var] = true
+                          var = strsubst_intern (context[var]:sub(2,-2))
+                        end
+                      end
+                      if context[var] then
+                        subst = true
+                        var = context[var]
+                      end
+
+                      arg = strsubst_intern (arg)
+
+                      if subst then
+                        if not sofar[var] then
+                          sofar[var] = true
+                          if type(var) == 'function' then
+                            local ok, result = pcall(var, context, arg)
+                            if ok then
+                              ret = tostring(result)
+                            else
+                              warn (context, "strsubst function failed:", var, result) --cwarn: <STRING> ::
+                              --cwarn:  strsubst tried to call a custom function which failed.
+                            end
+                          else
+                            ret = tostring(var)..arg
+                          end
+                        ret = strsubst_intern(ret)
+                          sofar[var] = nil
+                        else
+                          warn (context, "strsubst recursive expansion:", var)  --cwarn: <STRING> ::
+                          --cwarn:  cyclic substitution.
+                        end
+                      else
+                        if escape == 'unescape' and not ret:match "^{__.*__}$" then
+                          warn (context, "strsubst no expansion:", capture)  --cwarn: <STRING> ::
+                          --cwarn:  no substitution defined.
+                        end
+                      end
+
+                      return ret
+                    end
+    )
+  end
+
+  if escape == true or escape == 'escape' then
+    str =  str:gsub("[`\\]([{}\\])", strsubst_escapes)
+  end
+
+  str = strsubst_intern(str)
+
+  if escape == true or escape == 'unescape'then
+    str = str:gsub("%b{}", strsubst_escapes_back)
+  end
+
+  trace (context, "strsubst done:", str)
+  return str
+end
+
+
+
+
+
+
+----------------------
+-- Section handling --
+----------------------
+
+--sections:
+--: Text in pipadoc is appended to named 'sections'. Text can be associated with some
+--: alphanumeric key under that section. This enables later sorting for indices and glossaries.
+--:
+--: Sections can be one line or span a block of lines.
+--:
+--: One-line sections are defined when a section and maybe a key is followed by documentation
+--: text. Block sections start with the section definition but no documentation text on the same
+--: line. A block stays active until the next block section definition. One-line doctext can be
+--: interleaved into Blocks.
+--:
+--: The default block section name is the files name up, but excluding to the first dot.
+--:
+--: Sections are later brought into the desired order by pasting them into a 'toplevel' section.
+--: This default name for the 'toplevel' section is 'MAIN_\{markup\}' or if that does not exist
+--: just 'MAIN'.
+--:
+--: .An example document (example.sh)
+--: ----
+--: #!/bin/sh
+--: #: here the default section is 'example', derived from 'example.sh'
+--: #oneline:o this is appended to the section 'oneline' under key 'o'
+--: #: back to the 'example' section
+--: #newname:
+--: #: this starts a new section block named 'newname'
+--: #oneline:a this is appended to the section 'oneline' under key 'a'
+--: #MAIN:
+--: #: Assemble the document
+--: #: first the 'newname'
+--: #=newname
+--: #: then 'example'
+--: #=example
+--: #: and finally 'oneline' alphabetically sorted by keys
+--: #@oneline
+--: ----
+--:
+--: processed by pipadoc
+--: ....
+--: lua pipadoc.lua example.sh
+--: ....
+--:
+--: Will result in
+--: ----
+--: Assemble the document
+--: first the 'newname'
+--: this starts a new section block named 'newname'
+--: then 'example'
+--: here the default section is 'example', derived from 'example.sh'
+--: back to the 'example' section
+--: and finally 'oneline' alphabetically sorted by keys
+--: this is appended to the section 'oneline' under key 'a'
+--: this is appended to the section 'oneline' under key 'o'
+--: ----
+--:
+--: The pipadoc documentation you are just reading here is made and embedded in 'pipadoc.lua'
+--: itself using 'asciidoc' as markup. Refer to the source itself to see how it is done.
+--:
+local sections = {}
+local sections_usecnt = {}
+local sections_keys_usecnt = {}
+
+--api_sections:
+--:
+--: Sections
+--: ^^^^^^^^
+--:
+
+function section_append(section, key, context) --: Append data to the given section/key
+  --:   to be called from preprocessors or macros which generate new content.
+  --:
+  --:   section:::
+  --:     name of the section to append to, must be a string
+  assert_type(section, "string")
+  --:   key:::
+  --:     the sub-key for sorting within that section. 'nil' for appending text to normal sections
+  maybe_type(key, "string")
+  --:   context:::
+  --:     The source line broken down into its components and additional pipadoc metadata
+  assert_type(context, "table")
+  --:
+  trace(context, "append:", section..":"..(key or "-"), context.TEXT)
+  sections[section] = sections[section] or {keys = {}}
+  if key and #key > 0 then
+    sections[section].keys[key] = sections[section].keys[key] or {}
+    table.insert(sections[section].keys[key], context)
+  else
+    table.insert(sections[section], context)
+  end
+end
+
+--filetypes:
+--: Pipadoc needs to know about the syntax of line comments of the files it is reading.
+--: For this patterns are registered to be matched against the file name together with a
+--: list of line comment characters.
+--:
+--: Definitions for a lot common programming languages are already included. For languages
+--: that support block comments the opening (but not the closing) commenting characters are
+--: registered as well. This allows one to define section blocks right away. But using the
+--: comment closing sequence right on the line will clobber the output, don't do that!
+--:
+--: .Example in C
+--: ----
+--: /*blocksection:
+--: //: this is a block-section
+--: //: line comment sequences inside the block comment are still required
+--: */
+--:
+--: /*works_too: but looks ugly
+--: */
+--:
+--: // the following will include the closing */ in the documentation
+--: /*fail: don't do this, pipadoc comments span to the end of the line */
+--: ----
+--:
+--: A special case is that when a line comment is defined as an empty string ("") then every
+--: line of a file is considered as documentation but no special operations apply. This is used
+--: for plain text documentation files. Which also uses the "PIPADOC:" keyword to enable special
+--: operations within text files.
+--:
+--: New uncommon filetypes can be added from a config file with 'filetype_register()'  or with
+--: the '--register' command-line option.
+--:
+local filetypes = {}
+
+
+
+
+
+
+---------------
+-- Filetypes --
+---------------
+
+--api_filetypes:
+--:
+--: Filetypes
+--: ^^^^^^^^^
+--:
+function filetype_register(name, filep, linecommentseqs) --: Register a new filetype
+  --:     name:::
+  --:       mnemonic name of the language
+  --:     filep:::
+  --:       a Lua pattern or list of patterns matching filename
+  --:     linecommentseqs:::
+  --:       a string or list of strings matching comments of the registered filetype
+  --:
+  --: For example, C and C++ Filetypes are registered like:
+  --:
+  --: ----
+  --: filetype_register("C", \{"%.c$","%.cpp$","%.C$", "%.cxx$", "%.h$"\}, \{"//", "/*"\})
+  --: ----
+  --:
+  assert_type(name, "string")
+
+  filep = to_table(filep)
+  for _,v in pairs(filep) do
+    assert_type(v, "string")
+  end
+
+  linecommentseqs = to_table(linecommentseqs)
+  for _,v in pairs(linecommentseqs) do
+    assert_type(v, "string")
+  end
+
+  for i=1,#filep do
+    filetypes[filep[i]] = filetypes[filep[i]] or {language = name, comments = {}}
+    for j=1,#linecommentseqs do
+      dbg(nil, "register filetype:", name, filep[i], linecommentseqs[j])
+      filetypes[filep[i]].comments[#filetypes[filep[i]].comments + 1] = linecommentseqs[j]
+    end
+  end
+end
+
+local function filetype_get(filename)
+  assert_type(filename, "string")
+  for k,v in pairs(filetypes) do
+    if filename:match(k) then
+      return v,k
+    end
+  end
+end
+
+local function comment_select (line, filetype)
+  for i=1,#filetype.comments do
+    local comment = pattern_escape(filetype.comments[i])
+    if string.match(line, comment) then
+      return comment
+    end
+  end
+end
+
+
+
+
+
+
+------------------
+-- Preprocessor --
+------------------
+
+local preprocessors = {}
+--api_preproc:
+--:
+--: Preprocessors
+--: ^^^^^^^^^^^^^
+--:
+function preprocessor_register (langpat, preprocess) --: register a preprocessor
+  --:   langpat:::
+  --:     Register preprocessor to all filetypes whose mnemonic matches 'langpat'.
+  --:   preprocess:::
+  --:     The preprocessor to register. Can be one of:
+  --:     `function (context) ... end` ::::
+  --:       Takes the context of the current source line and shall return:
+  --:       *  the preprocessed line
+  --:       *  false to drop the line
+  --:       *  true to keep the line unaltered
+  --:       Preprocessors may store state or have other side effect using API functions.
+  --:     +\{pattern, repl [, n]\}+ ::::
+  --:       Generates a function calling 'context.SOURCE:gsub(pattern, repl [, n])' for preprocessing.
+  --:
+  --PLANNED: langpat as list of patterns
+  assert_type (langpat, "string")
+  dbg (nil, "register preprocessor:", langpat, preprocess)
+
+  if type (preprocess) == "table" then
+    local params = preprocess
+    preprocess = function (context)
+      local result = context.SOURCE:gsub (params[1], params[2], params[3])
+      if result == context.SOURCE then
+        return true
+      end
+      return result
+    end
+  end
+
+  if type (preprocess) == "function" then
+    table.insert(preprocessors, {pattern=langpat, preprocessor=preprocess})
+  else
+    warn (nil, "unsupported preprocessor type") --cwarn: <STRING> ::
+    --cwarn:  Tried to 'preprocessor_register()' something that is not a function or table.
+  end
+end
+
+-- internal, hook preprocessors into the filetype descriptors
+local function preprocessors_attach ()
+  for i=1,#preprocessors do
+    local ppdesc = preprocessors[i]
+    for k,v in pairs(filetypes) do
+      if ppdesc.pattern == "" or v.language:match(ppdesc.pattern) then
+        local filetype_preprocessors = v.preprocessors or {}
+        local skip = false
+        for i=1,#filetype_preprocessors do
+          if filetype_preprocessors[i] == ppdesc.preprocess then
+            skip = true
+            break
+          end
+        end
+        if not skip then
+          trace (nil, "add preprocessor for:", k, ppdesc.preprocessor)
+          table.insert(filetype_preprocessors, ppdesc.preprocessor)
+          v.preprocessors = filetype_preprocessors
+        end
+      end
+    end
+  end
+end
+
+
+local function preprocessors_run (preprocessors, context)
+  if preprocessors then
+    for i=1,#preprocessors do
+      local ok,result = pcall(preprocessors[i], context)
+      if not ok then
+        warn(context, "preprocessor failed:", result) --cwarn: <STRING> ::
+        --cwarn:  preprocessor function error.
+        --PLANNED: preprocessors may expand to multiple lines? return table
+      elseif type(result) == 'string' then
+        trace(context, "preprocessed:", context.SOURCE, "->", result)
+        context.SOURCE = result
+      elseif result == false then
+        trace(context, "preprocessed drop:", context.SOURCE)
+        context.SOURCE = nil
+        break
+      elseif result == true then
+        -- NOP
+      else
+        warn(context, "preprocessor returned wrong type:", preprocessors[i], type(result)) --cwarn: <STRING> ::
+        --cwarn:  preprocessor returned unsupported type (or nil).
+      end
+    end
+  end
+end
+
+
+
+
+
+
+-------------------
+-- Postprocessor --
+-------------------
+
+local postprocessors = {}
+--api_postproc:
+--:
+--: Postprocessors
+--: ^^^^^^^^^^^^^^
+--:
+function postprocessor_register (markuppat, postprocess) --: register a postprocessor
+  --:   markuppat:::
+  --:     Register postprocessor to all markups whose name matches 'markuppat'.
+  --:   postprocess:::
+  --:     The postprocessor to register. Can be one of:
+  --:     `function (context) ... end` ::::
+  --:       Takes the context of the current source line and shall return:
+  --:       *  the postprocessed line (context.TEXT)
+  --:       *  false to drop the line
+  --:       *  true to keep the line unaltered
+  --:       Postprocessors may store state or have other side effect using API functions.
+  --:     +\{pattern, repl [, n]\}+ ::::
+  --:       Generates a function calling 'context.TEXT:gsub(pattern, repl [, n])' for postprocessing.
+  --:
+  --PLANNED: markuppat as list of patterns
+  assert_type (markuppat, "string")
+  dbg (nil, "register postprocessor:", markuppat, postprocess)
+
+
+  if type (postprocess) == "table" then
+    local params = postprocess
+    postprocess = function (context)
+      local result = context.TEXT:gsub (params[1], params[2], params[3])
+      if result == context.TEXT then
+        return true
+      end
+      return result
+    end
+  end
+
+  if type (postprocess) == "function" then
+    table.insert(postprocessors, {pattern=markuppat, postprocessor=postprocess})
+  else
+    warn (nil, "unsupported postprocessor type") --cwarn: <STRING> ::
+    --cwarn:  Tried to 'postprocessor_register()' something that is not a function or table.
+  end
+end
+
+
+local active_postprocessors = {}
+
+local function postprocessors_attach ()
+  for i=1,#postprocessors do
+    local ppdesc = postprocessors[i]
+    if GLOBAL.MARKUP:match(ppdesc.pattern) then
+      trace (nil, "add postprocessor for:", GLOBAL.MARKUP, ppdesc.postprocessor)
+      table.insert(active_postprocessors, ppdesc.postprocessor)
+    end
+  end
+end
+
+--PLANNNED: wrap pcall for debugging purpose
+local function postprocessors_run (context)
+  for i=1,#active_postprocessors do
+    local ok, result = pcall(active_postprocessors[i], context)
+    if not ok then
+      warn(context, "postprocessor failed:", result) --cwarn: <STRING> ::
+      --cwarn:  postprocessor function error.
+      --PLANNED: postprocessors may expand to multiple lines? return table
+    elseif type(result) == 'string' then
+      trace(context, "postprocessed:", context.TEXT, "->", result)
+      context.TEXT = result
+    elseif result == false then
+      trace(context, "preprocessed drop:", context.TEXT)
+      context.TEXT = nil
+      break
+    elseif result == true then
+      -- NOP
+    else
+      warn(context, "postprocessor returned wrong type:", active_postprocessors[i], type(result)) --cwarn: <STRING> ::
+      --cwarn:  postprocessor returned unsupported type (or nil).
+    end
+  end
+
+  if context.TEXT then
+    context.TEXT = strsubst(context, context.TEXT, 'unescape')
+  end
+
+end
+
+
+
+
+
+---------------
+-- Operators --
+---------------
+
+--op:
+--: Operators define how documentation comments are evaluated, they are the core functionality
+--: of pipadoc and mandatory in the pipadoc syntax to define a pipadoc comment line. It is
+--: possible to (re-)define operators. Operators must be a single punctuation character.
+--:
+local procfuncs = {}
+local genfuncs = {}
+
+--api_op:
+--:
+--: Operators
+--: ^^^^^^^^^
+--:
+--: Operators have 2 functions associated. The first one is the processing function which
+--: defines how a documentation comment gets stored. The second one is the generator function
+--: which will emits the documentation.
+--:
+function operator_register(char, procfunc, genfunc) --: Register a new operator
+  --:   char:::
+  --:     single punctuation character except '.' defining this operator.
+  --:   procfunc +function(context)+:::
+  --:     a function which receives a CONTEXT table of the current line.
+  --:     The procfunc processes and store the context in appropriate
+  --:     fashion.
+   --:   genfunc +function(context)+:::
+  --:     a function generating the (sequential) output from given context.
+  --:
+  assert(string.match(char, "^%p$") == char)
+  assert_type(procfunc, 'function')
+  assert_type(genfunc, 'function')
+  dbg(nil, "register operator:", char)
+  procfuncs[char] = procfunc
+  genfuncs[char] = genfunc
+end
+
+
+local operator_pattern_cache
+
+function operator_pattern()
+  if not operator_pattern_cache then
+    operator_pattern_cache= "["
+    for k in pairs(procfuncs) do
+      operator_pattern_cache = operator_pattern_cache..k
+    end
+    operator_pattern_cache = operator_pattern_cache.."]"
+  end
+  return operator_pattern_cache
+end
+
+
+
+
+
+
+--------------------
+-- Initialization --
+--------------------
 
 -- store state for block comments
 local block_section
@@ -1328,6 +1431,13 @@ local function setup()
   postprocessors_attach ()
 end
 
+
+
+
+----------------------
+-- Input Processing --
+----------------------
+
 local function process_line (context, comment)
   --context:
   --:pre {VARDEF PRE}
@@ -1496,6 +1606,12 @@ local function process_inputs()
 end
 
 
+
+
+-----------------------
+-- Output Processing --
+-----------------------
+
 local sofar_rec={}
 
 function generate_output(which, output)
@@ -1566,6 +1682,13 @@ function report_orphan_doubletes()
 end
 
 
+
+
+
+----------
+-- Main --
+----------
+
 do
   setup()
   process_inputs()
@@ -1615,6 +1738,15 @@ do
 
   report_orphan_doubletes()
 end
+
+
+
+
+
+
+-------------------
+-- Documentation --
+-------------------
 
 
 --MAIN_asciidoc=MAIN
