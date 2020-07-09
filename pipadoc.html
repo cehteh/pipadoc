@@ -1,518 +1,811 @@
-<!DOCTYPE html>
-<html lang="en">
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN"
+    "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
 <head>
-<meta charset="UTF-8">
-<!--[if IE]><meta http-equiv="X-UA-Compatible" content="IE=edge"><![endif]-->
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="generator" content="Asciidoctor 1.5.8">
-<meta name="author" content="Christian Thaeter">
+<meta http-equiv="Content-Type" content="application/xhtml+xml; charset=UTF-8" />
+<meta name="generator" content="AsciiDoc 8.6.10" />
 <title>pipadoc - Documentation extractor</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
-<style>
-/* Asciidoctor default stylesheet | MIT License | http://asciidoctor.org */
-/* Uncomment @import statement below to use as custom stylesheet */
-/*@import "https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700";*/
-article,aside,details,figcaption,figure,footer,header,hgroup,main,nav,section,summary{display:block}
-audio,canvas,video{display:inline-block}
-audio:not([controls]){display:none;height:0}
-script{display:none!important}
-html{font-family:sans-serif;-ms-text-size-adjust:100%;-webkit-text-size-adjust:100%}
-a{background:transparent}
-a:focus{outline:thin dotted}
-a:active,a:hover{outline:0}
-h1{font-size:2em;margin:.67em 0}
-abbr[title]{border-bottom:1px dotted}
-b,strong{font-weight:bold}
-dfn{font-style:italic}
-hr{-moz-box-sizing:content-box;box-sizing:content-box;height:0}
-mark{background:#ff0;color:#000}
-code,kbd,pre,samp{font-family:monospace;font-size:1em}
-pre{white-space:pre-wrap}
-q{quotes:"\201C" "\201D" "\2018" "\2019"}
-small{font-size:80%}
-sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}
-sup{top:-.5em}
-sub{bottom:-.25em}
-img{border:0}
-svg:not(:root){overflow:hidden}
-figure{margin:0}
-fieldset{border:1px solid silver;margin:0 2px;padding:.35em .625em .75em}
-legend{border:0;padding:0}
-button,input,select,textarea{font-family:inherit;font-size:100%;margin:0}
-button,input{line-height:normal}
-button,select{text-transform:none}
-button,html input[type="button"],input[type="reset"],input[type="submit"]{-webkit-appearance:button;cursor:pointer}
-button[disabled],html input[disabled]{cursor:default}
-input[type="checkbox"],input[type="radio"]{box-sizing:border-box;padding:0}
-button::-moz-focus-inner,input::-moz-focus-inner{border:0;padding:0}
-textarea{overflow:auto;vertical-align:top}
-table{border-collapse:collapse;border-spacing:0}
-*,*::before,*::after{-moz-box-sizing:border-box;-webkit-box-sizing:border-box;box-sizing:border-box}
-html,body{font-size:100%}
-body{background:#fff;color:rgba(0,0,0,.8);padding:0;margin:0;font-family:"Noto Serif","DejaVu Serif",serif;font-weight:400;font-style:normal;line-height:1;position:relative;cursor:auto;tab-size:4;-moz-osx-font-smoothing:grayscale;-webkit-font-smoothing:antialiased}
-a:hover{cursor:pointer}
-img,object,embed{max-width:100%;height:auto}
-object,embed{height:100%}
-img{-ms-interpolation-mode:bicubic}
-.left{float:left!important}
-.right{float:right!important}
-.text-left{text-align:left!important}
-.text-right{text-align:right!important}
-.text-center{text-align:center!important}
-.text-justify{text-align:justify!important}
-.hide{display:none}
-img,object,svg{display:inline-block;vertical-align:middle}
-textarea{height:auto;min-height:50px}
-select{width:100%}
-.center{margin-left:auto;margin-right:auto}
-.stretch{width:100%}
-.subheader,.admonitionblock td.content>.title,.audioblock>.title,.exampleblock>.title,.imageblock>.title,.listingblock>.title,.literalblock>.title,.stemblock>.title,.openblock>.title,.paragraph>.title,.quoteblock>.title,table.tableblock>.title,.verseblock>.title,.videoblock>.title,.dlist>.title,.olist>.title,.ulist>.title,.qlist>.title,.hdlist>.title{line-height:1.45;color:#7a2518;font-weight:400;margin-top:0;margin-bottom:.25em}
-div,dl,dt,dd,ul,ol,li,h1,h2,h3,#toctitle,.sidebarblock>.content>.title,h4,h5,h6,pre,form,p,blockquote,th,td{margin:0;padding:0;direction:ltr}
-a{color:#2156a5;text-decoration:underline;line-height:inherit}
-a:hover,a:focus{color:#1d4b8f}
-a img{border:none}
-p{font-family:inherit;font-weight:400;font-size:1em;line-height:1.6;margin-bottom:1.25em;text-rendering:optimizeLegibility}
-p aside{font-size:.875em;line-height:1.35;font-style:italic}
-h1,h2,h3,#toctitle,.sidebarblock>.content>.title,h4,h5,h6{font-family:"Open Sans","DejaVu Sans",sans-serif;font-weight:300;font-style:normal;color:#ba3925;text-rendering:optimizeLegibility;margin-top:1em;margin-bottom:.5em;line-height:1.0125em}
-h1 small,h2 small,h3 small,#toctitle small,.sidebarblock>.content>.title small,h4 small,h5 small,h6 small{font-size:60%;color:#e99b8f;line-height:0}
-h1{font-size:2.125em}
-h2{font-size:1.6875em}
-h3,#toctitle,.sidebarblock>.content>.title{font-size:1.375em}
-h4,h5{font-size:1.125em}
-h6{font-size:1em}
-hr{border:solid #dddddf;border-width:1px 0 0;clear:both;margin:1.25em 0 1.1875em;height:0}
-em,i{font-style:italic;line-height:inherit}
-strong,b{font-weight:bold;line-height:inherit}
-small{font-size:60%;line-height:inherit}
-code{font-family:"Droid Sans Mono","DejaVu Sans Mono",monospace;font-weight:400;color:rgba(0,0,0,.9)}
-ul,ol,dl{font-size:1em;line-height:1.6;margin-bottom:1.25em;list-style-position:outside;font-family:inherit}
-ul,ol{margin-left:1.5em}
-ul li ul,ul li ol{margin-left:1.25em;margin-bottom:0;font-size:1em}
-ul.square li ul,ul.circle li ul,ul.disc li ul{list-style:inherit}
-ul.square{list-style-type:square}
-ul.circle{list-style-type:circle}
-ul.disc{list-style-type:disc}
-ol li ul,ol li ol{margin-left:1.25em;margin-bottom:0}
-dl dt{margin-bottom:.3125em;font-weight:bold}
-dl dd{margin-bottom:1.25em}
-abbr,acronym{text-transform:uppercase;font-size:90%;color:rgba(0,0,0,.8);border-bottom:1px dotted #ddd;cursor:help}
-abbr{text-transform:none}
-blockquote{margin:0 0 1.25em;padding:.5625em 1.25em 0 1.1875em;border-left:1px solid #ddd}
-blockquote cite{display:block;font-size:.9375em;color:rgba(0,0,0,.6)}
-blockquote cite::before{content:"\2014 \0020"}
-blockquote cite a,blockquote cite a:visited{color:rgba(0,0,0,.6)}
-blockquote,blockquote p{line-height:1.6;color:rgba(0,0,0,.85)}
-@media screen and (min-width:768px){h1,h2,h3,#toctitle,.sidebarblock>.content>.title,h4,h5,h6{line-height:1.2}
-h1{font-size:2.75em}
-h2{font-size:2.3125em}
-h3,#toctitle,.sidebarblock>.content>.title{font-size:1.6875em}
-h4{font-size:1.4375em}}
-table{background:#fff;margin-bottom:1.25em;border:solid 1px #dedede}
-table thead,table tfoot{background:#f7f8f7}
-table thead tr th,table thead tr td,table tfoot tr th,table tfoot tr td{padding:.5em .625em .625em;font-size:inherit;color:rgba(0,0,0,.8);text-align:left}
-table tr th,table tr td{padding:.5625em .625em;font-size:inherit;color:rgba(0,0,0,.8)}
-table tr.even,table tr.alt,table tr:nth-of-type(even){background:#f8f8f7}
-table thead tr th,table tfoot tr th,table tbody tr td,table tr td,table tfoot tr td{display:table-cell;line-height:1.6}
-h1,h2,h3,#toctitle,.sidebarblock>.content>.title,h4,h5,h6{line-height:1.2;word-spacing:-.05em}
-h1 strong,h2 strong,h3 strong,#toctitle strong,.sidebarblock>.content>.title strong,h4 strong,h5 strong,h6 strong{font-weight:400}
-.clearfix::before,.clearfix::after,.float-group::before,.float-group::after{content:" ";display:table}
-.clearfix::after,.float-group::after{clear:both}
-*:not(pre)>code{font-size:.9375em;font-style:normal!important;letter-spacing:0;padding:.1em .5ex;word-spacing:-.15em;background-color:#f7f7f8;-webkit-border-radius:4px;border-radius:4px;line-height:1.45;text-rendering:optimizeSpeed;word-wrap:break-word}
-*:not(pre)>code.nobreak{word-wrap:normal}
-*:not(pre)>code.nowrap{white-space:nowrap}
-pre,pre>code{line-height:1.45;color:rgba(0,0,0,.9);font-family:"Droid Sans Mono","DejaVu Sans Mono",monospace;font-weight:400;text-rendering:optimizeSpeed}
-em em{font-style:normal}
-strong strong{font-weight:400}
-.keyseq{color:rgba(51,51,51,.8)}
-kbd{font-family:"Droid Sans Mono","DejaVu Sans Mono",monospace;display:inline-block;color:rgba(0,0,0,.8);font-size:.65em;line-height:1.45;background-color:#f7f7f7;border:1px solid #ccc;-webkit-border-radius:3px;border-radius:3px;-webkit-box-shadow:0 1px 0 rgba(0,0,0,.2),0 0 0 .1em white inset;box-shadow:0 1px 0 rgba(0,0,0,.2),0 0 0 .1em #fff inset;margin:0 .15em;padding:.2em .5em;vertical-align:middle;position:relative;top:-.1em;white-space:nowrap}
-.keyseq kbd:first-child{margin-left:0}
-.keyseq kbd:last-child{margin-right:0}
-.menuseq,.menuref{color:#000}
-.menuseq b:not(.caret),.menuref{font-weight:inherit}
-.menuseq{word-spacing:-.02em}
-.menuseq b.caret{font-size:1.25em;line-height:.8}
-.menuseq i.caret{font-weight:bold;text-align:center;width:.45em}
-b.button::before,b.button::after{position:relative;top:-1px;font-weight:400}
-b.button::before{content:"[";padding:0 3px 0 2px}
-b.button::after{content:"]";padding:0 2px 0 3px}
-p a>code:hover{color:rgba(0,0,0,.9)}
-#header,#content,#footnotes,#footer{width:100%;margin-left:auto;margin-right:auto;margin-top:0;margin-bottom:0;max-width:62.5em;*zoom:1;position:relative;padding-left:.9375em;padding-right:.9375em}
-#header::before,#header::after,#content::before,#content::after,#footnotes::before,#footnotes::after,#footer::before,#footer::after{content:" ";display:table}
-#header::after,#content::after,#footnotes::after,#footer::after{clear:both}
-#content{margin-top:1.25em}
-#content::before{content:none}
-#header>h1:first-child{color:rgba(0,0,0,.85);margin-top:2.25rem;margin-bottom:0}
-#header>h1:first-child+#toc{margin-top:8px;border-top:1px solid #dddddf}
-#header>h1:only-child,body.toc2 #header>h1:nth-last-child(2){border-bottom:1px solid #dddddf;padding-bottom:8px}
-#header .details{border-bottom:1px solid #dddddf;line-height:1.45;padding-top:.25em;padding-bottom:.25em;padding-left:.25em;color:rgba(0,0,0,.6);display:-ms-flexbox;display:-webkit-flex;display:flex;-ms-flex-flow:row wrap;-webkit-flex-flow:row wrap;flex-flow:row wrap}
-#header .details span:first-child{margin-left:-.125em}
-#header .details span.email a{color:rgba(0,0,0,.85)}
-#header .details br{display:none}
-#header .details br+span::before{content:"\00a0\2013\00a0"}
-#header .details br+span.author::before{content:"\00a0\22c5\00a0";color:rgba(0,0,0,.85)}
-#header .details br+span#revremark::before{content:"\00a0|\00a0"}
-#header #revnumber{text-transform:capitalize}
-#header #revnumber::after{content:"\00a0"}
-#content>h1:first-child:not([class]){color:rgba(0,0,0,.85);border-bottom:1px solid #dddddf;padding-bottom:8px;margin-top:0;padding-top:1rem;margin-bottom:1.25rem}
-#toc{border-bottom:1px solid #e7e7e9;padding-bottom:.5em}
-#toc>ul{margin-left:.125em}
-#toc ul.sectlevel0>li>a{font-style:italic}
-#toc ul.sectlevel0 ul.sectlevel1{margin:.5em 0}
-#toc ul{font-family:"Open Sans","DejaVu Sans",sans-serif;list-style-type:none}
-#toc li{line-height:1.3334;margin-top:.3334em}
-#toc a{text-decoration:none}
-#toc a:active{text-decoration:underline}
-#toctitle{color:#7a2518;font-size:1.2em}
-@media screen and (min-width:768px){#toctitle{font-size:1.375em}
-body.toc2{padding-left:15em;padding-right:0}
-#toc.toc2{margin-top:0!important;background-color:#f8f8f7;position:fixed;width:15em;left:0;top:0;border-right:1px solid #e7e7e9;border-top-width:0!important;border-bottom-width:0!important;z-index:1000;padding:1.25em 1em;height:100%;overflow:auto}
-#toc.toc2 #toctitle{margin-top:0;margin-bottom:.8rem;font-size:1.2em}
-#toc.toc2>ul{font-size:.9em;margin-bottom:0}
-#toc.toc2 ul ul{margin-left:0;padding-left:1em}
-#toc.toc2 ul.sectlevel0 ul.sectlevel1{padding-left:0;margin-top:.5em;margin-bottom:.5em}
-body.toc2.toc-right{padding-left:0;padding-right:15em}
-body.toc2.toc-right #toc.toc2{border-right-width:0;border-left:1px solid #e7e7e9;left:auto;right:0}}
-@media screen and (min-width:1280px){body.toc2{padding-left:20em;padding-right:0}
-#toc.toc2{width:20em}
-#toc.toc2 #toctitle{font-size:1.375em}
-#toc.toc2>ul{font-size:.95em}
-#toc.toc2 ul ul{padding-left:1.25em}
-body.toc2.toc-right{padding-left:0;padding-right:20em}}
-#content #toc{border-style:solid;border-width:1px;border-color:#e0e0dc;margin-bottom:1.25em;padding:1.25em;background:#f8f8f7;-webkit-border-radius:4px;border-radius:4px}
-#content #toc>:first-child{margin-top:0}
-#content #toc>:last-child{margin-bottom:0}
-#footer{max-width:100%;background-color:rgba(0,0,0,.8);padding:1.25em}
-#footer-text{color:rgba(255,255,255,.8);line-height:1.44}
-#content{margin-bottom:.625em}
-.sect1{padding-bottom:.625em}
-@media screen and (min-width:768px){#content{margin-bottom:1.25em}
-.sect1{padding-bottom:1.25em}}
-.sect1:last-child{padding-bottom:0}
-.sect1+.sect1{border-top:1px solid #e7e7e9}
-#content h1>a.anchor,h2>a.anchor,h3>a.anchor,#toctitle>a.anchor,.sidebarblock>.content>.title>a.anchor,h4>a.anchor,h5>a.anchor,h6>a.anchor{position:absolute;z-index:1001;width:1.5ex;margin-left:-1.5ex;display:block;text-decoration:none!important;visibility:hidden;text-align:center;font-weight:400}
-#content h1>a.anchor::before,h2>a.anchor::before,h3>a.anchor::before,#toctitle>a.anchor::before,.sidebarblock>.content>.title>a.anchor::before,h4>a.anchor::before,h5>a.anchor::before,h6>a.anchor::before{content:"\00A7";font-size:.85em;display:block;padding-top:.1em}
-#content h1:hover>a.anchor,#content h1>a.anchor:hover,h2:hover>a.anchor,h2>a.anchor:hover,h3:hover>a.anchor,#toctitle:hover>a.anchor,.sidebarblock>.content>.title:hover>a.anchor,h3>a.anchor:hover,#toctitle>a.anchor:hover,.sidebarblock>.content>.title>a.anchor:hover,h4:hover>a.anchor,h4>a.anchor:hover,h5:hover>a.anchor,h5>a.anchor:hover,h6:hover>a.anchor,h6>a.anchor:hover{visibility:visible}
-#content h1>a.link,h2>a.link,h3>a.link,#toctitle>a.link,.sidebarblock>.content>.title>a.link,h4>a.link,h5>a.link,h6>a.link{color:#ba3925;text-decoration:none}
-#content h1>a.link:hover,h2>a.link:hover,h3>a.link:hover,#toctitle>a.link:hover,.sidebarblock>.content>.title>a.link:hover,h4>a.link:hover,h5>a.link:hover,h6>a.link:hover{color:#a53221}
-.audioblock,.imageblock,.literalblock,.listingblock,.stemblock,.videoblock{margin-bottom:1.25em}
-.admonitionblock td.content>.title,.audioblock>.title,.exampleblock>.title,.imageblock>.title,.listingblock>.title,.literalblock>.title,.stemblock>.title,.openblock>.title,.paragraph>.title,.quoteblock>.title,table.tableblock>.title,.verseblock>.title,.videoblock>.title,.dlist>.title,.olist>.title,.ulist>.title,.qlist>.title,.hdlist>.title{text-rendering:optimizeLegibility;text-align:left;font-family:"Noto Serif","DejaVu Serif",serif;font-size:1rem;font-style:italic}
-table.tableblock.fit-content>caption.title{white-space:nowrap;width:0}
-.paragraph.lead>p,#preamble>.sectionbody>[class="paragraph"]:first-of-type p{font-size:1.21875em;line-height:1.6;color:rgba(0,0,0,.85)}
-table.tableblock #preamble>.sectionbody>[class="paragraph"]:first-of-type p{font-size:inherit}
-.admonitionblock>table{border-collapse:separate;border:0;background:none;width:100%}
-.admonitionblock>table td.icon{text-align:center;width:80px}
-.admonitionblock>table td.icon img{max-width:none}
-.admonitionblock>table td.icon .title{font-weight:bold;font-family:"Open Sans","DejaVu Sans",sans-serif;text-transform:uppercase}
-.admonitionblock>table td.content{padding-left:1.125em;padding-right:1.25em;border-left:1px solid #dddddf;color:rgba(0,0,0,.6)}
-.admonitionblock>table td.content>:last-child>:last-child{margin-bottom:0}
-.exampleblock>.content{border-style:solid;border-width:1px;border-color:#e6e6e6;margin-bottom:1.25em;padding:1.25em;background:#fff;-webkit-border-radius:4px;border-radius:4px}
-.exampleblock>.content>:first-child{margin-top:0}
-.exampleblock>.content>:last-child{margin-bottom:0}
-.sidebarblock{border-style:solid;border-width:1px;border-color:#e0e0dc;margin-bottom:1.25em;padding:1.25em;background:#f8f8f7;-webkit-border-radius:4px;border-radius:4px}
-.sidebarblock>:first-child{margin-top:0}
-.sidebarblock>:last-child{margin-bottom:0}
-.sidebarblock>.content>.title{color:#7a2518;margin-top:0;text-align:center}
-.exampleblock>.content>:last-child>:last-child,.exampleblock>.content .olist>ol>li:last-child>:last-child,.exampleblock>.content .ulist>ul>li:last-child>:last-child,.exampleblock>.content .qlist>ol>li:last-child>:last-child,.sidebarblock>.content>:last-child>:last-child,.sidebarblock>.content .olist>ol>li:last-child>:last-child,.sidebarblock>.content .ulist>ul>li:last-child>:last-child,.sidebarblock>.content .qlist>ol>li:last-child>:last-child{margin-bottom:0}
-.literalblock pre,.listingblock pre:not(.highlight),.listingblock pre[class="highlight"],.listingblock pre[class^="highlight "],.listingblock pre.CodeRay,.listingblock pre.prettyprint{background:#f7f7f8}
-.sidebarblock .literalblock pre,.sidebarblock .listingblock pre:not(.highlight),.sidebarblock .listingblock pre[class="highlight"],.sidebarblock .listingblock pre[class^="highlight "],.sidebarblock .listingblock pre.CodeRay,.sidebarblock .listingblock pre.prettyprint{background:#f2f1f1}
-.literalblock pre,.literalblock pre[class],.listingblock pre,.listingblock pre[class]{-webkit-border-radius:4px;border-radius:4px;word-wrap:break-word;overflow-x:auto;padding:1em;font-size:.8125em}
-@media screen and (min-width:768px){.literalblock pre,.literalblock pre[class],.listingblock pre,.listingblock pre[class]{font-size:.90625em}}
-@media screen and (min-width:1280px){.literalblock pre,.literalblock pre[class],.listingblock pre,.listingblock pre[class]{font-size:1em}}
-.literalblock pre.nowrap,.literalblock pre.nowrap pre,.listingblock pre.nowrap,.listingblock pre.nowrap pre{white-space:pre;word-wrap:normal}
-.literalblock.output pre{color:#f7f7f8;background-color:rgba(0,0,0,.9)}
-.listingblock pre.highlightjs{padding:0}
-.listingblock pre.highlightjs>code{padding:1em;-webkit-border-radius:4px;border-radius:4px}
-.listingblock pre.prettyprint{border-width:0}
-.listingblock>.content{position:relative}
-.listingblock code[data-lang]::before{display:none;content:attr(data-lang);position:absolute;font-size:.75em;top:.425rem;right:.5rem;line-height:1;text-transform:uppercase;color:#999}
-.listingblock:hover code[data-lang]::before{display:block}
-.listingblock.terminal pre .command::before{content:attr(data-prompt);padding-right:.5em;color:#999}
-.listingblock.terminal pre .command:not([data-prompt])::before{content:"$"}
-table.pyhltable{border-collapse:separate;border:0;margin-bottom:0;background:none}
-table.pyhltable td{vertical-align:top;padding-top:0;padding-bottom:0;line-height:1.45}
-table.pyhltable td.code{padding-left:.75em;padding-right:0}
-pre.pygments .lineno,table.pyhltable td:not(.code){color:#999;padding-left:0;padding-right:.5em;border-right:1px solid #dddddf}
-pre.pygments .lineno{display:inline-block;margin-right:.25em}
-table.pyhltable .linenodiv{background:none!important;padding-right:0!important}
-.quoteblock{margin:0 1em 1.25em 1.5em;display:table}
-.quoteblock>.title{margin-left:-1.5em;margin-bottom:.75em}
-.quoteblock blockquote,.quoteblock p{color:rgba(0,0,0,.85);font-size:1.15rem;line-height:1.75;word-spacing:.1em;letter-spacing:0;font-style:italic;text-align:justify}
-.quoteblock blockquote{margin:0;padding:0;border:0}
-.quoteblock blockquote::before{content:"\201c";float:left;font-size:2.75em;font-weight:bold;line-height:.6em;margin-left:-.6em;color:#7a2518;text-shadow:0 1px 2px rgba(0,0,0,.1)}
-.quoteblock blockquote>.paragraph:last-child p{margin-bottom:0}
-.quoteblock .attribution{margin-top:.75em;margin-right:.5ex;text-align:right}
-.verseblock{margin:0 1em 1.25em}
-.verseblock pre{font-family:"Open Sans","DejaVu Sans",sans;font-size:1.15rem;color:rgba(0,0,0,.85);font-weight:300;text-rendering:optimizeLegibility}
-.verseblock pre strong{font-weight:400}
-.verseblock .attribution{margin-top:1.25rem;margin-left:.5ex}
-.quoteblock .attribution,.verseblock .attribution{font-size:.9375em;line-height:1.45;font-style:italic}
-.quoteblock .attribution br,.verseblock .attribution br{display:none}
-.quoteblock .attribution cite,.verseblock .attribution cite{display:block;letter-spacing:-.025em;color:rgba(0,0,0,.6)}
-.quoteblock.abstract blockquote::before,.quoteblock.excerpt blockquote::before,.quoteblock .quoteblock blockquote::before{display:none}
-.quoteblock.abstract blockquote,.quoteblock.abstract p,.quoteblock.excerpt blockquote,.quoteblock.excerpt p,.quoteblock .quoteblock blockquote,.quoteblock .quoteblock p{line-height:1.6;word-spacing:0}
-.quoteblock.abstract{margin:0 1em 1.25em;display:block}
-.quoteblock.abstract>.title{margin:0 0 .375em;font-size:1.15em;text-align:center}
-.quoteblock.excerpt,.quoteblock .quoteblock{margin:0 0 1.25em;padding:0 0 .25em 1em;border-left:.25em solid #dddddf}
-.quoteblock.excerpt blockquote,.quoteblock.excerpt p,.quoteblock .quoteblock blockquote,.quoteblock .quoteblock p{color:inherit;font-size:1.0625rem}
-.quoteblock.excerpt .attribution,.quoteblock .quoteblock .attribution{color:inherit;text-align:left;margin-right:0}
-table.tableblock{max-width:100%;border-collapse:separate}
-p.tableblock:last-child{margin-bottom:0}
-td.tableblock>.content{margin-bottom:-1.25em}
-table.tableblock,th.tableblock,td.tableblock{border:0 solid #dedede}
-table.grid-all>thead>tr>.tableblock,table.grid-all>tbody>tr>.tableblock{border-width:0 1px 1px 0}
-table.grid-all>tfoot>tr>.tableblock{border-width:1px 1px 0 0}
-table.grid-cols>*>tr>.tableblock{border-width:0 1px 0 0}
-table.grid-rows>thead>tr>.tableblock,table.grid-rows>tbody>tr>.tableblock{border-width:0 0 1px}
-table.grid-rows>tfoot>tr>.tableblock{border-width:1px 0 0}
-table.grid-all>*>tr>.tableblock:last-child,table.grid-cols>*>tr>.tableblock:last-child{border-right-width:0}
-table.grid-all>tbody>tr:last-child>.tableblock,table.grid-all>thead:last-child>tr>.tableblock,table.grid-rows>tbody>tr:last-child>.tableblock,table.grid-rows>thead:last-child>tr>.tableblock{border-bottom-width:0}
-table.frame-all{border-width:1px}
-table.frame-sides{border-width:0 1px}
-table.frame-topbot,table.frame-ends{border-width:1px 0}
-table.stripes-all tr,table.stripes-odd tr:nth-of-type(odd){background:#f8f8f7}
-table.stripes-none tr,table.stripes-odd tr:nth-of-type(even){background:none}
-th.halign-left,td.halign-left{text-align:left}
-th.halign-right,td.halign-right{text-align:right}
-th.halign-center,td.halign-center{text-align:center}
-th.valign-top,td.valign-top{vertical-align:top}
-th.valign-bottom,td.valign-bottom{vertical-align:bottom}
-th.valign-middle,td.valign-middle{vertical-align:middle}
-table thead th,table tfoot th{font-weight:bold}
-tbody tr th{display:table-cell;line-height:1.6;background:#f7f8f7}
-tbody tr th,tbody tr th p,tfoot tr th,tfoot tr th p{color:rgba(0,0,0,.8);font-weight:bold}
-p.tableblock>code:only-child{background:none;padding:0}
-p.tableblock{font-size:1em}
-td>div.verse{white-space:pre}
-ol{margin-left:1.75em}
-ul li ol{margin-left:1.5em}
-dl dd{margin-left:1.125em}
-dl dd:last-child,dl dd:last-child>:last-child{margin-bottom:0}
-ol>li p,ul>li p,ul dd,ol dd,.olist .olist,.ulist .ulist,.ulist .olist,.olist .ulist{margin-bottom:.625em}
-ul.checklist,ul.none,ol.none,ul.no-bullet,ol.no-bullet,ol.unnumbered,ul.unstyled,ol.unstyled{list-style-type:none}
-ul.no-bullet,ol.no-bullet,ol.unnumbered{margin-left:.625em}
-ul.unstyled,ol.unstyled{margin-left:0}
-ul.checklist{margin-left:.625em}
-ul.checklist li>p:first-child>.fa-square-o:first-child,ul.checklist li>p:first-child>.fa-check-square-o:first-child{width:1.25em;font-size:.8em;position:relative;bottom:.125em}
-ul.checklist li>p:first-child>input[type="checkbox"]:first-child{margin-right:.25em}
-ul.inline{display:-ms-flexbox;display:-webkit-box;display:flex;-ms-flex-flow:row wrap;-webkit-flex-flow:row wrap;flex-flow:row wrap;list-style:none;margin:0 0 .625em -1.25em}
-ul.inline>li{margin-left:1.25em}
-.unstyled dl dt{font-weight:400;font-style:normal}
-ol.arabic{list-style-type:decimal}
-ol.decimal{list-style-type:decimal-leading-zero}
-ol.loweralpha{list-style-type:lower-alpha}
-ol.upperalpha{list-style-type:upper-alpha}
-ol.lowerroman{list-style-type:lower-roman}
-ol.upperroman{list-style-type:upper-roman}
-ol.lowergreek{list-style-type:lower-greek}
-.hdlist>table,.colist>table{border:0;background:none}
-.hdlist>table>tbody>tr,.colist>table>tbody>tr{background:none}
-td.hdlist1,td.hdlist2{vertical-align:top;padding:0 .625em}
-td.hdlist1{font-weight:bold;padding-bottom:1.25em}
-.literalblock+.colist,.listingblock+.colist{margin-top:-.5em}
-.colist td:not([class]):first-child{padding:.4em .75em 0;line-height:1;vertical-align:top}
-.colist td:not([class]):first-child img{max-width:none}
-.colist td:not([class]):last-child{padding:.25em 0}
-.thumb,.th{line-height:0;display:inline-block;border:solid 4px #fff;-webkit-box-shadow:0 0 0 1px #ddd;box-shadow:0 0 0 1px #ddd}
-.imageblock.left{margin:.25em .625em 1.25em 0}
-.imageblock.right{margin:.25em 0 1.25em .625em}
-.imageblock>.title{margin-bottom:0}
-.imageblock.thumb,.imageblock.th{border-width:6px}
-.imageblock.thumb>.title,.imageblock.th>.title{padding:0 .125em}
-.image.left,.image.right{margin-top:.25em;margin-bottom:.25em;display:inline-block;line-height:0}
-.image.left{margin-right:.625em}
-.image.right{margin-left:.625em}
-a.image{text-decoration:none;display:inline-block}
-a.image object{pointer-events:none}
-sup.footnote,sup.footnoteref{font-size:.875em;position:static;vertical-align:super}
-sup.footnote a,sup.footnoteref a{text-decoration:none}
-sup.footnote a:active,sup.footnoteref a:active{text-decoration:underline}
-#footnotes{padding-top:.75em;padding-bottom:.75em;margin-bottom:.625em}
-#footnotes hr{width:20%;min-width:6.25em;margin:-.25em 0 .75em;border-width:1px 0 0}
-#footnotes .footnote{padding:0 .375em 0 .225em;line-height:1.3334;font-size:.875em;margin-left:1.2em;margin-bottom:.2em}
-#footnotes .footnote a:first-of-type{font-weight:bold;text-decoration:none;margin-left:-1.05em}
-#footnotes .footnote:last-of-type{margin-bottom:0}
-#content #footnotes{margin-top:-.625em;margin-bottom:0;padding:.75em 0}
-.gist .file-data>table{border:0;background:#fff;width:100%;margin-bottom:0}
-.gist .file-data>table td.line-data{width:99%}
-div.unbreakable{page-break-inside:avoid}
-.big{font-size:larger}
-.small{font-size:smaller}
-.underline{text-decoration:underline}
-.overline{text-decoration:overline}
-.line-through{text-decoration:line-through}
-.aqua{color:#00bfbf}
-.aqua-background{background-color:#00fafa}
-.black{color:#000}
-.black-background{background-color:#000}
-.blue{color:#0000bf}
-.blue-background{background-color:#0000fa}
-.fuchsia{color:#bf00bf}
-.fuchsia-background{background-color:#fa00fa}
-.gray{color:#606060}
-.gray-background{background-color:#7d7d7d}
-.green{color:#006000}
-.green-background{background-color:#007d00}
-.lime{color:#00bf00}
-.lime-background{background-color:#00fa00}
-.maroon{color:#600000}
-.maroon-background{background-color:#7d0000}
-.navy{color:#000060}
-.navy-background{background-color:#00007d}
-.olive{color:#606000}
-.olive-background{background-color:#7d7d00}
-.purple{color:#600060}
-.purple-background{background-color:#7d007d}
-.red{color:#bf0000}
-.red-background{background-color:#fa0000}
-.silver{color:#909090}
-.silver-background{background-color:#bcbcbc}
-.teal{color:#006060}
-.teal-background{background-color:#007d7d}
-.white{color:#bfbfbf}
-.white-background{background-color:#fafafa}
-.yellow{color:#bfbf00}
-.yellow-background{background-color:#fafa00}
-span.icon>.fa{cursor:default}
-a span.icon>.fa{cursor:inherit}
-.admonitionblock td.icon [class^="fa icon-"]{font-size:2.5em;text-shadow:1px 1px 2px rgba(0,0,0,.5);cursor:default}
-.admonitionblock td.icon .icon-note::before{content:"\f05a";color:#19407c}
-.admonitionblock td.icon .icon-tip::before{content:"\f0eb";text-shadow:1px 1px 2px rgba(155,155,0,.8);color:#111}
-.admonitionblock td.icon .icon-warning::before{content:"\f071";color:#bf6900}
-.admonitionblock td.icon .icon-caution::before{content:"\f06d";color:#bf3400}
-.admonitionblock td.icon .icon-important::before{content:"\f06a";color:#bf0000}
-.conum[data-value]{display:inline-block;color:#fff!important;background-color:rgba(0,0,0,.8);-webkit-border-radius:100px;border-radius:100px;text-align:center;font-size:.75em;width:1.67em;height:1.67em;line-height:1.67em;font-family:"Open Sans","DejaVu Sans",sans-serif;font-style:normal;font-weight:bold}
-.conum[data-value] *{color:#fff!important}
-.conum[data-value]+b{display:none}
-.conum[data-value]::after{content:attr(data-value)}
-pre .conum[data-value]{position:relative;top:-.125em}
-b.conum *{color:inherit!important}
-.conum:not([data-value]):empty{display:none}
-dt,th.tableblock,td.content,div.footnote{text-rendering:optimizeLegibility}
-h1,h2,p,td.content,span.alt{letter-spacing:-.01em}
-p strong,td.content strong,div.footnote strong{letter-spacing:-.005em}
-p,blockquote,dt,td.content,span.alt{font-size:1.0625rem}
-p{margin-bottom:1.25rem}
-.sidebarblock p,.sidebarblock dt,.sidebarblock td.content,p.tableblock{font-size:1em}
-.exampleblock>.content{background-color:#fffef7;border-color:#e0e0dc;-webkit-box-shadow:0 1px 4px #e0e0dc;box-shadow:0 1px 4px #e0e0dc}
-.print-only{display:none!important}
-@page{margin:1.25cm .75cm}
-@media print{*{-webkit-box-shadow:none!important;box-shadow:none!important;text-shadow:none!important}
-html{font-size:80%}
-a{color:inherit!important;text-decoration:underline!important}
-a.bare,a[href^="#"],a[href^="mailto:"]{text-decoration:none!important}
-a[href^="http:"]:not(.bare)::after,a[href^="https:"]:not(.bare)::after{content:"(" attr(href) ")";display:inline-block;font-size:.875em;padding-left:.25em}
-abbr[title]::after{content:" (" attr(title) ")"}
-pre,blockquote,tr,img,object,svg{page-break-inside:avoid}
-thead{display:table-header-group}
-svg{max-width:100%}
-p,blockquote,dt,td.content{font-size:1em;orphans:3;widows:3}
-h2,h3,#toctitle,.sidebarblock>.content>.title{page-break-after:avoid}
-#toc,.sidebarblock,.exampleblock>.content{background:none!important}
-#toc{border-bottom:1px solid #dddddf!important;padding-bottom:0!important}
-body.book #header{text-align:center}
-body.book #header>h1:first-child{border:0!important;margin:2.5em 0 1em}
-body.book #header .details{border:0!important;display:block;padding:0!important}
-body.book #header .details span:first-child{margin-left:0!important}
-body.book #header .details br{display:block}
-body.book #header .details br+span::before{content:none!important}
-body.book #toc{border:0!important;text-align:left!important;padding:0!important;margin:0!important}
-body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-break-before:always}
-.listingblock code[data-lang]::before{display:block}
-#footer{padding:0 .9375em}
-.hide-on-print{display:none!important}
-.print-only{display:block!important}
-.hide-for-print{display:none!important}
-.show-for-print{display:inherit!important}}
-@media print,amzn-kf8{#header>h1:first-child{margin-top:1.25rem}
-.sect1{padding:0!important}
-.sect1+.sect1{border:0}
-#footer{background:none}
-#footer-text{color:rgba(0,0,0,.6);font-size:.9em}}
-@media amzn-kf8{#header,#content,#footnotes,#footer{padding:0}}
+<style type="text/css">
+/* Shared CSS for AsciiDoc xhtml11 and html5 backends */
+
+/* Default font. */
+body {
+  font-family: Georgia,serif;
+}
+
+/* Title font. */
+h1, h2, h3, h4, h5, h6,
+div.title, caption.title,
+thead, p.table.header,
+#toctitle,
+#author, #revnumber, #revdate, #revremark,
+#footer {
+  font-family: Arial,Helvetica,sans-serif;
+}
+
+body {
+  margin: 1em 5% 1em 5%;
+}
+
+a {
+  color: blue;
+  text-decoration: underline;
+}
+a:visited {
+  color: fuchsia;
+}
+
+em {
+  font-style: italic;
+  color: navy;
+}
+
+strong {
+  font-weight: bold;
+  color: #083194;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  color: #527bbd;
+  margin-top: 1.2em;
+  margin-bottom: 0.5em;
+  line-height: 1.3;
+}
+
+h1, h2, h3 {
+  border-bottom: 2px solid silver;
+}
+h2 {
+  padding-top: 0.5em;
+}
+h3 {
+  float: left;
+}
+h3 + * {
+  clear: left;
+}
+h5 {
+  font-size: 1.0em;
+}
+
+div.sectionbody {
+  margin-left: 0;
+}
+
+hr {
+  border: 1px solid silver;
+}
+
+p {
+  margin-top: 0.5em;
+  margin-bottom: 0.5em;
+}
+
+ul, ol, li > p {
+  margin-top: 0;
+}
+ul > li     { color: #aaa; }
+ul > li > * { color: black; }
+
+.monospaced, code, pre {
+  font-family: "Courier New", Courier, monospace;
+  font-size: inherit;
+  color: navy;
+  padding: 0;
+  margin: 0;
+}
+pre {
+  white-space: pre-wrap;
+}
+
+#author {
+  color: #527bbd;
+  font-weight: bold;
+  font-size: 1.1em;
+}
+#email {
+}
+#revnumber, #revdate, #revremark {
+}
+
+#footer {
+  font-size: small;
+  border-top: 2px solid silver;
+  padding-top: 0.5em;
+  margin-top: 4.0em;
+}
+#footer-text {
+  float: left;
+  padding-bottom: 0.5em;
+}
+#footer-badges {
+  float: right;
+  padding-bottom: 0.5em;
+}
+
+#preamble {
+  margin-top: 1.5em;
+  margin-bottom: 1.5em;
+}
+div.imageblock, div.exampleblock, div.verseblock,
+div.quoteblock, div.literalblock, div.listingblock, div.sidebarblock,
+div.admonitionblock {
+  margin-top: 1.0em;
+  margin-bottom: 1.5em;
+}
+div.admonitionblock {
+  margin-top: 2.0em;
+  margin-bottom: 2.0em;
+  margin-right: 10%;
+  color: #606060;
+}
+
+div.content { /* Block element content. */
+  padding: 0;
+}
+
+/* Block element titles. */
+div.title, caption.title {
+  color: #527bbd;
+  font-weight: bold;
+  text-align: left;
+  margin-top: 1.0em;
+  margin-bottom: 0.5em;
+}
+div.title + * {
+  margin-top: 0;
+}
+
+td div.title:first-child {
+  margin-top: 0.0em;
+}
+div.content div.title:first-child {
+  margin-top: 0.0em;
+}
+div.content + div.title {
+  margin-top: 0.0em;
+}
+
+div.sidebarblock > div.content {
+  background: #ffffee;
+  border: 1px solid #dddddd;
+  border-left: 4px solid #f0f0f0;
+  padding: 0.5em;
+}
+
+div.listingblock > div.content {
+  border: 1px solid #dddddd;
+  border-left: 5px solid #f0f0f0;
+  background: #f8f8f8;
+  padding: 0.5em;
+}
+
+div.quoteblock, div.verseblock {
+  padding-left: 1.0em;
+  margin-left: 1.0em;
+  margin-right: 10%;
+  border-left: 5px solid #f0f0f0;
+  color: #888;
+}
+
+div.quoteblock > div.attribution {
+  padding-top: 0.5em;
+  text-align: right;
+}
+
+div.verseblock > pre.content {
+  font-family: inherit;
+  font-size: inherit;
+}
+div.verseblock > div.attribution {
+  padding-top: 0.75em;
+  text-align: left;
+}
+/* DEPRECATED: Pre version 8.2.7 verse style literal block. */
+div.verseblock + div.attribution {
+  text-align: left;
+}
+
+div.admonitionblock .icon {
+  vertical-align: top;
+  font-size: 1.1em;
+  font-weight: bold;
+  text-decoration: underline;
+  color: #527bbd;
+  padding-right: 0.5em;
+}
+div.admonitionblock td.content {
+  padding-left: 0.5em;
+  border-left: 3px solid #dddddd;
+}
+
+div.exampleblock > div.content {
+  border-left: 3px solid #dddddd;
+  padding-left: 0.5em;
+}
+
+div.imageblock div.content { padding-left: 0; }
+span.image img { border-style: none; vertical-align: text-bottom; }
+a.image:visited { color: white; }
+
+dl {
+  margin-top: 0.8em;
+  margin-bottom: 0.8em;
+}
+dt {
+  margin-top: 0.5em;
+  margin-bottom: 0;
+  font-style: normal;
+  color: navy;
+}
+dd > *:first-child {
+  margin-top: 0.1em;
+}
+
+ul, ol {
+    list-style-position: outside;
+}
+ol.arabic {
+  list-style-type: decimal;
+}
+ol.loweralpha {
+  list-style-type: lower-alpha;
+}
+ol.upperalpha {
+  list-style-type: upper-alpha;
+}
+ol.lowerroman {
+  list-style-type: lower-roman;
+}
+ol.upperroman {
+  list-style-type: upper-roman;
+}
+
+div.compact ul, div.compact ol,
+div.compact p, div.compact p,
+div.compact div, div.compact div {
+  margin-top: 0.1em;
+  margin-bottom: 0.1em;
+}
+
+tfoot {
+  font-weight: bold;
+}
+td > div.verse {
+  white-space: pre;
+}
+
+div.hdlist {
+  margin-top: 0.8em;
+  margin-bottom: 0.8em;
+}
+div.hdlist tr {
+  padding-bottom: 15px;
+}
+dt.hdlist1.strong, td.hdlist1.strong {
+  font-weight: bold;
+}
+td.hdlist1 {
+  vertical-align: top;
+  font-style: normal;
+  padding-right: 0.8em;
+  color: navy;
+}
+td.hdlist2 {
+  vertical-align: top;
+}
+div.hdlist.compact tr {
+  margin: 0;
+  padding-bottom: 0;
+}
+
+.comment {
+  background: yellow;
+}
+
+.footnote, .footnoteref {
+  font-size: 0.8em;
+}
+
+span.footnote, span.footnoteref {
+  vertical-align: super;
+}
+
+#footnotes {
+  margin: 20px 0 20px 0;
+  padding: 7px 0 0 0;
+}
+
+#footnotes div.footnote {
+  margin: 0 0 5px 0;
+}
+
+#footnotes hr {
+  border: none;
+  border-top: 1px solid silver;
+  height: 1px;
+  text-align: left;
+  margin-left: 0;
+  width: 20%;
+  min-width: 100px;
+}
+
+div.colist td {
+  padding-right: 0.5em;
+  padding-bottom: 0.3em;
+  vertical-align: top;
+}
+div.colist td img {
+  margin-top: 0.3em;
+}
+
+@media print {
+  #footer-badges { display: none; }
+}
+
+#toc {
+  margin-bottom: 2.5em;
+}
+
+#toctitle {
+  color: #527bbd;
+  font-size: 1.1em;
+  font-weight: bold;
+  margin-top: 1.0em;
+  margin-bottom: 0.1em;
+}
+
+div.toclevel0, div.toclevel1, div.toclevel2, div.toclevel3, div.toclevel4 {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+div.toclevel2 {
+  margin-left: 2em;
+  font-size: 0.9em;
+}
+div.toclevel3 {
+  margin-left: 4em;
+  font-size: 0.9em;
+}
+div.toclevel4 {
+  margin-left: 6em;
+  font-size: 0.9em;
+}
+
+span.aqua { color: aqua; }
+span.black { color: black; }
+span.blue { color: blue; }
+span.fuchsia { color: fuchsia; }
+span.gray { color: gray; }
+span.green { color: green; }
+span.lime { color: lime; }
+span.maroon { color: maroon; }
+span.navy { color: navy; }
+span.olive { color: olive; }
+span.purple { color: purple; }
+span.red { color: red; }
+span.silver { color: silver; }
+span.teal { color: teal; }
+span.white { color: white; }
+span.yellow { color: yellow; }
+
+span.aqua-background { background: aqua; }
+span.black-background { background: black; }
+span.blue-background { background: blue; }
+span.fuchsia-background { background: fuchsia; }
+span.gray-background { background: gray; }
+span.green-background { background: green; }
+span.lime-background { background: lime; }
+span.maroon-background { background: maroon; }
+span.navy-background { background: navy; }
+span.olive-background { background: olive; }
+span.purple-background { background: purple; }
+span.red-background { background: red; }
+span.silver-background { background: silver; }
+span.teal-background { background: teal; }
+span.white-background { background: white; }
+span.yellow-background { background: yellow; }
+
+span.big { font-size: 2em; }
+span.small { font-size: 0.6em; }
+
+span.underline { text-decoration: underline; }
+span.overline { text-decoration: overline; }
+span.line-through { text-decoration: line-through; }
+
+div.unbreakable { page-break-inside: avoid; }
+
+
+/*
+ * xhtml11 specific
+ *
+ * */
+
+div.tableblock {
+  margin-top: 1.0em;
+  margin-bottom: 1.5em;
+}
+div.tableblock > table {
+  border: 3px solid #527bbd;
+}
+thead, p.table.header {
+  font-weight: bold;
+  color: #527bbd;
+}
+p.table {
+  margin-top: 0;
+}
+/* Because the table frame attribute is overriden by CSS in most browsers. */
+div.tableblock > table[frame="void"] {
+  border-style: none;
+}
+div.tableblock > table[frame="hsides"] {
+  border-left-style: none;
+  border-right-style: none;
+}
+div.tableblock > table[frame="vsides"] {
+  border-top-style: none;
+  border-bottom-style: none;
+}
+
+
+/*
+ * html5 specific
+ *
+ * */
+
+table.tableblock {
+  margin-top: 1.0em;
+  margin-bottom: 1.5em;
+}
+thead, p.tableblock.header {
+  font-weight: bold;
+  color: #527bbd;
+}
+p.tableblock {
+  margin-top: 0;
+}
+table.tableblock {
+  border-width: 3px;
+  border-spacing: 0px;
+  border-style: solid;
+  border-color: #527bbd;
+  border-collapse: collapse;
+}
+th.tableblock, td.tableblock {
+  border-width: 1px;
+  padding: 4px;
+  border-style: solid;
+  border-color: #527bbd;
+}
+
+table.tableblock.frame-topbot {
+  border-left-style: hidden;
+  border-right-style: hidden;
+}
+table.tableblock.frame-sides {
+  border-top-style: hidden;
+  border-bottom-style: hidden;
+}
+table.tableblock.frame-none {
+  border-style: hidden;
+}
+
+th.tableblock.halign-left, td.tableblock.halign-left {
+  text-align: left;
+}
+th.tableblock.halign-center, td.tableblock.halign-center {
+  text-align: center;
+}
+th.tableblock.halign-right, td.tableblock.halign-right {
+  text-align: right;
+}
+
+th.tableblock.valign-top, td.tableblock.valign-top {
+  vertical-align: top;
+}
+th.tableblock.valign-middle, td.tableblock.valign-middle {
+  vertical-align: middle;
+}
+th.tableblock.valign-bottom, td.tableblock.valign-bottom {
+  vertical-align: bottom;
+}
+
+
+/*
+ * manpage specific
+ *
+ * */
+
+body.manpage h1 {
+  padding-top: 0.5em;
+  padding-bottom: 0.5em;
+  border-top: 2px solid silver;
+  border-bottom: 2px solid silver;
+}
+body.manpage h2 {
+  border-style: none;
+}
+body.manpage div.sectionbody {
+  margin-left: 3em;
+}
+
+@media print {
+  body.manpage div#toc { display: none; }
+}
+
+
 </style>
+<script type="text/javascript">
+/*<![CDATA[*/
+var asciidoc = {  // Namespace.
+
+/////////////////////////////////////////////////////////////////////
+// Table Of Contents generator
+/////////////////////////////////////////////////////////////////////
+
+/* Author: Mihai Bazon, September 2002
+ * http://students.infoiasi.ro/~mishoo
+ *
+ * Table Of Content generator
+ * Version: 0.4
+ *
+ * Feel free to use this script under the terms of the GNU General Public
+ * License, as long as you do not remove or alter this notice.
+ */
+
+ /* modified by Troy D. Hanson, September 2006. License: GPL */
+ /* modified by Stuart Rackham, 2006, 2009. License: GPL */
+
+// toclevels = 1..4.
+toc: function (toclevels) {
+
+  function getText(el) {
+    var text = "";
+    for (var i = el.firstChild; i != null; i = i.nextSibling) {
+      if (i.nodeType == 3 /* Node.TEXT_NODE */) // IE doesn't speak constants.
+        text += i.data;
+      else if (i.firstChild != null)
+        text += getText(i);
+    }
+    return text;
+  }
+
+  function TocEntry(el, text, toclevel) {
+    this.element = el;
+    this.text = text;
+    this.toclevel = toclevel;
+  }
+
+  function tocEntries(el, toclevels) {
+    var result = new Array;
+    var re = new RegExp('[hH]([1-'+(toclevels+1)+'])');
+    // Function that scans the DOM tree for header elements (the DOM2
+    // nodeIterator API would be a better technique but not supported by all
+    // browsers).
+    var iterate = function (el) {
+      for (var i = el.firstChild; i != null; i = i.nextSibling) {
+        if (i.nodeType == 1 /* Node.ELEMENT_NODE */) {
+          var mo = re.exec(i.tagName);
+          if (mo && (i.getAttribute("class") || i.getAttribute("className")) != "float") {
+            result[result.length] = new TocEntry(i, getText(i), mo[1]-1);
+          }
+          iterate(i);
+        }
+      }
+    }
+    iterate(el);
+    return result;
+  }
+
+  var toc = document.getElementById("toc");
+  if (!toc) {
+    return;
+  }
+
+  // Delete existing TOC entries in case we're reloading the TOC.
+  var tocEntriesToRemove = [];
+  var i;
+  for (i = 0; i < toc.childNodes.length; i++) {
+    var entry = toc.childNodes[i];
+    if (entry.nodeName.toLowerCase() == 'div'
+     && entry.getAttribute("class")
+     && entry.getAttribute("class").match(/^toclevel/))
+      tocEntriesToRemove.push(entry);
+  }
+  for (i = 0; i < tocEntriesToRemove.length; i++) {
+    toc.removeChild(tocEntriesToRemove[i]);
+  }
+
+  // Rebuild TOC entries.
+  var entries = tocEntries(document.getElementById("content"), toclevels);
+  for (var i = 0; i < entries.length; ++i) {
+    var entry = entries[i];
+    if (entry.element.id == "")
+      entry.element.id = "_toc_" + i;
+    var a = document.createElement("a");
+    a.href = "#" + entry.element.id;
+    a.appendChild(document.createTextNode(entry.text));
+    var div = document.createElement("div");
+    div.appendChild(a);
+    div.className = "toclevel" + entry.toclevel;
+    toc.appendChild(div);
+  }
+  if (entries.length == 0)
+    toc.parentNode.removeChild(toc);
+},
+
+
+/////////////////////////////////////////////////////////////////////
+// Footnotes generator
+/////////////////////////////////////////////////////////////////////
+
+/* Based on footnote generation code from:
+ * http://www.brandspankingnew.net/archive/2005/07/format_footnote.html
+ */
+
+footnotes: function () {
+  // Delete existing footnote entries in case we're reloading the footnodes.
+  var i;
+  var noteholder = document.getElementById("footnotes");
+  if (!noteholder) {
+    return;
+  }
+  var entriesToRemove = [];
+  for (i = 0; i < noteholder.childNodes.length; i++) {
+    var entry = noteholder.childNodes[i];
+    if (entry.nodeName.toLowerCase() == 'div' && entry.getAttribute("class") == "footnote")
+      entriesToRemove.push(entry);
+  }
+  for (i = 0; i < entriesToRemove.length; i++) {
+    noteholder.removeChild(entriesToRemove[i]);
+  }
+
+  // Rebuild footnote entries.
+  var cont = document.getElementById("content");
+  var spans = cont.getElementsByTagName("span");
+  var refs = {};
+  var n = 0;
+  for (i=0; i<spans.length; i++) {
+    if (spans[i].className == "footnote") {
+      n++;
+      var note = spans[i].getAttribute("data-note");
+      if (!note) {
+        // Use [\s\S] in place of . so multi-line matches work.
+        // Because JavaScript has no s (dotall) regex flag.
+        note = spans[i].innerHTML.match(/\s*\[([\s\S]*)]\s*/)[1];
+        spans[i].innerHTML =
+          "[<a id='_footnoteref_" + n + "' href='#_footnote_" + n +
+          "' title='View footnote' class='footnote'>" + n + "</a>]";
+        spans[i].setAttribute("data-note", note);
+      }
+      noteholder.innerHTML +=
+        "<div class='footnote' id='_footnote_" + n + "'>" +
+        "<a href='#_footnoteref_" + n + "' title='Return to text'>" +
+        n + "</a>. " + note + "</div>";
+      var id =spans[i].getAttribute("id");
+      if (id != null) refs["#"+id] = n;
+    }
+  }
+  if (n == 0)
+    noteholder.parentNode.removeChild(noteholder);
+  else {
+    // Process footnoterefs.
+    for (i=0; i<spans.length; i++) {
+      if (spans[i].className == "footnoteref") {
+        var href = spans[i].getElementsByTagName("a")[0].getAttribute("href");
+        href = href.match(/#.*/)[0];  // Because IE return full URL.
+        n = refs[href];
+        spans[i].innerHTML =
+          "[<a href='#_footnote_" + n +
+          "' title='View footnote' class='footnote'>" + n + "</a>]";
+      }
+    }
+  }
+},
+
+install: function(toclevels) {
+  var timerId;
+
+  function reinstall() {
+    asciidoc.footnotes();
+    if (toclevels) {
+      asciidoc.toc(toclevels);
+    }
+  }
+
+  function reinstallAndRemoveTimer() {
+    clearInterval(timerId);
+    reinstall();
+  }
+
+  timerId = setInterval(reinstall, 500);
+  if (document.addEventListener)
+    document.addEventListener("DOMContentLoaded", reinstallAndRemoveTimer, false);
+  else
+    window.onload = reinstallAndRemoveTimer;
+}
+
+}
+asciidoc.install(2);
+/*]]>*/
+</script>
 </head>
 <body class="article">
 <div id="header">
 <h1>pipadoc - Documentation extractor</h1>
-<div class="details">
-<span id="author" class="author">Christian Thaeter</span><br>
-<span id="email" class="email"><a href="mailto:ct@pipapo.org">ct@pipapo.org</a></span><br>
+<span id="author">Christian Thaeter</span><br />
+<span id="email"><code>&lt;<a href="mailto:ct@pipapo.org">ct@pipapo.org</a>&gt;</code></span><br />
+<span id="revdate">9. July 2020</span>
+<div id="toc">
+  <div id="toctitle">Table of Contents</div>
+  <noscript><p><b>JavaScript must be enabled in your browser to display the table of contents.</b></p></noscript>
 </div>
 </div>
 <div id="content">
 <div class="sect1">
 <h2 id="_introduction">Introduction</h2>
 <div class="sectionbody">
-<div class="paragraph">
-<p>Embedding documentation in program source files often results in the problem that the
+<div class="paragraph"><p>Embedding documentation in program source files often results in the problem that the
 structure of a program is not the optimal structure for the associated documentation.
 Still there are many good reasons to maintain documentation together with the source right
 within the code which defines the documented functionality. Pipadoc addresses this problem
 by extracting special comments out of a source file and let one define rules how to compile
 the documentation into proper order.  This is somewhat similar to &#8220;literate Programming&#8221;
-but it puts the emphasis back to the code.</p>
-</div>
-<div class="paragraph">
-<p>Pipadoc is programming language and documentation system agnostic, all it requires is that
+but it puts the emphasis back to the code.</p></div>
+<div class="paragraph"><p>Pipadoc is programming language and documentation system agnostic, all it requires is that
 the programming language has some form of comments starting with a defined character sequence
 and spanning to the end of the source line. Moreover documentation parts can be written in
-plain text files aside from the sources.</p>
-</div>
+plain text files aside from the sources.</p></div>
 </div>
 </div>
 <div class="sect1">
 <h2 id="_history">History</h2>
 <div class="sectionbody">
-<div class="paragraph">
-<p>This <em>pipadoc</em> implemented in Lua follows an earlier implementation with a slightly different
+<div class="paragraph"><p>This <em>pipadoc</em> implemented in Lua follows an earlier implementation with a slightly different
 (incompatible) syntax and less features which was implemented in AWK. Updating to the new
-syntax should be straightforward and is suggested for any projects using pipadoc.</p>
-</div>
+syntax should be straightforward and is suggested for any projects using pipadoc.</p></div>
 </div>
 </div>
 <div class="sect1">
 <h2 id="_getting_the_source">Getting the Source</h2>
 <div class="sectionbody">
-<div class="paragraph">
-<p>Pipadoc is managed the git revision control system. You can clone the repository with</p>
-</div>
+<div class="paragraph"><p>Pipadoc is managed the git revision control system. You can clone the repository with</p></div>
 <div class="literalblock">
 <div class="content">
-<pre>git clone --depth 1 git://git.pipapo.org/pipadoc</pre>
-</div>
-</div>
-<div class="paragraph">
-<p>The <em>master</em> branch will stay stable and development will be done on the <em>devel</em> branch.</p>
-</div>
+<pre><code>git clone --depth 1 git://git.pipapo.org/pipadoc</code></pre>
+</div></div>
+<div class="paragraph"><p>The <em>master</em> branch will stay stable and development will be done on the <em>devel</em> branch.</p></div>
 </div>
 </div>
 <div class="sect1">
 <h2 id="_installation">Installation</h2>
 <div class="sectionbody">
-<div class="paragraph">
-<p>Pipadoc is single Lua source file <code>pipadoc.lua</code> which is portable among most Lua versions
+<div class="paragraph"><p>Pipadoc is single Lua source file <code>pipadoc.lua</code> which is portable among most Lua versions
 (PUC Lua 5.1, 5.2, 5.3, Luajit, Ravi). It ships with a <code>pipadoc.install</code> shell script which
 figures a  suitable Lua version out and installs <code>pipadoc.lua</code> as <code>pipadoc</code> in a given
-directory or the current directory by default.</p>
-</div>
-<div class="paragraph">
-<p>There are different ways how this can be used in a project:</p>
-</div>
-<div class="ulist">
-<ul>
+directory or the current directory by default.</p></div>
+<div class="paragraph"><p>There are different ways how this can be used in a project:</p></div>
+<div class="ulist"><ul>
 <li>
-<p>One can rely on a pipadoc installed in $PATH and just call that from the build tool chain</p>
+<p>
+One can rely on a pipadoc installed in $PATH and just call that from the build tool chain
+</p>
 </li>
 <li>
-<p>When a installed Lua version is known from the build tool chain one can include the
-<code>pipadoc.lua</code> into the project and call it with the known Lua interpreter.</p>
+<p>
+When a installed Lua version is known from the build tool chain one can include the
+  <code>pipadoc.lua</code> into the project and call it with the known Lua interpreter.
+</p>
 </li>
 <li>
-<p>One can ship the <code>pipadoc.lua</code> and <code>pipadoc.install</code> and do a local install in the build
-directory and use this pipadoc thereafter</p>
+<p>
+One can ship the <code>pipadoc.lua</code> and <code>pipadoc.install</code> and do a local install in the build
+  directory and use this pipadoc thereafter
+</p>
 </li>
-</ul>
-</div>
+</ul></div>
 </div>
 </div>
 <div class="sect1">
@@ -520,7 +813,7 @@ directory and use this pipadoc thereafter</p>
 <div class="sectionbody">
 <div class="literalblock">
 <div class="content">
-<pre> pipadoc [options...] [inputs..]
+<pre><code> pipadoc [options...] [inputs..]
    options are:
      -v, --verbose
                          increment verbosity level
@@ -573,46 +866,31 @@ directory and use this pipadoc thereafter</p>
                          stops parsing the options and treats each
                          following argument as input file
 
-   inputs are file names or a '-' that indicates standard input</pre>
-</div>
-</div>
+   inputs are file names or a '-' that indicates standard input</code></pre>
+</div></div>
 </div>
 </div>
 <div class="sect1">
 <h2 id="_basic_concepts">Basic concepts</h2>
 <div class="sectionbody">
-<div class="paragraph">
-<p>Pipadoc is controlled by special line comments. This is chosen because it is the most common
-denominator between almost all programming languages.</p>
-</div>
-<div class="paragraph">
-<p>To make a line comment recognized as pipadoc comment it needs to be followed immediately
+<div class="paragraph"><p>Pipadoc is controlled by special line comments. This is chosen because it is the most common
+denominator between almost all programming languages.</p></div>
+<div class="paragraph"><p>To make a line comment recognized as pipadoc comment it needs to be followed immediately
 by a operator sequence. Which in the simplest case is just a single punctuation character.
-One can give a section name left of the operator and an argument/key rigt of the operator.</p>
-</div>
-<div class="paragraph">
-<p>To add special functionality and extend the semantics one can define pre and post processors.</p>
-</div>
-<div class="paragraph">
-<p>Preprocessors are defined per programming language and process all source lines.</p>
-</div>
-<div class="paragraph">
-<p>Postprocessors are defined per output markup and process every line to be outputed.</p>
-</div>
-<div class="paragraph">
-<p>Finally there is a string substitution/template engine which processes text in curly braces.</p>
-</div>
+One can give a section name left of the operator and an argument/key right of the operator.</p></div>
+<div class="paragraph"><p>To add special functionality and extend the semantics one can define pre and post processors.</p></div>
+<div class="paragraph"><p>Preprocessors are defined per programming language and process all source lines.</p></div>
+<div class="paragraph"><p>Postprocessors are defined per output markup and process every line to be outputed.</p></div>
+<div class="paragraph"><p>Finally there is a string substitution/template engine which processes text in curly braces.</p></div>
 <div class="sect2">
 <h3 id="_syntax">Syntax</h3>
-<div class="paragraph">
-<p>Any <em>line-comment</em> of the programming language directly (without spaces) followed by a
+<div class="paragraph"><p>Any <em>line-comment</em> of the programming language directly (without spaces) followed by a
 optional alphanumeric section name, followed by an operator, followed by an optional
-argument. Only lines qualify this syntax are processed as pipadoc documentation.</p>
-</div>
+argument. Only lines qualify this syntax are processed as pipadoc documentation.</p></div>
 <div class="literalblock">
 <div class="title">The formal syntax looks like:</div>
 <div class="content">
-<pre>&lt;pipadoc&gt; ::= [source] &lt;linecomment&gt; &lt;opspec&gt; [ &lt;space&gt; [documentationtext]]
+<pre><code>&lt;pipadoc&gt; ::= [source] &lt;linecomment&gt; &lt;opspec&gt; [ &lt;space&gt; [documentationtext]]
 
 &lt;source&gt; ::= &lt;any source code text&gt;
 
@@ -626,134 +904,135 @@ argument. Only lines qualify this syntax are processed as pipadoc documentation.
 
 &lt;argument&gt; ::= &lt;alphanumeric text including underscore and dots&gt;
 
-&lt;documentationtext&gt; ::= &lt;rest of the line&gt;</pre>
-</div>
-</div>
-<div class="admonitionblock important">
-<table>
-<tr>
+&lt;documentationtext&gt; ::= &lt;rest of the line&gt;</code></pre>
+</div></div>
+<div class="admonitionblock">
+<table><tr>
 <td class="icon">
 <div class="title">Important</div>
 </td>
-<td class="content">
-Pipadoc does not know anything except the line comment characters about the source
+<td class="content">Pipadoc does not know anything except the line comment characters about the source
            programming languages syntax. This includes literal strings and any other
            syntactic form which may look like a line comment, but is not. Such lines need to
-           be dropped by a preprocessor to make them unambiguous.
-</td>
-</tr>
-</table>
+           be dropped by a preprocessor to make them unambiguous.</td>
+</tr></table>
 </div>
-<div class="paragraph">
-<p>There config shipped with pipadoc gives an example to drop a line when it end with "NODOC".</p>
-</div>
+<div class="paragraph"><p>There config shipped with pipadoc gives an example to drop a line when it end with "NODOC".</p></div>
 <div class="listingblock">
 <div class="content">
-<pre>const char* example = "//MAIN: this is a C string and not documentation"; //NODOC</pre>
-</div>
-</div>
-<div class="paragraph">
-<p>Documentation can be either blocked or oneline.</p>
-</div>
-<div class="dlist">
-<dl>
-<dt class="hdlist1">Block</dt>
+<pre><code>const char* example = "//MAIN: this is a C string and not documentation"; //NODOC</code></pre>
+</div></div>
+<div class="paragraph"><p>Documentation can be either blocked or oneline.</p></div>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+Block
+</dt>
 <dd>
-<p>Start with a documentation comment including a section or argument specifier but are not
-followed by documentation text on the same line.
-The text block then follows in documentation comments where section and
-argument are empty. Blocks span unti a new documentation block is started.</p>
+<p>
+  Start with a documentation comment including a section or argument specifier but are not
+  followed by documentation text on the same line.
+  The text block then follows in documentation comments where section and
+  argument are empty. Blocks span until a new documentation block is started.
+</p>
 </dd>
-<dt class="hdlist1">Oneline</dt>
+<dt class="hdlist1">
+Oneline
+</dt>
 <dd>
-<p>Is defined by a documentation comment which sets section and/or argument followed by
-documentation text on the same line. They can be interleaved within blocks.
-This is used to define index and glosary items right within block documentation.</p>
+<p>
+  Is defined by a documentation comment which sets section and/or argument followed by
+  documentation text on the same line. They can be interleaved within blocks.
+  This is used to define index and glossary items right within block documentation.
+</p>
 </dd>
-</dl>
-</div>
+</dl></div>
 </div>
 <div class="sect2">
 <h3 id="_order_of_operations">Order of operations</h3>
-<div class="paragraph">
-<p>Pipadoc reads all files line by line. and processes them in the following order:</p>
-</div>
-<div class="dlist">
-<dl>
-<dt class="hdlist1">Preprocessing </dt>
+<div class="paragraph"><p>Pipadoc reads all files line by line. and processes them in the following order:</p></div>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+Preprocessing 
+</dt>
 <dd>
-<p>Preprocessors are Lua functions who may alter the entire content of a line before any
-further processing. They get a <em>context</em> passed in with the <em>SOURCE</em> member containing
-the line read from the input file.</p>
+<p>
+  Preprocessors are Lua functions who may alter the entire content of a line before any
+  further processing. They get a <em>context</em> passed in with the <em>SOURCE</em> member containing
+  the line read from the input file.
+</p>
 </dd>
-<dt class="hdlist1">Parsing </dt>
+<dt class="hdlist1">
+Parsing 
+</dt>
 <dd>
-<p>The line is broken down into it&#8217;s components and the operators processing function
-will be called which is responsible for storing. The colon (<em>:</em>) operator also does a first
-string substitution pass to expand variables. This strsubst is done in input order.
-Macros may leverage this for additional state and may generate extra content like indices
-and append that to the respective sections.</p>
+<p>
+  The line is broken down into it&#8217;s components and the operators processing function
+  will be called which is responsible for storing. The colon (<em>:</em>) operator also does a first
+  string substitution pass to expand variables. This strsubst is done in input order.
+  Macros may leverage this for additional state and may generate extra content like indices
+  and append that to the respective sections.
+</p>
 </dd>
-<dt class="hdlist1">Output Ordering </dt>
+<dt class="hdlist1">
+Output Ordering 
+</dt>
 <dd>
-<p>The output order is generated by assembling the <em>{toplevel}_{markup}</em> or if that does
-not exist the <em>{toplevel}</em> section.
-The paste and sorting operators on the toplevel and included sections define the
-order of the document.</p>
+<p>
+  The paste and sorting operators on the toplevel and included sections define the
+  order of the document.
+</p>
 </dd>
-<dt class="hdlist1">Postprocessing </dt>
+<dt class="hdlist1">
+Postprocessing 
+</dt>
 <dd>
-<p>For each output context the postprocessors run in output order.
-A final string substitution pass is applied in <em>output</em> order then.</p>
+<p>
+  For each output context the postprocessors run in output order.
+  A final string substitution pass is applied in <em>output</em> order then.
+</p>
 </dd>
-<dt class="hdlist1">Writeout </dt>
+<dt class="hdlist1">
+Writeout 
+</dt>
 <dd>
-<p>The finished document is written to the output.</p>
+<p>
+  The finished document is written to the output.
+</p>
 </dd>
-<dt class="hdlist1">Report empty sections, Orphans and Doubletes</dt>
+<dt class="hdlist1">
+Report empty sections, Orphans and Doubletes
+</dt>
 <dd>
-<p>Pipadoc keeps stats on how each section was used. Finally it gives a report (as warning)
-on sections which appear to be unused or used more than once. These warnings may be ok, but
-sometimes they give useful hints about typing errors.</p>
+<p>
+  Pipadoc keeps stats on how each section was used. Finally it gives a report (as warning)
+  on sections which appear to be unused or used more than once. These warnings may be ok, but
+  sometimes they give useful hints about typing errors.
+</p>
 </dd>
-</dl>
-</div>
-<div class="paragraph">
-<p>It is important to know that reading happens only line by line, operations can not span
+</dl></div>
+<div class="paragraph"><p>It is important to know that reading happens only line by line, operations can not span
 lines. The processing steps may be stateful and thus preserve information for further
-processing.</p>
-</div>
+processing.</p></div>
 </div>
 </div>
 </div>
 <div class="sect1">
 <h2 id="_sections_and_keys">Sections and Keys</h2>
 <div class="sectionbody">
-<div class="paragraph">
-<p>Text in pipadoc is appended to named <em>sections</em>. Text can be associated with some
-alphanumeric key under that section. This enables later sorting for indices and glossaries.</p>
-</div>
-<div class="paragraph">
-<p>Sections can be one line or span a block of lines.</p>
-</div>
-<div class="paragraph">
-<p>Oneline sections are defined when a section and maybe a key is followed by documentation
+<div class="paragraph"><p>Text in pipadoc is appended to named <em>sections</em>. Text can be associated with some
+alphanumeric key under that section. This enables later sorting for indices and glossaries.</p></div>
+<div class="paragraph"><p>Sections can be one line or span a block of lines.</p></div>
+<div class="paragraph"><p>One-line sections are defined when a section and maybe a key is followed by documentation
 text. Block sections start with the section definition but no documentation text on the same
-line. A block stays active until the next block section definition. Oneline doctext can be
-interleaved into Blocks.</p>
-</div>
-<div class="paragraph">
-<p>The default block section name is the files name up, but excluding to the first dot.</p>
-</div>
-<div class="paragraph">
-<p>Sections are later brought into the desired order by pasting them into a <em>toplevel</em> section.
-This default name for the <em>toplevel</em> section is <em>MAIN_{markup}</em> or if that does not exist
-just <em>MAIN</em>.</p>
-</div>
+line. A block stays active until the next block section definition. One-line doctext can be
+interleaved into Blocks.</p></div>
+<div class="paragraph"><p>The default block section name is the files name up, but excluding to the first dot.</p></div>
+<div class="paragraph"><p>Sections are later brought into the desired order by pasting them into a <em>toplevel</em> section.
+just <em>MAIN</em>.</p></div>
 <div class="listingblock">
 <div class="title">An example document (example.sh)</div>
 <div class="content">
-<pre>#!/bin/sh
+<pre><code>#!/bin/sh
 #: here the default section is 'example', derived from 'example.sh'
 #oneline:o this is appended to the section 'oneline' under key 'o'
 #: back to the 'example' section
@@ -767,23 +1046,17 @@ just <em>MAIN</em>.</p>
 #: then 'example'
 #=example
 #: and finally 'oneline' alphabetically sorted by keys
-#@oneline</pre>
-</div>
-</div>
-<div class="paragraph">
-<p>processed by pipadoc</p>
-</div>
+#@oneline</code></pre>
+</div></div>
+<div class="paragraph"><p>processed by pipadoc</p></div>
 <div class="literalblock">
 <div class="content">
-<pre>lua pipadoc.lua example.sh</pre>
-</div>
-</div>
-<div class="paragraph">
-<p>Will result in</p>
-</div>
+<pre><code>lua pipadoc.lua example.sh</code></pre>
+</div></div>
+<div class="paragraph"><p>Will result in</p></div>
 <div class="listingblock">
 <div class="content">
-<pre>Assemble the document
+<pre><code>Assemble the document
 first the 'newname'
 this starts a new section block named 'newname'
 then 'example'
@@ -791,33 +1064,26 @@ here the default section is 'example', derived from 'example.sh'
 back to the 'example' section
 and finally 'oneline' alphabetically sorted by keys
 this is appended to the section 'oneline' under key 'a'
-this is appended to the section 'oneline' under key 'o'</pre>
-</div>
-</div>
-<div class="paragraph">
-<p>The pipadoc documentation you are just reading here is made and embedded in <em>pipadoc.lua</em>
-itself using <em>asciidoc</em> as markup. Refer to the source itself to see how it is done.</p>
-</div>
+this is appended to the section 'oneline' under key 'o'</code></pre>
+</div></div>
+<div class="paragraph"><p>The pipadoc documentation you are just reading here is made and embedded in <em>pipadoc.lua</em>
+itself using <em>asciidoc</em> as markup. Refer to the source itself to see how it is done.</p></div>
 </div>
 </div>
 <div class="sect1">
 <h2 id="_filetypes">Filetypes</h2>
 <div class="sectionbody">
-<div class="paragraph">
-<p>Pipadoc needs to know about the syntax of line comments of the files it is reading.
+<div class="paragraph"><p>Pipadoc needs to know about the syntax of line comments of the files it is reading.
 For this patterns are registered to be matched against the file name together with a
-list of line comment characters.</p>
-</div>
-<div class="paragraph">
-<p>Definitions for a lot common programming languages are already included. For languages
+list of line comment characters.</p></div>
+<div class="paragraph"><p>Definitions for a lot common programming languages are already included. For languages
 that support block comments the opening (but not the closing) commenting characters are
 registered as well. This allows one to define section blocks right away. But using the
-comment closing sequence right on the line will clobber the output, don&#8217;t do that!</p>
-</div>
+comment closing sequence right on the line will clobber the output, don&#8217;t do that!</p></div>
 <div class="listingblock">
 <div class="title">Example in C</div>
 <div class="content">
-<pre>/*blocksection:
+<pre><code>/*blocksection:
 //: this is a block-section
 //: line comment sequences inside the block comment are still required
 */
@@ -826,245 +1092,184 @@ comment closing sequence right on the line will clobber the output, don&#8217;t 
 */
 
 // the following will include the closing */ in the documentation
-/*fail: don't do this, pipadoc comments span to the end of the line */</pre>
-</div>
-</div>
-<div class="paragraph">
-<p>A special case is that when a line comment is defined as an empty string ("") then every
+/*fail: don't do this, pipadoc comments span to the end of the line */</code></pre>
+</div></div>
+<div class="paragraph"><p>A special case is that when a line comment is defined as an empty string ("") then every
 line of a file is considered as documentation but no special operations apply. This is used
-for plaintext documentation files. Which also uses the "PIPADOC:" keyword to enable special
-operations within text files.</p>
-</div>
-<div class="paragraph">
-<p>New uncommon filetypes can be added from a config file with <em>filetype_register()</em>  or with
-the <em>--register</em> commandline option.</p>
-</div>
+for plain text documentation files. Which also uses the "PIPADOC:" keyword to enable special
+operations within text files.</p></div>
+<div class="paragraph"><p>New uncommon filetypes can be added from a config file with <em>filetype_register()</em>  or with
+the <em>--register</em> command-line option.</p></div>
 <div class="sect2">
 <h3 id="_programming_languages_supported_by_pipadoc">Programming languages supported by pipadoc</h3>
-<div class="paragraph">
-<p>Autoconf, Automake,
+<div class="paragraph"><p>Autoconf, Automake,
+
 AWK,
+
 C, C++, Headerfiles,
 CMake,
+
 Delphi, Pascal,
+
 Java, C#,
+
 Javascript,
+
 Lua,
+
 Makefiles,
+
 Objective-C,
+
 Perl,
+
 PHP,
+
 Prolog,
+
 Python,
+
 Ruby,
+
 SCons,
+
 Shell,
+
 SQL,
+
 Textfiles, Pipadoc (<code>.pdoc</code>),
-Visual Basic,</p>
-</div>
+
+Visual Basic,</p></div>
 </div>
 </div>
 </div>
 <div class="sect1">
 <h2 id="_operators">Operators</h2>
 <div class="sectionbody">
-<div class="paragraph">
-<p>Operators define what is considered as pipadoc comment and how to assemble the resulting document.</p>
-</div>
-<div class="dlist">
-<dl>
-<dt class="hdlist1"><code>:</code> </dt>
+<div class="paragraph"><p>Operators define what is considered as pipadoc comment and how to assemble the resulting document.</p></div>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+<code>:</code> 
+</dt>
 <dd>
-<p>The documentation operator. Defines normal documentation text. Each pipadoc comment using
-the <code>:</code> operator is processed as documentation. Later when generating the toplevel
-Section is used to paste all other documentation in proper order together.</p>
+<p>
+  The documentation operator. Defines normal documentation text. Each pipadoc comment using
+  the <code>:</code> operator is processed as documentation. Later when generating the toplevel
+  Section is used to paste all other documentation in proper order together.
+</p>
 </dd>
-</dl>
-</div>
-<div class="dlist">
-<dl>
-<dt class="hdlist1"><code>=</code> </dt>
+</dl></div>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+<code>=</code> 
+</dt>
 <dd>
-<p>Section paste operator. Takes a section name as argument and will paste that section in
-place.</p>
+<p>
+  Section paste operator. Takes a section name as argument and will paste that section in
+  place.
+</p>
 </dd>
-</dl>
-</div>
-<div class="dlist">
-<dl>
-<dt class="hdlist1"><code>@</code> </dt>
+</dl></div>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+<code>@</code> 
+</dt>
 <dd>
-<p>Alphabetic sorting operator. Takes a section name as argument and will paste section
-text alphabetically sorted by its keys.</p>
+<p>
+  Alphabetic sorting operator. Takes a section name as argument and will paste section
+  text alphabetically sorted by its keys.
+</p>
 </dd>
-</dl>
-</div>
-<div class="dlist">
-<dl>
-<dt class="hdlist1"><code>$</code> </dt>
+</dl></div>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+<code>$</code> 
+</dt>
 <dd>
-<p>Generic Sorting operator. Takes a section name as argument and will paste section text
-sorted by its keys.</p>
+<p>
+  Generic Sorting operator. Takes a section name as argument and will paste section text
+  sorted by its keys.
+</p>
 </dd>
-</dl>
-</div>
-<div class="dlist">
-<dl>
-<dt class="hdlist1"><code>#</code> </dt>
+</dl></div>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+<code>#</code> 
+</dt>
 <dd>
-<p>Numerical sorting operator. Takes a section name as argument and will paste section text
-numerically sorted by its keys.</p>
+<p>
+  Numerical sorting operator. Takes a section name as argument and will paste section text
+  numerically sorted by its keys.
+</p>
 </dd>
-</dl>
-</div>
+</dl></div>
 </div>
 </div>
 <div class="sect1">
 <h2 id="_configuration_file">Configuration File</h2>
 <div class="sectionbody">
-<div class="paragraph">
-<p>Pipadoc tries to load a configuration file on startup. By default it&#8217;s named
+<div class="paragraph"><p>Pipadoc tries to load a configuration file on startup. By default it&#8217;s named
 <code>pipadoc_config.lua</code> in the current directory. This name can be changed by the <em>--config</em>
-option.</p>
-</div>
-<div class="paragraph">
-<p>The configuration file is used to define pre- and post- processors, define states
+option.</p></div>
+<div class="paragraph"><p>The configuration file is used to define pre- and post- processors, define states
 for those, define custom operators and string substitution macros. It is loaded and
 executed as it own chunk and may only access the global variables (GLOBAL, CONTEXT) and
-API functions described below.</p>
-</div>
+API functions described below.</p></div>
 <div class="sect2">
 <h3 id="_preprocessors">Preprocessors</h3>
-<div class="paragraph">
-<p>One can register multiple preprocessors for filetypes. A preprocessor can modify any
+<div class="paragraph"><p>One can register multiple preprocessors for filetypes. A preprocessor can modify any
 line prior it is parsed and further processed. By default pipadoc has no preprocessors
-defined. The user may define these in a config file.</p>
-</div>
-<div class="paragraph">
-<p>Preprocessors are used to autogenerate documentation comments from code. Lifting
-parts of the code to the documentation side.</p>
-</div>
+defined. The user may define these in a config file.</p></div>
+<div class="paragraph"><p>Preprocessors are used to autogenerate documentation comments from code. Lifting
+parts of the code to the documentation side.</p></div>
 </div>
 <div class="sect2">
 <h3 id="_postprocessors">Postprocessors</h3>
-<div class="paragraph">
-<p>Postprocessors run at output generation time. They are registered per markup types.
-Processors are called in order of their definition.</p>
-</div>
-<div class="paragraph">
-<p>They are used to augment the generated output with markup specific things.</p>
-</div>
+<div class="paragraph"><p>Postprocessors run at output generation time. They are registered per markup types.
+Processors are called in order of their definition.</p></div>
+<div class="paragraph"><p>They are used to augment the generated output with markup specific things.</p></div>
 </div>
 <div class="sect2">
 <h3 id="_string_substitutions">String Substitutions</h3>
-<div class="paragraph">
-<p>Documentation text is be passed to the string substitution engine which recursively
+<div class="paragraph"><p>Documentation text is be passed to the string substitution engine which recursively
 substitutes expressions within curly braces. The substitutions are taken from the passed
 context (and GLOBAL&#8217;s). Strings are replaced, functions become evaluated, everything else is
-translated with Luas <em>tostring()</em> function.</p>
-</div>
-<div class="paragraph">
-<p>The names for substitituions must start with an alphabetic character or underline and can
+translated with Luas <em>tostring()</em> function.</p></div>
+<div class="paragraph"><p>The names for substitutions must start with an alphabetic character or underline and can
 be followed by alphanumeric characters or underlines. It may be followed with a delimiting
-characterspace (space) and an optional argument string which gets passed to functions or
-retained verbatim on everyting else. Names starting and ending with 2 underscores are
-reserved to the implementation.</p>
-</div>
-<div class="paragraph">
-<p>Curly braces, can be escaped with backslashes or backtick characters. These
-characters can be escaped by themself.</p>
-</div>
+character (space) and an optional argument string which gets passed to functions or
+retained verbatim on everything else. Names starting and ending with 2 underscores are
+reserved to the implementation.</p></div>
+<div class="paragraph"><p>Curly braces, can be escaped with backslashes or backtick characters. These
+characters can be escaped by them self.</p></div>
 </div>
 <div class="sect2">
 <h3 id="_example_configuration_file">Example Configuration File</h3>
-<div class="paragraph">
-<p>Pipadocs main objective is to scrape documentation comments from a project and generate
+<div class="paragraph"><p>Pipadocs main objective is to scrape documentation comments from a project and generate
 output in desired order. Such an basic approach would be insufficient for many common cases.
-Thus pipadoc has facilities to generate and modify documentation in an extensible way.</p>
-</div>
-<div class="paragraph">
-<p>Pipadoc itself comes with a configuration file for generating it&#8217;s own documentation and
-assist the testsuite. This is a good starting point for writing your own configuration.</p>
-</div>
-<div class="paragraph">
-<p>This configfile supports <em>text</em> and <em>asciidoc</em> backends.</p>
-</div>
+Thus pipadoc has facilities to generate and modify documentation in an extensible way.</p></div>
+<div class="paragraph"><p>Pipadoc itself comes with a configuration file for generating it&#8217;s own documentation and
+assist the test suite. This is a good starting point for writing your own configuration.</p></div>
+<div class="paragraph"><p>This configfile supports <em>text</em> and <em>asciidoc</em> back ends.</p></div>
 <div class="sect3">
 <h4 id="_preprocessors_2">Preprocessors</h4>
-<div class="ulist">
-<ul>
-<li>
-<p>Ignore any line which ends in <em>NODOC</em>.</p>
-</li>
-<li>
-<p>Replace <em>&lt;STRING&gt;</em> in pipadoc comments with the first literal doublequoted string from the code.
-Lifts string literals from sourcecode to documentation. The doublequotes are removed.</p>
-</li>
-<li>
-<p>Automatic generation of documentation for Lua functions.
-Generates an index entry and a prototype header from an one line function definition</p>
-</li>
-<li>
-<p>When GLOBAL.ISSUES is defined, generate formatted lists for doc comments in
-WIP/FIXME/TODO/PLANNED/DONE sections.
-When GLOBAL.GIT is defined (<em>-D GIT</em>) then each such item includes information gathered
-from the git commit which touched that line the last.
-When GLOBAL.NOBUG is defined it reaps <a href="http://nobug.pipapo.org">NoBug</a> annotations from
-C source files as well.</p>
-</li>
-</ul>
-</div>
 </div>
 <div class="sect3">
 <h4 id="_postprocessors_2">Postprocessors</h4>
-<div class="ulist">
-<ul>
-<li>
-<p>Keep track of original file:line as asciidoc comments in the output.
-Disable this tracking when a doc comment starts with <em>NOORIGIN</em> and
-re-enable it with a doc comment starting with <em>ORGIN</em>.</p>
-</li>
-</ul>
-</div>
 </div>
 <div class="sect3">
 <h4 id="_substitutions_macros">Substitutions Macros</h4>
-<div class="ulist">
-<ul>
-<li>
-<p><em>{LUA_FNDEF}</em> Lifts a Lua function definition to the documentation text.
-Used by the Lua documentation preprocessor.</p>
-</li>
-<li>
-<p><em>{VARDEF name}</em> generates a header and index entry for <em>name</em>.
-Used for documentaton of GLOBAL and CONTEXT variables (pipadoc&#8217;s own documentation).
-Defined for asciidoc and text backends.</p>
-</li>
-<li>
-<p><em>{INDEX_ENTRY name}</em> Entry in the index that refers back to <em>name</em>.</p>
-</li>
-<li>
-<p><em>{GIT_BLAME}</em> Insert a <em>git blame</em> report about the current line.
-Refer to the source for details.</p>
-</li>
-</ul>
-</div>
 </div>
 </div>
 <div class="sect2">
 <h3 id="_dependencies">Dependencies</h3>
-<div class="paragraph">
-<p><em>pipadoc</em> does not depend on any external Lua libraries. Nevertheless modules can be loaded
+<div class="paragraph"><p><em>pipadoc</em> does not depend on any external Lua libraries. Nevertheless modules can be loaded
 optionally to augment the behavior and provide extra features. Plugin-writers should
 use the <em>request()</em> function instead the Lua <em>require()</em>, falling back to simpler but usable
 functionality when some library is not available or call <em>die()</em> when a reasonable fallback
-won&#8217;t do it.</p>
-</div>
-<div class="paragraph">
-<p>Pipadoc calls <em>request "luarocks.loader"</em> to make rocks modules available when
-installed.</p>
-</div>
+won&#8217;t do it.</p></div>
+<div class="paragraph"><p>Pipadoc calls <em>request "luarocks.loader"</em> to make rocks modules available when
+installed.</p></div>
 </div>
 </div>
 </div>
@@ -1073,270 +1278,380 @@ installed.</p>
 <div class="sectionbody">
 <div class="sect2">
 <h3 id="GLOBAL">Documentation Variables</h3>
-<div class="paragraph">
-<p>The <em>GLOBAL</em> and <em>GLOBAL_POST</em> Lua tables holds key/value pairs of variables
+<div class="paragraph"><p>The <em>GLOBAL</em> and <em>GLOBAL_POST</em> Lua tables holds key/value pairs of variables
 with global definitions. These are used by the core and processors/<em>strsubst()</em>.
-Simple string assigments can be set from the command line. Configuration files may define
-more complex Lua functions for string substitutions.</p>
-</div>
+Simple string assignments can be set from the command line. Configuration files may define
+more complex Lua functions for string substitutions.</p></div>
 <div class="sect3">
 <h4 id="_predefined_variables">Predefined Variables</h4>
-<div class="paragraph">
-<p>The <em>GLOBAL</em> table is initialized with:</p>
-</div>
-<div class="dlist">
-<dl>
-<dt class="hdlist1"><a id="index_YEAR"></a><a id="index_MONTH"></a><a id="index_DAY"></a><a id="index_HOUR"></a><a id="index_MINUTE"></a><code>YEAR, MONTH, DAY, HOUR, MINUTE</code></dt>
+<div class="paragraph"><p>The <em>GLOBAL</em> table is initialized with:</p></div>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+<a id="index_YEAR"></a><a id="index_MONTH"></a><a id="index_DAY"></a><a id="index_HOUR"></a><a id="index_MINUTE"></a><code>YEAR, MONTH, DAY, HOUR, MINUTE</code>
+</dt>
 <dd>
-<p>Current date information</p>
+<p>
+  Current date information
+</p>
 </dd>
-<dt class="hdlist1"><a id="index_DAYNAME"></a><a id="index_MONTHNAME"></a><code>DAYNAME, MONTHNAME</code></dt>
+<dt class="hdlist1">
+<a id="index_DAYNAME"></a><a id="index_MONTHNAME"></a><code>DAYNAME, MONTHNAME</code>
+</dt>
 <dd>
-<p>The name of the day of week or month</p>
+<p>
+  The name of the day of week or month
+</p>
 </dd>
-<dt class="hdlist1"><a id="index_DATE"></a><code>DATE</code></dt>
+<dt class="hdlist1">
+<a id="index_DATE"></a><code>DATE</code>
+</dt>
 <dd>
-<p>Current date in YEAR/MONTH/DAY format</p>
+<p>
+  Current date in YEAR/MONTH/DAY format
+</p>
 </dd>
-<dt class="hdlist1"><a id="index_LOCALDATE"></a><code>LOCALDATE</code></dt>
+<dt class="hdlist1">
+<a id="index_LOCALDATE"></a><code>LOCALDATE</code>
+</dt>
 <dd>
-<p>Current date in current locale format</p>
+<p>
+  Current date in current locale format
+</p>
 </dd>
-<dt class="hdlist1"><a id="index_MARKUP"></a><code>MARKUP</code></dt>
+<dt class="hdlist1">
+<a id="index_MARKUP"></a><code>MARKUP</code>
+</dt>
 <dd>
-<p>The markup syntax (--markup option). This information used by pipadoc
-for selecting the toplevel section and postprocessors. Other user
-defined extensions may use it as well.</p>
+<p>
+  The markup syntax (--markup option). This information used by pipadoc
+  for selecting the top level section and postprocessors. Other user
+  defined extensions may use it as well.
+</p>
 </dd>
-<dt class="hdlist1"><a id="index_NIL"></a><code>NIL</code></dt>
+<dt class="hdlist1">
+<a id="index_NIL"></a><code>NIL</code>
+</dt>
 <dd>
-<p>Expands to an empty string.</p>
+<p>
+  Expands to an empty string.
+</p>
 </dd>
-<dt class="hdlist1"><a id="index_NL"></a><code>NL</code></dt>
+<dt class="hdlist1">
+<a id="index_NL"></a><code>NL</code>
+</dt>
 <dd>
-<p>The line-break character sequence, defaults to <em>\n</em> and
-can be changed with the <em>--define</em> command-line option.</p>
+<p>
+  The line-break character sequence, defaults to <em>\n</em> and
+  can be changed with the <em>--define</em> command-line option.
+</p>
 </dd>
-</dl>
-</div>
-<div class="paragraph">
-<p>The <em>GLOBAL_POST</em> table is used for a final <em>strsubst()</em> pass afer postprocessing.
-There are no values defined in <em>GLOBAL_POST</em>.</p>
-</div>
+</dl></div>
+<div class="paragraph"><p>The <em>GLOBAL_POST</em> table is used for a final <em>strsubst()</em> pass after postprocessing.
+There are no values defined in <em>GLOBAL_POST</em>.</p></div>
 </div>
 </div>
 <div class="sect2">
 <h3 id="CONTEXT">The Context</h3>
-<div class="paragraph">
-<p>Processors, operators, string substitution calls and diagnostics get a context
+<div class="paragraph"><p>Processors, operators, string substitution calls and diagnostics get a context
 passed along. This context represents the state for the actual processed line plus
-everything thats defined in GLOBAL.</p>
-</div>
-<div class="paragraph">
-<p>In a few cases a fake-context in angle brakets is passed around for diagnostic functions.</p>
-</div>
+everything that&#8217;s defined in GLOBAL.</p></div>
+<div class="paragraph"><p>In a few cases a fake-context in angle brackets is passed around for diagnostic functions.</p></div>
 <div class="sect3">
 <h4 id="_context_members">Context Members</h4>
-<div class="paragraph">
-<p>The following members are used/defined in <em>contexts</em>.</p>
-</div>
-<div class="dlist">
-<dl>
-<dt class="hdlist1"><a id="index_ARG"></a><code>ARG</code></dt>
+<div class="paragraph"><p>The following members are used/defined in <em>contexts</em>.</p></div>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+<a id="index_ARG"></a><code>ARG</code>
+</dt>
 <dd>
-<p>Optional argument to the operator. This can be the sort key
-(alphabetic or numeric) or another section name for pasting.</p>
+<p>
+  Optional argument to the operator. This can be the sort key
+  (alphabetic or numeric) or another section name for pasting.
+</p>
 </dd>
-<dt class="hdlist1"><a id="index_COMMENT"></a><code>COMMENT</code></dt>
+<dt class="hdlist1">
+<a id="index_COMMENT"></a><code>COMMENT</code>
+</dt>
 <dd>
-<p>Character sequence which is used as line comment.</p>
+<p>
+  Character sequence which is used as line comment.
+</p>
 </dd>
-<dt class="hdlist1"><a id="index_FILE"></a><code>FILE</code></dt>
+<dt class="hdlist1">
+<a id="index_FILE"></a><code>FILE</code>
+</dt>
 <dd>
-<p>The file or section name currently processed or some special annotation
-in angle brackets (eg <em>&lt;startup&gt;</em>) on other processing phases</p>
+<p>
+  The file or section name currently processed or some special annotation
+  in angle brackets (eg <em>&lt;startup&gt;</em>) on other processing phases
+</p>
 </dd>
-<dt class="hdlist1"><a id="index_COMMENTS"></a><a id="index_TABLE"></a><code>COMMENTS_TABLE</code></dt>
+<dt class="hdlist1">
+<a id="index_COMMENTS"></a><a id="index_TABLE"></a><code>COMMENTS_TABLE</code>
+</dt>
 <dd>
-<p>A Lua table with the all possible line comment character sequences
-for this filetype. Already available at preprocessing time.</p>
+<p>
+  A Lua table with the all possible line comment character sequences
+  for this filetype. Already available at preprocessing time.
+</p>
 </dd>
-<dt class="hdlist1"><a id="index_LANGUAGE"></a><code>LANGUAGE</code></dt>
+<dt class="hdlist1">
+<a id="index_LANGUAGE"></a><code>LANGUAGE</code>
+</dt>
 <dd>
-<p>The language name of this file.</p>
+<p>
+  The language name of this file.
+</p>
 </dd>
-<dt class="hdlist1"><a id="index_LINE"></a><code>LINE</code></dt>
+<dt class="hdlist1">
+<a id="index_LINE"></a><code>LINE</code>
+</dt>
 <dd>
-<p>Current line number of input or section, or indexing key
-Lines start at 1</p>
+<p>
+  Current line number of input or section, or indexing key
+  Lines start at 1
+</p>
 </dd>
-<dt class="hdlist1"><a id="index_OP"></a><code>OP</code></dt>
+<dt class="hdlist1">
+<a id="index_OP"></a><code>OP</code>
+</dt>
 <dd>
-<p>Single punctuation operator defining how to process this line.</p>
+<p>
+  Single punctuation operator defining how to process this line.
+</p>
 </dd>
-<dt class="hdlist1"><a id="index_PRE"></a><code>PRE</code></dt>
+<dt class="hdlist1">
+<a id="index_PRE"></a><code>PRE</code>
+</dt>
 <dd>
-<p>Contains the sourcecode in font of the line comment.</p>
+<p>
+  Contains the source code in font of the line comment.
+</p>
 </dd>
-<dt class="hdlist1"><a id="index_SECTION"></a><code>SECTION</code></dt>
+<dt class="hdlist1">
+<a id="index_SECTION"></a><code>SECTION</code>
+</dt>
 <dd>
-<p>Section where the documentation should appear.</p>
+<p>
+  Section where the documentation should appear.
+</p>
 </dd>
-<dt class="hdlist1"><a id="index_SOURCE"></a><code>SOURCE</code></dt>
+<dt class="hdlist1">
+<a id="index_SOURCE"></a><code>SOURCE</code>
+</dt>
 <dd>
-<p>The line read from the input file, used for preprocessing and will be erased
-afterward preprocessing is done.</p>
+<p>
+  The line read from the input file, used for preprocessing and will be erased
+  afterward preprocessing is done.
+</p>
 </dd>
-<dt class="hdlist1"><a id="index_TEXT"></a><code>TEXT</code></dt>
+<dt class="hdlist1">
+<a id="index_TEXT"></a><code>TEXT</code>
+</dt>
 <dd>
-<p>The actual Documentation Text.</p>
+<p>
+ The actual Documentation Text.
+</p>
 </dd>
-</dl>
-</div>
+</dl></div>
 </div>
 </div>
 <div class="sect2">
 <h3 id="_exported_functions">Exported Functions</h3>
-<div class="paragraph">
-<p>pipadoc exports some functions for the use in pre/post processors from config files.</p>
-</div>
+<div class="paragraph"><p>pipadoc exports some functions for the use in pre/post processors from config files.</p></div>
 <div class="sect3">
 <h4 id="_library_loading">Library Loading</h4>
-<div class="dlist">
-<dl>
-<dt class="hdlist1"><a id="index_request"></a> <code><strong>request(name)</strong></code></dt>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+<a id="index_request"></a> <code><strong>request(name)</strong></code>
+</dt>
 <dd>
-<p>try to load optional modules
-  wraps Lua <em>require</em> in a pcall so that failure to load module <em>name</em> results in <em>nil</em>
-  rather than a error.</p>
+<p>
+ try to load optional modules
+   wraps Lua <em>require</em> in a pcall so that failure to load module <em>name</em> results in <em>nil</em>
+   rather than a error.
+</p>
 </dd>
-</dl>
-</div>
+</dl></div>
 </div>
 <div class="sect3">
 <h4 id="_logging_progress_and_errors">Logging Progress and Errors</h4>
-<div class="paragraph">
-<p>Functions for to log progress and report errors. All this functions take a variable argument
+<div class="paragraph"><p>Functions for to log progress and report errors. All this functions take a variable argument
 list. Any argument passed to them will be converted to a string and printed to stderr when
-the verbosity level is high enough.</p>
-</div>
-<div class="dlist">
-<dl>
-<dt class="hdlist1"><a id="index_warn"></a> <code><strong>warn(context,&#8230;&#8203;)</strong></code></dt>
+the verbosity level is high enough.</p></div>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+<a id="index_warn"></a> <code><strong>warn(context,&#8230;)</strong></code>
+</dt>
 <dd>
-<p>report a important but non fatal failure</p>
+<p>
+ report a important but non fatal failure
+</p>
 </dd>
-<dt class="hdlist1"><a id="index_dbg"></a> <code><strong>dbg(context,&#8230;&#8203;)</strong></code></dt>
+<dt class="hdlist1">
+<a id="index_dbg"></a> <code><strong>dbg(context,&#8230;)</strong></code>
+</dt>
 <dd>
-<p>show debugging information</p>
+<p>
+ show debugging information
+</p>
 </dd>
-<dt class="hdlist1"><a id="index_trace"></a> <code><strong>trace(context,&#8230;&#8203;)</strong></code></dt>
+<dt class="hdlist1">
+<a id="index_trace"></a> <code><strong>trace(context,&#8230;)</strong></code>
+</dt>
 <dd>
-<p>show more detailed progress information</p>
+<p>
+ show more detailed progress information
+</p>
 </dd>
-<dt class="hdlist1"><a id="index_die"></a> <code><strong>die(context, &#8230;&#8203;)</strong></code></dt>
+<dt class="hdlist1">
+<a id="index_die"></a> <code><strong>die(context, &#8230;)</strong></code>
+</dt>
 <dd>
-<p>report a fatal error and exit the program</p>
+<p>
+ report a fatal error and exit the program
+</p>
 </dd>
-</dl>
-</div>
+</dl></div>
 </div>
 <div class="sect3">
 <h4 id="_type_checks">Type Checks</h4>
-<div class="paragraph">
-<p>Wrappers around <em>assert</em> to check externally supplied data. On success <em>var</em> will be returned
-otherwise an assertion error is raised.</p>
-</div>
-<div class="dlist">
-<dl>
-<dt class="hdlist1"><a id="index_assert_type"></a> <code><strong>assert_type(var, expected)</strong></code></dt>
+<div class="paragraph"><p>Wrappers around <em>assert</em> to check externally supplied data. On success <em>var</em> will be returned
+otherwise an assertion error is raised.</p></div>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+<a id="index_assert_type"></a> <code><strong>assert_type(var, expected)</strong></code>
+</dt>
 <dd>
-<p>checks that the <em>var</em> is of type <em>expected</em></p>
+<p>
+ checks that the <em>var</em> is of type <em>expected</em>
+</p>
 </dd>
-<dt class="hdlist1"><a id="index_maybe_type"></a> <code><strong>maybe_type(var, expected)</strong></code></dt>
+<dt class="hdlist1">
+<a id="index_maybe_type"></a> <code><strong>maybe_type(var, expected)</strong></code>
+</dt>
 <dd>
-<p>checks that the <em>var</em> is of type <em>expected</em> or nil</p>
+<p>
+ checks that the <em>var</em> is of type <em>expected</em> or nil
+</p>
 </dd>
-<dt class="hdlist1"><a id="index_assert_char"></a> <code><strong>assert_char(var)</strong></code></dt>
+<dt class="hdlist1">
+<a id="index_assert_char"></a> <code><strong>assert_char(var)</strong></code>
+</dt>
 <dd>
-<p>checks that <em>var</em> is a single character</p>
+<p>
+ checks that <em>var</em> is a single character
+</p>
 </dd>
-<dt class="hdlist1"><a id="index_assert_notnil"></a> <code><strong>assert_notnil(var)</strong></code></dt>
+<dt class="hdlist1">
+<a id="index_assert_notnil"></a> <code><strong>assert_notnil(var)</strong></code>
+</dt>
 <dd>
-<p>checks that <em>var</em> is not <em>nil</em></p>
+<p>
+ checks that <em>var</em> is not <em>nil</em>
+</p>
 </dd>
-</dl>
-</div>
+</dl></div>
 </div>
 <div class="sect3">
 <h4 id="_type_conversions">Type Conversions</h4>
-<div class="paragraph">
-<p>Functions which do specific conversions.</p>
-</div>
-<div class="dlist">
-<dl>
-<dt class="hdlist1"><a id="index_to_table"></a> <code><strong>to_table(v)</strong></code></dt>
+<div class="paragraph"><p>Functions which do specific conversions.</p></div>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+<a id="index_to_table"></a> <code><strong>to_table(v)</strong></code>
+</dt>
 <dd>
-<p>if <em>v</em> is not a table then return {v}</p>
+<p>
+ if <em>v</em> is not a table then return {v}
+</p>
 </dd>
-<dt class="hdlist1"><a id="index_maybe_text"></a> <code><strong>maybe_text(v)</strong></code></dt>
+<dt class="hdlist1">
+<a id="index_maybe_text"></a> <code><strong>maybe_text(v)</strong></code>
+</dt>
 <dd>
-<p>convert <em>v</em> to a string, returns <em>nil</em> when that string would be empty</p>
+<p>
+ convert <em>v</em> to a string, returns <em>nil</em> when that string would be empty
+</p>
 </dd>
-</dl>
-</div>
+</dl></div>
 </div>
 <div class="sect3">
 <h4 id="_string_substitution">String Substitution</h4>
-<div class="dlist">
-<dl>
-<dt class="hdlist1"><a id="index_strsubst"></a> <code><strong>strsubst (context, str, escape)</strong></code></dt>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+<a id="index_strsubst"></a> <code><strong>strsubst (context, str, escape)</strong></code>
+</dt>
 <dd>
-<p>substitute text</p>
-<div class="dlist">
-<dl>
-<dt class="hdlist1">context</dt>
+<p>
+ substitute text
+</p>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+context
+</dt>
 <dd>
-<p>The current context which defines all variables and
-macros for the substitution.</p>
+<p>
+    The current context which defines all variables and
+    macros for the substitution.
+</p>
 </dd>
-<dt class="hdlist1">str</dt>
+<dt class="hdlist1">
+str
+</dt>
 <dd>
-<p>The string to operate on</p>
+<p>
+    The string to operate on
+</p>
 </dd>
-<dt class="hdlist1">escape</dt>
+<dt class="hdlist1">
+escape
+</dt>
 <dd>
-<p>Rule for special character escaping</p>
-<div class="dlist">
-<dl>
-<dt class="hdlist1">true</dt>
+<p>
+    Rule for special character escaping
+</p>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+true
+</dt>
 <dd>
-<p>handle escaping in one pass</p>
+<p>
+handle escaping in one pass
+</p>
 </dd>
-<dt class="hdlist1"><em>escape</em></dt>
+<dt class="hdlist1">
+<em>escape</em>
+</dt>
 <dd>
-<p>1st pass</p>
+<p>
+1st pass
+</p>
 </dd>
-<dt class="hdlist1"><em>unescape</em></dt>
+<dt class="hdlist1">
+<em>unescape</em>
+</dt>
 <dd>
-<p>2nd pass</p>
+<p>
+2nd pass
+</p>
 </dd>
-<dt class="hdlist1">nil</dt>
+<dt class="hdlist1">
+nil
+</dt>
 <dd>
-<p>no special escaping</p>
+<p>
+no special escaping
+</p>
 </dd>
-</dl>
-</div>
+</dl></div>
 </dd>
-</dl>
-</div>
+</dl></div>
 </dd>
-</dl>
-</div>
+</dl></div>
 <div class="listingblock">
 <div class="title">Examples</div>
 <div class="content">
-<pre>context = {
+<pre><code>context = {
   STRING = "example string",
   STR = "{STRING}",
   ING = "ING",
@@ -1364,384 +1679,554 @@ assert(strsubst(context, "{UPPER arg}") == "ARG")
 assert(strsubst(context, "{UPPER {STR}}") == "EXAMPLE STRING")
 
 -- undefined names are kept verbatim
-assert(strsubst(context, "{undefined}") == "{undefined}")</pre>
-</div>
-</div>
+assert(strsubst(context, "{undefined}") == "{undefined}")</code></pre>
+</div></div>
 </div>
 <div class="sect3">
 <h4 id="_filetypes_2">Filetypes</h4>
-<div class="dlist">
-<dl>
-<dt class="hdlist1"><a id="index_filetype_register"></a> <code><strong>filetype_register(name, filep, linecommentseqs)</strong></code></dt>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+<a id="index_filetype_register"></a> <code><strong>filetype_register(name, filep, linecommentseqs)</strong></code>
+</dt>
 <dd>
-<p>Register a new filetype</p>
-<div class="dlist">
-<dl>
-<dt class="hdlist1">name</dt>
+<p>
+ Register a new filetype
+</p>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+name
+</dt>
 <dd>
-<p>mnemonic name of the language</p>
+<p>
+      mnemonic name of the language
+</p>
 </dd>
-<dt class="hdlist1">filep</dt>
+<dt class="hdlist1">
+filep
+</dt>
 <dd>
-<p>a Lua pattern or list of patterns matching filename</p>
+<p>
+      a Lua pattern or list of patterns matching filename
+</p>
 </dd>
-<dt class="hdlist1">linecommentseqs</dt>
+<dt class="hdlist1">
+linecommentseqs
+</dt>
 <dd>
-<p>a string or list of strings matching comments of the registered filetype</p>
+<p>
+      a string or list of strings matching comments of the registered filetype
+</p>
 </dd>
-</dl>
-</div>
+</dl></div>
 </dd>
-</dl>
-</div>
-<div class="paragraph">
-<p>For example, C and C++ Filetypes are registered like:</p>
-</div>
+</dl></div>
+<div class="paragraph"><p>For example, C and C++ Filetypes are registered like:</p></div>
 <div class="listingblock">
 <div class="content">
-<pre>filetype_register("C", {"%.c$","%.cpp$","%.C$", "%.cxx$", "%.h$"}, {"//", "/*"})</pre>
-</div>
-</div>
+<pre><code>filetype_register("C", {"%.c$","%.cpp$","%.C$", "%.cxx$", "%.h$"}, {"//", "/*"})</code></pre>
+</div></div>
 </div>
 <div class="sect3">
 <h4 id="_operators_2">Operators</h4>
-<div class="paragraph">
-<p>Operators have 2 functions associated. The first one is the processing function which
+<div class="paragraph"><p>Operators have 2 functions associated. The first one is the processing function which
 defines how a documentation comment gets stored. The second one is the generator function
-which will emits the documentation.</p>
-</div>
-<div class="dlist">
-<dl>
-<dt class="hdlist1"><a id="index_operator_register"></a> <code><strong>operator_register(char, procfunc, genfunc)</strong></code></dt>
+which will emits the documentation.</p></div>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+<a id="index_operator_register"></a> <code><strong>operator_register(char, procfunc, genfunc)</strong></code>
+</dt>
 <dd>
-<p>Register a new operator</p>
-<div class="dlist">
-<dl>
-<dt class="hdlist1">char</dt>
+<p>
+ Register a new operator
+</p>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+char
+</dt>
 <dd>
-<p>single punctuation character defining this operator.</p>
+<p>
+    single punctuation character except <em>.</em> defining this operator.
+</p>
 </dd>
-<dt class="hdlist1">procfunc <code>function(context)</code></dt>
+<dt class="hdlist1">
+procfunc <code>function(context)</code>
+</dt>
 <dd>
-<p>a function which receives a CONTEXT table of the current line.
-The procfunc processes and store the context in aprobiate
-fashion.</p>
+<p>
+    a function which receives a CONTEXT table of the current line.
+    The procfunc processes and store the context in appropriate
+    fashion.
+</p>
 </dd>
-<dt class="hdlist1">genfunc <code>function(context)</code></dt>
+<dt class="hdlist1">
+genfunc <code>function(context)</code>
+</dt>
 <dd>
-<p>a function generating the (sequential) output from given context.</p>
+<p>
+    a function generating the (sequential) output from given context.
+</p>
 </dd>
-</dl>
-</div>
+</dl></div>
 </dd>
-</dl>
-</div>
+</dl></div>
 </div>
 <div class="sect3">
 <h4 id="_preprocessors_3">Preprocessors</h4>
-<div class="dlist">
-<dl>
-<dt class="hdlist1"><a id="index_preprocessor_register"></a> <code><strong>preprocessor_register (langpat, preprocess)</strong></code></dt>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+<a id="index_preprocessor_register"></a> <code><strong>preprocessor_register (langpat, preprocess)</strong></code>
+</dt>
 <dd>
-<p>register a preprocessor</p>
-<div class="dlist">
-<dl>
-<dt class="hdlist1">langpat</dt>
+<p>
+ register a preprocessor
+</p>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+langpat
+</dt>
 <dd>
-<p>Register preprocessor to all filetypes whose mnemonic matches <em>langpat</em>.</p>
+<p>
+    Register preprocessor to all filetypes whose mnemonic matches <em>langpat</em>.
+</p>
 </dd>
-<dt class="hdlist1">preprocess</dt>
+<dt class="hdlist1">
+preprocess
+</dt>
 <dd>
-<p>The preprocesor to register. Can be one of:</p>
-<div class="dlist">
-<dl>
-<dt class="hdlist1"><code>function (context) ... end</code> </dt>
+<p>
+    The preprocessor to register. Can be one of:
+</p>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+<code>function (context) ... end</code> 
+</dt>
 <dd>
-<p>Takes the context of the current source line and shall return:</p>
-<div class="ulist">
-<ul>
+<p>
+      Takes the context of the current source line and shall return:
+</p>
+<div class="ulist"><ul>
 <li>
-<p>the preprocessed line</p>
+<p>
+the preprocessed line
+</p>
 </li>
 <li>
-<p>false to drop the line</p>
+<p>
+false to drop the line
+</p>
 </li>
 <li>
-<p>true to keep the line unaltered
-Preprocessors may store state or have other side effect using API functions.</p>
+<p>
+true to keep the line unaltered
+      Preprocessors may store state or have other side effect using API functions.
+</p>
 </li>
-</ul>
-</div>
+</ul></div>
 </dd>
-<dt class="hdlist1"><code>{pattern, repl [, n]}</code> </dt>
+<dt class="hdlist1">
+<code>{pattern, repl [, n]}</code> 
+</dt>
 <dd>
-<p>Generates a function calling <em>context.SOURCE:gsub(pattern, repl [, n])</em> for preprocessing.</p>
+<p>
+      Generates a function calling <em>context.SOURCE:gsub(pattern, repl [, n])</em> for preprocessing.
+</p>
 </dd>
-</dl>
-</div>
+</dl></div>
 </dd>
-</dl>
-</div>
+</dl></div>
 </dd>
-</dl>
-</div>
+</dl></div>
 </div>
 <div class="sect3">
 <h4 id="_postprocessors_3">Postprocessors</h4>
-<div class="dlist">
-<dl>
-<dt class="hdlist1"><a id="index_postprocessor_register"></a> <code><strong>postprocessor_register (markuppat, postprocess)</strong></code></dt>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+<a id="index_postprocessor_register"></a> <code><strong>postprocessor_register (markuppat, postprocess)</strong></code>
+</dt>
 <dd>
-<p>register a postprocessor</p>
-<div class="dlist">
-<dl>
-<dt class="hdlist1">markuppat</dt>
+<p>
+ register a postprocessor
+</p>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+markuppat
+</dt>
 <dd>
-<p>Register postprocessor to all markups whose name matche <em>markuppat</em>.</p>
+<p>
+    Register postprocessor to all markups whose name matches <em>markuppat</em>.
+</p>
 </dd>
-<dt class="hdlist1">postprocess</dt>
+<dt class="hdlist1">
+postprocess
+</dt>
 <dd>
-<p>The postprocesor to register. Can be one of:</p>
-<div class="dlist">
-<dl>
-<dt class="hdlist1"><code>function (context) ... end</code> </dt>
+<p>
+    The postprocessor to register. Can be one of:
+</p>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+<code>function (context) ... end</code> 
+</dt>
 <dd>
-<p>Takes the context of the current source line and shall return:</p>
-<div class="ulist">
-<ul>
+<p>
+      Takes the context of the current source line and shall return:
+</p>
+<div class="ulist"><ul>
 <li>
-<p>the postprocessed line (context.TEXT)</p>
+<p>
+the postprocessed line (context.TEXT)
+</p>
 </li>
 <li>
-<p>false to drop the line</p>
+<p>
+false to drop the line
+</p>
 </li>
 <li>
-<p>true to keep the line unaltered
-Postprocessors may store state or have other side effect using API functions.</p>
+<p>
+true to keep the line unaltered
+      Postprocessors may store state or have other side effect using API functions.
+</p>
 </li>
-</ul>
-</div>
+</ul></div>
 </dd>
-<dt class="hdlist1"><code>{pattern, repl [, n]}</code> </dt>
+<dt class="hdlist1">
+<code>{pattern, repl [, n]}</code> 
+</dt>
 <dd>
-<p>Generates a function calling <em>context.TEXT:gsub(pattern, repl [, n])</em> for postprocessing.</p>
+<p>
+      Generates a function calling <em>context.TEXT:gsub(pattern, repl [, n])</em> for postprocessing.
+</p>
 </dd>
-</dl>
-</div>
+</dl></div>
 </dd>
-</dl>
-</div>
+</dl></div>
 </dd>
-</dl>
-</div>
+</dl></div>
 </div>
 <div class="sect3">
 <h4 id="_sections">Sections</h4>
-<div class="dlist">
-<dl>
-<dt class="hdlist1"><a id="index_section_append"></a> <code><strong>section_append(section, key, context)</strong></code></dt>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+<a id="index_section_append"></a> <code><strong>section_append(section, key, context)</strong></code>
+</dt>
 <dd>
-<p>Append data to the given section/key
- to be called from preprocessors or macros which generate new content.</p>
-<div class="dlist">
-<dl>
-<dt class="hdlist1">section</dt>
+<p>
+ Append data to the given section/key
+  to be called from preprocessors or macros which generate new content.
+</p>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+section
+</dt>
 <dd>
-<p>name of the section to append to, must be a string</p>
+<p>
+    name of the section to append to, must be a string
+</p>
 </dd>
-<dt class="hdlist1">key</dt>
+<dt class="hdlist1">
+key
+</dt>
 <dd>
-<p>the subkey for sorting within that section. <em>nil</em> for appending text to normal sections</p>
+<p>
+    the sub-key for sorting within that section. <em>nil</em> for appending text to normal sections
+</p>
 </dd>
-<dt class="hdlist1">context</dt>
+<dt class="hdlist1">
+context
+</dt>
 <dd>
-<p>The source line broken down into its components and additional pipadoc metadata</p>
+<p>
+    The source line broken down into its components and additional pipadoc metadata
+</p>
 </dd>
-</dl>
-</div>
+</dl></div>
 </dd>
-</dl>
-</div>
+</dl></div>
 </div>
 </div>
 <div class="sect2">
 <h3 id="_other_functions">Other functions</h3>
-<div class="dlist">
-<dl>
-<dt class="hdlist1"><a id="index_pattern_escape"></a> <code><strong>pattern_escape (s)</strong></code></dt>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+<a id="index_pattern_escape"></a> <code><strong>pattern_escape (s)</strong></code>
+</dt>
 <dd>
-<p>Escape all characters in string <em>s</em> so that it cane be used as verbatim pattern.</p>
+<p>
+ Escape all characters in string <em>s</em> so that it cane be used as verbatim pattern.
+</p>
 </dd>
-<dt class="hdlist1"><a id="index_add_inputfile"></a> <code><strong>add_inputfile(filename)</strong></code></dt>
+<dt class="hdlist1">
+<a id="index_add_inputfile"></a> <code><strong>add_inputfile(filename)</strong></code>
+</dt>
 <dd>
-<p>Add a <em>filename</em> to the list of files to process</p>
+<p>
+ Add a <em>filename</em> to the list of files to process
+</p>
 </dd>
-<dt class="hdlist1"><a id="index_register_alias"></a> <code><strong>register_alias(from, to)</strong></code></dt>
+<dt class="hdlist1">
+<a id="index_register_alias"></a> <code><strong>register_alias(from, to)</strong></code>
+</dt>
 <dd>
-<p>Register a new alias</p>
+<p>
+ Register a new alias
+</p>
 </dd>
-<dt class="hdlist1"><a id="index_make_context"></a> <code><strong>make_context(parent, new)</strong></code></dt>
+<dt class="hdlist1">
+<a id="index_make_context"></a> <code><strong>make_context(parent, new)</strong></code>
+</dt>
 <dd>
-<p> Create a new context.
-Used whenever preprocessors/macros need to generate new content.</p>
-<div class="dlist">
-<dl>
-<dt class="hdlist1">parent</dt>
+<p>
+ Create a new context.
+Used whenever preprocessors/macros need to generate new content.
+</p>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+parent
+</dt>
 <dd>
-<p>The parent context to extend from.</p>
+<p>
+    The parent context to extend from.
+</p>
 </dd>
-<dt class="hdlist1">new</dt>
+<dt class="hdlist1">
+new
+</dt>
 <dd>
-<p>A table (or nil) containing the additional members for the
-new context.</p>
+<p>
+    A table (or nil) containing the additional members for the
+    new context.
+</p>
 </dd>
-</dl>
-</div>
+</dl></div>
 </dd>
-</dl>
-</div>
+</dl></div>
 </div>
 </div>
 </div>
 <div class="sect1">
 <h2 id="_common_warnings">Appendix A: Common Warnings</h2>
 <div class="sectionbody">
-<div class="paragraph">
-<p>Pipadoc emits warnings on problems. Even with warnings processing will go on but the output
+<div class="paragraph"><p>Pipadoc emits warnings on problems. Even with warnings processing will go on but the output
 may need some attention.
-Warnings are supressed with the <em>--quiet</em> option.</p>
-</div>
-<div class="dlist">
-<dl>
-<dt class="hdlist1">can&#8217;t load module: </dt>
+Warnings are suppressed with the <em>--quiet</em> option.</p></div>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+can&#8217;t load module: 
+</dt>
 <dd>
-<p><em>request()</em> failed to load a module.</p>
+<p>
+ <em>request()</em> failed to load a module.
+</p>
 </dd>
-<dt class="hdlist1">strsubst function failed: </dt>
+<dt class="hdlist1">
+strsubst function failed: 
+</dt>
 <dd>
-<p>strsubst tried to call a custom function which failed.</p>
+<p>
+ strsubst tried to call a custom function which failed.
+</p>
 </dd>
-<dt class="hdlist1">strsubst recursive expansion: </dt>
+<dt class="hdlist1">
+strsubst recursive expansion: 
+</dt>
 <dd>
-<p>cyclic substititution.</p>
+<p>
+ cyclic substitution.
+</p>
 </dd>
-<dt class="hdlist1">strsubst no expansion: </dt>
+<dt class="hdlist1">
+strsubst no expansion: 
+</dt>
 <dd>
-<p>no substitution defined.</p>
+<p>
+ no substitution defined.
+</p>
 </dd>
-<dt class="hdlist1">unsupported preprocessor type </dt>
+<dt class="hdlist1">
+unsupported preprocessor type 
+</dt>
 <dd>
-<p>Tried to <em>preprocessor_register()</em> something that is not a function or table.</p>
+<p>
+ Tried to <em>preprocessor_register()</em> something that is not a function or table.
+</p>
 </dd>
-<dt class="hdlist1">preprocessor failed: </dt>
+<dt class="hdlist1">
+preprocessor failed: 
+</dt>
 <dd>
-<p>preprocessor function errored out.</p>
+<p>
+ preprocessor function error.
+</p>
 </dd>
-<dt class="hdlist1">preprocessor returned wrong type: </dt>
+<dt class="hdlist1">
+preprocessor returned wrong type: 
+</dt>
 <dd>
-<p>preprocessor returned unsupported type (or nil).</p>
+<p>
+ preprocessor returned unsupported type (or nil).
+</p>
 </dd>
-<dt class="hdlist1">unsupported postprocessor type </dt>
+<dt class="hdlist1">
+unsupported postprocessor type 
+</dt>
 <dd>
-<p>Tried to <em>postprocessor_register()</em> something that is not a function or table.</p>
+<p>
+ Tried to <em>postprocessor_register()</em> something that is not a function or table.
+</p>
 </dd>
-<dt class="hdlist1">postprocessor failed: </dt>
+<dt class="hdlist1">
+postprocessor failed: 
+</dt>
 <dd>
-<p>postprocessor function errored out.</p>
+<p>
+ postprocessor function error.
+</p>
 </dd>
-<dt class="hdlist1">postprocessor returned wrong type: </dt>
+<dt class="hdlist1">
+postprocessor returned wrong type: 
+</dt>
 <dd>
-<p>postprocessor returned unsupported type (or nil).</p>
+<p>
+ postprocessor returned unsupported type (or nil).
+</p>
 </dd>
-<dt class="hdlist1">paste argument missing </dt>
+<dt class="hdlist1">
+paste argument missing 
+</dt>
 <dd>
-<p>Using the <em>=</em> operator without an argument.</p>
+<p>
+ Using the <em>=</em> operator without an argument.
+</p>
 </dd>
-<dt class="hdlist1">sort argument missing </dt>
+<dt class="hdlist1">
+sort argument missing 
+</dt>
 <dd>
-<p>Using the <em>@</em>, <em>$</em> or <em>#</em> operator without an argument.</p>
+<p>
+ Using the <em>@</em>, <em>$</em> or <em>#</em> operator without an argument.
+</p>
 </dd>
-<dt class="hdlist1">section is empty: </dt>
+<dt class="hdlist1">
+section is empty: 
+</dt>
 <dd>
-<p>Using <em>=</em>, <em>@</em> or <em>#</em> on a section which has no data (under respective keys).</p>
+<p>
+ Using <em>=</em>, <em>@</em> or <em>#</em> on a section which has no data (under respective keys).
+</p>
 </dd>
-<dt class="hdlist1">no section named: </dt>
+<dt class="hdlist1">
+no section named: 
+</dt>
 <dd>
-<p>Using <em>=</em>, <em>@</em> or <em>#</em> on a section which as never defined.</p>
+<p>
+ Using <em>=</em>, <em>@</em> or <em>#</em> on a section which as never defined.
+</p>
 </dd>
-<dt class="hdlist1">can&#8217;t load config file: </dt>
+<dt class="hdlist1">
+can&#8217;t load config file: 
+</dt>
 <dd>
-<p>The config file (<em>--config</em> option) could not be loaded.</p>
+<p>
+ The config file (<em>--config</em> option) could not be loaded.
+</p>
 </dd>
-<dt class="hdlist1">operator processing failed: </dt>
+<dt class="hdlist1">
+operator processing failed: 
+</dt>
 <dd>
-<p>error executing a operators processor.</p>
+<p>
+ error executing a operators processor.
+</p>
 </dd>
-<dt class="hdlist1">file not found: </dt>
+<dt class="hdlist1">
+file not found: 
+</dt>
 <dd>
-<p>A given File can not be opened (wrong path or typo?).</p>
+<p>
+ A given File can not be opened (wrong path or typo?).
+</p>
 </dd>
-<dt class="hdlist1">unknown file type: </dt>
+<dt class="hdlist1">
+unknown file type: 
+</dt>
 <dd>
-<p>The type of the given file was not recongized (see <a href="#_usage"><em>--register</em></a> option).</p>
+<p>
+ The type of the given file was not recognized (see <a href="#_usage"><em>--register</em></a> option).
+</p>
 </dd>
-<dt class="hdlist1">recursive paste: </dt>
+<dt class="hdlist1">
+recursive paste: 
+</dt>
 <dd>
-<p>Pasted sections (see <a href="#_built_in_operators">paste operator</a>) can not recursively
-include themself.</p>
+<p>
+ Pasted sections (see <a href="#_built_in_operators">paste operator</a>) can not recursively
+ include themselves.
+</p>
 </dd>
-<dt class="hdlist1">generator failed: </dt>
+<dt class="hdlist1">
+generator failed: 
+</dt>
 <dd>
-<p>error in operators generator function.</p>
+<p>
+ error in operators generator function.
+</p>
 </dd>
-<dt class="hdlist1">section unused: </dt>
+<dt class="hdlist1">
+section unused: 
+</dt>
 <dd>
-<p>The printed section was not used. This might be intentional when generating
-only partial outputs.</p>
+<p>
+ The printed section was not used. This might be intentional when generating
+ only partial outputs.
+</p>
 </dd>
-<dt class="hdlist1">section multiple times used: </dt>
+<dt class="hdlist1">
+section multiple times used: 
+</dt>
 <dd>
-<p>Section was pasted multiple times in the output.</p>
+<p>
+ Section was pasted multiple times in the output.
+</p>
 </dd>
-<dt class="hdlist1">section w/ keys unused: </dt>
+<dt class="hdlist1">
+section w/ keys unused: 
+</dt>
 <dd>
-<p>Section with keys (numeric or alphabetic) was not used.</p>
+<p>
+ Section with keys (numeric or alphabetic) was not used.
+</p>
 </dd>
-<dt class="hdlist1">section w/ keys multiple times used: </dt>
+<dt class="hdlist1">
+section w/ keys multiple times used: 
+</dt>
 <dd>
-<p>Section was used multiple times in the output (<em>@</em>, <em>$</em> or <em>#</em> operator).</p>
+<p>
+ Section was used multiple times in the output (<em>@</em>, <em>$</em> or <em>#</em> operator).
+</p>
 </dd>
-</dl>
-</div>
+</dl></div>
 </div>
 </div>
 <div class="sect1">
 <h2 id="_generate_the_pipadoc_documentation">Appendix B: Generate the Pipadoc Documentation</h2>
 <div class="sectionbody">
-<div class="paragraph">
-<p><em>pipadoc</em> documents itself with embedded asciidoc text. This can be extracted with</p>
-</div>
+<div class="paragraph"><p><em>pipadoc</em> documents itself with embedded asciidoc text. This can be extracted with</p></div>
 <div class="listingblock">
 <div class="content">
-<pre>lua pipadoc.lua -m asciidoc pipadoc.lua &gt;pipadoc.txt</pre>
-</div>
-</div>
-<div class="paragraph">
-<p>The resulting <code>pipadoc.txt</code> can then be processed with the asciidoc tool chain to produce
-distribution formats:</p>
-</div>
+<pre><code>lua pipadoc.lua -m asciidoc pipadoc.lua &gt;pipadoc.txt</code></pre>
+</div></div>
+<div class="paragraph"><p>The resulting <code>pipadoc.txt</code> can then be processed with the asciidoc tool chain to produce
+distribution formats:</p></div>
 <div class="listingblock">
 <div class="content">
-<pre># generate HTML
+<pre><code># generate HTML
 asciidoc -a toc pipadoc.txt
 
 # generate PDF
-a2x -L -k -v --dblatex-opts "-P latex.output.revhistory=0" pipadoc.txt</pre>
-</div>
-</div>
-<div class="paragraph">
-<p>There is a <em>--make-doc</em> option which calls the above commands. For convinience</p>
-</div>
+a2x -L -k -v --dblatex-opts "-P latex.output.revhistory=0" pipadoc.txt</code></pre>
+</div></div>
+<div class="paragraph"><p>There is a <em>--make-doc</em> option which calls the above commands. For convenience</p></div>
 </div>
 </div>
 <div class="sect1">
@@ -1749,7 +2234,7 @@ a2x -L -k -v --dblatex-opts "-P latex.output.revhistory=0" pipadoc.txt</pre>
 <div class="sectionbody">
 <div class="listingblock">
 <div class="content">
-<pre>pipadoc - Documentation extractor
+<pre><code>pipadoc - Documentation extractor
 Copyright (C)                        Pipapo Project
  2015, 2016, 2017, 2020              Christian Thaeter &lt;ct@pipapo.org&gt;
 
@@ -1764,134 +2249,216 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.</pre>
-</div>
-</div>
+along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.</code></pre>
+</div></div>
 <div class="sect2">
 <h3 id="_license_explanation">License Explanation</h3>
-<div class="paragraph">
-<p>The License (GPL) only applies to pipadoc and any derivative work. The purpose of pipadoc
+<div class="paragraph"><p>The License (GPL) only applies to pipadoc and any derivative work. The purpose of pipadoc
 is to extract documentation from other files, this does not imply that these source files
 from which the documentation is extracted need to be licensed under the GPL, neither does
 this imply that the extracted documentation need to be licensed under the GPL.
 Using pipadoc for non-free software poses no problems about the Licensing terms of
-this software.</p>
-</div>
-<div class="paragraph">
-<p>The GPL applies when you distribute pipadoc itself, in original or modified form. Since
+this software.</p></div>
+<div class="paragraph"><p>The GPL applies when you distribute pipadoc itself, in original or modified form. Since
 pipadoc is written in the Lua scripting language, you already distribute its source as well,
-which naturally makes this distribution conform with the GPL.</p>
-</div>
-<div class="paragraph">
-<p>Nevertheless, when you make any improvements to pipadoc please consider to contact
-Christian Thäter &lt;<a href="mailto:ct@pipapo.org">ct@pipapo.org</a>&gt; for including them into the mainline.</p>
-</div>
+which naturally makes this distribution conform with the GPL.</p></div>
+<div class="paragraph"><p>Nevertheless, when you make any improvements to pipadoc please consider to contact
+Christian Thäter &lt;<a href="mailto:ct@pipapo.org">ct@pipapo.org</a>&gt; for including them into the mainline.</p></div>
 </div>
 </div>
 </div>
 <div class="sect1">
 <h2 id="_index">Index</h2>
 <div class="sectionbody">
-<div class="dlist">
-<dl>
-<dt class="hdlist1"><span class="big">A</span> </dt>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+<span class="big">A</span> 
+</dt>
 <dd>
-<p> <a href="#index_add_inputfile">add_inputfile</a><br>
-<a href="#index_ARG">ARG</a><br>
-<a href="#index_assert_char">assert_char</a><br>
-<a href="#index_assert_notnil">assert_notnil</a><br>
-<a href="#index_assert_type">assert_type</a><br></p>
+<p>
+   <a href="#index_add_inputfile">add_inputfile</a><br />
+
+  <a href="#index_ARG">ARG</a><br />
+
+  <a href="#index_assert_char">assert_char</a><br />
+
+  <a href="#index_assert_notnil">assert_notnil</a><br />
+
+  <a href="#index_assert_type">assert_type</a><br />
+</p>
 </dd>
-<dt class="hdlist1"><span class="big">C</span> </dt>
+<dt class="hdlist1">
+<span class="big">C</span> 
+</dt>
 <dd>
-<p> <a href="#index_COMMENT">COMMENT</a><br>
-<a href="#index_COMMENTS">COMMENTS</a><br></p>
+<p>
+   <a href="#index_COMMENT">COMMENT</a><br />
+
+  <a href="#index_COMMENTS">COMMENTS</a><br />
+</p>
 </dd>
-<dt class="hdlist1"><span class="big">D</span> </dt>
+<dt class="hdlist1">
+<span class="big">D</span> 
+</dt>
 <dd>
-<p> <a href="#index_DATE">DATE</a><br>
-<a href="#index_DAY">DAY</a><br>
-<a href="#index_DAYNAME">DAYNAME</a><br>
-<a href="#index_dbg">dbg</a><br>
-<a href="#index_die">die</a><br></p>
+<p>
+   <a href="#index_DATE">DATE</a><br />
+
+  <a href="#index_DAY">DAY</a><br />
+
+  <a href="#index_DAYNAME">DAYNAME</a><br />
+
+  <a href="#index_dbg">dbg</a><br />
+
+  <a href="#index_die">die</a><br />
+</p>
 </dd>
-<dt class="hdlist1"><span class="big">F</span> </dt>
+<dt class="hdlist1">
+<span class="big">F</span> 
+</dt>
 <dd>
-<p> <a href="#index_FILE">FILE</a><br>
-<a href="#index_filetype_register">filetype_register</a><br></p>
+<p>
+   <a href="#index_FILE">FILE</a><br />
+
+  <a href="#index_filetype_register">filetype_register</a><br />
+</p>
 </dd>
-<dt class="hdlist1"><span class="big">H</span> </dt>
+<dt class="hdlist1">
+<span class="big">H</span> 
+</dt>
 <dd>
-<p><a href="#index_HOUR">HOUR</a><br></p>
+<p>
+   <a href="#index_HOUR">HOUR</a><br />
+</p>
 </dd>
-<dt class="hdlist1"><span class="big">L</span> </dt>
+<dt class="hdlist1">
+<span class="big">L</span> 
+</dt>
 <dd>
-<p> <a href="#index_LANGUAGE">LANGUAGE</a><br>
-<a href="#index_LINE">LINE</a><br>
-<a href="#index_LOCALDATE">LOCALDATE</a><br></p>
+<p>
+   <a href="#index_LANGUAGE">LANGUAGE</a><br />
+
+  <a href="#index_LINE">LINE</a><br />
+
+  <a href="#index_LOCALDATE">LOCALDATE</a><br />
+</p>
 </dd>
-<dt class="hdlist1"><span class="big">M</span> </dt>
+<dt class="hdlist1">
+<span class="big">M</span> 
+</dt>
 <dd>
-<p> <a href="#index_make_context">make_context</a><br>
-<a href="#index_MARKUP">MARKUP</a><br>
-<a href="#index_maybe_text">maybe_text</a><br>
-<a href="#index_maybe_type">maybe_type</a><br>
-<a href="#index_MINUTE">MINUTE</a><br>
-<a href="#index_MONTH">MONTH</a><br>
-<a href="#index_MONTHNAME">MONTHNAME</a><br></p>
+<p>
+   <a href="#index_make_context">make_context</a><br />
+
+  <a href="#index_MARKUP">MARKUP</a><br />
+
+  <a href="#index_maybe_text">maybe_text</a><br />
+
+  <a href="#index_maybe_type">maybe_type</a><br />
+
+  <a href="#index_MINUTE">MINUTE</a><br />
+  <a href="#index_MONTH">MONTH</a><br />
+
+  <a href="#index_MONTHNAME">MONTHNAME</a><br />
+</p>
 </dd>
-<dt class="hdlist1"><span class="big">N</span> </dt>
+<dt class="hdlist1">
+<span class="big">N</span> 
+</dt>
 <dd>
-<p> <a href="#index_NIL">NIL</a><br>
-<a href="#index_NL">NL</a><br></p>
+<p>
+   <a href="#index_NIL">NIL</a><br />
+
+  <a href="#index_NL">NL</a><br />
+</p>
 </dd>
-<dt class="hdlist1"><span class="big">O</span> </dt>
+<dt class="hdlist1">
+<span class="big">O</span> 
+</dt>
 <dd>
-<p> <a href="#index_OP">OP</a><br>
-<a href="#index_operator_register">operator_register</a><br></p>
+<p>
+   <a href="#index_OP">OP</a><br />
+
+  <a href="#index_operator_register">operator_register</a><br />
+</p>
 </dd>
-<dt class="hdlist1"><span class="big">P</span> </dt>
+<dt class="hdlist1">
+<span class="big">P</span> 
+</dt>
 <dd>
-<p> <a href="#index_pattern_escape">pattern_escape</a><br>
-<a href="#index_postprocessor_register">postprocessor_register</a><br>
-<a href="#index_PRE">PRE</a><br>
-<a href="#index_preprocessor_register">preprocessor_register</a><br></p>
+<p>
+   <a href="#index_pattern_escape">pattern_escape</a><br />
+
+  <a href="#index_postprocessor_register">postprocessor_register</a><br />
+
+  <a href="#index_PRE">PRE</a><br />
+
+  <a href="#index_preprocessor_register">preprocessor_register</a><br />
+</p>
 </dd>
-<dt class="hdlist1"><span class="big">R</span> </dt>
+<dt class="hdlist1">
+<span class="big">R</span> 
+</dt>
 <dd>
-<p> <a href="#index_register_alias">register_alias</a><br>
-<a href="#index_request">request</a><br></p>
+<p>
+   <a href="#index_register_alias">register_alias</a><br />
+
+  <a href="#index_request">request</a><br />
+</p>
 </dd>
-<dt class="hdlist1"><span class="big">S</span> </dt>
+<dt class="hdlist1">
+<span class="big">S</span> 
+</dt>
 <dd>
-<p> <a href="#index_SECTION">SECTION</a><br>
-<a href="#index_section_append">section_append</a><br>
-<a href="#index_SOURCE">SOURCE</a><br>
-<a href="#index_strsubst">strsubst</a><br></p>
+<p>
+   <a href="#index_SECTION">SECTION</a><br />
+
+  <a href="#index_section_append">section_append</a><br />
+
+  <a href="#index_SOURCE">SOURCE</a><br />
+
+  <a href="#index_strsubst">strsubst</a><br />
+</p>
 </dd>
-<dt class="hdlist1"><span class="big">T</span> </dt>
+<dt class="hdlist1">
+<span class="big">T</span> 
+</dt>
 <dd>
-<p> <a href="#index_TABLE">TABLE</a><br>
-<a href="#index_TEXT">TEXT</a><br>
-<a href="#index_to_table">to_table</a><br>
-<a href="#index_trace">trace</a><br></p>
+<p>
+   <a href="#index_TABLE">TABLE</a><br />
+
+  <a href="#index_TEXT">TEXT</a><br />
+
+  <a href="#index_to_table">to_table</a><br />
+
+  <a href="#index_trace">trace</a><br />
+</p>
 </dd>
-<dt class="hdlist1"><span class="big">W</span> </dt>
+<dt class="hdlist1">
+<span class="big">W</span> 
+</dt>
 <dd>
-<p><a href="#index_warn">warn</a><br></p>
+<p>
+   <a href="#index_warn">warn</a><br />
+</p>
 </dd>
-<dt class="hdlist1"><span class="big">Y</span> </dt>
+<dt class="hdlist1">
+<span class="big">Y</span> 
+</dt>
 <dd>
-<p><a href="#index_YEAR">YEAR</a><br></p>
+<p>
+   <a href="#index_YEAR">YEAR</a><br />
+</p>
 </dd>
-</dl>
+</dl></div>
 </div>
 </div>
 </div>
-</div>
+<div id="footnotes"><hr /></div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2020-04-16 03:00:40 +0200
+Last updated
+ 2020-07-09 16:01:12 CEST
 </div>
 </div>
 </body>

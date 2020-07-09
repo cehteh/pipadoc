@@ -1,6 +1,7 @@
 #!/bin/sh
 # Pipadoc test suite
-# Copyright (C) 2017            Christian Thäter <ct@pipapo.org>
+# Copyright (C)
+#   2017, 2020,                         Christian Thäter <ct@pipapo.org>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,8 +20,8 @@
 # NOTE: this is a very basic, incomplete test suite yet
 #
 
-test_lua_interpreters="luajit ravi lua5.3 lua-5.3 lua5.2 lua-5.2 lua lua-5.1 lua5.1"
-
+test_lua_interpreters="${1:-luajit ravi lua5.3 lua-5.3 lua5.2 lua-5.2 lua lua-5.1 lua5.1}"
+test "$1" && shift
 
 awk '/^#>/{sub("#> ?", ""); print }' pipadoc.test >'test_expected'
 
@@ -31,8 +32,8 @@ for i in $test_lua_interpreters; do
     echo "checking $i"
     sh pipadoc.install -i "$i" -x "_test_$i" || continue
 
-    echo "./pipadoc_test_$i -D TESTSUITE -t TEST -r test '%.test$' '#' pipadoc.test"
-    if ./pipadoc_test_$i "$@" -D TESTSUITE -t TEST -r test '%.test$' '#' pipadoc.test -o test_out_$i; then
+    echo "./pipadoc_test_$i -d -v -D TESTSUITE -t TEST -r test '%.test$' '#' pipadoc.test"
+    if ./pipadoc_test_$i -d -v "$@" -D TESTSUITE -t TEST -r test '%.test$' '#' pipadoc.test -o test_out_$i; then
 
             if cmp test_out_$i test_expected; then
                     echo "SUCCESS: pipadoc_test_$i"
@@ -48,7 +49,10 @@ for i in $test_lua_interpreters; do
     fi
 done
 
-return $error
+exit $error
+
+#TODO: recursion tests    #FOO=FOO
+#PLANNED: stderr expected tests #DEBUGLEVEL> ...
 
 # tests
 #TEST: NOORIGIN
