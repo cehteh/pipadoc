@@ -1218,7 +1218,6 @@ end
 
 local function setup()
   --PLANNED: os.setlocale by option
-  parse_args(arg)
   set_gcontext "<setup>"
 
   request "luarocks.loader"
@@ -1690,6 +1689,7 @@ end
 ----------
 
 do
+  parse_args(arg)
   setup()
   process_inputs()
 
