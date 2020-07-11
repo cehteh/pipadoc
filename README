@@ -1,4 +1,3 @@
-// pipadoc.lua:1758 //
 pipadoc - Documentation extractor
 =================================
 :author:   Christian Thaeter
@@ -231,7 +230,6 @@ processing.
 Sections and Keys
 -----------------
 
-// pipadoc.lua:697 //
 Text in pipadoc is appended to named 'sections'. Text can be associated with some
 alphanumeric key under that section. This enables later sorting for indices and glossaries.
 
@@ -288,12 +286,10 @@ this is appended to the section 'oneline' under key 'o'
 The pipadoc documentation you are just reading here is made and embedded in 'pipadoc.lua'
 itself using 'asciidoc' as markup. Refer to the source itself to see how it is done.
 
-// pipadoc.lua:1940 //
 
 Filetypes
 ---------
 
-// pipadoc.lua:787 //
 Pipadoc needs to know about the syntax of line comments of the files it is reading.
 For this patterns are registered to be matched against the file name together with a
 list of line comment characters.
@@ -313,7 +309,6 @@ comment closing sequence right on the line will clobber the output, don't do tha
 /*works_too: but looks ugly
 */
 
-// the following will include the closing */ in the documentation
 /*fail: don't do this, pipadoc comments span to the end of the line */
 ----
 
@@ -325,51 +320,30 @@ operations within text files.
 New uncommon filetypes can be added from a config file with 'filetype_register()'  or with
 the '--register' command-line option.
 
-// pipadoc.lua:1945 //
 
 Programming languages supported by pipadoc
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-// pipadoc.lua:1169 //
 Autoconf, Automake,
-// pipadoc.lua:1181 //
 AWK,
-// pipadoc.lua:1162 //
 C, C++, Headerfiles,
 CMake,
-// pipadoc.lua:1208 //
 Delphi, Pascal,
-// pipadoc.lua:1190 //
 Java, C#,
-// pipadoc.lua:1205 //
 Javascript,
-// pipadoc.lua:1166 //
 Lua,
-// pipadoc.lua:1172 //
 Makefiles,
-// pipadoc.lua:1193 //
 Objective-C,
-// pipadoc.lua:1178 //
 Perl,
-// pipadoc.lua:1202 //
 PHP,
-// pipadoc.lua:1184 //
 Prolog,
-// pipadoc.lua:1196 //
 Python,
-// pipadoc.lua:1211 //
 Ruby,
-// pipadoc.lua:1156 //
 SCons,
-// pipadoc.lua:1175 //
 Shell,
-// pipadoc.lua:1214 //
 SQL,
-// pipadoc.lua:1187 //
 Textfiles, Pipadoc (`.pdoc`),
-// pipadoc.lua:1199 //
 Visual Basic,
-// pipadoc.lua:1950 //
 
 
 Operators
@@ -377,33 +351,27 @@ Operators
 
 Operators define what is considered as pipadoc comment and how to assemble the resulting document.
 
-// pipadoc.lua:1257 //
 `:` ::
   The documentation operator. Defines normal documentation text. Each pipadoc comment using
   the `:` operator is processed as documentation. Later when generating the toplevel
   Section is used to paste all other documentation in proper order together.
 
-// pipadoc.lua:1292 //
 `=` ::
   Section paste operator. Takes a section name as argument and will paste that section in
   place.
 
-// pipadoc.lua:1373 //
 `@` ::
   Alphabetic sorting operator. Takes a section name as argument and will paste section
   text alphabetically sorted by its keys.
 
-// pipadoc.lua:1387 //
 `$` ::
   Generic Sorting operator. Takes a section name as argument and will paste section text
   sorted by its keys.
 
-// pipadoc.lua:1400 //
 `#` ::
   Numerical sorting operator. Takes a section name as argument and will paste section text
   numerically sorted by its keys.
 
-// pipadoc.lua:1958 //
 
 
 Configuration File
@@ -511,29 +479,23 @@ Predefined Variables
 
 The 'GLOBAL' table is initialized with:
 
-// pipadoc.lua:1228 //
 anchor:index_YEAR[]anchor:index_MONTH[]anchor:index_DAY[]anchor:index_HOUR[]anchor:index_MINUTE[]`YEAR, MONTH, DAY, HOUR, MINUTE`::
   Current date information
-// pipadoc.lua:1237 //
 anchor:index_DAYNAME[]anchor:index_MONTHNAME[]`DAYNAME, MONTHNAME`::
   The name of the day of week or month
 anchor:index_DATE[]`DATE`::
   Current date in YEAR/MONTH/DAY format
 anchor:index_LOCALDATE[]`LOCALDATE`::
   Current date in current locale format
-// pipadoc.lua:41 //
 anchor:index_MARKUP[]`MARKUP`::
   The markup syntax (--markup option). This information used by pipadoc
   for selecting the top level section and postprocessors. Other user
   defined extensions may use it as well.
-// pipadoc.lua:37 //
 anchor:index_NIL[]`NIL`::
   Expands to an empty string.
-// pipadoc.lua:32 //
 anchor:index_NL[]`NL`::
   The line-break character sequence, defaults to '\n' and
   can be changed with the '--define' command-line option.
-// pipadoc.lua:2069 //
 
 The 'GLOBAL_POST' table is used for a final 'strsubst()' pass after postprocessing.
 There are no values defined in 'GLOBAL_POST'.
@@ -553,44 +515,33 @@ Context Members
 
 The following members are used/defined in 'contexts'.
 
-// pipadoc.lua:1450 //
 anchor:index_ARG[]`ARG`::
   Optional argument to the operator. This can be the sort key
   (alphabetic or numeric) or another section name for pasting.
-// pipadoc.lua:1444 //
 anchor:index_COMMENT[]`COMMENT`::
   Character sequence which is used as line comment.
-// pipadoc.lua:52 //
 anchor:index_FILE[]`FILE`::
   The file or section name currently processed or some special annotation
   in angle brackets (eg '<startup>') on other processing phases
-// pipadoc.lua:1550 //
 anchor:index_COMMENTS[]anchor:index_TABLE[]`COMMENTS_TABLE`::
   A Lua table with the all possible line comment character sequences
   for this filetype. Already available at preprocessing time.
-// pipadoc.lua:1559 //
 anchor:index_LANGUAGE[]`LANGUAGE`::
   The language name of this file.
-// pipadoc.lua:55 //
 anchor:index_LINE[]`LINE`::
   Current line number of input or section, or indexing key
   Lines start at 1
-// pipadoc.lua:1448 //
 anchor:index_OP[]`OP`::
   Single punctuation operator defining how to process this line.
-// pipadoc.lua:1442 //
 anchor:index_PRE[]`PRE`::
   Contains the source code in font of the line comment.
 anchor:index_SECTION[]`SECTION`::
   Section where the documentation should appear.
-// pipadoc.lua:1570 //
 anchor:index_SOURCE[]`SOURCE`::
   The line read from the input file, used for preprocessing and will be erased
   afterward preprocessing is done.
-// pipadoc.lua:1453 //
 anchor:index_TEXT[]`TEXT`::
  The actual Documentation Text.
-// pipadoc.lua:2089 //
 
 
 Exported Functions
@@ -598,7 +549,6 @@ Exported Functions
 
 pipadoc exports some functions for the use in pre/post processors from config files.
 
-// pipadoc.lua:505 //
 
 Library Loading
 ^^^^^^^^^^^^^^^
@@ -607,9 +557,7 @@ anchor:index_request[] +*request(name)*+::
  try to load optional modules
    wraps Lua 'require' in a pcall so that failure to load module 'name' results in 'nil'
    rather than a error.
-// pipadoc.lua:522 //
 
-// pipadoc.lua:198 //
 
 Logging Progress and Errors
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -624,10 +572,8 @@ anchor:index_dbg[] +*dbg(context,...)*+::
  show debugging information
 anchor:index_trace[] +*trace(context,...)*+::
  show more detailed progress information
-// pipadoc.lua:219 //
 anchor:index_die[] +*die(context, ...)*+::
  report a fatal error and exit the program
-// pipadoc.lua:82 //
 
 Type Checks
 ^^^^^^^^^^^
@@ -637,16 +583,12 @@ otherwise an assertion error is raised.
 
 anchor:index_assert_type[] +*assert_type(var, expected)*+::
  checks that the 'var' is of type 'expected'
-// pipadoc.lua:95 //
 anchor:index_maybe_type[] +*maybe_type(var, expected)*+::
  checks that the 'var' is of type 'expected' or nil
-// pipadoc.lua:100 //
 anchor:index_assert_char[] +*assert_char(var)*+::
  checks that 'var' is a single character
-// pipadoc.lua:105 //
 anchor:index_assert_notnil[] +*assert_notnil(var)*+::
  checks that 'var' is not 'nil'
-// pipadoc.lua:111 //
 
 Type Conversions
 ^^^^^^^^^^^^^^^^
@@ -655,15 +597,12 @@ Functions which do specific conversions.
 
 anchor:index_to_table[] +*to_table(v)*+::
  if 'v' is not a table then return +++{v}+++
-// pipadoc.lua:126 //
 anchor:index_maybe_text[] +*maybe_text(v)*+::
  convert 'v' to a string, returns 'nil' when that string would be empty
-// pipadoc.lua:534 //
 
 String Substitution
 ^^^^^^^^^^^^^^^^^^^
 
-// pipadoc.lua:594 //
 anchor:index_strsubst[] +*strsubst (context, str, escape)*+::
  substitute text
   context:::
@@ -677,7 +616,6 @@ anchor:index_strsubst[] +*strsubst (context, str, escape)*+::
     'escape':::: 1st pass
     'unescape':::: 2nd pass
     nil:::: no special escaping
-// pipadoc.lua:539 //
 
 .Examples
 ----
@@ -712,7 +650,6 @@ assert(strsubst(context, "{UPPER {STR}}") == "EXAMPLE STRING")
 assert(strsubst(context, "{undefined}") == "{undefined}")
 ----
 
-// pipadoc.lua:830 //
 
 Filetypes
 ^^^^^^^^^
@@ -732,7 +669,6 @@ For example, C and C++ Filetypes are registered like:
 filetype_register("C", {"%.c$","%.cpp$","%.C$", "%.cxx$", "%.h$"}, {"//", "/*"})
 ----
 
-// pipadoc.lua:1101 //
 
 Operators
 ^^^^^^^^^
@@ -752,7 +688,6 @@ anchor:index_operator_register[] +*operator_register(char, procfunc, genfunc)*+:
   genfunc +function(context)+:::
     a function generating the (sequential) output from given context.
 
-// pipadoc.lua:898 //
 
 Preprocessors
 ^^^^^^^^^^^^^
@@ -772,7 +707,6 @@ anchor:index_preprocessor_register[] +*preprocessor_register (langpat, preproces
     +{pattern, repl [, n]}+ ::::
       Generates a function calling 'context.SOURCE:gsub(pattern, repl [, n])' for preprocessing.
 
-// pipadoc.lua:1000 //
 
 Postprocessors
 ^^^^^^^^^^^^^^
@@ -792,7 +726,6 @@ anchor:index_postprocessor_register[] +*postprocessor_register (markuppat, postp
     +{pattern, repl [, n]}+ ::::
       Generates a function calling 'context.TEXT:gsub(pattern, repl [, n])' for postprocessing.
 
-// pipadoc.lua:758 //
 
 Sections
 ^^^^^^^^
@@ -808,21 +741,16 @@ anchor:index_section_append[] +*section_append(section, key, context)*+::
   context:::
     The source line broken down into its components and additional pipadoc metadata
 
-// pipadoc.lua:2107 //
 
 Other functions
 ~~~~~~~~~~~~~~~
 
-// pipadoc.lua:155 //
 anchor:index_pattern_escape[] +*pattern_escape (s)*+::
  Escape all characters in string 's' so that it cane be used as verbatim pattern.
-// pipadoc.lua:247 //
 anchor:index_add_inputfile[] +*add_inputfile(filename)*+::
  Add a 'filename' to the list of files to process
-// pipadoc.lua:252 //
 anchor:index_register_alias[] +*register_alias(from, to)*+::
  Register a new alias
-// pipadoc.lua:1504 //
 anchor:index_make_context[] +*make_context(parent, new)*+::
  Create a new context.
 Used whenever preprocessors/macros need to generate new content.
@@ -831,7 +759,6 @@ Used whenever preprocessors/macros need to generate new content.
   new:::
     A table (or nil) containing the additional members for the
     new context.
-// pipadoc.lua:2112 //
 
 
 [appendix]
@@ -842,78 +769,56 @@ Pipadoc emits warnings on problems. Even with warnings processing will go on but
 may need some attention.
 Warnings are suppressed with the '--quiet' option.
 
-// pipadoc.lua:517 //
 can't load module: ::
  'request()' failed to load a module.
-// pipadoc.lua:649 //
 strsubst function failed: ::
  strsubst tried to call a custom function which failed.
-// pipadoc.lua:658 //
 strsubst recursive expansion: ::
  cyclic substitution.
 strsubst no expansion: ::
  no substitution defined.
-// pipadoc.lua:934 //
 unsupported preprocessor type ::
  Tried to 'preprocessor_register()' something that is not a function or table.
-// pipadoc.lua:969 //
 preprocessor failed: ::
  preprocessor function error.
-// pipadoc.lua:982 //
 preprocessor returned wrong type: ::
  preprocessor returned unsupported type (or nil).
-// pipadoc.lua:1037 //
 unsupported postprocessor type ::
  Tried to 'postprocessor_register()' something that is not a function or table.
-// pipadoc.lua:1060 //
 postprocessor failed: ::
  postprocessor function error.
-// pipadoc.lua:1073 //
 postprocessor returned wrong type: ::
  postprocessor returned unsupported type (or nil).
-// pipadoc.lua:1304 //
 paste argument missing ::
  Using the '=' operator without an argument.
-// pipadoc.lua:1321 //
 sort argument missing ::
  Using the '@', '$' or '#' operator without an argument.
-// pipadoc.lua:1354 //
 section is empty: ::
  Using '=', '@' or '#' on a section which has no data (under respective keys).
-// pipadoc.lua:1365 //
 no section named: ::
  Using '=', '@' or '#' on a section which as never defined.
-// pipadoc.lua:1424 //
 can't load config file: ::
  The config file ('--config' option) could not be loaded.
-// pipadoc.lua:1483 //
 operator processing failed: ::
  error executing a operators processor.
-// pipadoc.lua:1534 //
 file not found: ::
  A given File can not be opened (wrong path or typo?).
-// pipadoc.lua:1544 //
 unknown file type: ::
  The type of the given file was not recognized (see <<_usage,'--register'>> option).
-// pipadoc.lua:1624 //
 recursive paste: ::
  Pasted sections (see <<_built_in_operators,paste operator>>) can not recursively
  include themselves.
-// pipadoc.lua:1643 //
 generator failed: ::
  error in operators generator function.
-// pipadoc.lua:1663 //
 section unused: ::
  The printed section was not used. This might be intentional when generating
  only partial outputs.
 section multiple times used: ::
  Section was pasted multiple times in the output.
-// pipadoc.lua:1674 //
 section w/ keys unused: ::
  Section with keys (numeric or alphabetic) was not used.
 section w/ keys multiple times used: ::
  Section was used multiple times in the output ('@', '$' or '#' operator).
-// pipadoc.lua:2124 //
 
 [appendix]
 Generate the Pipadoc Documentation
@@ -983,125 +888,80 @@ Christian Thäter <ct@pipapo.org> for including them into the mainline.
 Index
 -----
 
-// pipadoc.lua:247 //
 
 [big]#A# :: 
    <<index_add_inputfile,add_inputfile>> +
-// pipadoc.lua:1450 //
   <<index_ARG,ARG>> +
-// pipadoc.lua:100 //
   <<index_assert_char,assert_char>> +
-// pipadoc.lua:105 //
   <<index_assert_notnil,assert_notnil>> +
-// pipadoc.lua:90 //
   <<index_assert_type,assert_type>> +
-// pipadoc.lua:1444 //
 
 [big]#C# :: 
    <<index_COMMENT,COMMENT>> +
-// pipadoc.lua:1550 //
   <<index_COMMENTS,COMMENTS>> +
-// pipadoc.lua:1242 //
 
 [big]#D# :: 
    <<index_DATE,DATE>> +
-// pipadoc.lua:1228 //
   <<index_DAY,DAY>> +
-// pipadoc.lua:1237 //
   <<index_DAYNAME,DAYNAME>> +
-// pipadoc.lua:210 //
   <<index_dbg,dbg>> +
-// pipadoc.lua:219 //
   <<index_die,die>> +
-// pipadoc.lua:52 //
 
 [big]#F# :: 
    <<index_FILE,FILE>> +
-// pipadoc.lua:834 //
   <<index_filetype_register,filetype_register>> +
-// pipadoc.lua:1228 //
 
 [big]#H# :: 
    <<index_HOUR,HOUR>> +
-// pipadoc.lua:1559 //
 
 [big]#L# :: 
    <<index_LANGUAGE,LANGUAGE>> +
-// pipadoc.lua:55 //
   <<index_LINE,LINE>> +
-// pipadoc.lua:1245 //
   <<index_LOCALDATE,LOCALDATE>> +
-// pipadoc.lua:1504 //
 
 [big]#M# :: 
    <<index_make_context,make_context>> +
-// pipadoc.lua:41 //
   <<index_MARKUP,MARKUP>> +
-// pipadoc.lua:126 //
   <<index_maybe_text,maybe_text>> +
-// pipadoc.lua:95 //
   <<index_maybe_type,maybe_type>> +
-// pipadoc.lua:1228 //
   <<index_MINUTE,MINUTE>> +
   <<index_MONTH,MONTH>> +
-// pipadoc.lua:1237 //
   <<index_MONTHNAME,MONTHNAME>> +
-// pipadoc.lua:37 //
 
 [big]#N# :: 
    <<index_NIL,NIL>> +
-// pipadoc.lua:32 //
   <<index_NL,NL>> +
-// pipadoc.lua:1448 //
 
 [big]#O# :: 
    <<index_OP,OP>> +
-// pipadoc.lua:1109 //
   <<index_operator_register,operator_register>> +
-// pipadoc.lua:155 //
 
 [big]#P# :: 
    <<index_pattern_escape,pattern_escape>> +
-// pipadoc.lua:1004 //
   <<index_postprocessor_register,postprocessor_register>> +
-// pipadoc.lua:1442 //
   <<index_PRE,PRE>> +
-// pipadoc.lua:902 //
   <<index_preprocessor_register,preprocessor_register>> +
-// pipadoc.lua:252 //
 
 [big]#R# :: 
    <<index_register_alias,register_alias>> +
-// pipadoc.lua:509 //
   <<index_request,request>> +
-// pipadoc.lua:1446 //
 
 [big]#S# :: 
    <<index_SECTION,SECTION>> +
-// pipadoc.lua:763 //
   <<index_section_append,section_append>> +
-// pipadoc.lua:1570 //
   <<index_SOURCE,SOURCE>> +
-// pipadoc.lua:594 //
   <<index_strsubst,strsubst>> +
-// pipadoc.lua:1550 //
 
 [big]#T# :: 
    <<index_TABLE,TABLE>> +
-// pipadoc.lua:1453 //
   <<index_TEXT,TEXT>> +
-// pipadoc.lua:118 //
   <<index_to_table,to_table>> +
-// pipadoc.lua:214 //
   <<index_trace,trace>> +
-// pipadoc.lua:206 //
 
 [big]#W# :: 
    <<index_warn,warn>> +
-// pipadoc.lua:1228 //
 
 [big]#Y# :: 
    <<index_YEAR,YEAR>> +
-// pipadoc.lua:2182 //
 
 
