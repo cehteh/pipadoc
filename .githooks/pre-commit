@@ -6,7 +6,7 @@ if bash ./pipadoc.test; then
     lua pipadoc.lua -m asciidoc pipadoc.lua >pipadoc.txt &&
         git stash pop -q --index &&
         asciidoc -a toc pipadoc.txt &&
-        mv pipadoc.txt README &&
+        grep -v '// ' pipadoc.txt >README &&
         if git diff --numstat README |
                 { read a r f ; test $((a+r)) -gt 2; }; then
             git add README pipadoc.html
