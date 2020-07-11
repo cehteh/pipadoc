@@ -1149,7 +1149,7 @@ end
 
 -- store state for block comments
 local block_section
-local block_arg
+local block_key
 
 
 local function builtin_filetypes()
@@ -1265,17 +1265,17 @@ local function setup()
       if context.TEXT ~= "" and (context.SECTION or context.ARG) then
         --oneline
         context.SECTION = context.SECTION or block_section
-        context.ARG = context.ARG or block_arg
+        context.ARG = context.ARG or block_key
         context.TEXT = strsubst(context, context.TEXT, 'escape') .. GLOBAL.NL
         section_append(context.SECTION, context.ARG, context)
       elseif context.TEXT == "" and (context.SECTION or context.ARG) then
         --block head
         block_section = context.SECTION or block_section
-        block_arg = context.ARG -- or block_arg
+        block_key = context.ARG -- or block_key
       else
         --block cont
         context.SECTION = context.SECTION or block_section
-        context.ARG = context.ARG or block_arg
+        context.ARG = context.ARG or block_key
         context.TEXT = strsubst(context, context.TEXT, 'escape') .. GLOBAL.NL
         section_append(context.SECTION, context.ARG, context)
       end
