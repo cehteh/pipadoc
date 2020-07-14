@@ -783,6 +783,15 @@ function section_append(section, key, context) --: Append data to the given sect
   end
 end
 
+
+
+
+
+
+---------------
+-- Filetypes --
+---------------
+
 --filetypes:
 --: Pipadoc needs to know about the syntax of line comments of the files it is reading.
 --: For this patterns are registered to be matched against the file name together with a
@@ -816,15 +825,6 @@ end
 --: the '--register' command-line option.
 --:
 local filetypes = {}
-
-
-
-
-
-
----------------
--- Filetypes --
----------------
 
 --api_filetypes:
 --:
