@@ -249,6 +249,7 @@ function add_inputfile(filename) --: Add a 'filename' to the list of files to pr
   opt_inputs[#opt_inputs+1] = filename
 end
 
+--PLANNED: rename alias_register
 function register_alias(from, to) --: Register a new alias
   assert_type(from, "string")
   assert_type(to, "string")
@@ -899,6 +900,7 @@ local preprocessors = {}
 --: Preprocessors
 --: ^^^^^^^^^^^^^
 --:
+--PLANNED: add a mnemonic name preprocessor_register (name, langpat, preprocess)
 function preprocessor_register (langpat, preprocess) --: register a preprocessor
   --:   langpat:::
   --:     Register preprocessor to all filetypes whose mnemonic matches 'langpat'.
@@ -1001,6 +1003,7 @@ local postprocessors = {}
 --: Postprocessors
 --: ^^^^^^^^^^^^^^
 --:
+--PLANNED: add a mnemonic name postprocessor_register (name, markuppat, preprocess)
 function postprocessor_register (markuppat, postprocess) --: register a postprocessor
   --:   markuppat:::
   --:     Register postprocessor to all markups whose name matches 'markuppat'.
