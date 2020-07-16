@@ -14,6 +14,7 @@ if bash ./pipadoc.test 2>&1 | tee test.log ; then
             # stage docs only when anything more than 1 lines
             # (generation date) changed
             git add README pipadoc.html
+            echo "# regenerated documentation" >>$GIT_DIR/COMMIT_EDITMSG
         fi
 
     ret=$?
