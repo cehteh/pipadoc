@@ -83,6 +83,8 @@ echo TESTPP becomes a docline
 #:
 #=strsubst
 #:
+#: Empty and non-existing parameters
+#.:
 #=
 #@
 ##
@@ -106,6 +108,8 @@ echo TESTPP becomes a docline
 #oneline:a oneline w/ arg a
 #oneline:2 oneline w/ arg 2
 #oneline:1 oneline w/ arg 1
+#oneline.3: oneline w/ arg 3 dot syntax
+#oneline.4:5 oneline w/ arg 4 dot syntax warning
 
 #block:
 #: block test
@@ -117,6 +121,8 @@ echo TESTPP becomes a docline
 #: block w/ arg 2
 #block:1
 #: block w/ arg 1
+#block.3:
+#: block w/ arg 3 dot syntax
 
 #argonly:
 #:bb
@@ -155,9 +161,13 @@ echo TESTPP becomes a docline
 #>
 #> oneline w/ arg 1
 #> oneline w/ arg 2
+#> oneline w/ arg 3 dot syntax
+#> oneline w/ arg 4 dot syntax warning
 #>
 #> oneline w/ arg 1
 #> oneline w/ arg 2
+#> oneline w/ arg 3 dot syntax
+#> oneline w/ arg 4 dot syntax warning
 #> oneline w/ arg a
 #> oneline w/ arg b
 #>
@@ -168,9 +178,11 @@ echo TESTPP becomes a docline
 #>
 #> block w/ arg 1
 #> block w/ arg 2
+#> block w/ arg 3 dot syntax
 #>
 #> block w/ arg 1
 #> block w/ arg 2
+#> block w/ arg 3 dot syntax
 #> block w/ arg a
 #> block w/ arg b
 #>
@@ -198,6 +210,8 @@ echo TESTPP becomes a docline
 #> {STRING example}
 #> {STR}
 #> {STRING}
+#>
+#> Empty and non-existing parameters
 #>
 #>
 #>

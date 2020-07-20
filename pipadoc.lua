@@ -1120,6 +1120,7 @@ function operator_register(char, procfunc, genfunc) --: Register a new operator
   --:     a function generating the (sequential) output from given context.
   --:
   assert(string.match(char, "^%p$") == char)
+  assert(char ~= '.')
   assert_type(procfunc, 'function')
   assert_type(genfunc, 'function')
   dbg(nil, "register operator:", char)
@@ -1265,22 +1266,33 @@ local function setup()
   operator_register(
     ":",
     function (context)
-      if context.TEXT ~= "" and (context.SECTION or context.ARG) then
+      if context.KEY and context.ARG then
+        warn (context, "ARG and KEY defined in operator ':', using KEY only") --cwarn: <STRING> ::
+        --cwarn:  Operator ':' must either be 'section:key' or 'section.key:' but not 'section.key:key'.
+        context.ARG = nil
+      end
+
+      if context.ARG then
+        context.KEY = context.ARG
+        context.ARG = nil
+      end
+
+      if context.TEXT ~= "" and (context.SECTION or context.KEY) then
         --oneline
         context.SECTION = context.SECTION or block_section
-        context.ARG = context.ARG or block_key
         context.TEXT = strsubst(context, context.TEXT, 'escape')
-        section_append(context.SECTION, context.ARG, context)
-      elseif context.TEXT == "" and (context.SECTION or context.ARG) then
+        section_append(context.SECTION, context.KEY, context)
+      elseif context.TEXT == "" and (context.SECTION or context.KEY) then
         --block head
         block_section = context.SECTION or block_section
-        block_key = context.ARG -- or block_key
+        block_key = context.KEY
+        trace (context, "block: ", block_section.."."..(block_key or '-'))
       else
         --block cont
         context.SECTION = context.SECTION or block_section
-        context.ARG = context.ARG or block_key
+        context.KEY = context.KEY or block_key
         context.TEXT = strsubst(context, context.TEXT, 'escape')
-        section_append(context.SECTION, context.ARG, context)
+        section_append(context.SECTION, context.KEY, context)
       end
     end,
 
@@ -1314,12 +1326,12 @@ local function setup()
     end
   )
 
-
   local function sortprocess(context)
-    context.SECTION = context.SECTION or block_section
+    context.SECTION = context.SECTION or block_section  --FIXME: move to parser
+    context.KEY = context.KEY or block_key  --FIXME: move to parser
 
-    if context.ARG and #context.ARG > 0 then
-      section_append(context.SECTION, nil, context)
+    if context.ARG then
+      section_append(context.SECTION,  context.KEY, context)
     else
       warn(context, "sort argument missing") --cwarn: <STRING> ::
       ---cwarn:  Using the '@', '$' or '#' operator without an argument.
@@ -1448,6 +1460,8 @@ local function process_line (context, comment)
   --:comment   Character sequence which is used as line comment.
   --:section {VARDEF SECTION}
   --:section   Section where the documentation should appear.
+  --:key {VARDEF KEY}
+  --:key   Sort key
   --:op {VARDEF OP}
   --:op   Single punctuation operator defining how to process this line.
   --:arg {VARDEF ARG}
@@ -1458,20 +1472,23 @@ local function process_line (context, comment)
 
   -- special case for plain text files
   if comment == "" then
-    context.PRE, context.COMMENT, context.SECTION, context.OP, context.ARG, context.TEXT =
-      "", " ", nil, ":", nil, context.SOURCE
+    context.PRE, context.COMMENT, context.SECTION, context.OP, context.KEY, context.ARG, context.TEXT =
+      "", " ", nil, ":", nil, nil, context.SOURCE
   else
-    local pattern = "^(.-)("..comment..")([%w_.]*)("..operator_pattern()..")([%w_.]*)%s?(.*)$"
-    trace(context, "pattern:", pattern)
-    context.PRE, context.COMMENT, context.SECTION, context.OP, context.ARG, context.TEXT =
+    local pattern = "^(.-)("..comment..")([%w_]*)%.?([%w_]-)("..operator_pattern()..")([%w_]*)%s?(.-)$"
+    context.PRE, context.COMMENT, context.SECTION, context.KEY, context.OP, context.ARG, context.TEXT =
       string.match(context.SOURCE, pattern)
     context.SECTION = maybe_text(context.SECTION)
+    context.KEY = maybe_text(context.KEY)
     context.ARG = maybe_text(context.ARG)
   end
 
+  --FIXME: handle oneline/block here
+
   local op = context.OP
   if op then
-    dbg(context,
+    dbg(context, "source:", context.SOURCE)
+    trace(context,
         "parsed:", context.PRE,
         "section:", context.SECTION,
         "key:", context.KEY,
@@ -1486,6 +1503,8 @@ local function process_line (context, comment)
       warn (context, "operator processing failed:", op, err) --cwarn: <STRING> ::
       --cwarn:  error executing a operators processor.
     end
+    trace(context,
+        "--------------------------------------------------\n")
   end
 end
 
@@ -1862,13 +1881,15 @@ end
 --:
 --: <linecomment> ::= <the filetypes linecomment sequence>
 --:
---: <opspec> ::= [section] <operator> [argument]
+--: <opspec> ::= [section['.'key]] <operator> [argument]
 --:
---: <section> ::= <alphanumeric text including underscore and dots>
+--: <section> ::= <alphanumeric text including underscore>
 --:
 --: <operator> ::= ":" | "=" | "@" | "$" | "#" | <user defined operators>
 --:
---: <argument> ::= <alphanumeric text including underscore and dots>
+--: <key> ::= <alphanumeric text including underscore>
+--:
+--: <argument> ::= <alphanumeric text including underscore>
 --:
 --: <documentationtext> ::= <rest of the line>
 --: ....
