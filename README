@@ -2,7 +2,7 @@ pipadoc - Documentation extractor
 =================================
 :author:   Christian Thaeter
 :email:    ct@pipapo.org
-:date:     11. July 2020
+:date:     20. July 2020
 
 
 [preface]
@@ -891,77 +891,122 @@ Index
 
 [big]#A# :: 
    <<index_add_inputfile,add_inputfile>> +
+
   <<index_ARG,ARG>> +
+
   <<index_assert_char,assert_char>> +
+
   <<index_assert_notnil,assert_notnil>> +
+
   <<index_assert_type,assert_type>> +
+
 
 [big]#C# :: 
    <<index_COMMENT,COMMENT>> +
+
   <<index_COMMENTS,COMMENTS>> +
+
 
 [big]#D# :: 
    <<index_DATE,DATE>> +
+
   <<index_DAY,DAY>> +
+
   <<index_DAYNAME,DAYNAME>> +
+
   <<index_dbg,dbg>> +
+
   <<index_die,die>> +
+
 
 [big]#F# :: 
    <<index_FILE,FILE>> +
+
   <<index_filetype_register,filetype_register>> +
+
 
 [big]#H# :: 
    <<index_HOUR,HOUR>> +
 
+
 [big]#L# :: 
    <<index_LANGUAGE,LANGUAGE>> +
+
   <<index_LINE,LINE>> +
+
   <<index_LOCALDATE,LOCALDATE>> +
+
 
 [big]#M# :: 
    <<index_make_context,make_context>> +
+
   <<index_MARKUP,MARKUP>> +
+
   <<index_maybe_text,maybe_text>> +
+
   <<index_maybe_type,maybe_type>> +
+
   <<index_MINUTE,MINUTE>> +
+
   <<index_MONTH,MONTH>> +
+
   <<index_MONTHNAME,MONTHNAME>> +
+
 
 [big]#N# :: 
    <<index_NIL,NIL>> +
+
   <<index_NL,NL>> +
+
 
 [big]#O# :: 
    <<index_OP,OP>> +
+
   <<index_operator_register,operator_register>> +
+
 
 [big]#P# :: 
    <<index_pattern_escape,pattern_escape>> +
+
   <<index_postprocessor_register,postprocessor_register>> +
+
   <<index_PRE,PRE>> +
+
   <<index_preprocessor_register,preprocessor_register>> +
+
 
 [big]#R# :: 
    <<index_register_alias,register_alias>> +
+
   <<index_request,request>> +
+
 
 [big]#S# :: 
    <<index_SECTION,SECTION>> +
+
   <<index_section_append,section_append>> +
+
   <<index_SOURCE,SOURCE>> +
+
   <<index_strsubst,strsubst>> +
+
 
 [big]#T# :: 
    <<index_TABLE,TABLE>> +
+
   <<index_TEXT,TEXT>> +
+
   <<index_to_table,to_table>> +
+
   <<index_trace,trace>> +
+
 
 [big]#W# :: 
    <<index_warn,warn>> +
 
+
 [big]#Y# :: 
    <<index_YEAR,YEAR>> +
+
 
 
