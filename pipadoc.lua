@@ -1269,7 +1269,7 @@ local function setup()
         --oneline
         context.SECTION = context.SECTION or block_section
         context.ARG = context.ARG or block_key
-        context.TEXT = strsubst(context, context.TEXT, 'escape') .. GLOBAL.NL
+        context.TEXT = strsubst(context, context.TEXT, 'escape')
         section_append(context.SECTION, context.ARG, context)
       elseif context.TEXT == "" and (context.SECTION or context.ARG) then
         --block head
@@ -1279,7 +1279,7 @@ local function setup()
         --block cont
         context.SECTION = context.SECTION or block_section
         context.ARG = context.ARG or block_key
-        context.TEXT = strsubst(context, context.TEXT, 'escape') .. GLOBAL.NL
+        context.TEXT = strsubst(context, context.TEXT, 'escape')
         section_append(context.SECTION, context.ARG, context)
       end
     end,
@@ -1728,6 +1728,7 @@ do
     postprocessors_run(output[i])
     if output[i].TEXT then
       outfd:write(output[i].TEXT)
+      outfd:write(GLOBAL.NL)
     end
   end
   -- free memory
