@@ -1322,7 +1322,7 @@ local function setup()
     end,
 
     function (context, output)
-      return generate_output(context.ARG, output)
+      return output_generate(context.ARG, nil, output)
     end
   )
 
@@ -1635,29 +1635,40 @@ end
 
 local sofar_rec={}
 
-function generate_output(which, output)
+function output_generate(which, key, output)
+  assert_type(which, 'string')
+  maybe_type(key, 'string')
+  assert_type(output, 'table')
   set_gcontext "<output>"
-  dbg(nil, "generate_output:", which)
+  dbg(nil, "generate_output:", which, key)
 
-  local section = sections[which]
+  local which_key = which
+  if key then
+    which_key = which_key .. '.' .. key
+  else
+    key = ""
+  end
+
+  local section = sections[which][key] or sections[which]
+
 
   if section ~= nil then
-    if sofar_rec[which] then
-      warn(nil, "recursive paste:",which) --cwarn: <STRING> ::
+    if sofar_rec[which_key] then
+      warn(nil, "recursive paste:", which_key) --cwarn: <STRING> ::
       --cwarn:  Pasted sections (see <<_built_in_operators,paste operator>>) can not recursively
-      --cwarn:  include themselves.
+      --cwarn:  include themself.
       return ""
     end
 
     if #section == 0 then
-      warn(nil, "section is empty:",which)
-      return ""
+      warn(nil, "section is empty:", which_key)
+      return
     end
-    sofar_rec[which] = true
-    sections_usecnt[which] = (sections_usecnt[which] or 0) + 1
+    sofar_rec[which_key] = true
+    sections_usecnt[which_key] = (sections_usecnt[which_key] or 0) + 1
 
     for i=1,#section do
-      gcontext.LINE=i
+      GLOBAL.LINE=i
       local genfunc = genfuncs[section[i].OP]
       if genfunc then
         local ok, err = pcall(genfunc, section[i], output)
@@ -1669,9 +1680,9 @@ function generate_output(which, output)
         warn(nil, "no generator function for:", section[i].OP)
       end
     end
-    sofar_rec[which] = nil
+    sofar_rec[which_key] = nil
   else
-    warn(nil, "no section named:", which)
+    warn(nil, "no section named:", which_key)
   end
 end
 
@@ -1724,7 +1735,7 @@ do
     topsection = opt_toplevel.."_"..GLOBAL.MARKUP
   end
 
-  generate_output(topsection, output)
+  output_generate(topsection, nil, output)
 
   local outfd, err = io.stdout
 

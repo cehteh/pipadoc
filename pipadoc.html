@@ -737,7 +737,7 @@ asciidoc.install(2);
 <h1>pipadoc - Documentation extractor</h1>
 <span id="author">Christian Thaeter</span><br />
 <span id="email"><code>&lt;<a href="mailto:ct@pipapo.org">ct@pipapo.org</a>&gt;</code></span><br />
-<span id="revdate">20. July 2020</span>
+<span id="revdate">21. July 2020</span>
 <div id="toc">
   <div id="toctitle">Table of Contents</div>
   <noscript><p><b>JavaScript must be enabled in your browser to display the table of contents.</b></p></noscript>
@@ -896,13 +896,15 @@ argument. Only lines qualify this syntax are processed as pipadoc documentation.
 
 &lt;linecomment&gt; ::= &lt;the filetypes linecomment sequence&gt;
 
-&lt;opspec&gt; ::= [section] &lt;operator&gt; [argument]
+&lt;opspec&gt; ::= [section['.'key]] &lt;operator&gt; [argument]
 
-&lt;section&gt; ::= &lt;alphanumeric text including underscore and dots&gt;
+&lt;section&gt; ::= &lt;alphanumeric text including underscore&gt;
 
 &lt;operator&gt; ::= ":" | "=" | "@" | "$" | "#" | &lt;user defined operators&gt;
 
-&lt;argument&gt; ::= &lt;alphanumeric text including underscore and dots&gt;
+&lt;key&gt; ::= &lt;alphanumeric text including underscore&gt;
+
+&lt;argument&gt; ::= &lt;alphanumeric text including underscore&gt;
 
 &lt;documentationtext&gt; ::= &lt;rest of the line&gt;</code></pre>
 </div></div>
@@ -1393,6 +1395,14 @@ everything that&#8217;s defined in GLOBAL.</p></div>
 <p>
   A Lua table with the all possible line comment character sequences
   for this filetype. Already available at preprocessing time.
+</p>
+</dd>
+<dt class="hdlist1">
+<a id="index_KEY"></a><code>KEY</code>
+</dt>
+<dd>
+<p>
+  Sort key
 </p>
 </dd>
 <dt class="hdlist1">
@@ -2092,6 +2102,14 @@ postprocessor returned wrong type:
 </p>
 </dd>
 <dt class="hdlist1">
+ARG and KEY defined in operator <em>:</em>, using KEY only 
+</dt>
+<dd>
+<p>
+ Operator <em>:</em> must either be <em>section:key</em> or <em>section.key:</em> but not <em>section.key:key</em>.
+</p>
+</dd>
+<dt class="hdlist1">
 paste argument missing 
 </dt>
 <dd>
@@ -2362,6 +2380,16 @@ Christian Thäter &lt;<a href="mailto:ct@pipapo.org">ct@pipapo.org</a>&gt; for i
 </dl></div>
 <div class="dlist"><dl>
 <dt class="hdlist1">
+<span class="big">K</span> 
+</dt>
+<dd>
+<p>
+   <a href="#index_KEY">KEY</a><br />
+</p>
+</dd>
+</dl></div>
+<div class="dlist"><dl>
+<dt class="hdlist1">
 <span class="big">L</span> 
 </dt>
 <dd>
@@ -2547,7 +2575,7 @@ Christian Thäter &lt;<a href="mailto:ct@pipapo.org">ct@pipapo.org</a>&gt; for i
 <div id="footer">
 <div id="footer-text">
 Last updated
- 2020-07-20 22:24:54 CEST
+ 2020-07-21 00:53:06 CEST
 </div>
 </div>
 </body>

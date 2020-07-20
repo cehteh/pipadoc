@@ -2,7 +2,7 @@ pipadoc - Documentation extractor
 =================================
 :author:   Christian Thaeter
 :email:    ct@pipapo.org
-:date:     20. July 2020
+:date:     21. July 2020
 
 
 [preface]
@@ -152,13 +152,15 @@ argument. Only lines qualify this syntax are processed as pipadoc documentation.
 
 <linecomment> ::= <the filetypes linecomment sequence>
 
-<opspec> ::= [section] <operator> [argument]
+<opspec> ::= [section['.'key]] <operator> [argument]
 
-<section> ::= <alphanumeric text including underscore and dots>
+<section> ::= <alphanumeric text including underscore>
 
 <operator> ::= ":" | "=" | "@" | "$" | "#" | <user defined operators>
 
-<argument> ::= <alphanumeric text including underscore and dots>
+<key> ::= <alphanumeric text including underscore>
+
+<argument> ::= <alphanumeric text including underscore>
 
 <documentationtext> ::= <rest of the line>
 ....
@@ -526,6 +528,8 @@ anchor:index_FILE[]`FILE`::
 anchor:index_COMMENTS[]anchor:index_TABLE[]`COMMENTS_TABLE`::
   A Lua table with the all possible line comment character sequences
   for this filetype. Already available at preprocessing time.
+anchor:index_KEY[]`KEY`::
+  Sort key
 anchor:index_LANGUAGE[]`LANGUAGE`::
   The language name of this file.
 anchor:index_LINE[]`LINE`::
@@ -789,6 +793,8 @@ postprocessor failed: ::
  postprocessor function error.
 postprocessor returned wrong type: ::
  postprocessor returned unsupported type (or nil).
+ARG and KEY defined in operator ':', using KEY only ::
+ Operator ':' must either be 'section:key' or 'section.key:' but not 'section.key:key'.
 paste argument missing ::
  Using the '=' operator without an argument.
 sort argument missing ::
@@ -927,6 +933,10 @@ Index
 
 [big]#H# :: 
    <<index_HOUR,HOUR>> +
+
+
+[big]#K# :: 
+   <<index_KEY,KEY>> +
 
 
 [big]#L# :: 
