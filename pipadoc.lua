@@ -774,7 +774,7 @@ function section_append(section, key, context) --: Append data to the given sect
   --:     The source line broken down into its components and additional pipadoc metadata
   assert_type(context, "table")
   --:
-  trace(context, "append:", section..":"..(key or "-"), context.TEXT)
+  trace(context, "append:", section.."."..(key or "-"), context.TEXT)
   sections[section] = sections[section] or {keys = {}}
   if key and #key > 0 then
     sections[section].keys[key] = sections[section].keys[key] or {}
@@ -1730,11 +1730,12 @@ do
 
   local output = {}
 
-  local topsection = opt_toplevel
+  local topsection = opt_toplevel  --TODO: DOCME
   if sections[opt_toplevel.."_"..GLOBAL.MARKUP] then
     topsection = opt_toplevel.."_"..GLOBAL.MARKUP
   end
 
+  set_gcontext "<output>"
   output_generate(topsection, nil, output)
 
   local outfd, err = io.stdout

@@ -2,7 +2,7 @@ pipadoc - Documentation extractor
 =================================
 :author:   Christian Thaeter
 :email:    ct@pipapo.org
-:date:     21. July 2020
+:date:     4. August 2020
 
 
 [preface]
@@ -813,7 +813,7 @@ unknown file type: ::
  The type of the given file was not recognized (see <<_usage,'--register'>> option).
 recursive paste: ::
  Pasted sections (see <<_built_in_operators,paste operator>>) can not recursively
- include themselves.
+ include themself.
 generator failed: ::
  error in operators generator function.
 section unused: ::
