@@ -126,8 +126,11 @@ echo TESTPP becomes a docline
 
 #argonly:
 #:bb
-#: 2. arg block
+#: 3. arg block
+#.cc:
+#: 4. arg block dot syntax
 #:aa 1. arg oneline
+#.aa: 2. arg oneline dot syntax
 
 #strsubst:
 #: {STRING}
@@ -187,7 +190,9 @@ echo TESTPP becomes a docline
 #> block w/ arg b
 #>
 #> 1. arg oneline
-#> 2. arg block
+#> 2. arg oneline dot syntax
+#> 3. arg block
+#> 4. arg block dot syntax
 #>
 #> TESTBAR
 #> TESTBAR becomes a docline
