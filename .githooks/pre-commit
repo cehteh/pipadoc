@@ -3,7 +3,7 @@ KEEP_TESTS=5
 WORKTREE_DIR="$PWD"
 TEST_PREFIX=".tests-"
 
-test_dir="${TEST_PREFIX}-${GIT_AUTHOR_DATE% +*}"
+test_dir="${TEST_PREFIX}${GIT_AUTHOR_DATE% +*}"
 git archive "$(git write-tree)" --prefix="$test_dir/" | tar xf -
 cd "$test_dir"
 if bash ./pipadoc.test 2>&1 | tee test.log ; then
@@ -22,7 +22,7 @@ if bash ./pipadoc.test 2>&1 | tee test.log ; then
 
     # cleanup old test dirs
     cd "$WORKTREE_DIR"
-    find -name "${TEST_PREFIX}-*" -type d | sort -n | head -n -$KEEP_TESTS | xargs -r rm -r
+    find -name "${TEST_PREFIX}*" -type d | sort -n | head -n -$KEEP_TESTS | xargs -r rm -r
 
 else
     ret=$?
