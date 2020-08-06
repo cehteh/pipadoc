@@ -1,17 +1,21 @@
 #!/bin/bash
 WORKTREE_DIR="$PWD"
-TEST_DIR=".tests-${GIT_AUTHOR_DATE% +*}"
-git archive "$(git write-tree)" --prefix="$TEST_DIR/" | tar xf -
-cd "$TEST_DIR"
+TEST_PREFIX=".tests-"
+
+test_dir="${TEST_PREFIX}-${GIT_AUTHOR_DATE% +*}"
+git archive "$(git write-tree)" --prefix="$test_dir/" | tar xf -
+cd "$test_dir"
 if bash ./pipadoc.test 2>&1 | tee test.log ; then
     ret=$?
+
+    # generate docs
     lua pipadoc.lua -m asciidoc pipadoc.lua >pipadoc.txt &&
         asciidoc -a toc pipadoc.txt &&
-        grep -v '^// ' pipadoc.txt >README &&
+        grep -v '^// ' pipadoc.txt >"$WORKTREE_DIR/README" &&
+        cd "$WORKTREE_DIR" &&
         if git diff --numstat README |
                 { read a r f ; test $((a+r)) -gt 2; }; then
-            mv README pipadoc.html "$WORKTREE_DIR/"
-            cd "$WORKTREE_DIR"
+            mv "$test_dir/pipadoc.html" "$WORKTREE_DIR/"
             git add README pipadoc.html
         fi
 else
