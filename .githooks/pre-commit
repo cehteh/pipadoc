@@ -1,4 +1,5 @@
 #!/bin/bash
+KEEP_TESTS=5
 WORKTREE_DIR="$PWD"
 TEST_PREFIX=".tests-"
 
@@ -18,6 +19,11 @@ if bash ./pipadoc.test 2>&1 | tee test.log ; then
             mv "$test_dir/pipadoc.html" "$WORKTREE_DIR/"
             git add README pipadoc.html
         fi
+
+    # cleanup old test dirs
+    cd "$WORKTREE_DIR"
+    find -name "${TEST_PREFIX}-*" -type d | sort -n | head -n -$KEEP_TESTS | xargs -r rm -r
+
 else
     ret=$?
     echo "testsuite failed, abort commit" 1>&2
