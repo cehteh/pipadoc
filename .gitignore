@@ -4,4 +4,4 @@
 *.txt
 *.xml
 pipadoc
-test_expected
+.tests-*

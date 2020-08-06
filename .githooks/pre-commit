@@ -1,26 +1,22 @@
 #!/bin/bash
-
-# stash to staged changes and run the testsuite
-git stash push -k
-
+WORKTREE_DIR="$PWD"
+TEST_DIR=".tests-${GIT_AUTHOR_DATE% +*}"
+git archive "$(git write-tree)" --prefix="$TEST_DIR/" | tar xf -
+cd "$TEST_DIR"
 if bash ./pipadoc.test 2>&1 | tee test.log ; then
-    # testsuite success, rebuild documentation
+    ret=$?
     lua pipadoc.lua -m asciidoc pipadoc.lua >pipadoc.txt &&
-        git stash pop -q --index &&
         asciidoc -a toc pipadoc.txt &&
         grep -v '^// ' pipadoc.txt >README &&
         if git diff --numstat README |
                 { read a r f ; test $((a+r)) -gt 2; }; then
-            # stage docs only when anything more than 1 lines
-            # (generation date) changed
+            mv README pipadoc.html "$WORKTREE_DIR/"
+            cd "$WORKTREE_DIR"
             git add README pipadoc.html
         fi
-
-    ret=$?
 else
     ret=$?
     echo "testsuite failed, abort commit" 1>&2
-    git stash pop -q --index
 fi
 
 exit $ret
