@@ -266,13 +266,6 @@ function register_alias(from, to) --: Register a new alias
   opt_aliases[#opt_aliases+1] = {from, to}
 end
 
-function usage()
-  for i=1,#options do
-    print(options[i])
-  end
-  os.exit(0)
-end
-
 --usage:
 local options = {
   "pipadoc [options...] [inputs..]",  --:  <STRING>
@@ -473,6 +466,15 @@ local options = {
   "", --:  <STRING>
   "  inputs are file names or a '-' that indicates standard input", --:  <STRING>
 }
+
+
+function usage()
+  for i=1,#options do
+    print(options[i])
+  end
+  os.exit(0)
+end
+
 
 function parse_args(arg)
   set_gcontext "<parse_args>"
