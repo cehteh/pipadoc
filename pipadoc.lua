@@ -88,23 +88,31 @@ local opt_config_set = false
 --: otherwise an assertion error is raised.
 --:
 
+-- assert with corrected error context
+local function assertx(flag, message)
+  if not flag then
+    error(message, 3)
+  end
+end
+
+
 function assert_type(var, expected) --: checks that the 'var' is of type 'expected'
-  assert(type(var) == expected, "type error: "..expected.." expected, got "..type(var))
+  assertx(type(var) == expected, "type error: "..expected.." expected, got "..type(var))
   return var
 end
 
 function maybe_type(var, expected) --: checks that the 'var' is of type 'expected' or nil
-  assert(var == nil or type(var) == expected, "type error: "..expected.." or nil expected, got "..type(var).. " >>>"..tostring(var).."<<<")
+  assertx(var == nil or type(var) == expected, "type error: "..expected.." or nil expected, got "..type(var).. " >>>"..tostring(var).."<<<")
   return var
 end
 
 function assert_char(var) --: checks that 'var' is a single character
-  assert(type(var) == "string" and #var == 1, "type error: single character expected")
+  assertx(type(var) == "string" and #var == 1, "type error: single character expected")
   return var
 end
 
 function assert_notnil(var) --: checks that 'var' is not 'nil'
-  assert(type(var) ~= "nil", "Value expected")
+  assertx(type(var) ~= "nil", "Value expected")
   return var
 end
 
