@@ -1,3 +1,4 @@
+#!/usr/bin/lua
 --license:
 --: pipadoc - Documentation extractor
 --: Copyright (C)                        Pipapo Project

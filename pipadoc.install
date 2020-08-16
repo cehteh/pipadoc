@@ -130,7 +130,7 @@ check_lua ()
                 {
                     dbg "emit: interpreter $lua_interpreter"
                     echo "#!$lua_interpreter" >"$installdir/$name$suffix"
-                    cat "$name.lua" >>"$installdir/$name$suffix"
+                    tail -n +2 "$name.lua" >>"$installdir/$name$suffix"
                     chmod +x "$installdir/$name$suffix"
                 }
                 return 0
