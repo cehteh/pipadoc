@@ -2259,34 +2259,32 @@ end
 --: ~~~
 --:
 --$WIP
+--PLANNED: only generate ISSUE Section when there are any items
+--PLANNED: TEXT on special ops become parameters  --$WIP optional, reverse ....
 --:
 --: FIXME
 --: ~~~~~
 --:
 --$FIXME
 --:
---PLANNED: only generate FIXME Section when there are FIXME's
 --:
 --: TODO
 --: ~~~~
 --:
 --$TODO
 --:
---PLANNED: only generate TODO section when there are TODO's
 --:
 --: PLANNED
 --: ~~~~~~~
 --:
 --$PLANNED
 --:
---PLANNED: only generate PLANNED section when there are PLANNED's
 --:
 --: DONE
 --: ~~~~
 --:
 --$DONE
 --:
---PLANNED: only generate DONE section when there are DONE's
 --:
 
 
