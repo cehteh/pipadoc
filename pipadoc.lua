@@ -369,6 +369,7 @@ local options = {
   "", --:  <STRING>
   --PLANNED: integrate markup processor integration when -o is given and --format .pdf|.html etc are given (driven by config file)
 
+  --PLANNED: multiple output files, associated with markup, toplevel and defines  --generate <config> somehow
   "    -o, --output <file>", --:  <STRING>
   "                        writes output to 'file' [stdout]", --:  <STRING>
   ["-o"] = "--output",
@@ -956,7 +957,7 @@ local preprocessors = {}
 --: Preprocessors
 --: ^^^^^^^^^^^^^
 --:
---PLANNED: add a mnemonic name preprocessor_register(name, langpat, preprocess)
+--TODO: add a mnemonic name preprocessor_register(name, langpat, preprocess)
 function preprocessor_register(langpat, preprocess) --: register a preprocessor
   --:   langpat:::
   --:     Register preprocessor to all filetypes whose mnemonic matches 'langpat'.
@@ -971,6 +972,7 @@ function preprocessor_register(langpat, preprocess) --: register a preprocessor
   --:     +\{pattern, repl [, n]\}+ ::::
   --:       Generates a function calling 'context.SOURCE:gsub(pattern, repl [, n])' for preprocessing.
   --:
+  --PLANNED: maybe_type() -> nil == for all
   --PLANNED: langpat as list of patterns
   assert_type(langpat, "string")
   dbg(nil, "register preprocessor:", langpat, preprocess)
@@ -1059,7 +1061,7 @@ local postprocessors = {}
 --: Postprocessors
 --: ^^^^^^^^^^^^^^
 --:
---PLANNED: add a mnemonic name postprocessor_register(name, markuppat, preprocess)
+--TODO: add a mnemonic name postprocessor_register(name, markuppat, preprocess)
 function postprocessor_register(markuppat, postprocess) --: register a postprocessor
   --:   markuppat:::
   --:     Register postprocessor to all markups whose name matches 'markuppat'.
@@ -1074,6 +1076,7 @@ function postprocessor_register(markuppat, postprocess) --: register a postproce
   --:     +\{pattern, repl [, n]\}+ ::::
   --:       Generates a function calling 'context.TEXT:gsub(pattern, repl [, n])' for postprocessing.
   --:
+  --PLANNED: maybe_type() -> nil == for all
   --PLANNED: markuppat as list of patterns
   assert_type(markuppat, "string")
   dbg(nil, "register postprocessor:", markuppat, postprocess)
@@ -1308,7 +1311,7 @@ local function setup()
 
   if not opt_nodefaults then
     --PLANNED: read style file like a config, lower priority, different paths (./ /etc/ ~/ ...)
-    --PLANNED: for each language/markup (pipadoc_asciidoc.lua) etc
+    --PLANNED: configfile for each markup (pipadoc_asciidoc.lua) etc
     filetypes_builtin()
   end
 
@@ -1352,7 +1355,6 @@ local function setup()
     end,
 
     function (context, output)
-      --PLANNED: link prev/next context
       table.insert(output, context)
     end
   )
@@ -1491,7 +1493,6 @@ local function setup()
     end,
 
     function (context, output)
-      --PLANNED: link prev/next context
       table.insert(output, context)
     end
   )
@@ -2264,7 +2265,7 @@ end
 --: may need some attention.
 --: Warnings are suppressed with the '--quiet' option.
 --:
---PLANNED: sort warnings
+--TODO: sort warnings
 --=cwarn
 --:
 --: [appendix]
