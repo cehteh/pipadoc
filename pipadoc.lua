@@ -71,6 +71,7 @@ local opt_output = nil
 --PLANNED: make opt_config a list
 local opt_config = "pipadoc_config.lua"
 local opt_config_set = false
+local opt_dryrun = false
 
 
 
@@ -298,6 +299,14 @@ local options = {
   end,
   "", --:  <STRING>
 
+  "    -n, --dry-run", --:  <STRING>
+  "                        don not generate output", --:  <STRING>
+  ["-n"] = "--dry-run",
+  ["--dry-run"] = function ()
+    opt_dryrun = true
+  end,
+  "", --:  <STRING>
+
   "    -h, --help", --:  <STRING>
   "                        show this help", --:  <STRING>
   ["-h"] = "--help",
@@ -433,6 +442,7 @@ local options = {
 
   -- intentionally here undocumented, only works in development tree
   ["--make-doc"] = function (arg, i)
+    opt_dryrun = true
     os.execute [[
         lua pipadoc.lua -m text pipadoc.lua pipadoc_config.lua -o README
         lua pipadoc.lua -m asciidoc pipadoc.lua pipadoc_config.lua -o pipadoc.txt
@@ -447,6 +457,7 @@ local options = {
 
   ["--issues"] = function (arg, i)
     --PLANNED: run universally
+    opt_dryrun = true
     os.execute [[
         lua pipadoc.lua -m asciidoc -D GIT -D ISSUES -t ISSUES pipadoc.lua pipadoc_config.lua
     ]]
@@ -1745,6 +1756,10 @@ do
   setup()
   process_inputs()
 
+  if opt_dryrun then
+    os.exit(0)
+  end
+
   collectgarbage()
 
   local output = {}
@@ -1754,7 +1769,8 @@ do
   if topsection then
     output_paste(topsection, output)
   else
-    usage()
+    die (nil, "Toplevel section undefined:", opt_toplevel) --cwarn: <STRING> ::
+    --cwarn:  The section used as root for the output generation is not defined.
   end
 
   local outfd, err = io.stdout

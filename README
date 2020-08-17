@@ -74,6 +74,9 @@ Usage
                          set verbosity to debug level
                          one additional -v enables tracing
  
+     -n, --dry-run
+                         don not generate output
+ 
      -h, --help
                          show this help
  
@@ -827,6 +830,8 @@ section key unused: ::
  Section with keys (numeric or alphabetic) was not used.
 section key multiple times used: ::
  Section was used multiple times in the output ('@', '$' or '#' operator).
+Toplevel section undefined: ::
+ The section used as root for the output generation is not defined.
 
 [appendix]
 Generate the Pipadoc Documentation

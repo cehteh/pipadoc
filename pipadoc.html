@@ -825,6 +825,9 @@ One can ship the <code>pipadoc.lua</code> and <code>pipadoc.install</code> and d
                          set verbosity to debug level
                          one additional -v enables tracing
 
+     -n, --dry-run
+                         don not generate output
+
      -h, --help
                          show this help
 
@@ -2231,6 +2234,14 @@ section key multiple times used:
  Section was used multiple times in the output (<em>@</em>, <em>$</em> or <em>#</em> operator).
 </p>
 </dd>
+<dt class="hdlist1">
+Toplevel section undefined: 
+</dt>
+<dd>
+<p>
+ The section used as root for the output generation is not defined.
+</p>
+</dd>
 </dl></div>
 </div>
 </div>
@@ -2583,7 +2594,7 @@ Christian Thäter &lt;<a href="mailto:ct@pipapo.org">ct@pipapo.org</a>&gt; for i
 <div id="footer">
 <div id="footer-text">
 Last updated
- 2020-08-17 14:38:21 CEST
+ 2020-08-17 15:01:53 CEST
 </div>
 </div>
 </body>
