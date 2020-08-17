@@ -1208,6 +1208,17 @@ Visual Basic,</p></div>
 </p>
 </dd>
 </dl></div>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+<code>+</code> 
+</dt>
+<dd>
+<p>
+  Concat operator. Like <em>:</em> but appends text to the last line instead creating a new line.
+  Note that some context information (file/line) gets lost as only the text will be appended.
+</p>
+</dd>
+</dl></div>
 </div>
 </div>
 <div class="sect1">
@@ -1544,6 +1555,34 @@ context
 </p>
 </dd>
 </dl></div>
+<div class="paragraph"><p>Append data to the given section/key
+  to be called from preprocessors or macros which generate new content.</p></div>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+section
+</dt>
+<dd>
+<p>
+    name of the section to append to, must be a string
+</p>
+</dd>
+<dt class="hdlist1">
+key
+</dt>
+<dd>
+<p>
+    the sub-key for sorting within that section. <em>nil</em> for appending text to normal sections
+</p>
+</dd>
+<dt class="hdlist1">
+context
+</dt>
+<dd>
+<p>
+    The source line broken down into its components and additional pipadoc metadata
+</p>
+</dd>
+</dl></div>
 </div>
 </div>
 <div class="sect2">
@@ -1689,6 +1728,14 @@ no such section with keys
 <dd>
 <p>
  The given section has no key entries.
+</p>
+</dd>
+<dt class="hdlist1">
+ARG and KEY defined in operator <em>+</em>, using KEY only 
+</dt>
+<dd>
+<p>
+ Operator <em><code></em> must either be <em>section+key</em> or <em>section.key</code></em> but not <em>section.key+key</em>.
 </p>
 </dd>
 <dt class="hdlist1">
@@ -1861,7 +1908,7 @@ Christian Thäter &lt;<a href="mailto:ct@pipapo.org">ct@pipapo.org</a>&gt; for i
 <div id="footer">
 <div id="footer-text">
 Last updated
- 2020-08-17 21:28:20 CEST
+ 2020-08-17 22:06:44 CEST
 </div>
 </div>
 </body>

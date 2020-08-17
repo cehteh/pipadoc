@@ -67,6 +67,8 @@ exit $error
 #:
 #$oneline
 #:
+#=oneline_concat
+#:
 #=block
 #:
 #@block
@@ -74,6 +76,8 @@ exit $error
 ##block
 #:
 #$block
+#:
+#=block_concat
 #:
 #@argonly
 #: not a docline NODOC
@@ -116,6 +120,9 @@ echo TESTPP becomes a docline
 #oneline.3: oneline w/ arg 3 dot syntax
 #oneline.4:5 oneline w/ arg 4 dot syntax warning
 
+#oneline_concat: oneline_concat
+#oneline_concat+  end
+
 #block:
 #: block test
 #block:b
@@ -128,6 +135,10 @@ echo TESTPP becomes a docline
 #: block w/ arg 1
 #block.3:
 #: block w/ arg 3 dot syntax
+
+#block_concat:
+#: block_concat
+#+  end
 
 #argonly:
 #:bb
@@ -208,6 +219,8 @@ echo TESTPP becomes a docline
 #> oneline w/ arg a
 #> oneline w/ arg b
 #>
+#> oneline_concat end
+#>
 #> block test
 #>
 #> block w/ arg a
@@ -222,6 +235,8 @@ echo TESTPP becomes a docline
 #> block w/ arg 3 dot syntax
 #> block w/ arg a
 #> block w/ arg b
+#>
+#> block_concat end
 #>
 #> 1. arg oneline
 #> 2. arg oneline dot syntax

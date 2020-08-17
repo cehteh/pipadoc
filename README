@@ -377,6 +377,10 @@ Operators define what is considered as pipadoc comment and how to assemble the r
   Numerical sorting operator. Takes a section name as argument and will paste section text
   numerically sorted by its keys.
 
+`+` ::
+  Concat operator. Like ':' but appends text to the last line instead creating a new line.
+  Note that some context information (file/line) gets lost as only the text will be appended.
+
 
 
 Configuration File
@@ -731,6 +735,16 @@ Append data to the given section/key
   context:::
     The source line broken down into its components and additional pipadoc metadata
 
+Append data to the given section/key
+  to be called from preprocessors or macros which generate new content.
+
+  section:::
+    name of the section to append to, must be a string
+  key:::
+    the sub-key for sorting within that section. 'nil' for appending text to normal sections
+  context:::
+    The source line broken down into its components and additional pipadoc metadata
+
 
 Other functions
 ~~~~~~~~~~~~~~~
@@ -785,6 +799,8 @@ sort argument missing ::
  Using the '@', '$' or '#' operator without an argument.
 no such section with keys ::
  The given section has no key entries.
+ARG and KEY defined in operator '+', using KEY only ::
+ Operator '+' must either be 'section+key' or 'section.key+' but not 'section.key+key'.
 can't load config file: ::
  The config file ('--config' option) could not be loaded.
 operator processing failed: ::

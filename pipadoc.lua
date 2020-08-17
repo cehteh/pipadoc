@@ -19,7 +19,6 @@
 -------------------------------------------------------------------------------------------------
 
 --PLANNED: include operator, add a file to the processing list
---PLANNED: compose/concat operator .. hint: delayed section_append/strsubst
 --PLANNED: Version check for documents \{VERSION 2\} ...
 --PLANNED: --disable-strsubst option .. NOSTRSUBST STRSUBST macros
 --PLANNED: merge sections for sorting --#foo+bar+baz or something like this
@@ -806,6 +805,41 @@ function section_append(section, key, context) --: Append data to the given sect
   end
 end
 
+function section_concat(section, key, context) --: Append data to the given section/key
+  --:   to be called from preprocessors or macros which generate new content.
+  --:
+  --:   section:::
+  --:     name of the section to append to, must be a string
+  assert_type(section, "string")
+  --:   key:::
+  --:     the sub-key for sorting within that section. 'nil' for appending text to normal sections
+  maybe_type(key, "string")
+  --:   context:::
+  --:     The source line broken down into its components and additional pipadoc metadata
+  assert_type(context, "table")
+  --:
+  trace(context, "concat:", section.."."..(key or "-"), context.TEXT)
+  sections[section] = sections[section] or {keys = {}}
+  if key then
+    sections[section].keys[key] = sections[section].keys[key] or {}
+
+    local last = #sections[section].keys[key]
+    if last > 0 then
+      sections[section].keys[key][last].TEXT = sections[section].keys[key][last].TEXT .. context.TEXT
+    else
+      table.insert(sections[section].keys[key], context)
+    end
+  else
+
+    local last = #sections[section]
+    if last > 0 then
+      sections[section][last].TEXT = sections[section][last].TEXT .. context.TEXT
+    else
+      table.insert(sections[section], context)
+    end
+  end
+end
+
 
 
 
@@ -1418,6 +1452,52 @@ local function setup()
     sortgenerate
   )
 
+  --op_builtin:
+  --: `+` ::
+  --:   Concat operator. Like ':' but appends text to the last line instead creating a new line.
+  --:   Note that some context information (file/line) gets lost as only the text will be appended.
+  --:
+  operator_register(
+    "+",
+    function (context)
+      if context.KEY and context.ARG then
+        warn(context, "ARG and KEY defined in operator '+', using KEY only") --cwarn: <STRING> ::
+        --cwarn:  Operator '\+' must either be 'section+key' or 'section.key\+' but not 'section.key+key'.
+        context.ARG = nil
+      end
+
+      if context.ARG then
+        context.KEY = context.ARG
+        context.ARG = nil
+      end
+
+      if context.TEXT ~= "" and (context.SECTION or context.KEY) then
+        --oneline
+        context.SECTION = context.SECTION or block_section
+        context.TEXT = strsubst(context, context.TEXT, 'escape')
+        section_concat(context.SECTION, context.KEY, context)
+      elseif context.TEXT == "" and (context.SECTION or context.KEY) then
+        --block head
+        block_section = context.SECTION or block_section
+        block_key = context.KEY
+        trace(context, "block: ", block_section.."."..(block_key or '-'))
+      else
+        --block cont
+        context.SECTION = context.SECTION or block_section
+        context.KEY = context.KEY or block_key
+        context.TEXT = strsubst(context, context.TEXT, 'escape')
+        section_concat(context.SECTION, context.KEY, context)
+      end
+    end,
+
+    function (context, output)
+      --PLANNED: link prev/next context
+      table.insert(output, context)
+    end
+  )
+
+
+  -- load config files
   if opt_config_set or not opt_nodefaults then
     gcontext_set "<loadconfig>"
 
