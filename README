@@ -2,7 +2,7 @@ pipadoc - Documentation extractor
 =================================
 :author:   Christian Thaeter
 :email:    ct@pipapo.org
-:date:     4. August 2020
+:date:     17. August 2020
 
 
 [preface]
@@ -799,10 +799,8 @@ paste argument missing ::
  Using the '=' operator without an argument.
 sort argument missing ::
  Using the '@', '$' or '#' operator without an argument.
-section is empty: ::
- Using '=', '@' or '#' on a section which has no data (under respective keys).
-no section named: ::
- Using '=', '@' or '#' on a section which as never defined.
+no such section with keys ::
+ The given section has no key entries.
 can't load config file: ::
  The config file ('--config' option) could not be loaded.
 operator processing failed: ::
@@ -816,14 +814,16 @@ recursive paste: ::
  include themself.
 generator failed: ::
  error in operators generator function.
+section is empty: ::
+ Using '=', '@' or '#' on a section which has no data (under respective keys).
 section unused: ::
  The printed section was not used. This might be intentional when generating
  only partial outputs.
 section multiple times used: ::
  Section was pasted multiple times in the output.
-section w/ keys unused: ::
+section key unused: ::
  Section with keys (numeric or alphabetic) was not used.
-section w/ keys multiple times used: ::
+section key multiple times used: ::
  Section was used multiple times in the output ('@', '$' or '#' operator).
 
 [appendix]

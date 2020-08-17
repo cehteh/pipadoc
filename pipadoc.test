@@ -78,6 +78,10 @@ exit $error
 #@argonly
 #: not a docline NODOC
 #:
+#=nestedpaste
+#:
+#@nestedargs
+#:
 #: TESTFOO
 echo TESTPP becomes a docline
 #:
@@ -98,6 +102,7 @@ echo TESTPP becomes a docline
 ##nokeys
 #:
 #: drop the NODOC
+#orphan:key is not used
 #: END
 
 #nokeys: has no keys
@@ -132,6 +137,36 @@ echo TESTPP becomes a docline
 #:aa 1. arg oneline
 #.aa: 2. arg oneline dot syntax
 
+#nestedpaste:
+#: nested paste
+#=nestedpasteinner
+
+#nestedpasteinner:
+#:  nestedpaste inner
+#=nestedpasteinner2
+
+#nestedpasteinner2:
+#:  nestedpaste inner2
+
+
+#nestedargs:aa
+#: nested arguments paste old syntax
+#=nestedargsinner
+
+#nestedargs.aa:
+#: nested arguments paste dot syntax
+#=nestedargsinner
+
+
+#: nested arguments sort
+#$nestedargsinner
+
+#nestedargsinner:  one
+#nestedargsinner:11
+#:  nest 1
+#nestedargsinner:22
+#:  nest 2
+
 #strsubst:
 #: {STRING}
 #: {STRING example}
@@ -151,7 +186,6 @@ echo TESTPP becomes a docline
 #: \{STRING example\}
 #: \{STR\}
 #: \{STR{ING}\}
-
 
 
 # expected results
@@ -193,6 +227,19 @@ echo TESTPP becomes a docline
 #> 2. arg oneline dot syntax
 #> 3. arg block
 #> 4. arg block dot syntax
+#>
+#> nested paste
+#>  nestedpaste inner
+#>  nestedpaste inner2
+#>
+#> nested arguments paste old syntax
+#>  one
+#> nested arguments paste dot syntax
+#>  one
+#> nested arguments sort
+#>  nest 1
+#>  nest 2
+
 #>
 #> TESTBAR
 #> TESTBAR becomes a docline

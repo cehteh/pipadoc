@@ -763,8 +763,6 @@ end
 --: itself using 'asciidoc' as markup. Refer to the source itself to see how it is done.
 --:
 local sections = {}
-local sections_usecnt = {}
-local sections_keys_usecnt = {}
 
 --api_sections:
 --:
@@ -1324,8 +1322,8 @@ local function setup()
     function (context)
       context.SECTION = context.SECTION or block_section
 
-      if context.ARG and #context.ARG > 0 then
-        section_append(context.SECTION, nil, context)
+      if context.ARG then
+        section_append(context.SECTION, context.KEY or block_key, context)
       else
         warn(context, "paste argument missing")  --cwarn: <STRING> ::
         --cwarn:  Using the '=' operator without an argument.
@@ -1333,66 +1331,35 @@ local function setup()
     end,
 
     function (context, output)
-      return output_generate(context.ARG, nil, output)
+      trace (context, "paste: ", context.ARG)
+      output_paste (sections[context.ARG], output)
     end
   )
 
   local function sortprocess(context)
-    context.SECTION = context.SECTION or block_section  --FIXME: move to parser
-    context.KEY = context.KEY or block_key  --FIXME: move to parser
+    context.SECTION = context.SECTION or block_section
+    context.KEY = context.KEY or block_key
 
     if context.ARG then
-      section_append(context.SECTION,  context.KEY, context)
+      section_append(context.SECTION, context.KEY, context)
     else
       warn(context, "sort argument missing") --cwarn: <STRING> ::
       ---cwarn:  Using the '@', '$' or '#' operator without an argument.
     end
   end
 
-  local function sortgenerate(context, output)
-    dbg(context, "generate_output_sorted")
-    local which = context.ARG
-    local section = sections[which] and sections[which].keys
-    local text = ""
 
-    if section ~= nil then
-      sections_keys_usecnt[which] = (sections_keys_usecnt[which] or 0) + 1
+  function sortgenerate(context, output)
+    dbg(context, "sort:", context.OP)
+    local section = sections[context.ARG]
 
-      local sorted = {}
-
-      for k in pairs(section) do
-        if context.OP == '@' and not tonumber (k) then
-          table.insert(sorted, k)
-        elseif context.OP == '#' and tonumber (k) then
-          table.insert(sorted, k)
-        elseif context.OP == '$' then
-          table.insert(sorted, k)
-        end
-      end
-
-      if context.OP == '@' or context.OP == '$' then
-        table.sort(sorted, function(a,b) return tostring(a) < tostring(b) end)
-      elseif context.OP == '#' then
-        table.sort(sorted, function(a,b) return (tonumber(a) or 0) < (tonumber(b) or 0) end)
-      end
-
-      if #sorted == 0 then
-        warn(context, "section is empty:",which) --cwarn: <STRING> ::
-        --cwarn:  Using '=', '@' or '#' on a section which has no data (under respective keys).
-        return ""
-      end
-
-      for i=1,#sorted do
-        for j=1,#section[sorted[i]] do
-          table.insert(output, section[sorted[i]][j])
-        end
-      end
+    if section.keys then
+      output_sort(section, context.OP, output)
     else
-      warn(context, "no section named:", which) --cwarn: <STRING> ::
-      --cwarn:  Using '=', '@' or '#' on a section which as never defined.
+      warn(context, "no such section with keys", context.ARG) --cwarn: <STRING> ::
+      ---cwarn:  The given section has no key entries.
     end
   end
-
 
 
   --op_builtin:
@@ -1514,6 +1481,7 @@ local function process_line (context, comment)
       warn (context, "operator processing failed:", op, err) --cwarn: <STRING> ::
       --cwarn:  error executing a operators processor.
     end
+
     trace(context,
         "--------------------------------------------------\n")
   end
@@ -1646,54 +1614,85 @@ end
 
 local sofar_rec={}
 
-function output_generate(which, key, output)
-  assert_type(which, 'string')
-  maybe_type(key, 'string')
+function output_paste(section, output)
+  assert_type(section, 'table')
   assert_type(output, 'table')
-  set_gcontext "<output>"
-  dbg(nil, "generate_output:", which, key)
 
-  local which_key = which
-  if key then
-    which_key = which_key .. '.' .. key
-  else
-    key = ""
+  if sofar_rec[section] then
+    warn(nil, "recursive paste:", which) --cwarn: <STRING> ::
+    --cwarn:  Pasted sections (see <<_built_in_operators,paste operator>>) can not recursively
+    --cwarn:  include themself.
+    return
   end
 
-  local section = sections[which][key] or sections[which]
+  if #section == 0 then
+    warn(nil, "section is empty:", which)
+    return
+  end
 
+  sofar_rec[section] = true
+  section.usecnt = (section.usecnt or 0) + 1
 
-  if section ~= nil then
-    if sofar_rec[which_key] then
-      warn(nil, "recursive paste:", which_key) --cwarn: <STRING> ::
-      --cwarn:  Pasted sections (see <<_built_in_operators,paste operator>>) can not recursively
-      --cwarn:  include themself.
-      return ""
+  for i=1,#section do
+    GLOBAL.LINE=i
+    local genfunc = genfuncs[section[i].OP]
+    if genfunc then
+      local ok, err = pcall(genfunc, section[i], output)
+      if not ok then
+        warn(section[i], "generator failed:", err) --cwarn: <STRING> ::
+        --cwarn:  error in operators generator function.
+      end
+    else
+      warn(nil, "no generator function for:", section[i].OP)
     end
+  end
+  sofar_rec[section] = nil
+end
 
-    if #section == 0 then
-      warn(nil, "section is empty:", which_key)
-      return
-    end
-    sofar_rec[which_key] = true
-    sections_usecnt[which_key] = (sections_usecnt[which_key] or 0) + 1
+function output_sort(section, op, output)
+  assert_type(section, 'table')
+  assert_type(section.keys, 'table')
+  assert_char(op)
+  assert(string.find ("@#$", op, 1, true), "No such sort operator")
+  assert_type(output, 'table')
+  dbg(nil, "output_sort:", section.name)
 
-    for i=1,#section do
-      GLOBAL.LINE=i
-      local genfunc = genfuncs[section[i].OP]
-      if genfunc then
-        local ok, err = pcall(genfunc, section[i], output)
-        if not ok then
-          warn(section[i], "generator failed:", err) --cwarn: <STRING> ::
-          --cwarn:  error in operators generator function.
-        end
-      else
-        warn(nil, "no generator function for:", section[i].OP)
+  --PLANNED: rule based / table for sort operators, opchar = {filter, compare}
+
+  section.sorted = section.sorted or {}
+  local sorted = section.sorted[op]
+
+  if not sorted then
+    sorted = {}
+    section.sorted[op] = sorted
+
+    -- filter out what to sort
+    for k in pairs(section.keys) do
+      if op == '@' and not tonumber (k) then
+        table.insert(sorted, k)
+      elseif op == '#' and tonumber (k) then
+        table.insert(sorted, k)
+      elseif op == '$' then
+        table.insert(sorted, k)
       end
     end
-    sofar_rec[which_key] = nil
-  else
-    warn(nil, "no section named:", which_key)
+
+    if #sorted == 0 then
+      warn(context, "section is empty:",which) --cwarn: <STRING> ::
+      --cwarn:  Using '=', '@' or '#' on a section which has no data (under respective keys).
+      return
+    end
+
+    -- sort it
+    if op == '@' or op == '$' then
+      table.sort(sorted, function(a,b) return tostring(a) < tostring(b) end)
+    elseif op == '#' then
+      table.sort(sorted, function(a,b) return (tonumber(a) or 0) < (tonumber(b) or 0) end)
+    end
+  end
+
+  for i=1,#sorted do
+    output_paste(section.keys[sorted[i]], output)
   end
 end
 
@@ -1702,24 +1701,27 @@ end
 function report_orphan_doubletes()
   local orphan = {FILE = "<orphan>"}
   local doublete = {FILE = "<doublete>"}
-  for k,v in pairs(sections_usecnt) do
-    if v == 0 then
-      warn(orphan, "section unused:", k) --cwarn: <STRING> ::
-      --cwarn:  The printed section was not used. This might be intentional when generating
-      --cwarn:  only partial outputs.
-    elseif v > 1 then
-      warn(doublete, "section multiple times used:", k, v) --cwarn: <STRING> ::
-      --cwarn:  Section was pasted multiple times in the output.
-    end
-  end
 
-  for k,v in pairs(sections_keys_usecnt) do
-    if v == 0 then
-      warn(orphan, "section w/ keys unused:", k) --cwarn: <STRING> ::
-      --cwarn:  Section with keys (numeric or alphabetic) was not used.
-    elseif v > 1 then
-      warn(doublete, "section w/ keys multiple times used:", k, v) --cwarn: <STRING> ::
-      --cwarn:  Section was used multiple times in the output ('@', '$' or '#' operator).
+  for name, section in pairs(sections) do
+    if #section > 0 then
+      if not section.usecnt then
+        warn(orphan, "section unused:", name) --cwarn: <STRING> ::
+        --cwarn:  The printed section was not used. This might be intentional when generating
+        --cwarn:  only partial outputs.
+      elseif section.usecnt > 1 then
+        warn(doublete, "section multiple times used:", name, section.usecnt) --cwarn: <STRING> ::
+        --cwarn:  Section was pasted multiple times in the output.
+      end
+    end
+
+    for kname, key in pairs(section.keys) do
+      if not key.usecnt then
+        warn(orphan, "section key unused:", name.."."..kname) --cwarn: <STRING> ::
+        --cwarn:  Section with keys (numeric or alphabetic) was not used.
+      elseif key.usecnt > 1 then
+        warn(doublete, "section key multiple times used:", name.."."..kname, key.usecnt) --cwarn: <STRING> ::
+        --cwarn:  Section was used multiple times in the output ('@', '$' or '#' operator).
+      end
     end
   end
 end
@@ -1741,13 +1743,13 @@ do
 
   local output = {}
 
-  local topsection = opt_toplevel  --TODO: DOCME
-  if sections[opt_toplevel.."_"..GLOBAL.MARKUP] then
-    topsection = opt_toplevel.."_"..GLOBAL.MARKUP
-  end
-
   set_gcontext "<output>"
-  output_generate(topsection, nil, output)
+  local topsection = sections[opt_toplevel.."_"..GLOBAL.MARKUP] or sections[opt_toplevel]
+  if topsection then
+    output_paste (topsection, output)
+  else
+    usage ()
+  end
 
   local outfd, err = io.stdout
 
@@ -1774,7 +1776,6 @@ do
     end
   end
   -- free memory
-  sections = nil
   output = nil
   collectgarbage()
 

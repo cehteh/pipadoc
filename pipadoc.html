@@ -737,7 +737,7 @@ asciidoc.install(2);
 <h1>pipadoc - Documentation extractor</h1>
 <span id="author">Christian Thaeter</span><br />
 <span id="email"><code>&lt;<a href="mailto:ct@pipapo.org">ct@pipapo.org</a>&gt;</code></span><br />
-<span id="revdate">4. August 2020</span>
+<span id="revdate">17. August 2020</span>
 <div id="toc">
   <div id="toctitle">Table of Contents</div>
   <noscript><p><b>JavaScript must be enabled in your browser to display the table of contents.</b></p></noscript>
@@ -2126,19 +2126,11 @@ sort argument missing
 </p>
 </dd>
 <dt class="hdlist1">
-section is empty: 
+no such section with keys 
 </dt>
 <dd>
 <p>
- Using <em>=</em>, <em>@</em> or <em>#</em> on a section which has no data (under respective keys).
-</p>
-</dd>
-<dt class="hdlist1">
-no section named: 
-</dt>
-<dd>
-<p>
- Using <em>=</em>, <em>@</em> or <em>#</em> on a section which as never defined.
+ The given section has no key entries.
 </p>
 </dd>
 <dt class="hdlist1">
@@ -2191,6 +2183,14 @@ generator failed:
 </p>
 </dd>
 <dt class="hdlist1">
+section is empty: 
+</dt>
+<dd>
+<p>
+ Using <em>=</em>, <em>@</em> or <em>#</em> on a section which has no data (under respective keys).
+</p>
+</dd>
+<dt class="hdlist1">
 section unused: 
 </dt>
 <dd>
@@ -2208,7 +2208,7 @@ section multiple times used:
 </p>
 </dd>
 <dt class="hdlist1">
-section w/ keys unused: 
+section key unused: 
 </dt>
 <dd>
 <p>
@@ -2216,7 +2216,7 @@ section w/ keys unused:
 </p>
 </dd>
 <dt class="hdlist1">
-section w/ keys multiple times used: 
+section key multiple times used: 
 </dt>
 <dd>
 <p>
@@ -2575,7 +2575,7 @@ Christian Thäter &lt;<a href="mailto:ct@pipapo.org">ct@pipapo.org</a>&gt; for i
 <div id="footer">
 <div id="footer-text">
 Last updated
- 2020-08-04 19:24:59 CEST
+ 2020-08-17 02:25:41 CEST
 </div>
 </div>
 </body>
