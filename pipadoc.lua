@@ -1333,7 +1333,13 @@ local function setup()
 
     function (context, output)
       trace (context, "paste: ", context.ARG)
-      output_paste (sections[context.ARG], output)
+
+      if sections[context.ARG] then
+        output_paste (sections[context.ARG], output)
+      else
+        warn(context, "no such section", context.ARG) --cwarn: <STRING> ::
+        ---cwarn:  The given section is not defined.
+      end
     end
   )
 
@@ -1354,7 +1360,7 @@ local function setup()
     dbg(context, "sort:", context.OP)
     local section = sections[context.ARG]
 
-    if section.keys then
+    if section and section.keys then
       output_sort(section, context.OP, output)
     else
       warn(context, "no such section with keys", context.ARG) --cwarn: <STRING> ::
