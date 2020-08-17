@@ -24,7 +24,8 @@
 --PLANNED: --disable-strsubst option .. NOSTRSUBST STRSUBST macros
 --PLANNED: merge sections for sorting --#foo+bar+baz or something like this
 
---TODO: style: replace 'foo(' with 'foo ('
+
+
 
 --------------------------
 -- Variable Definitions --
@@ -49,7 +50,7 @@ GLOBAL = {
 
 GLOBAL_POST = {}
 
-local gcontext = setmetatable (
+local gcontext = setmetatable(
   {
     --context:file {VARDEF FILE}
     --context:file   The file or section name currently processed or some special annotation
@@ -134,7 +135,7 @@ function to_table(v) --: if 'v' is not a table then return +++\{v\}+++
 end
 
 function maybe_text(v) --: convert 'v' to a string, returns 'nil' when that string would be empty
-  v = tostring (v)
+  v = tostring(v)
   if v ~= "" then
     return v
   else
@@ -162,7 +163,7 @@ local function set_gcontext(file, line)
 end
 
 --api_various:
-function pattern_escape (s)  --: Escape all characters in string 's' so that it cane be used as verbatim pattern.
+function pattern_escape(s)  --: Escape all characters in string 's' so that it cane be used as verbatim pattern.
   return (s:gsub("%W", "%%%1"))
 end
 
@@ -196,7 +197,7 @@ local function printerr(...)
 end
 
 local function printlvl(context,lvl,...)
-  maybe_type (context, 'table')
+  maybe_type(context, 'table')
   if lvl <= opt_verbose then
     context = context or gcontext
     printerr(context.FILE..":"..(context.LINE and context.LINE..":" or ""), ...)
@@ -379,7 +380,7 @@ local options = {
   ["-a"] = "--alias",
   ["--alias"] = function (arg, i)
     check_args(arg, i+2)
-    register_alias (arg[i+1], arg[i+2])
+    register_alias(arg[i+1], arg[i+2])
     return 2
   end,
   "", --:  <STRING>
@@ -585,7 +586,7 @@ end
 --: ----
 --:
 
-local function table_inverse (t)
+local function table_inverse(t)
   local ret = {}
   for k,v in pairs(t) do
     ret[v] = k
@@ -604,7 +605,7 @@ local strsubst_escapes_back = table_inverse(strsubst_escapes)
 
 
 --api_strsubst:
-function strsubst (context, str, escape) --: substitute text
+function strsubst(context, str, escape) --: substitute text
   --:   context:::
   --:     The current context which defines all variables and
   --:     macros for the substitution.
@@ -616,14 +617,14 @@ function strsubst (context, str, escape) --: substitute text
   --:     'escape':::: 1st pass
   --:     'unescape':::: 2nd pass
   --:     nil:::: no special escaping
-  trace (context, "strsubst:", str)
-  maybe_type (context, "table")
-  assert_type (str, "string")
+  trace(context, "strsubst:", str)
+  maybe_type(context, "table")
+  assert_type(str, "string")
 
   context = context or gcontext
   local sofar = {}
 
-  local function strsubst_intern (str)
+  local function strsubst_intern(str)
     trace(context, "strsubst_intern:", str)
 
     return str:gsub("%b{}",
@@ -633,7 +634,7 @@ function strsubst (context, str, escape) --: substitute text
 
                       local var,arg = capture:match("^{(%a[%w_{}]*).?(.*)}$")
                       if not var then return capture end
-                      var = strsubst_intern (var)
+                      var = strsubst_intern(var)
 
                       -- recursively dereference names when braced
                       do
@@ -641,7 +642,7 @@ function strsubst (context, str, escape) --: substitute text
                         while not sofar[var] and type(context[var]) == "string" and context[var]:match("^(%b{})$") do
                           subst = true
                           sofar[var] = true
-                          var = strsubst_intern (context[var]:sub(2,-2))
+                          var = strsubst_intern(context[var]:sub(2,-2))
                         end
                       end
                       if context[var] then
@@ -649,7 +650,7 @@ function strsubst (context, str, escape) --: substitute text
                         var = context[var]
                       end
 
-                      arg = strsubst_intern (arg)
+                      arg = strsubst_intern(arg)
 
                       if subst then
                         if not sofar[var] then
@@ -659,21 +660,21 @@ function strsubst (context, str, escape) --: substitute text
                             if ok then
                               ret = tostring(result)
                             else
-                              warn (context, "strsubst function failed:", var, result) --cwarn: <STRING> ::
+                              warn(context, "strsubst function failed:", var, result) --cwarn: <STRING> ::
                               --cwarn:  strsubst tried to call a custom function which failed.
                             end
                           else
                             ret = tostring(var)..arg
                           end
-                        ret = strsubst_intern(ret)
+                          ret = strsubst_intern(ret)
                           sofar[var] = nil
                         else
-                          warn (context, "strsubst recursive expansion:", var)  --cwarn: <STRING> ::
+                          warn(context, "strsubst recursive expansion:", var)  --cwarn: <STRING> ::
                           --cwarn:  cyclic substitution.
                         end
                       else
                         if escape == 'unescape' and not ret:match "^{__.*__}$" then
-                          warn (context, "strsubst no expansion:", capture)  --cwarn: <STRING> ::
+                          warn(context, "strsubst no expansion:", capture)  --cwarn: <STRING> ::
                           --cwarn:  no substitution defined.
                         end
                       end
@@ -693,7 +694,7 @@ function strsubst (context, str, escape) --: substitute text
     str = str:gsub("%b{}", strsubst_escapes_back)
   end
 
-  trace (context, "strsubst done:", str)
+  trace(context, "strsubst done:", str)
   return str
 end
 
@@ -886,7 +887,7 @@ local function filetype_get(filename)
   end
 end
 
-local function comment_select (line, filetype)
+local function comment_select(line, filetype)
   for i=1,#filetype.comments do
     local comment = pattern_escape(filetype.comments[i])
     if string.match(line, comment) then
@@ -910,8 +911,8 @@ local preprocessors = {}
 --: Preprocessors
 --: ^^^^^^^^^^^^^
 --:
---PLANNED: add a mnemonic name preprocessor_register (name, langpat, preprocess)
-function preprocessor_register (langpat, preprocess) --: register a preprocessor
+--PLANNED: add a mnemonic name preprocessor_register(name, langpat, preprocess)
+function preprocessor_register(langpat, preprocess) --: register a preprocessor
   --:   langpat:::
   --:     Register preprocessor to all filetypes whose mnemonic matches 'langpat'.
   --:   preprocess:::
@@ -926,13 +927,13 @@ function preprocessor_register (langpat, preprocess) --: register a preprocessor
   --:       Generates a function calling 'context.SOURCE:gsub(pattern, repl [, n])' for preprocessing.
   --:
   --PLANNED: langpat as list of patterns
-  assert_type (langpat, "string")
-  dbg (nil, "register preprocessor:", langpat, preprocess)
+  assert_type(langpat, "string")
+  dbg(nil, "register preprocessor:", langpat, preprocess)
 
-  if type (preprocess) == "table" then
+  if type(preprocess) == "table" then
     local params = preprocess
     preprocess = function (context)
-      local result = context.SOURCE:gsub (params[1], params[2], params[3])
+      local result = context.SOURCE:gsub(params[1], params[2], params[3])
       if result == context.SOURCE then
         return true
       end
@@ -940,16 +941,16 @@ function preprocessor_register (langpat, preprocess) --: register a preprocessor
     end
   end
 
-  if type (preprocess) == "function" then
+  if type(preprocess) == "function" then
     table.insert(preprocessors, {pattern=langpat, preprocessor=preprocess})
   else
-    warn (nil, "unsupported preprocessor type") --cwarn: <STRING> ::
+    warn(nil, "unsupported preprocessor type") --cwarn: <STRING> ::
     --cwarn:  Tried to 'preprocessor_register()' something that is not a function or table.
   end
 end
 
 -- internal, hook preprocessors into the filetype descriptors
-local function preprocessors_attach ()
+local function preprocessors_attach()
   for i=1,#preprocessors do
     local ppdesc = preprocessors[i]
     for k,v in pairs(filetypes) do
@@ -963,7 +964,7 @@ local function preprocessors_attach ()
           end
         end
         if not skip then
-          trace (nil, "add preprocessor for:", k, ppdesc.preprocessor)
+          trace(nil, "add preprocessor for:", k, ppdesc.preprocessor)
           table.insert(filetype_preprocessors, ppdesc.preprocessor)
           v.preprocessors = filetype_preprocessors
         end
@@ -973,7 +974,7 @@ local function preprocessors_attach ()
 end
 
 
-local function preprocessors_run (preprocessors, context)
+local function preprocessors_run(preprocessors, context)
   if preprocessors then
     for i=1,#preprocessors do
       local ok,result = pcall(preprocessors[i], context)
@@ -1013,8 +1014,8 @@ local postprocessors = {}
 --: Postprocessors
 --: ^^^^^^^^^^^^^^
 --:
---PLANNED: add a mnemonic name postprocessor_register (name, markuppat, preprocess)
-function postprocessor_register (markuppat, postprocess) --: register a postprocessor
+--PLANNED: add a mnemonic name postprocessor_register(name, markuppat, preprocess)
+function postprocessor_register(markuppat, postprocess) --: register a postprocessor
   --:   markuppat:::
   --:     Register postprocessor to all markups whose name matches 'markuppat'.
   --:   postprocess:::
@@ -1029,14 +1030,14 @@ function postprocessor_register (markuppat, postprocess) --: register a postproc
   --:       Generates a function calling 'context.TEXT:gsub(pattern, repl [, n])' for postprocessing.
   --:
   --PLANNED: markuppat as list of patterns
-  assert_type (markuppat, "string")
-  dbg (nil, "register postprocessor:", markuppat, postprocess)
+  assert_type(markuppat, "string")
+  dbg(nil, "register postprocessor:", markuppat, postprocess)
 
 
-  if type (postprocess) == "table" then
+  if type(postprocess) == "table" then
     local params = postprocess
     postprocess = function (context)
-      local result = context.TEXT:gsub (params[1], params[2], params[3])
+      local result = context.TEXT:gsub(params[1], params[2], params[3])
       if result == context.TEXT then
         return true
       end
@@ -1044,10 +1045,10 @@ function postprocessor_register (markuppat, postprocess) --: register a postproc
     end
   end
 
-  if type (postprocess) == "function" then
+  if type(postprocess) == "function" then
     table.insert(postprocessors, {pattern=markuppat, postprocessor=postprocess})
   else
-    warn (nil, "unsupported postprocessor type") --cwarn: <STRING> ::
+    warn(nil, "unsupported postprocessor type") --cwarn: <STRING> ::
     --cwarn:  Tried to 'postprocessor_register()' something that is not a function or table.
   end
 end
@@ -1055,18 +1056,18 @@ end
 
 local active_postprocessors = {}
 
-local function postprocessors_attach ()
+local function postprocessors_attach()
   for i=1,#postprocessors do
     local ppdesc = postprocessors[i]
     if GLOBAL.MARKUP:match(ppdesc.pattern) then
-      trace (nil, "add postprocessor for:", GLOBAL.MARKUP, ppdesc.postprocessor)
+      trace(nil, "add postprocessor for:", GLOBAL.MARKUP, ppdesc.postprocessor)
       table.insert(active_postprocessors, ppdesc.postprocessor)
     end
   end
 end
 
 --PLANNNED: wrap pcall for debugging purpose
-local function postprocessors_run (context)
+local function postprocessors_run(context)
   for i=1,#active_postprocessors do
     local ok, result = pcall(active_postprocessors[i], context)
     if not ok then
@@ -1122,11 +1123,11 @@ local genfuncs = {}
 function operator_register(char, procfunc, genfunc) --: Register a new operator
   --:   char:::
   --:     single punctuation character except '.' defining this operator.
-  --:   procfunc +function(context)+:::
+  --:   procfunc +function (context)+:::
   --:     a function which receives a CONTEXT table of the current line.
   --:     The procfunc processes and store the context in appropriate
   --:     fashion.
-   --:   genfunc +function(context)+:::
+  --:   genfunc +function (context)+:::
   --:     a function generating the (sequential) output from given context.
   --:
   assert(string.match(char, "^%p$") == char)
@@ -1238,7 +1239,7 @@ local function setup()
 
   do
     local time = os.time()
-    local date = os.date ("*t", time)
+    local date = os.date("*t", time)
     --GLOBAL:date {VARDEF YEAR, MONTH, DAY, HOUR, MINUTE}
     --GLOBAL:date   Current date information
     GLOBAL.YEAR = date.year
@@ -1250,15 +1251,15 @@ local function setup()
     --PLANNED: locale support for dates
     --GLOBAL:date {VARDEF DAYNAME, MONTHNAME}
     --GLOBAL:date   The name of the day of week or month
-    GLOBAL.DAYNAME = os.date ("%A", time)
-    GLOBAL.MONTHNAME = os.date ("%B", time)
+    GLOBAL.DAYNAME = os.date("%A", time)
+    GLOBAL.MONTHNAME = os.date("%B", time)
 
     --GLOBAL:date {VARDEF DATE}
     --GLOBAL:date   Current date in YEAR/MONTH/DAY format
     GLOBAL.DATE = date.year.."/"..date.month.."/"..date.day
     --GLOBAL:date {VARDEF LOCALDATE}
     --GLOBAL:date   Current date in current locale format
-    GLOBAL.LOCALDATE = os.date ("%c", time)
+    GLOBAL.LOCALDATE = os.date("%c", time)
   end
 
   if not opt_nodefaults then
@@ -1277,7 +1278,7 @@ local function setup()
     ":",
     function (context)
       if context.KEY and context.ARG then
-        warn (context, "ARG and KEY defined in operator ':', using KEY only") --cwarn: <STRING> ::
+        warn(context, "ARG and KEY defined in operator ':', using KEY only") --cwarn: <STRING> ::
         --cwarn:  Operator ':' must either be 'section:key' or 'section.key:' but not 'section.key:key'.
         context.ARG = nil
       end
@@ -1296,7 +1297,7 @@ local function setup()
         --block head
         block_section = context.SECTION or block_section
         block_key = context.KEY
-        trace (context, "block: ", block_section.."."..(block_key or '-'))
+        trace(context, "block: ", block_section.."."..(block_key or '-'))
       else
         --block cont
         context.SECTION = context.SECTION or block_section
@@ -1332,10 +1333,10 @@ local function setup()
     end,
 
     function (context, output)
-      trace (context, "paste: ", context.ARG)
+      trace(context, "paste: ", context.ARG)
 
       if sections[context.ARG] then
-        output_paste (sections[context.ARG], output)
+        output_paste(sections[context.ARG], output)
       else
         warn(context, "no such section", context.ARG) --cwarn: <STRING> ::
         ---cwarn:  The given section is not defined.
@@ -1411,23 +1412,23 @@ local function setup()
   if opt_config_set or not opt_nodefaults then
     set_gcontext "<loadconfig>"
 
-    dbg (nil, "load config:", opt_config)
+    dbg(nil, "load config:", opt_config)
     local config = loadfile(opt_config)
 
     if config then
-      config ()
+      config()
     else
       local fn = warn
       if opt_config_set then
         fn = die
       end
-      fn (nil, "can't load config file:", opt_config) --cwarn: <STRING> ::
+      fn(nil, "can't load config file:", opt_config) --cwarn: <STRING> ::
       --cwarn:  The config file ('--config' option) could not be loaded.
     end
   end
 
-  preprocessors_attach ()
-  postprocessors_attach ()
+  preprocessors_attach()
+  postprocessors_attach()
 end
 
 
@@ -1437,7 +1438,7 @@ end
 -- Input Processing --
 ----------------------
 
-local function process_line (context, comment)
+local function process_line(context, comment)
   --context:
   --:pre {VARDEF PRE}
   --:pre   Contains the source code in font of the line comment.
@@ -1472,23 +1473,23 @@ local function process_line (context, comment)
   if op then
     dbg(context, "source:", context.SOURCE)
     trace(context,
-        "parsed:", context.PRE,
-        "section:", context.SECTION,
-        "key:", context.KEY,
-        "op:", op,
-        "arg:", context.ARG,
-        "text:", context.TEXT)
+          "parsed:", context.PRE,
+          "section:", context.SECTION,
+          "key:", context.KEY,
+          "op:", op,
+          "arg:", context.ARG,
+          "text:", context.TEXT)
 
     context.SOURCE = nil
 
     local ok,err = pcall(procfuncs[op], context)
     if not ok then
-      warn (context, "operator processing failed:", op, err) --cwarn: <STRING> ::
+      warn(context, "operator processing failed:", op, err) --cwarn: <STRING> ::
       --cwarn:  error executing a operators processor.
     end
 
     trace(context,
-        "--------------------------------------------------\n")
+          "--------------------------------------------------\n")
   end
 end
 
@@ -1497,10 +1498,10 @@ local function file_alias(filename)
   for i=1,#opt_aliases do
     local ok, alias, n = pcall(string.gsub, filename, opt_aliases[i][1], opt_aliases[i][2], 1)
     if ok and n>0 then
-      dbg (nil, "alias:", filename, alias)
+      dbg(nil, "alias:", filename, alias)
       return alias
     elseif not ok then
-      warn (nil, "alias pattern error:", alias, opt_aliases[i][1], opt_aliases[i][2])
+      warn(nil, "alias pattern error:", alias, opt_aliases[i][1], opt_aliases[i][2])
     end
   end
   return filename
@@ -1514,8 +1515,8 @@ function make_context(parent, new) --: Create a new context.
   --:   new:::
   --:     A table (or nil) containing the additional members for the
   --:     new context.
-  assert_type (parent, 'table')
-  maybe_type (new, 'table')
+  assert_type(parent, 'table')
+  maybe_type(new, 'table')
   return setmetatable(new or {}, {__index = parent})
 end
 
@@ -1544,7 +1545,7 @@ local function process_file(file)
     filecontext.FILE = file
   end
 
-  local filetype = filetype_get (file_alias(file))
+  local filetype = filetype_get(file_alias(file))
 
   if not filetype then
     warn(filecontext, "unknown file type:", file) --cwarn: <STRING> ::
@@ -1582,7 +1583,7 @@ local function process_file(file)
     })
 
 
-    preprocessors_run (filetype.preprocessors, context)
+    preprocessors_run(filetype.preprocessors, context)
 
     if context.SOURCE then
       local comment = comment_select(context.SOURCE, filetype)
@@ -1623,6 +1624,7 @@ function output_paste(section, output)
   assert_type(section, 'table')
   assert_type(output, 'table')
 
+
   if sofar_rec[section] then
     warn(nil, "recursive paste:", which) --cwarn: <STRING> ::
     --cwarn:  Pasted sections (see <<_built_in_operators,paste operator>>) can not recursively
@@ -1658,7 +1660,7 @@ function output_sort(section, op, output)
   assert_type(section, 'table')
   assert_type(section.keys, 'table')
   assert_char(op)
-  assert(string.find ("@#$", op, 1, true), "No such sort operator")
+  assert(string.find("@#$", op, 1, true), "No such sort operator")
   assert_type(output, 'table')
   dbg(nil, "output_sort:", section.name)
 
@@ -1673,9 +1675,9 @@ function output_sort(section, op, output)
 
     -- filter out what to sort
     for k in pairs(section.keys) do
-      if op == '@' and not tonumber (k) then
+      if op == '@' and not tonumber(k) then
         table.insert(sorted, k)
-      elseif op == '#' and tonumber (k) then
+      elseif op == '#' and tonumber(k) then
         table.insert(sorted, k)
       elseif op == '$' then
         table.insert(sorted, k)
@@ -1692,7 +1694,7 @@ function output_sort(section, op, output)
     if op == '@' or op == '$' then
       table.sort(sorted, function(a,b) return tostring(a) < tostring(b) end)
     elseif op == '#' then
-      table.sort(sorted, function(a,b) return (tonumber(a) or 0) < (tonumber(b) or 0) end)
+      table.sort(sorted, function(a,b) return(tonumber(a) or 0) <(tonumber(b) or 0) end)
     end
   end
 
@@ -1750,9 +1752,9 @@ do
   set_gcontext "<output>"
   local topsection = sections[opt_toplevel.."_"..GLOBAL.MARKUP] or sections[opt_toplevel]
   if topsection then
-    output_paste (topsection, output)
+    output_paste(topsection, output)
   else
-    usage ()
+    usage()
   end
 
   local outfd, err = io.stdout
@@ -1761,7 +1763,7 @@ do
     outfd, err = io.open(opt_output, "w+")
 
     if not outfd then
-      die (nil, "failed to open:", opt_output, err)
+      die(nil, "failed to open:", opt_output, err)
     end
   end
 
@@ -1770,7 +1772,7 @@ do
   section_append = function () die(nil, "section_append() not available when postprocessing") end
 
   --activate GLOBAL_POST for postprocessing
-  setmetatable (GLOBAL, {__index = GLOBAL_POST})
+  setmetatable(GLOBAL, {__index = GLOBAL_POST})
 
   for i=1,#output do
     postprocessors_run(output[i])

@@ -607,7 +607,7 @@ anchor:index_maybe_text[] +*maybe_text(v)*+::
 String Substitution
 ^^^^^^^^^^^^^^^^^^^
 
-anchor:index_strsubst[] +*strsubst (context, str, escape)*+::
+anchor:index_strsubst[] +*strsubst(context, str, escape)*+::
  substitute text
   context:::
     The current context which defines all variables and
@@ -685,18 +685,18 @@ anchor:index_operator_register[] +*operator_register(char, procfunc, genfunc)*+:
  Register a new operator
   char:::
     single punctuation character except '.' defining this operator.
-  procfunc +function(context)+:::
+  procfunc +function (context)+:::
     a function which receives a CONTEXT table of the current line.
     The procfunc processes and store the context in appropriate
     fashion.
-  genfunc +function(context)+:::
+  genfunc +function (context)+:::
     a function generating the (sequential) output from given context.
 
 
 Preprocessors
 ^^^^^^^^^^^^^
 
-anchor:index_preprocessor_register[] +*preprocessor_register (langpat, preprocess)*+::
+anchor:index_preprocessor_register[] +*preprocessor_register(langpat, preprocess)*+::
  register a preprocessor
   langpat:::
     Register preprocessor to all filetypes whose mnemonic matches 'langpat'.
@@ -715,7 +715,7 @@ anchor:index_preprocessor_register[] +*preprocessor_register (langpat, preproces
 Postprocessors
 ^^^^^^^^^^^^^^
 
-anchor:index_postprocessor_register[] +*postprocessor_register (markuppat, postprocess)*+::
+anchor:index_postprocessor_register[] +*postprocessor_register(markuppat, postprocess)*+::
  register a postprocessor
   markuppat:::
     Register postprocessor to all markups whose name matches 'markuppat'.
@@ -749,7 +749,7 @@ anchor:index_section_append[] +*section_append(section, key, context)*+::
 Other functions
 ~~~~~~~~~~~~~~~
 
-anchor:index_pattern_escape[] +*pattern_escape (s)*+::
+anchor:index_pattern_escape[] +*pattern_escape(s)*+::
  Escape all characters in string 's' so that it cane be used as verbatim pattern.
 anchor:index_add_inputfile[] +*add_inputfile(filename)*+::
  Add a 'filename' to the list of files to process
@@ -797,6 +797,8 @@ ARG and KEY defined in operator ':', using KEY only ::
  Operator ':' must either be 'section:key' or 'section.key:' but not 'section.key:key'.
 paste argument missing ::
  Using the '=' operator without an argument.
+no such section ::
+ The given section is not defined.
 sort argument missing ::
  Using the '@', '$' or '#' operator without an argument.
 no such section with keys ::
