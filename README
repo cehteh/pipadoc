@@ -488,21 +488,21 @@ Predefined Variables
 
 The 'GLOBAL' table is initialized with:
 
-{VARDEF YEAR, MONTH, DAY, HOUR, MINUTE}
+anchor:index_YEAR[]anchor:index_MONTH[]anchor:index_DAY[]anchor:index_HOUR[]anchor:index_MINUTE[]`YEAR, MONTH, DAY, HOUR, MINUTE`::
   Current date information
-{VARDEF DAYNAME, MONTHNAME}
+anchor:index_DAYNAME[]anchor:index_MONTHNAME[]`DAYNAME, MONTHNAME`::
   The name of the day of week or month
-{VARDEF DATE}
+anchor:index_DATE[]`DATE`::
   Current date in YEAR/MONTH/DAY format
-{VARDEF LOCALDATE}
+anchor:index_LOCALDATE[]`LOCALDATE`::
   Current date in current locale format
-{VARDEF MARKUP}
+anchor:index_MARKUP[]`MARKUP`::
   The markup syntax (--markup option). This information used by pipadoc
   for selecting the top level section and postprocessors. Other user
   defined extensions may use it as well.
-{VARDEF NIL}
+anchor:index_NIL[]`NIL`::
   Expands to an empty string.
-{VARDEF NL}
+anchor:index_NL[]`NL`::
   The line-break character sequence, defaults to '\n' and
   can be changed with the '--define' command-line option.
 
@@ -524,34 +524,34 @@ Context Members
 
 The following members are used/defined in 'contexts'.
 
-{VARDEF ARG}
+anchor:index_ARG[]`ARG`::
   Optional argument to the operator. This can be the sort key
   (alphabetic or numeric) or another section name for pasting.
-{VARDEF COMMENT}
+anchor:index_COMMENT[]`COMMENT`::
   Character sequence which is used as line comment.
-{VARDEF FILE}
+anchor:index_FILE[]`FILE`::
   The file or section name currently processed or some special annotation
   in angle brackets (eg '<startup>') on other processing phases
-{VARDEF COMMENTS_TABLE}
+anchor:index_COMMENTS[]anchor:index_TABLE[]`COMMENTS_TABLE`::
   A Lua table with the all possible line comment character sequences
   for this filetype. Already available at preprocessing time.
-{VARDEF KEY}
+anchor:index_KEY[]`KEY`::
   Sort key
-{VARDEF LANGUAGE}
+anchor:index_LANGUAGE[]`LANGUAGE`::
   The language name of this file.
-{VARDEF LINE}
+anchor:index_LINE[]`LINE`::
   Current line number of input or section, or indexing key
   Lines start at 1
-{VARDEF OP}
+anchor:index_OP[]`OP`::
   Single punctuation operator defining how to process this line.
-{VARDEF PRE}
+anchor:index_PRE[]`PRE`::
   Contains the source code in font of the line comment.
-{VARDEF SECTION}
+anchor:index_SECTION[]`SECTION`::
   Section where the documentation should appear.
-{VARDEF SOURCE}
+anchor:index_SOURCE[]`SOURCE`::
   The line read from the input file, used for preprocessing and will be erased
   afterward preprocessing is done.
-{VARDEF TEXT}
+anchor:index_TEXT[]`TEXT`::
  The actual Documentation Text.
 
 
@@ -564,7 +564,8 @@ pipadoc exports some functions for the use in pre/post processors from config fi
 Library Loading
 ^^^^^^^^^^^^^^^
 
-try to load optional modules
+anchor:index_request[] +*request(name)*+::
+ try to load optional modules
    wraps Lua 'require' in a pcall so that failure to load module 'name' results in 'nil'
    rather than a error.
 
@@ -576,10 +577,14 @@ Functions for to log progress and report errors. All this functions take a varia
 list. Any argument passed to them will be converted to a string and printed to stderr when
 the verbosity level is high enough.
 
-report a important but non fatal failure
-show debugging information
-show more detailed progress information
-report a fatal error and exit the program
+anchor:index_warn[] +*warn(context,...)*+::
+ report a important but non fatal failure
+anchor:index_dbg[] +*dbg(context,...)*+::
+ show debugging information
+anchor:index_trace[] +*trace(context,...)*+::
+ show more detailed progress information
+anchor:index_die[] +*die(context, ...)*+::
+ report a fatal error and exit the program
 
 Type Checks
 ^^^^^^^^^^^
@@ -587,23 +592,30 @@ Type Checks
 Wrappers around 'assert' to check externally supplied data. On success 'var' will be returned
 otherwise an assertion error is raised.
 
-checks that the 'var' is of type 'expected'
-checks that the 'var' is of type 'expected' or nil
-checks that 'var' is a single character
-checks that 'var' is not 'nil'
+anchor:index_assert_type[] +*assert_type(var, expected)*+::
+ checks that the 'var' is of type 'expected'
+anchor:index_maybe_type[] +*maybe_type(var, expected)*+::
+ checks that the 'var' is of type 'expected' or nil
+anchor:index_assert_char[] +*assert_char(var)*+::
+ checks that 'var' is a single character
+anchor:index_assert_notnil[] +*assert_notnil(var)*+::
+ checks that 'var' is not 'nil'
 
 Type Conversions
 ^^^^^^^^^^^^^^^^
 
 Functions which do specific conversions.
 
-if 'v' is not a table then return +++{v}+++
-convert 'v' to a string, returns 'nil' when that string would be empty
+anchor:index_to_table[] +*to_table(v)*+::
+ if 'v' is not a table then return +++{v}+++
+anchor:index_maybe_text[] +*maybe_text(v)*+::
+ convert 'v' to a string, returns 'nil' when that string would be empty
 
 String Substitution
 ^^^^^^^^^^^^^^^^^^^
 
-substitute text
+anchor:index_strsubst[] +*strsubst(context, str, escape)*+::
+ substitute text
   context:::
     The current context which defines all variables and
     macros for the substitution.
@@ -653,7 +665,8 @@ assert(strsubst(context, "{undefined}") == "{undefined}")
 Filetypes
 ^^^^^^^^^
 
-Register a new filetype
+anchor:index_filetype_register[] +*filetype_register(name, filep, linecommentseqs)*+::
+ Register a new filetype
     name:::
       mnemonic name of the language
     filep:::
@@ -675,7 +688,8 @@ Operators have 2 functions associated. The first one is the processing function 
 defines how a documentation comment gets stored. The second one is the generator function
 which will emits the documentation.
 
-Register a new operator
+anchor:index_operator_register[] +*operator_register(char, procfunc, genfunc)*+::
+ Register a new operator
   char:::
     single punctuation character except '.' defining this operator.
   procfunc +function (context)+:::
@@ -689,7 +703,8 @@ Register a new operator
 Preprocessors
 ^^^^^^^^^^^^^
 
-register a preprocessor
+anchor:index_preprocessor_register[] +*preprocessor_register(langpat, preprocess)*+::
+ register a preprocessor
   langpat:::
     Register preprocessor to all filetypes whose mnemonic matches 'langpat'.
   preprocess:::
@@ -707,7 +722,8 @@ register a preprocessor
 Postprocessors
 ^^^^^^^^^^^^^^
 
-register a postprocessor
+anchor:index_postprocessor_register[] +*postprocessor_register(markuppat, postprocess)*+::
+ register a postprocessor
   markuppat:::
     Register postprocessor to all markups whose name matches 'markuppat'.
   postprocess:::
@@ -725,7 +741,8 @@ register a postprocessor
 Sections
 ^^^^^^^^
 
-Append data to the given section/key
+anchor:index_section_append[] +*section_append(section, key, context)*+::
+ Append data to the given section/key
   to be called from preprocessors or macros which generate new content.
 
   section:::
@@ -735,7 +752,8 @@ Append data to the given section/key
   context:::
     The source line broken down into its components and additional pipadoc metadata
 
-Append data to the given section/key
+anchor:index_section_concat[] +*section_concat(section, key, context)*+::
+ Append data to the given section/key
   to be called from preprocessors or macros which generate new content.
 
   section:::
@@ -749,10 +767,14 @@ Append data to the given section/key
 Other functions
 ~~~~~~~~~~~~~~~
 
-Escape all characters in string 's' so that it cane be used as verbatim pattern.
-Add a 'filename' to the list of files to process
-Register a new alias
-Create a new context.
+anchor:index_pattern_escape[] +*pattern_escape(s)*+::
+ Escape all characters in string 's' so that it cane be used as verbatim pattern.
+anchor:index_inputfile_add[] +*inputfile_add(filename)*+::
+ Add a 'filename' to the list of files to process
+anchor:index_alias_register[] +*alias_register(from, to)*+::
+ Register a new alias
+anchor:index_context_make[] +*context_make(parent, new)*+::
+ Create a new context.
 Used whenever preprocessors/macros need to generate new content.
   parent:::
     The parent context to extend from.
@@ -800,7 +822,7 @@ sort argument missing ::
 no such section with keys ::
  The given section has no key entries.
 ARG and KEY defined in operator '+', using KEY only ::
- Operator '+' must either be 'section+key' or 'section.key+' but not 'section.key+key'.
+ Operator '\+' must either be 'section+key' or 'section.key\+' but not 'section.key+key'.
 can't load config file: ::
  The config file ('--config' option) could not be loaded.
 operator processing failed: ::
@@ -895,6 +917,134 @@ Christian Thäter <ct@pipapo.org> for including them into the mainline.
 [index]
 Index
 -----
+
+
+[big]#A# :: 
+   <<index_alias_register,alias_register>> +
+
+  <<index_ARG,ARG>> +
+
+  <<index_assert_char,assert_char>> +
+
+  <<index_assert_notnil,assert_notnil>> +
+
+  <<index_assert_type,assert_type>> +
+
+
+[big]#C# :: 
+   <<index_COMMENT,COMMENT>> +
+
+  <<index_COMMENTS,COMMENTS>> +
+
+  <<index_context_make,context_make>> +
+
+
+[big]#D# :: 
+   <<index_DATE,DATE>> +
+
+  <<index_DAY,DAY>> +
+
+  <<index_DAYNAME,DAYNAME>> +
+
+  <<index_dbg,dbg>> +
+
+  <<index_die,die>> +
+
+
+[big]#F# :: 
+   <<index_FILE,FILE>> +
+
+  <<index_filetype_register,filetype_register>> +
+
+
+[big]#H# :: 
+   <<index_HOUR,HOUR>> +
+
+
+[big]#I# :: 
+   <<index_inputfile_add,inputfile_add>> +
+
+
+[big]#K# :: 
+   <<index_KEY,KEY>> +
+
+
+[big]#L# :: 
+   <<index_LANGUAGE,LANGUAGE>> +
+
+  <<index_LINE,LINE>> +
+
+  <<index_LOCALDATE,LOCALDATE>> +
+
+
+[big]#M# :: 
+   <<index_MARKUP,MARKUP>> +
+
+  <<index_maybe_text,maybe_text>> +
+
+  <<index_maybe_type,maybe_type>> +
+
+  <<index_MINUTE,MINUTE>> +
+
+  <<index_MONTH,MONTH>> +
+
+  <<index_MONTHNAME,MONTHNAME>> +
+
+
+[big]#N# :: 
+   <<index_NIL,NIL>> +
+
+  <<index_NL,NL>> +
+
+
+[big]#O# :: 
+   <<index_OP,OP>> +
+
+  <<index_operator_register,operator_register>> +
+
+
+[big]#P# :: 
+   <<index_pattern_escape,pattern_escape>> +
+
+  <<index_postprocessor_register,postprocessor_register>> +
+
+  <<index_PRE,PRE>> +
+
+  <<index_preprocessor_register,preprocessor_register>> +
+
+
+[big]#R# :: 
+   <<index_request,request>> +
+
+
+[big]#S# :: 
+   <<index_SECTION,SECTION>> +
+
+  <<index_section_append,section_append>> +
+
+  <<index_section_concat,section_concat>> +
+
+  <<index_SOURCE,SOURCE>> +
+
+  <<index_strsubst,strsubst>> +
+
+
+[big]#T# :: 
+   <<index_TABLE,TABLE>> +
+
+  <<index_TEXT,TEXT>> +
+
+  <<index_to_table,to_table>> +
+
+  <<index_trace,trace>> +
+
+
+[big]#W# :: 
+   <<index_warn,warn>> +
+
+
+[big]#Y# :: 
+   <<index_YEAR,YEAR>> +
 
 
 
