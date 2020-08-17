@@ -24,6 +24,7 @@
 --PLANNED: --disable-strsubst option .. NOSTRSUBST STRSUBST macros
 --PLANNED: merge sections for sorting --#foo+bar+baz or something like this
 
+--TODO: style: replace 'foo(' with 'foo ('
 
 --------------------------
 -- Variable Definitions --
@@ -234,7 +235,7 @@ end
 
 
 -- debugging only
-function dump_table(context, p,t)
+function dump_table(context, p, t)
   for k,v in pairs(t) do
     dbg(context, p,k,v)
     if type(v) == 'table' then
@@ -358,7 +359,7 @@ local options = {
     return 1
   end,
   "", --:  <STRING>
-
+  --PLANNED: integrate markup processor integration when -o is given and --format .pdf|.html etc are given (driven by config file)
 
   "    -o, --output <file>", --:  <STRING>
   "                        writes output to 'file' [stdout]", --:  <STRING>
@@ -785,7 +786,7 @@ function section_append(section, key, context) --: Append data to the given sect
   --:
   trace(context, "append:", section.."."..(key or "-"), context.TEXT)
   sections[section] = sections[section] or {keys = {}}
-  if key and #key > 0 then
+  if key then
     sections[section].keys[key] = sections[section].keys[key] or {}
     table.insert(sections[section].keys[key], context)
   else
@@ -1142,7 +1143,7 @@ local operator_pattern_cache
 
 function operator_pattern()
   if not operator_pattern_cache then
-    operator_pattern_cache= "["
+    operator_pattern_cache = "["
     for k in pairs(procfuncs) do
       operator_pattern_cache = operator_pattern_cache..k
     end
@@ -1461,8 +1462,6 @@ local function process_line (context, comment)
     context.ARG = maybe_text(context.ARG)
   end
 
-  --FIXME: handle oneline/block here
-
   local op = context.OP
   if op then
     dbg(context, "source:", context.SOURCE)
@@ -1697,7 +1696,6 @@ function output_sort(section, op, output)
 end
 
 
---PLANNED: some way to hint the checker to suppress these warnings ignore operator --!name
 function report_orphan_doubletes()
   local orphan = {FILE = "<orphan>"}
   local doublete = {FILE = "<doublete>"}
@@ -1757,7 +1755,7 @@ do
     outfd, err = io.open(opt_output, "w+")
 
     if not outfd then
-      die (nil, "failed to open:", err)
+      die (nil, "failed to open:", opt_output, err)
     end
   end
 
@@ -2184,6 +2182,7 @@ end
 --: The resulting `pipadoc.txt` can then be processed with the asciidoc tool chain to produce
 --: distribution formats:
 --:
+--PLANNED: asciidoctor integration
 --: ----
 --: # generate HTML
 --: asciidoc -a toc pipadoc.txt
