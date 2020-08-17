@@ -153,11 +153,11 @@ end
 -- Helper Functions --
 ----------------------
 
-local function check_args(arg, n)
+local function args_check(arg, n)
   assert(#arg >= n, "missing arg: "..arg[n-1])
 end
 
-local function set_gcontext(file, line)
+local function gcontext_set(file, line)
   assert_type(file, 'string')
   gcontext.FILE = file
   gcontext.LINE = line
@@ -237,7 +237,7 @@ end
 
 
 -- debugging only
-function dump_table(context, p, t)
+function table_dump(context, p, t)
   for k,v in pairs(t) do
     dbg(context, p,k,v)
     if type(v) == 'table' then
@@ -256,13 +256,12 @@ end
 ----------------------------
 
 --api_various:
-function add_inputfile(filename) --: Add a 'filename' to the list of files to process
+function inputfile_add(filename) --: Add a 'filename' to the list of files to process
   assert_type(filename, "string")
   opt_inputs[#opt_inputs+1] = filename
 end
 
---PLANNED: rename alias_register
-function register_alias(from, to) --: Register a new alias
+function alias_register(from, to) --: Register a new alias
   assert_type(from, "string")
   assert_type(to, "string")
   dbg(nil, "register alias:", from, "->", to)
@@ -319,7 +318,7 @@ local options = {
   "                        for files matching a file pattern", --:  <STRING>
   ["-r"] = "--register",
   ["--register"] = function (arg,i)
-    check_args(arg, i+3)
+    args_check(arg, i+3)
     filetype_register(arg[i+1], arg[i+2], arg[i+3])
     return 3
   end,
@@ -330,7 +329,7 @@ local options = {
   "                        sets 'name' as toplevel node [MAIN]", --:  <STRING>
   ["-t"] = "--toplevel",
   ["--toplevel"] = function (arg, i)
-    check_args(arg, i+1)
+    args_check(arg, i+1)
     opt_toplevel = arg[i+1]
     dbg(nil, "toplevel:", opt_toplevel)
     return 1
@@ -341,7 +340,7 @@ local options = {
   "                        selects a config file [pipadoc_config.lua]", --:  <STRING>
   ["-c"] = "--config",
   ["--config"] = function (arg, i)
-    check_args(arg, i+1)
+    args_check(arg, i+1)
     opt_config = arg[i+1]
     opt_config_set = true
     dbg(nil, "config:", opt_config)
@@ -363,7 +362,7 @@ local options = {
   "                        selects the markup engine for the output [text]", --:  <STRING>
   ["-m"] = "--markup",
   ["--markup"] = function (arg, i)
-    check_args(arg, i+1)
+    args_check(arg, i+1)
     GLOBAL.MARKUP = arg[i+1]
     dbg(nil, "markup:", GLOBAL.MARKUP)
     return 1
@@ -375,7 +374,7 @@ local options = {
   "                        writes output to 'file' [stdout]", --:  <STRING>
   ["-o"] = "--output",
   ["--output"] = function (arg, i)
-    check_args(arg, i+1)
+    args_check(arg, i+1)
     opt_output = arg[i+1]
     dbg(nil, "output:", opt_output)
     return 1
@@ -388,8 +387,8 @@ local options = {
   "                         --alias '(.*)%.install' '%1.sh'", --:  <STRING>
   ["-a"] = "--alias",
   ["--alias"] = function (arg, i)
-    check_args(arg, i+2)
-    register_alias(arg[i+1], arg[i+2])
+    args_check(arg, i+2)
+    alias_register(arg[i+1], arg[i+2])
     return 2
   end,
   "", --:  <STRING>
@@ -400,7 +399,7 @@ local options = {
   "                        undefine a GLOBAL variable", --:  <STRING>
   ["-D"] = "--define",
   ["--define"] = function (arg,i)
-    check_args(arg, i+1)
+    args_check(arg, i+1)
     local key,has_value,value = arg[i+1]:match("^([%w_]+)(=?)(.*)")
     local undef = arg[i+1]:match("^[-]([%w_]+)")
     if undef then
@@ -423,7 +422,7 @@ local options = {
   "                        undefine a GLOBAL_POST variable", --:  <STRING>
   ["-P"] = "--define-post",
   ["--define-post"] = function (arg,i)
-    check_args(arg, i+1)
+    args_check(arg, i+1)
     local key,has_value,value = arg[i+1]:match("^([%w_]+)(=?)(.*)")
     local undef = arg[i+1]:match("^[-]([%w_]+)")
     if undef then
@@ -481,6 +480,7 @@ local options = {
 }
 
 
+
 function usage()
   for i=1,#options do
     print(options[i])
@@ -489,19 +489,19 @@ function usage()
 end
 
 
-function parse_args(arg)
-  set_gcontext "<parse_args>"
+function args_parse(arg)
+  gcontext_set "<args_parse>"
 
   local i = 1
   while i <= #arg do
     gcontext.LINE=i
     while string.match(arg[i], "^%-%a%a+") do
-      parse_args {"-"..string.sub(arg[i],2,2)}
+      args_parse {"-"..string.sub(arg[i],2,2)}
       arg[i] = "-"..string.sub(arg[i],3)
     end
 
     if not options[arg[i]] then
-      add_inputfile(arg[i])
+      inputfile_add(arg[i])
     else
       local f = options[arg[i]]
       while options[f] do
@@ -1177,8 +1177,7 @@ end
 local block_section
 local block_key
 
-
-local function builtin_filetypes()
+local function filetypes_builtin()
   --filetypes_builtin:scons SCons,
   filetype_register("scons", "^SConstuct$", "#")
 
@@ -1244,7 +1243,7 @@ end
 
 local function setup()
   --PLANNED: os.setlocale by option
-  set_gcontext "<setup>"
+  gcontext_set "<setup>"
 
   request "luarocks.loader"
 
@@ -1276,7 +1275,7 @@ local function setup()
   if not opt_nodefaults then
     --PLANNED: read style file like a config, lower priority, different paths (./ /etc/ ~/ ...)
     --PLANNED: for each language/markup (pipadoc_asciidoc.lua) etc
-    builtin_filetypes()
+    filetypes_builtin()
   end
 
   --op_builtin:
@@ -1367,7 +1366,6 @@ local function setup()
     end
   end
 
-
   function sortgenerate(context, output)
     dbg(context, "sort:", context.OP)
     local section = sections[context.ARG]
@@ -1421,7 +1419,7 @@ local function setup()
   )
 
   if opt_config_set or not opt_nodefaults then
-    set_gcontext "<loadconfig>"
+    gcontext_set "<loadconfig>"
 
     dbg(nil, "load config:", opt_config)
     local config = loadfile(opt_config)
@@ -1449,7 +1447,7 @@ end
 -- Input Processing --
 ----------------------
 
-local function process_line(context, comment)
+local function line_process(context, comment)
   --context:
   --:pre {VARDEF PRE}
   --:pre   Contains the source code in font of the line comment.
@@ -1519,7 +1517,7 @@ local function file_alias(filename)
 end
 
 --api_various:
-function make_context(parent, new) --: Create a new context.
+function context_make(parent, new) --: Create a new context.
   --: Used whenever preprocessors/macros need to generate new content.
   --:   parent:::
   --:     The parent context to extend from.
@@ -1531,14 +1529,12 @@ function make_context(parent, new) --: Create a new context.
   return setmetatable(new or {}, {__index = parent})
 end
 
-
-
-local function process_file(file)
+local function file_process(file)
   -- filecontext is a partial context storing data
   -- of the current file processed
 
-  local filecontext = make_context(GLOBAL, {
-                                     FILE="<process_file>",
+  local filecontext = context_make(GLOBAL, {
+                                     FILE="<file_process>",
   })
 
   local fh
@@ -1588,7 +1584,7 @@ local function process_file(file)
     --:source {VARDEF SOURCE}
     --:source   The line read from the input file, used for preprocessing and will be erased
     --:source   afterward preprocessing is done.
-    local context = make_context(filecontext, {
+    local context = context_make(filecontext, {
                                    LINE = lineno,
                                    SOURCE = line,
     })
@@ -1600,23 +1596,22 @@ local function process_file(file)
       local comment = comment_select(context.SOURCE, filetype)
 
       if comment then
-        process_line(context, comment)
+        line_process(context, comment)
       end
     end
   end
   fh:close()
 end
 
-
-local function process_inputs()
-  set_gcontext "<process_inputs>"
+local function inputs_process()
+  gcontext_set "<inputs_process>"
 
   local processed_files = {}
   for _, filename in ipairs(opt_inputs) do
     if processed_files[filename] then
       warn(nil, "input file given twice:", filename)
     else
-      process_file(filename)
+      file_process(filename)
       processed_files[filename] = true
     end
   end
@@ -1714,8 +1709,7 @@ function output_sort(section, op, output)
   end
 end
 
-
-function report_orphan_doubletes()
+function orphan_doublet_report()
   local orphan = {FILE = "<orphan>"}
   local doublete = {FILE = "<doublete>"}
 
@@ -1752,9 +1746,9 @@ end
 ----------
 
 do
-  parse_args(arg)
+  args_parse(arg)
   setup()
-  process_inputs()
+  inputs_process()
 
   if opt_dryrun then
     os.exit(0)
@@ -1764,7 +1758,7 @@ do
 
   local output = {}
 
-  set_gcontext "<output>"
+  gcontext_set "<output>"
   local topsection = sections[opt_toplevel.."_"..GLOBAL.MARKUP] or sections[opt_toplevel]
   if topsection then
     output_paste(topsection, output)
@@ -1784,7 +1778,7 @@ do
   end
 
 
-  set_gcontext "<postprocessing>"
+  gcontext_set "<postprocessing>"
   section_append = function () die(nil, "section_append() not available when postprocessing") end
 
   --activate GLOBAL_POST for postprocessing
@@ -1805,7 +1799,7 @@ do
     outfd:close()
   end
 
-  report_orphan_doubletes()
+  orphan_doublet_report()
 end
 
 

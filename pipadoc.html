@@ -1290,67 +1290,27 @@ more complex Lua functions for string substitutions.</p></div>
 <div class="sect3">
 <h4 id="_predefined_variables">Predefined Variables</h4>
 <div class="paragraph"><p>The <em>GLOBAL</em> table is initialized with:</p></div>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-<a id="index_YEAR"></a><a id="index_MONTH"></a><a id="index_DAY"></a><a id="index_HOUR"></a><a id="index_MINUTE"></a><code>YEAR, MONTH, DAY, HOUR, MINUTE</code>
-</dt>
-<dd>
-<p>
+<div class="paragraph"><p>{VARDEF YEAR, MONTH, DAY, HOUR, MINUTE}
   Current date information
-</p>
-</dd>
-<dt class="hdlist1">
-<a id="index_DAYNAME"></a><a id="index_MONTHNAME"></a><code>DAYNAME, MONTHNAME</code>
-</dt>
-<dd>
-<p>
+
+{VARDEF DAYNAME, MONTHNAME}
   The name of the day of week or month
-</p>
-</dd>
-<dt class="hdlist1">
-<a id="index_DATE"></a><code>DATE</code>
-</dt>
-<dd>
-<p>
+{VARDEF DATE}
   Current date in YEAR/MONTH/DAY format
-</p>
-</dd>
-<dt class="hdlist1">
-<a id="index_LOCALDATE"></a><code>LOCALDATE</code>
-</dt>
-<dd>
-<p>
+{VARDEF LOCALDATE}
   Current date in current locale format
-</p>
-</dd>
-<dt class="hdlist1">
-<a id="index_MARKUP"></a><code>MARKUP</code>
-</dt>
-<dd>
-<p>
+
+{VARDEF MARKUP}
   The markup syntax (--markup option). This information used by pipadoc
   for selecting the top level section and postprocessors. Other user
   defined extensions may use it as well.
-</p>
-</dd>
-<dt class="hdlist1">
-<a id="index_NIL"></a><code>NIL</code>
-</dt>
-<dd>
-<p>
+
+{VARDEF NIL}
   Expands to an empty string.
-</p>
-</dd>
-<dt class="hdlist1">
-<a id="index_NL"></a><code>NL</code>
-</dt>
-<dd>
-<p>
+
+{VARDEF NL}
   The line-break character sequence, defaults to <em>\n</em> and
-  can be changed with the <em>--define</em> command-line option.
-</p>
-</dd>
-</dl></div>
+  can be changed with the <em>--define</em> command-line option.</p></div>
 <div class="paragraph"><p>The <em>GLOBAL_POST</em> table is used for a final <em>strsubst()</em> pass after postprocessing.
 There are no values defined in <em>GLOBAL_POST</em>.</p></div>
 </div>
@@ -1364,109 +1324,45 @@ everything that&#8217;s defined in GLOBAL.</p></div>
 <div class="sect3">
 <h4 id="_context_members">Context Members</h4>
 <div class="paragraph"><p>The following members are used/defined in <em>contexts</em>.</p></div>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-<a id="index_ARG"></a><code>ARG</code>
-</dt>
-<dd>
-<p>
+<div class="paragraph"><p>{VARDEF ARG}
   Optional argument to the operator. This can be the sort key
   (alphabetic or numeric) or another section name for pasting.
-</p>
-</dd>
-<dt class="hdlist1">
-<a id="index_COMMENT"></a><code>COMMENT</code>
-</dt>
-<dd>
-<p>
+
+{VARDEF COMMENT}
   Character sequence which is used as line comment.
-</p>
-</dd>
-<dt class="hdlist1">
-<a id="index_FILE"></a><code>FILE</code>
-</dt>
-<dd>
-<p>
+
+{VARDEF FILE}
   The file or section name currently processed or some special annotation
   in angle brackets (eg <em>&lt;startup&gt;</em>) on other processing phases
-</p>
-</dd>
-<dt class="hdlist1">
-<a id="index_COMMENTS"></a><a id="index_TABLE"></a><code>COMMENTS_TABLE</code>
-</dt>
-<dd>
-<p>
+
+{VARDEF COMMENTS_TABLE}
   A Lua table with the all possible line comment character sequences
   for this filetype. Already available at preprocessing time.
-</p>
-</dd>
-<dt class="hdlist1">
-<a id="index_KEY"></a><code>KEY</code>
-</dt>
-<dd>
-<p>
+
+{VARDEF KEY}
   Sort key
-</p>
-</dd>
-<dt class="hdlist1">
-<a id="index_LANGUAGE"></a><code>LANGUAGE</code>
-</dt>
-<dd>
-<p>
+
+{VARDEF LANGUAGE}
   The language name of this file.
-</p>
-</dd>
-<dt class="hdlist1">
-<a id="index_LINE"></a><code>LINE</code>
-</dt>
-<dd>
-<p>
+
+{VARDEF LINE}
   Current line number of input or section, or indexing key
   Lines start at 1
-</p>
-</dd>
-<dt class="hdlist1">
-<a id="index_OP"></a><code>OP</code>
-</dt>
-<dd>
-<p>
+
+{VARDEF OP}
   Single punctuation operator defining how to process this line.
-</p>
-</dd>
-<dt class="hdlist1">
-<a id="index_PRE"></a><code>PRE</code>
-</dt>
-<dd>
-<p>
+
+{VARDEF PRE}
   Contains the source code in font of the line comment.
-</p>
-</dd>
-<dt class="hdlist1">
-<a id="index_SECTION"></a><code>SECTION</code>
-</dt>
-<dd>
-<p>
+{VARDEF SECTION}
   Section where the documentation should appear.
-</p>
-</dd>
-<dt class="hdlist1">
-<a id="index_SOURCE"></a><code>SOURCE</code>
-</dt>
-<dd>
-<p>
+
+{VARDEF SOURCE}
   The line read from the input file, used for preprocessing and will be erased
   afterward preprocessing is done.
-</p>
-</dd>
-<dt class="hdlist1">
-<a id="index_TEXT"></a><code>TEXT</code>
-</dt>
-<dd>
-<p>
- The actual Documentation Text.
-</p>
-</dd>
-</dl></div>
+
+{VARDEF TEXT}
+ The actual Documentation Text.</p></div>
 </div>
 </div>
 <div class="sect2">
@@ -1474,193 +1370,54 @@ everything that&#8217;s defined in GLOBAL.</p></div>
 <div class="paragraph"><p>pipadoc exports some functions for the use in pre/post processors from config files.</p></div>
 <div class="sect3">
 <h4 id="_library_loading">Library Loading</h4>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-<a id="index_request"></a> <code><strong>request(name)</strong></code>
-</dt>
-<dd>
-<p>
- try to load optional modules
+<div class="paragraph"><p>try to load optional modules
    wraps Lua <em>require</em> in a pcall so that failure to load module <em>name</em> results in <em>nil</em>
-   rather than a error.
-</p>
-</dd>
-</dl></div>
+   rather than a error.</p></div>
 </div>
 <div class="sect3">
 <h4 id="_logging_progress_and_errors">Logging Progress and Errors</h4>
 <div class="paragraph"><p>Functions for to log progress and report errors. All this functions take a variable argument
 list. Any argument passed to them will be converted to a string and printed to stderr when
 the verbosity level is high enough.</p></div>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-<a id="index_warn"></a> <code><strong>warn(context,&#8230;)</strong></code>
-</dt>
-<dd>
-<p>
- report a important but non fatal failure
-</p>
-</dd>
-<dt class="hdlist1">
-<a id="index_dbg"></a> <code><strong>dbg(context,&#8230;)</strong></code>
-</dt>
-<dd>
-<p>
- show debugging information
-</p>
-</dd>
-<dt class="hdlist1">
-<a id="index_trace"></a> <code><strong>trace(context,&#8230;)</strong></code>
-</dt>
-<dd>
-<p>
- show more detailed progress information
-</p>
-</dd>
-<dt class="hdlist1">
-<a id="index_die"></a> <code><strong>die(context, &#8230;)</strong></code>
-</dt>
-<dd>
-<p>
- report a fatal error and exit the program
-</p>
-</dd>
-</dl></div>
+<div class="paragraph"><p>report a important but non fatal failure
+show debugging information
+show more detailed progress information
+
+report a fatal error and exit the program</p></div>
 </div>
 <div class="sect3">
 <h4 id="_type_checks">Type Checks</h4>
 <div class="paragraph"><p>Wrappers around <em>assert</em> to check externally supplied data. On success <em>var</em> will be returned
 otherwise an assertion error is raised.</p></div>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-<a id="index_assert_type"></a> <code><strong>assert_type(var, expected)</strong></code>
-</dt>
-<dd>
-<p>
- checks that the <em>var</em> is of type <em>expected</em>
-</p>
-</dd>
-<dt class="hdlist1">
-<a id="index_maybe_type"></a> <code><strong>maybe_type(var, expected)</strong></code>
-</dt>
-<dd>
-<p>
- checks that the <em>var</em> is of type <em>expected</em> or nil
-</p>
-</dd>
-<dt class="hdlist1">
-<a id="index_assert_char"></a> <code><strong>assert_char(var)</strong></code>
-</dt>
-<dd>
-<p>
- checks that <em>var</em> is a single character
-</p>
-</dd>
-<dt class="hdlist1">
-<a id="index_assert_notnil"></a> <code><strong>assert_notnil(var)</strong></code>
-</dt>
-<dd>
-<p>
- checks that <em>var</em> is not <em>nil</em>
-</p>
-</dd>
-</dl></div>
+<div class="paragraph"><p>checks that the <em>var</em> is of type <em>expected</em>
+
+checks that the <em>var</em> is of type <em>expected</em> or nil
+
+checks that <em>var</em> is a single character
+
+checks that <em>var</em> is not <em>nil</em></p></div>
 </div>
 <div class="sect3">
 <h4 id="_type_conversions">Type Conversions</h4>
 <div class="paragraph"><p>Functions which do specific conversions.</p></div>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-<a id="index_to_table"></a> <code><strong>to_table(v)</strong></code>
-</dt>
-<dd>
-<p>
- if <em>v</em> is not a table then return {v}
-</p>
-</dd>
-<dt class="hdlist1">
-<a id="index_maybe_text"></a> <code><strong>maybe_text(v)</strong></code>
-</dt>
-<dd>
-<p>
- convert <em>v</em> to a string, returns <em>nil</em> when that string would be empty
-</p>
-</dd>
-</dl></div>
+<div class="paragraph"><p>if <em>v</em> is not a table then return {v}
+
+convert <em>v</em> to a string, returns <em>nil</em> when that string would be empty</p></div>
 </div>
 <div class="sect3">
 <h4 id="_string_substitution">String Substitution</h4>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-<a id="index_strsubst"></a> <code><strong>strsubst(context, str, escape)</strong></code>
-</dt>
-<dd>
-<p>
- substitute text
-</p>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-context
-</dt>
-<dd>
-<p>
+<div class="paragraph"><p>substitute text
+  context:::
     The current context which defines all variables and
     macros for the substitution.
-</p>
-</dd>
-<dt class="hdlist1">
-str
-</dt>
-<dd>
-<p>
+  str:::
     The string to operate on
-</p>
-</dd>
-<dt class="hdlist1">
-escape
-</dt>
-<dd>
-<p>
+  escape:::
     Rule for special character escaping
-</p>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-true
-</dt>
-<dd>
-<p>
-handle escaping in one pass
-</p>
-</dd>
-<dt class="hdlist1">
-<em>escape</em>
-</dt>
-<dd>
-<p>
-1st pass
-</p>
-</dd>
-<dt class="hdlist1">
-<em>unescape</em>
-</dt>
-<dd>
-<p>
-2nd pass
-</p>
-</dd>
-<dt class="hdlist1">
-nil
-</dt>
-<dd>
-<p>
-no special escaping
-</p>
-</dd>
-</dl></div>
-</dd>
-</dl></div>
-</dd>
-</dl></div>
+    true:::: handle escaping in one pass
+    <em>escape</em>:::: 1st pass
+    <em>unescape</em>:::: 2nd pass
+    nil:::: no special escaping</p></div>
 <div class="listingblock">
 <div class="title">Examples</div>
 <div class="content">
@@ -1697,42 +1454,13 @@ assert(strsubst(context, "{undefined}") == "{undefined}")</code></pre>
 </div>
 <div class="sect3">
 <h4 id="_filetypes_2">Filetypes</h4>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-<a id="index_filetype_register"></a> <code><strong>filetype_register(name, filep, linecommentseqs)</strong></code>
-</dt>
-<dd>
-<p>
- Register a new filetype
-</p>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-name
-</dt>
-<dd>
-<p>
+<div class="paragraph"><p>Register a new filetype
+    name:::
       mnemonic name of the language
-</p>
-</dd>
-<dt class="hdlist1">
-filep
-</dt>
-<dd>
-<p>
+    filep:::
       a Lua pattern or list of patterns matching filename
-</p>
-</dd>
-<dt class="hdlist1">
-linecommentseqs
-</dt>
-<dd>
-<p>
-      a string or list of strings matching comments of the registered filetype
-</p>
-</dd>
-</dl></div>
-</dd>
-</dl></div>
+    linecommentseqs:::
+      a string or list of strings matching comments of the registered filetype</p></div>
 <div class="paragraph"><p>For example, C and C++ Filetypes are registered like:</p></div>
 <div class="listingblock">
 <div class="content">
@@ -1744,190 +1472,52 @@ linecommentseqs
 <div class="paragraph"><p>Operators have 2 functions associated. The first one is the processing function which
 defines how a documentation comment gets stored. The second one is the generator function
 which will emits the documentation.</p></div>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-<a id="index_operator_register"></a> <code><strong>operator_register(char, procfunc, genfunc)</strong></code>
-</dt>
-<dd>
-<p>
- Register a new operator
-</p>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-char
-</dt>
-<dd>
-<p>
+<div class="paragraph"><p>Register a new operator
+  char:::
     single punctuation character except <em>.</em> defining this operator.
-</p>
-</dd>
-<dt class="hdlist1">
-procfunc <code>function (context)</code>
-</dt>
-<dd>
-<p>
+  procfunc <code>function (context)</code>:::
     a function which receives a CONTEXT table of the current line.
     The procfunc processes and store the context in appropriate
     fashion.
-</p>
-</dd>
-<dt class="hdlist1">
-genfunc <code>function (context)</code>
-</dt>
-<dd>
-<p>
-    a function generating the (sequential) output from given context.
-</p>
-</dd>
-</dl></div>
-</dd>
-</dl></div>
+  genfunc <code>function (context)</code>:::
+    a function generating the (sequential) output from given context.</p></div>
 </div>
 <div class="sect3">
 <h4 id="_preprocessors_3">Preprocessors</h4>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-<a id="index_preprocessor_register"></a> <code><strong>preprocessor_register(langpat, preprocess)</strong></code>
-</dt>
-<dd>
-<p>
- register a preprocessor
-</p>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-langpat
-</dt>
-<dd>
-<p>
+<div class="paragraph"><p>register a preprocessor
+  langpat:::
     Register preprocessor to all filetypes whose mnemonic matches <em>langpat</em>.
-</p>
-</dd>
-<dt class="hdlist1">
-preprocess
-</dt>
-<dd>
-<p>
+  preprocess:::
     The preprocessor to register. Can be one of:
-</p>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-<code>function (context) ... end</code> 
-</dt>
-<dd>
-<p>
+    <code>function (context) ... end</code> ::::
       Takes the context of the current source line and shall return:
-</p>
-<div class="ulist"><ul>
-<li>
-<p>
-the preprocessed line
-</p>
-</li>
-<li>
-<p>
-false to drop the line
-</p>
-</li>
-<li>
-<p>
-true to keep the line unaltered
+      *  the preprocessed line
+      *  false to drop the line
+      *  true to keep the line unaltered
       Preprocessors may store state or have other side effect using API functions.
-</p>
-</li>
-</ul></div>
-</dd>
-<dt class="hdlist1">
-<code>{pattern, repl [, n]}</code> 
-</dt>
-<dd>
-<p>
-      Generates a function calling <em>context.SOURCE:gsub(pattern, repl [, n])</em> for preprocessing.
-</p>
-</dd>
-</dl></div>
-</dd>
-</dl></div>
-</dd>
-</dl></div>
+    <code>{pattern, repl [, n]}</code> ::::
+      Generates a function calling <em>context.SOURCE:gsub(pattern, repl [, n])</em> for preprocessing.</p></div>
 </div>
 <div class="sect3">
 <h4 id="_postprocessors_3">Postprocessors</h4>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-<a id="index_postprocessor_register"></a> <code><strong>postprocessor_register(markuppat, postprocess)</strong></code>
-</dt>
-<dd>
-<p>
- register a postprocessor
-</p>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-markuppat
-</dt>
-<dd>
-<p>
+<div class="paragraph"><p>register a postprocessor
+  markuppat:::
     Register postprocessor to all markups whose name matches <em>markuppat</em>.
-</p>
-</dd>
-<dt class="hdlist1">
-postprocess
-</dt>
-<dd>
-<p>
+  postprocess:::
     The postprocessor to register. Can be one of:
-</p>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-<code>function (context) ... end</code> 
-</dt>
-<dd>
-<p>
+    <code>function (context) ... end</code> ::::
       Takes the context of the current source line and shall return:
-</p>
-<div class="ulist"><ul>
-<li>
-<p>
-the postprocessed line (context.TEXT)
-</p>
-</li>
-<li>
-<p>
-false to drop the line
-</p>
-</li>
-<li>
-<p>
-true to keep the line unaltered
+      *  the postprocessed line (context.TEXT)
+      *  false to drop the line
+      *  true to keep the line unaltered
       Postprocessors may store state or have other side effect using API functions.
-</p>
-</li>
-</ul></div>
-</dd>
-<dt class="hdlist1">
-<code>{pattern, repl [, n]}</code> 
-</dt>
-<dd>
-<p>
-      Generates a function calling <em>context.TEXT:gsub(pattern, repl [, n])</em> for postprocessing.
-</p>
-</dd>
-</dl></div>
-</dd>
-</dl></div>
-</dd>
-</dl></div>
+    <code>{pattern, repl [, n]}</code> ::::
+      Generates a function calling <em>context.TEXT:gsub(pattern, repl [, n])</em> for postprocessing.</p></div>
 </div>
 <div class="sect3">
 <h4 id="_sections">Sections</h4>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-<a id="index_section_append"></a> <code><strong>section_append(section, key, context)</strong></code>
-</dt>
-<dd>
-<p>
- Append data to the given section/key
-  to be called from preprocessors or macros which generate new content.
-</p>
+<div class="paragraph"><p>Append data to the given section/key
+  to be called from preprocessors or macros which generate new content.</p></div>
 <div class="dlist"><dl>
 <dt class="hdlist1">
 section
@@ -1954,66 +1544,23 @@ context
 </p>
 </dd>
 </dl></div>
-</dd>
-</dl></div>
 </div>
 </div>
 <div class="sect2">
 <h3 id="_other_functions">Other functions</h3>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-<a id="index_pattern_escape"></a> <code><strong>pattern_escape(s)</strong></code>
-</dt>
-<dd>
-<p>
- Escape all characters in string <em>s</em> so that it cane be used as verbatim pattern.
-</p>
-</dd>
-<dt class="hdlist1">
-<a id="index_add_inputfile"></a> <code><strong>add_inputfile(filename)</strong></code>
-</dt>
-<dd>
-<p>
- Add a <em>filename</em> to the list of files to process
-</p>
-</dd>
-<dt class="hdlist1">
-<a id="index_register_alias"></a> <code><strong>register_alias(from, to)</strong></code>
-</dt>
-<dd>
-<p>
- Register a new alias
-</p>
-</dd>
-<dt class="hdlist1">
-<a id="index_make_context"></a> <code><strong>make_context(parent, new)</strong></code>
-</dt>
-<dd>
-<p>
- Create a new context.
+<div class="paragraph"><p>Escape all characters in string <em>s</em> so that it cane be used as verbatim pattern.
+
+Add a <em>filename</em> to the list of files to process
+
+Register a new alias
+
+Create a new context.
 Used whenever preprocessors/macros need to generate new content.
-</p>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-parent
-</dt>
-<dd>
-<p>
+  parent:::
     The parent context to extend from.
-</p>
-</dd>
-<dt class="hdlist1">
-new
-</dt>
-<dd>
-<p>
+  new:::
     A table (or nil) containing the additional members for the
-    new context.
-</p>
-</dd>
-</dl></div>
-</dd>
-</dl></div>
+    new context.</p></div>
 </div>
 </div>
 </div>
@@ -2307,286 +1854,6 @@ Christian Thäter &lt;<a href="mailto:ct@pipapo.org">ct@pipapo.org</a>&gt; for i
 <div class="sect1">
 <h2 id="_index">Index</h2>
 <div class="sectionbody">
-<div class="dlist"><dl>
-<dt class="hdlist1">
-<span class="big">A</span> 
-</dt>
-<dd>
-<p>
-   <a href="#index_add_inputfile">add_inputfile</a><br />
-</p>
-</dd>
-</dl></div>
-<div class="literalblock">
-<div class="content">
-<pre><code>&lt;&lt;index_ARG,ARG&gt;&gt; +</code></pre>
-</div></div>
-<div class="literalblock">
-<div class="content">
-<pre><code>&lt;&lt;index_assert_char,assert_char&gt;&gt; +</code></pre>
-</div></div>
-<div class="literalblock">
-<div class="content">
-<pre><code>&lt;&lt;index_assert_notnil,assert_notnil&gt;&gt; +</code></pre>
-</div></div>
-<div class="literalblock">
-<div class="content">
-<pre><code>&lt;&lt;index_assert_type,assert_type&gt;&gt; +</code></pre>
-</div></div>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-<span class="big">C</span> 
-</dt>
-<dd>
-<p>
-   <a href="#index_COMMENT">COMMENT</a><br />
-</p>
-</dd>
-</dl></div>
-<div class="literalblock">
-<div class="content">
-<pre><code>&lt;&lt;index_COMMENTS,COMMENTS&gt;&gt; +</code></pre>
-</div></div>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-<span class="big">D</span> 
-</dt>
-<dd>
-<p>
-   <a href="#index_DATE">DATE</a><br />
-</p>
-</dd>
-</dl></div>
-<div class="literalblock">
-<div class="content">
-<pre><code>&lt;&lt;index_DAY,DAY&gt;&gt; +</code></pre>
-</div></div>
-<div class="literalblock">
-<div class="content">
-<pre><code>&lt;&lt;index_DAYNAME,DAYNAME&gt;&gt; +</code></pre>
-</div></div>
-<div class="literalblock">
-<div class="content">
-<pre><code>&lt;&lt;index_dbg,dbg&gt;&gt; +</code></pre>
-</div></div>
-<div class="literalblock">
-<div class="content">
-<pre><code>&lt;&lt;index_die,die&gt;&gt; +</code></pre>
-</div></div>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-<span class="big">F</span> 
-</dt>
-<dd>
-<p>
-   <a href="#index_FILE">FILE</a><br />
-</p>
-</dd>
-</dl></div>
-<div class="literalblock">
-<div class="content">
-<pre><code>&lt;&lt;index_filetype_register,filetype_register&gt;&gt; +</code></pre>
-</div></div>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-<span class="big">H</span> 
-</dt>
-<dd>
-<p>
-   <a href="#index_HOUR">HOUR</a><br />
-</p>
-</dd>
-</dl></div>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-<span class="big">K</span> 
-</dt>
-<dd>
-<p>
-   <a href="#index_KEY">KEY</a><br />
-</p>
-</dd>
-</dl></div>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-<span class="big">L</span> 
-</dt>
-<dd>
-<p>
-   <a href="#index_LANGUAGE">LANGUAGE</a><br />
-</p>
-</dd>
-</dl></div>
-<div class="literalblock">
-<div class="content">
-<pre><code>&lt;&lt;index_LINE,LINE&gt;&gt; +</code></pre>
-</div></div>
-<div class="literalblock">
-<div class="content">
-<pre><code>&lt;&lt;index_LOCALDATE,LOCALDATE&gt;&gt; +</code></pre>
-</div></div>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-<span class="big">M</span> 
-</dt>
-<dd>
-<p>
-   <a href="#index_make_context">make_context</a><br />
-</p>
-</dd>
-</dl></div>
-<div class="literalblock">
-<div class="content">
-<pre><code>&lt;&lt;index_MARKUP,MARKUP&gt;&gt; +</code></pre>
-</div></div>
-<div class="literalblock">
-<div class="content">
-<pre><code>&lt;&lt;index_maybe_text,maybe_text&gt;&gt; +</code></pre>
-</div></div>
-<div class="literalblock">
-<div class="content">
-<pre><code>&lt;&lt;index_maybe_type,maybe_type&gt;&gt; +</code></pre>
-</div></div>
-<div class="literalblock">
-<div class="content">
-<pre><code>&lt;&lt;index_MINUTE,MINUTE&gt;&gt; +</code></pre>
-</div></div>
-<div class="literalblock">
-<div class="content">
-<pre><code>&lt;&lt;index_MONTH,MONTH&gt;&gt; +</code></pre>
-</div></div>
-<div class="literalblock">
-<div class="content">
-<pre><code>&lt;&lt;index_MONTHNAME,MONTHNAME&gt;&gt; +</code></pre>
-</div></div>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-<span class="big">N</span> 
-</dt>
-<dd>
-<p>
-   <a href="#index_NIL">NIL</a><br />
-</p>
-</dd>
-</dl></div>
-<div class="literalblock">
-<div class="content">
-<pre><code>&lt;&lt;index_NL,NL&gt;&gt; +</code></pre>
-</div></div>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-<span class="big">O</span> 
-</dt>
-<dd>
-<p>
-   <a href="#index_OP">OP</a><br />
-</p>
-</dd>
-</dl></div>
-<div class="literalblock">
-<div class="content">
-<pre><code>&lt;&lt;index_operator_register,operator_register&gt;&gt; +</code></pre>
-</div></div>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-<span class="big">P</span> 
-</dt>
-<dd>
-<p>
-   <a href="#index_pattern_escape">pattern_escape</a><br />
-</p>
-</dd>
-</dl></div>
-<div class="literalblock">
-<div class="content">
-<pre><code>&lt;&lt;index_postprocessor_register,postprocessor_register&gt;&gt; +</code></pre>
-</div></div>
-<div class="literalblock">
-<div class="content">
-<pre><code>&lt;&lt;index_PRE,PRE&gt;&gt; +</code></pre>
-</div></div>
-<div class="literalblock">
-<div class="content">
-<pre><code>&lt;&lt;index_preprocessor_register,preprocessor_register&gt;&gt; +</code></pre>
-</div></div>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-<span class="big">R</span> 
-</dt>
-<dd>
-<p>
-   <a href="#index_register_alias">register_alias</a><br />
-</p>
-</dd>
-</dl></div>
-<div class="literalblock">
-<div class="content">
-<pre><code>&lt;&lt;index_request,request&gt;&gt; +</code></pre>
-</div></div>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-<span class="big">S</span> 
-</dt>
-<dd>
-<p>
-   <a href="#index_SECTION">SECTION</a><br />
-</p>
-</dd>
-</dl></div>
-<div class="literalblock">
-<div class="content">
-<pre><code>&lt;&lt;index_section_append,section_append&gt;&gt; +</code></pre>
-</div></div>
-<div class="literalblock">
-<div class="content">
-<pre><code>&lt;&lt;index_SOURCE,SOURCE&gt;&gt; +</code></pre>
-</div></div>
-<div class="literalblock">
-<div class="content">
-<pre><code>&lt;&lt;index_strsubst,strsubst&gt;&gt; +</code></pre>
-</div></div>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-<span class="big">T</span> 
-</dt>
-<dd>
-<p>
-   <a href="#index_TABLE">TABLE</a><br />
-</p>
-</dd>
-</dl></div>
-<div class="literalblock">
-<div class="content">
-<pre><code>&lt;&lt;index_TEXT,TEXT&gt;&gt; +</code></pre>
-</div></div>
-<div class="literalblock">
-<div class="content">
-<pre><code>&lt;&lt;index_to_table,to_table&gt;&gt; +</code></pre>
-</div></div>
-<div class="literalblock">
-<div class="content">
-<pre><code>&lt;&lt;index_trace,trace&gt;&gt; +</code></pre>
-</div></div>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-<span class="big">W</span> 
-</dt>
-<dd>
-<p>
-   <a href="#index_warn">warn</a><br />
-</p>
-</dd>
-</dl></div>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-<span class="big">Y</span> 
-</dt>
-<dd>
-<p>
-   <a href="#index_YEAR">YEAR</a><br />
-</p>
-</dd>
-</dl></div>
 </div>
 </div>
 </div>
@@ -2594,7 +1861,7 @@ Christian Thäter &lt;<a href="mailto:ct@pipapo.org">ct@pipapo.org</a>&gt; for i
 <div id="footer">
 <div id="footer-text">
 Last updated
- 2020-08-17 15:01:53 CEST
+ 2020-08-17 21:28:20 CEST
 </div>
 </div>
 </body>
