@@ -12,7 +12,7 @@ if bash ./pipadoc.test 2>&1 | tee test.log ; then
     # generate docs
     sh pipadoc.install
     ./pipadoc --make-doc &&
-        cp README pipadoc.html pipadoc.pdf "$WORKTREE_DIR" &&
+        cp README pipadoc.html "$WORKTREE_DIR" &&
         cd "$WORKTREE_DIR" &&
         if git diff --numstat README |
                 { read a r f ; test $((a+r)) -gt 2; }; then
