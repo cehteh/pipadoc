@@ -10,13 +10,12 @@ if bash ./pipadoc.test 2>&1 | tee test.log ; then
     ret=$?
 
     # generate docs
-    lua pipadoc.lua -m asciidoc pipadoc.lua >pipadoc.txt &&
-        asciidoc -a toc pipadoc.txt &&
-        grep -v '^// ' pipadoc.txt >"$WORKTREE_DIR/README" &&
+    sh pipadoc.install
+    ./pipadoc --make-doc &&
+        cp README pipadoc.html pipadoc.pdf "$WORKTREE_DIR" &&
         cd "$WORKTREE_DIR" &&
         if git diff --numstat README |
                 { read a r f ; test $((a+r)) -gt 2; }; then
-            mv "$test_dir/pipadoc.html" "$WORKTREE_DIR/"
             git add README pipadoc.html
         fi
 

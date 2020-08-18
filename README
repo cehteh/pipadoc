@@ -314,6 +314,7 @@ comment closing sequence right on the line will clobber the output, don't do tha
 /*works_too: but looks ugly
 */
 
+// the following will include the closing */ in the documentation
 /*fail: don't do this, pipadoc comments span to the end of the line */
 ----
 
@@ -446,14 +447,36 @@ This configfile supports 'text' and 'asciidoc' back ends.
 Preprocessors
 ^^^^^^^^^^^^^
 
+* Ignore any line which ends in 'NODOC'.
+*  Replace '<STRING>' in pipadoc comments with the first literal doublequoted string from the code.
+   Lifts string literals from sourcecode to documentation. The doublequotes are removed.
+* Automatic generation of documentation for Lua functions.
+  Generates an index entry and a prototype header from an one line function definition
+* When GLOBAL.ISSUES is defined, generate formatted lists for doc comments in
+  WIP/FIXME/TODO/PLANNED/DONE sections.
+  When GLOBAL.GIT is defined ('-D GIT') then each such item includes information gathered
+  from the git commit which touched that line the last.
+  When GLOBAL.NOBUG is defined it reaps http://nobug.pipapo.org[NoBug] annotations from
+  C source files as well.
 
 Postprocessors
 ^^^^^^^^^^^^^^
 
+* Keep track of original file:line as asciidoc comments in the output.
+  Disable this tracking when a doc comment starts with 'NOORIGIN' and
+  re-enable it with a doc comment starting with 'ORGIN'.
 
 Substitutions Macros
 ^^^^^^^^^^^^^^^^^^^^
 
+* '\{LUA_FNDEF}' Lifts a Lua function definition to the documentation text.
+  Used by the Lua documentation preprocessor.
+* '{VARDEF name}' generates a header and index entry for 'name'.
+  Used for documentaton of GLOBAL and CONTEXT variables (pipadoc's own documentation).
+  Defined for asciidoc and text backends.
+* '{INDEX_ENTRY name}' Entry in the index that refers back to 'name'.
+* '\{GIT_BLAME}' Insert a 'git blame' report about the current line.
+  Refer to the source for details.
 
 
 Dependencies
@@ -488,21 +511,21 @@ Predefined Variables
 
 The 'GLOBAL' table is initialized with:
 
-anchor:index_YEAR[]anchor:index_MONTH[]anchor:index_DAY[]anchor:index_HOUR[]anchor:index_MINUTE[]`YEAR, MONTH, DAY, HOUR, MINUTE`::
+YEAR, MONTH, DAY, HOUR, MINUTE:
   Current date information
-anchor:index_DAYNAME[]anchor:index_MONTHNAME[]`DAYNAME, MONTHNAME`::
+DAYNAME, MONTHNAME:
   The name of the day of week or month
-anchor:index_DATE[]`DATE`::
+DATE:
   Current date in YEAR/MONTH/DAY format
-anchor:index_LOCALDATE[]`LOCALDATE`::
+LOCALDATE:
   Current date in current locale format
-anchor:index_MARKUP[]`MARKUP`::
+MARKUP:
   The markup syntax (--markup option). This information used by pipadoc
   for selecting the top level section and postprocessors. Other user
   defined extensions may use it as well.
-anchor:index_NIL[]`NIL`::
+NIL:
   Expands to an empty string.
-anchor:index_NL[]`NL`::
+NL:
   The line-break character sequence, defaults to '\n' and
   can be changed with the '--define' command-line option.
 
@@ -524,34 +547,34 @@ Context Members
 
 The following members are used/defined in 'contexts'.
 
-anchor:index_ARG[]`ARG`::
+ARG:
   Optional argument to the operator. This can be the sort key
   (alphabetic or numeric) or another section name for pasting.
-anchor:index_COMMENT[]`COMMENT`::
+COMMENT:
   Character sequence which is used as line comment.
-anchor:index_FILE[]`FILE`::
+FILE:
   The file or section name currently processed or some special annotation
   in angle brackets (eg '<startup>') on other processing phases
-anchor:index_COMMENTS[]anchor:index_TABLE[]`COMMENTS_TABLE`::
+COMMENTS_TABLE:
   A Lua table with the all possible line comment character sequences
   for this filetype. Already available at preprocessing time.
-anchor:index_KEY[]`KEY`::
+KEY:
   Sort key
-anchor:index_LANGUAGE[]`LANGUAGE`::
+LANGUAGE:
   The language name of this file.
-anchor:index_LINE[]`LINE`::
+LINE:
   Current line number of input or section, or indexing key
   Lines start at 1
-anchor:index_OP[]`OP`::
+OP:
   Single punctuation operator defining how to process this line.
-anchor:index_PRE[]`PRE`::
+PRE:
   Contains the source code in font of the line comment.
-anchor:index_SECTION[]`SECTION`::
+SECTION:
   Section where the documentation should appear.
-anchor:index_SOURCE[]`SOURCE`::
+SOURCE:
   The line read from the input file, used for preprocessing and will be erased
   afterward preprocessing is done.
-anchor:index_TEXT[]`TEXT`::
+TEXT:
  The actual Documentation Text.
 
 
@@ -564,7 +587,7 @@ pipadoc exports some functions for the use in pre/post processors from config fi
 Library Loading
 ^^^^^^^^^^^^^^^
 
-anchor:index_request[] +*request(name)*+::
+request(name):
  try to load optional modules
    wraps Lua 'require' in a pcall so that failure to load module 'name' results in 'nil'
    rather than a error.
@@ -577,13 +600,13 @@ Functions for to log progress and report errors. All this functions take a varia
 list. Any argument passed to them will be converted to a string and printed to stderr when
 the verbosity level is high enough.
 
-anchor:index_warn[] +*warn(context,...)*+::
+warn(context,...):
  report a important but non fatal failure
-anchor:index_dbg[] +*dbg(context,...)*+::
+dbg(context,...):
  show debugging information
-anchor:index_trace[] +*trace(context,...)*+::
+trace(context,...):
  show more detailed progress information
-anchor:index_die[] +*die(context, ...)*+::
+die(context, ...):
  report a fatal error and exit the program
 
 Type Checks
@@ -592,13 +615,13 @@ Type Checks
 Wrappers around 'assert' to check externally supplied data. On success 'var' will be returned
 otherwise an assertion error is raised.
 
-anchor:index_assert_type[] +*assert_type(var, expected)*+::
+assert_type(var, expected):
  checks that the 'var' is of type 'expected'
-anchor:index_maybe_type[] +*maybe_type(var, expected)*+::
+maybe_type(var, expected):
  checks that the 'var' is of type 'expected' or nil
-anchor:index_assert_char[] +*assert_char(var)*+::
+assert_char(var):
  checks that 'var' is a single character
-anchor:index_assert_notnil[] +*assert_notnil(var)*+::
+assert_notnil(var):
  checks that 'var' is not 'nil'
 
 Type Conversions
@@ -606,15 +629,15 @@ Type Conversions
 
 Functions which do specific conversions.
 
-anchor:index_to_table[] +*to_table(v)*+::
+to_table(v):
  if 'v' is not a table then return +++{v}+++
-anchor:index_maybe_text[] +*maybe_text(v)*+::
+maybe_text(v):
  convert 'v' to a string, returns 'nil' when that string would be empty
 
 String Substitution
 ^^^^^^^^^^^^^^^^^^^
 
-anchor:index_strsubst[] +*strsubst(context, str, escape)*+::
+strsubst(context, str, escape):
  substitute text
   context:::
     The current context which defines all variables and
@@ -665,7 +688,7 @@ assert(strsubst(context, "{undefined}") == "{undefined}")
 Filetypes
 ^^^^^^^^^
 
-anchor:index_filetype_register[] +*filetype_register(name, filep, linecommentseqs)*+::
+filetype_register(name, filep, linecommentseqs):
  Register a new filetype
     name:::
       mnemonic name of the language
@@ -688,7 +711,7 @@ Operators have 2 functions associated. The first one is the processing function 
 defines how a documentation comment gets stored. The second one is the generator function
 which will emits the documentation.
 
-anchor:index_operator_register[] +*operator_register(char, procfunc, genfunc)*+::
+operator_register(char, procfunc, genfunc):
  Register a new operator
   char:::
     single punctuation character except '.' defining this operator.
@@ -703,7 +726,7 @@ anchor:index_operator_register[] +*operator_register(char, procfunc, genfunc)*+:
 Preprocessors
 ^^^^^^^^^^^^^
 
-anchor:index_preprocessor_register[] +*preprocessor_register(langpat, preprocess)*+::
+preprocessor_register(langpat, preprocess):
  register a preprocessor
   langpat:::
     Register preprocessor to all filetypes whose mnemonic matches 'langpat'.
@@ -722,7 +745,7 @@ anchor:index_preprocessor_register[] +*preprocessor_register(langpat, preprocess
 Postprocessors
 ^^^^^^^^^^^^^^
 
-anchor:index_postprocessor_register[] +*postprocessor_register(markuppat, postprocess)*+::
+postprocessor_register(markuppat, postprocess):
  register a postprocessor
   markuppat:::
     Register postprocessor to all markups whose name matches 'markuppat'.
@@ -741,7 +764,7 @@ anchor:index_postprocessor_register[] +*postprocessor_register(markuppat, postpr
 Sections
 ^^^^^^^^
 
-anchor:index_section_append[] +*section_append(section, key, context)*+::
+section_append(section, key, context):
  Append data to the given section/key
   to be called from preprocessors or macros which generate new content.
 
@@ -752,7 +775,7 @@ anchor:index_section_append[] +*section_append(section, key, context)*+::
   context:::
     The source line broken down into its components and additional pipadoc metadata
 
-anchor:index_section_concat[] +*section_concat(section, key, context)*+::
+section_concat(section, key, context):
  Concat data to the given section/key
   to be called from preprocessors or macros which generate new content.
 
@@ -767,13 +790,13 @@ anchor:index_section_concat[] +*section_concat(section, key, context)*+::
 Other functions
 ~~~~~~~~~~~~~~~
 
-anchor:index_pattern_escape[] +*pattern_escape(s)*+::
+pattern_escape(s):
  Escape all characters in string 's' so that it cane be used as verbatim pattern.
-anchor:index_inputfile_add[] +*inputfile_add(filename)*+::
+inputfile_add(filename):
  Add a 'filename' to the list of files to process
-anchor:index_alias_register[] +*alias_register(from, to)*+::
+alias_register(from, to):
  Register a new alias
-anchor:index_context_make[] +*context_make(parent, new)*+::
+context_make(parent, new):
  Create a new context.
 Used whenever preprocessors/macros need to generate new content.
   parent:::
@@ -913,138 +936,4 @@ which naturally makes this distribution conform with the GPL.
 
 Nevertheless, when you make any improvements to pipadoc please consider to contact
 Christian Thäter <ct@pipapo.org> for including them into the mainline.
-
-[index]
-Index
------
-
-
-[big]#A# :: 
-   <<index_alias_register,alias_register>> +
-
-  <<index_ARG,ARG>> +
-
-  <<index_assert_char,assert_char>> +
-
-  <<index_assert_notnil,assert_notnil>> +
-
-  <<index_assert_type,assert_type>> +
-
-
-[big]#C# :: 
-   <<index_COMMENT,COMMENT>> +
-
-  <<index_COMMENTS,COMMENTS>> +
-
-  <<index_context_make,context_make>> +
-
-
-[big]#D# :: 
-   <<index_DATE,DATE>> +
-
-  <<index_DAY,DAY>> +
-
-  <<index_DAYNAME,DAYNAME>> +
-
-  <<index_dbg,dbg>> +
-
-  <<index_die,die>> +
-
-
-[big]#F# :: 
-   <<index_FILE,FILE>> +
-
-  <<index_filetype_register,filetype_register>> +
-
-
-[big]#H# :: 
-   <<index_HOUR,HOUR>> +
-
-
-[big]#I# :: 
-   <<index_inputfile_add,inputfile_add>> +
-
-
-[big]#K# :: 
-   <<index_KEY,KEY>> +
-
-
-[big]#L# :: 
-   <<index_LANGUAGE,LANGUAGE>> +
-
-  <<index_LINE,LINE>> +
-
-  <<index_LOCALDATE,LOCALDATE>> +
-
-
-[big]#M# :: 
-   <<index_MARKUP,MARKUP>> +
-
-  <<index_maybe_text,maybe_text>> +
-
-  <<index_maybe_type,maybe_type>> +
-
-  <<index_MINUTE,MINUTE>> +
-
-  <<index_MONTH,MONTH>> +
-
-  <<index_MONTHNAME,MONTHNAME>> +
-
-
-[big]#N# :: 
-   <<index_NIL,NIL>> +
-
-  <<index_NL,NL>> +
-
-
-[big]#O# :: 
-   <<index_OP,OP>> +
-
-  <<index_operator_register,operator_register>> +
-
-
-[big]#P# :: 
-   <<index_pattern_escape,pattern_escape>> +
-
-  <<index_postprocessor_register,postprocessor_register>> +
-
-  <<index_PRE,PRE>> +
-
-  <<index_preprocessor_register,preprocessor_register>> +
-
-
-[big]#R# :: 
-   <<index_request,request>> +
-
-
-[big]#S# :: 
-   <<index_SECTION,SECTION>> +
-
-  <<index_section_append,section_append>> +
-
-  <<index_section_concat,section_concat>> +
-
-  <<index_SOURCE,SOURCE>> +
-
-  <<index_strsubst,strsubst>> +
-
-
-[big]#T# :: 
-   <<index_TABLE,TABLE>> +
-
-  <<index_TEXT,TEXT>> +
-
-  <<index_to_table,to_table>> +
-
-  <<index_trace,trace>> +
-
-
-[big]#W# :: 
-   <<index_warn,warn>> +
-
-
-[big]#Y# :: 
-   <<index_YEAR,YEAR>> +
-
-
 

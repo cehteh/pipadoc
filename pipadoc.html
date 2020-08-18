@@ -1269,12 +1269,76 @@ assist the test suite. This is a good starting point for writing your own config
 <div class="paragraph"><p>This configfile supports <em>text</em> and <em>asciidoc</em> back ends.</p></div>
 <div class="sect3">
 <h4 id="_preprocessors_2">Preprocessors</h4>
+<div class="ulist"><ul>
+<li>
+<p>
+Ignore any line which ends in <em>NODOC</em>.
+</p>
+</li>
+<li>
+<p>
+Replace <em>&lt;STRING&gt;</em> in pipadoc comments with the first literal doublequoted string from the code.
+   Lifts string literals from sourcecode to documentation. The doublequotes are removed.
+</p>
+</li>
+<li>
+<p>
+Automatic generation of documentation for Lua functions.
+  Generates an index entry and a prototype header from an one line function definition
+</p>
+</li>
+<li>
+<p>
+When GLOBAL.ISSUES is defined, generate formatted lists for doc comments in
+  WIP/FIXME/TODO/PLANNED/DONE sections.
+  When GLOBAL.GIT is defined (<em>-D GIT</em>) then each such item includes information gathered
+  from the git commit which touched that line the last.
+  When GLOBAL.NOBUG is defined it reaps <a href="http://nobug.pipapo.org">NoBug</a> annotations from
+  C source files as well.
+</p>
+</li>
+</ul></div>
 </div>
 <div class="sect3">
 <h4 id="_postprocessors_2">Postprocessors</h4>
+<div class="ulist"><ul>
+<li>
+<p>
+Keep track of original file:line as asciidoc comments in the output.
+  Disable this tracking when a doc comment starts with <em>NOORIGIN</em> and
+  re-enable it with a doc comment starting with <em>ORGIN</em>.
+</p>
+</li>
+</ul></div>
 </div>
 <div class="sect3">
 <h4 id="_substitutions_macros">Substitutions Macros</h4>
+<div class="ulist"><ul>
+<li>
+<p>
+<em>{LUA_FNDEF}</em> Lifts a Lua function definition to the documentation text.
+  Used by the Lua documentation preprocessor.
+</p>
+</li>
+<li>
+<p>
+<em>{VARDEF name}</em> generates a header and index entry for <em>name</em>.
+  Used for documentaton of GLOBAL and CONTEXT variables (pipadoc&#8217;s own documentation).
+  Defined for asciidoc and text backends.
+</p>
+</li>
+<li>
+<p>
+<em>{INDEX_ENTRY name}</em> Entry in the index that refers back to <em>name</em>.
+</p>
+</li>
+<li>
+<p>
+<em>{GIT_BLAME}</em> Insert a <em>git blame</em> report about the current line.
+  Refer to the source for details.
+</p>
+</li>
+</ul></div>
 </div>
 </div>
 <div class="sect2">
@@ -2660,7 +2724,7 @@ Christian Thäter &lt;<a href="mailto:ct@pipapo.org">ct@pipapo.org</a>&gt; for i
 <div id="footer">
 <div id="footer-text">
 Last updated
- 2020-08-18 02:57:08 CEST
+ 2020-08-18 18:45:13 CEST
 </div>
 </div>
 </body>
