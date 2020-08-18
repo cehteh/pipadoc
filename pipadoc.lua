@@ -922,6 +922,7 @@ local preprocessors = {}
 function preprocessor_register(langpat, preprocess) --: register a preprocessor
   --:   langpat:::
   --:     Register preprocessor to all filetypes whose mnemonic matches 'langpat'.
+  --:     Matches all languages when 'nil'.
   --:   preprocess:::
   --:     The preprocessor to register. Can be one of:
   --:     `function (context) ... end` ::::
@@ -933,9 +934,9 @@ function preprocessor_register(langpat, preprocess) --: register a preprocessor
   --:     +\{pattern, repl [, n]\}+ ::::
   --:       Generates a function calling 'context.SOURCE:gsub(pattern, repl [, n])' for preprocessing.
   --:
-  --PLANNED: maybe_type() -> nil == for all
   --PLANNED: langpat as list of patterns
-  assert_type(langpat, "string")
+  maybe_type(langpat, "string")
+  langpat = langpat or ""
   dbg(nil, "register preprocessor:", langpat, preprocess)
 
   if type(preprocess) == "table" then
@@ -1026,6 +1027,7 @@ local postprocessors = {}
 function postprocessor_register(markuppat, postprocess) --: register a postprocessor
   --:   markuppat:::
   --:     Register postprocessor to all markups whose name matches 'markuppat'.
+  --:     Matches all markups when 'nil'.
   --:   postprocess:::
   --:     The postprocessor to register. Can be one of:
   --:     `function (context) ... end` ::::
@@ -1037,11 +1039,10 @@ function postprocessor_register(markuppat, postprocess) --: register a postproce
   --:     +\{pattern, repl [, n]\}+ ::::
   --:       Generates a function calling 'context.TEXT:gsub(pattern, repl [, n])' for postprocessing.
   --:
-  --PLANNED: maybe_type() -> nil == for all
   --PLANNED: markuppat as list of patterns
-  assert_type(markuppat, "string")
+  maybe_type(markuppat, "string")
+  markuppat = markuppat or ""
   dbg(nil, "register postprocessor:", markuppat, postprocess)
-
 
   if type(postprocess) == "table" then
     local params = postprocess

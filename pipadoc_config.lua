@@ -1,6 +1,6 @@
 --shipped_config_pre:
 --: * Ignore any line which ends in 'NODOC'.
-preprocessor_register ("",
+preprocessor_register (nil,
                        function (context)
                          if context.SOURCE:match("NODOC$") then
                            return false
@@ -14,7 +14,7 @@ preprocessor_register ("",
 --shipped_config_pre:
 --: *  Replace '<STRING>' in pipadoc comments with the first literal doublequoted string from the code.
 --:    Lifts string literals from sourcecode to documentation. The doublequotes are removed.
-preprocessor_register ("",
+preprocessor_register (nil,
                        {
                          '^([^"]*"([^"]*)".*%p+%w*:%w*)(.*)<STRING>(.*)',
                          '%1%3%2%4',
@@ -165,7 +165,7 @@ local file
 local line=0
 local origin=true
 
-postprocessor_register ("",
+postprocessor_register (nil,
                         function (context)
                           if context.TEXT:match("^NOORIGIN") then
                             origin=false
@@ -175,7 +175,7 @@ postprocessor_register ("",
                         end
 )
 
-postprocessor_register ("",
+postprocessor_register (nil,
                         function (context)
                           if context.TEXT:match("^ORIGIN") then
                             origin=true
@@ -273,7 +273,7 @@ if GLOBAL.NOBUG then
 end
 
 if GLOBAL.ISSUES then
-  preprocessor_register ("",
+  preprocessor_register (nil,
                          function (context)
                            for _,word in ipairs(issues_keywords) do
                              for _,comment in ipairs(context.COMMENTS_TABLE) do
