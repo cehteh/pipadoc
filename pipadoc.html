@@ -784,15 +784,10 @@ syntax should be straightforward and is suggested for any projects using pipadoc
 <div class="sectionbody">
 <div class="paragraph"><p>Pipadoc is single Lua source file <code>pipadoc.lua</code> which is portable among most Lua versions
 (PUC Lua 5.1, 5.2, 5.3, Luajit, Ravi). It ships with a <code>pipadoc.install</code> shell script which
-figures a  suitable Lua version out and installs <code>pipadoc.lua</code> as <code>pipadoc</code> in a given
-directory or the current directory by default.</p></div>
+figures a suitable Lua version out and installs <code>pipadoc.lua</code> as <code>pipadoc</code> in a given
+directory (the current directory by default).</p></div>
 <div class="paragraph"><p>There are different ways how this can be used in a project:</p></div>
 <div class="ulist"><ul>
-<li>
-<p>
-One can rely on a pipadoc installed in $PATH and just call that from the build tool chain
-</p>
-</li>
 <li>
 <p>
 When a installed Lua version is known from the build tool chain one can include the
@@ -801,8 +796,13 @@ When a installed Lua version is known from the build tool chain one can include 
 </li>
 <li>
 <p>
-One can ship the <code>pipadoc.lua</code> and <code>pipadoc.install</code> and do a local install in the build
-  directory and use this pipadoc thereafter
+One can rely on a pipadoc installed in <em>$PATH</em> and just call that from the build tool chain
+</p>
+</li>
+<li>
+<p>
+One could ship the <code>pipadoc.lua</code> and <code>pipadoc.install</code> and do a local install in the build
+  directory and use this pipadoc thereafter.
 </p>
 </li>
 </ul></div>
@@ -811,6 +811,8 @@ One can ship the <code>pipadoc.lua</code> and <code>pipadoc.install</code> and d
 <div class="sect1">
 <h2 id="_usage">Usage</h2>
 <div class="sectionbody">
+<div class="paragraph"><p>Pipadoc is called with options and all input files. It may read a configuration file. When
+generating output it is either send to <em>stdout</em> or saved as a given output file.</p></div>
 <div class="literalblock">
 <div class="content">
 <pre><code> pipadoc [options...] [inputs..]
@@ -852,7 +854,7 @@ One can ship the <code>pipadoc.lua</code> and <code>pipadoc.install</code> and d
 
      -a, --alias &lt;pattern&gt; &lt;as&gt;
                          aliases filenames to another filetype.
-                         force example, treat .install files as shell files:
+                         for example, treat .install files as shell files:
                           --alias '(.*)%.install' '%1.sh'
 
      -D, --define &lt;name&gt;[=&lt;value&gt;]
@@ -880,16 +882,66 @@ One can ship the <code>pipadoc.lua</code> and <code>pipadoc.install</code> and d
 denominator between almost all programming languages.</p></div>
 <div class="paragraph"><p>To make a line comment recognized as pipadoc comment it needs to be followed immediately
 by a operator sequence. Which in the simplest case is just a single punctuation character.
-One can give a section name left of the operator and an argument/key right of the operator.</p></div>
-<div class="paragraph"><p>To add special functionality and extend the semantics one can define pre and post processors.</p></div>
-<div class="paragraph"><p>Preprocessors are defined per programming language and process all source lines.</p></div>
-<div class="paragraph"><p>Postprocessors are defined per output markup and process every line to be outputed.</p></div>
-<div class="paragraph"><p>Finally there is a string substitution/template engine which processes text in curly braces.</p></div>
+These operator sequences can define the section to which this comment belongs to.</p></div>
+<div class="paragraph"><p>To add special functionality and extend the semantics one can define pre and post processors.
+Preprocessors are defined per input programming language and process all source lines. They can
+modify the source arbitrary before pipadoc does the parsing. This allows to generate completely
+new content. Lift parts on the source code side over to the documentation and generate
+additional information such as indices and glossaries.
+Postprocessors are defined for output markup and process every line in output order. The allow
+to augment output in a markup specific way.</p></div>
+<div class="paragraph"><p>There is a string substitution/template engine which can processes text.</p></div>
+<div class="sect2">
+<h3 id="_example">Example</h3>
+<div class="paragraph"><p>Without further ado, here is a slightly terse example showing pipadoc documentation on a
+shell script. For a more complex example one could look at <em>pipadoc.lua</em> itself. The exact
+pipadoc syntax is described in the next section.</p></div>
+<div class="listingblock">
+<div class="title">An example document (example.sh)</div>
+<div class="content">
+<pre><code>#!/bin/sh
+#: here the default section is 'example', derived from 'example.sh'
+#oneline:o this is appended to the section 'oneline' under key 'o'
+#: back to the 'example' section
+#newname:
+#: this starts a new section block named 'newname'
+#oneline:a this is appended to the section 'oneline' under key 'a'
+#MAIN:
+#: Assemble the document
+#: first the 'newname'
+#=newname
+#: then 'example'
+#=example
+#: and finally 'oneline' alphabetically sorted by keys
+#@oneline</code></pre>
+</div></div>
+<div class="paragraph"><p>processed by pipadoc</p></div>
+<div class="literalblock">
+<div class="content">
+<pre><code>lua pipadoc.lua -- example.sh</code></pre>
+</div></div>
+<div class="paragraph"><p>Will result in</p></div>
+<div class="listingblock">
+<div class="content">
+<pre><code>Assemble the document
+first the 'newname'
+this starts a new section block named 'newname'
+then 'example'
+here the default section is 'example', derived from 'example.sh'
+back to the 'example' section
+and finally 'oneline' alphabetically sorted by keys
+this is appended to the section 'oneline' under key 'a'
+this is appended to the section 'oneline' under key 'o'</code></pre>
+</div></div>
+</div>
 <div class="sect2">
 <h3 id="_syntax">Syntax</h3>
-<div class="paragraph"><p>Any <em>line-comment</em> of the programming language directly (without spaces) followed by a
-optional alphanumeric section name, followed by an operator, followed by an optional
-argument. Only lines qualify this syntax are processed as pipadoc documentation.</p></div>
+<div class="paragraph"><div class="title">In short:</div><p>A pipadoc comment is any <em>line-comment</em> of the programming language directly (without spaces)
+followed by a optional alphanumeric section name which may have a sorting key appended by
+a dot, followed by an operator, followed by an optional argument. Possibyl followed by the
+documentation text itself.</p></div>
+<div class="paragraph"><p>Only lines qualify this syntax are processed as pipadoc documentation. But preprocessors run
+before the parsing is done and may translate otherwise non pipadoc sourcecode into documentation.</p></div>
 <div class="literalblock">
 <div class="title">The formal syntax looks like:</div>
 <div class="content">
@@ -919,15 +971,12 @@ argument. Only lines qualify this syntax are processed as pipadoc documentation.
 <td class="content">Pipadoc does not know anything except the line comment characters about the source
            programming languages syntax. This includes literal strings and any other
            syntactic form which may look like a line comment, but is not. Such lines need to
-           be dropped by a preprocessor to make them unambiguous.</td>
+           be dropped by a preprocessor to make them unambiguous.
+           There config shipped with pipadoc gives an example to drop a line when it end with
+          "NODOC".</td>
 </tr></table>
 </div>
-<div class="paragraph"><p>There config shipped with pipadoc gives an example to drop a line when it end with "NODOC".</p></div>
-<div class="listingblock">
-<div class="content">
-<pre><code>const char* example = "//MAIN: this is a C string and not documentation"; //NODOC</code></pre>
-</div></div>
-<div class="paragraph"><p>Documentation can be either blocked or oneline.</p></div>
+<div class="paragraph"><p>Documentation can be either in blocks or single lines.</p></div>
 <div class="dlist"><dl>
 <dt class="hdlist1">
 Block
@@ -941,7 +990,7 @@ Block
 </p>
 </dd>
 <dt class="hdlist1">
-Oneline
+One Line
 </dt>
 <dd>
 <p>
@@ -952,6 +1001,21 @@ Oneline
 </dd>
 </dl></div>
 </div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_sections_and_keys">Sections and Keys</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>Text in pipadoc is stored in named <em>sections</em>. Text can be associated with some
+alphanumeric key under that section. This enables later sorting for indices and glossaries.</p></div>
+<div class="paragraph"><p>One-line sections are defined when a section and maybe a key is followed by documentation
+text. Block sections start with the section definition but no documentation text on the same
+line. A block stays active until the next block section definition. One-line doctext can be
+interleaved into Blocks.</p></div>
+<div class="paragraph"><p>The default block section name is the files name up, but excluding to the first dot.</p></div>
+<div class="paragraph"><p>Sections are later brought into the desired order by pasting them into a <em>toplevel</em> section.
+This default name for the <em>toplevel</em> section is <em>MAIN_{markup}</em> or if that does not exist
+just <em>MAIN</em>.</p></div>
 <div class="sect2">
 <h3 id="_order_of_operations">Order of operations</h3>
 <div class="paragraph"><p>Pipadoc reads all files line by line. and processes them in the following order:</p></div>
@@ -962,8 +1026,8 @@ Preprocessing
 <dd>
 <p>
   Preprocessors are Lua functions who may alter the entire content of a line before any
-  further processing. They get a <em>context</em> passed in with the <em>SOURCE</em> member containing
-  the line read from the input file.
+  further processing. They get a <em>context</em> table passed in with the <em>SOURCE</em> member
+  containing the line read from the input file.
 </p>
 </dd>
 <dt class="hdlist1">
@@ -971,11 +1035,11 @@ Parsing
 </dt>
 <dd>
 <p>
-  The line is broken down into it&#8217;s components and the operators processing function
-  will be called which is responsible for storing. The colon (<em>:</em>) operator also does a first
-  string substitution pass to expand variables. This strsubst is done in input order.
-  Macros may leverage this for additional state and may generate extra content like indices
-  and append that to the respective sections.
+  The line is broken down into its components and the operators processing function
+  will be called. The <em>:</em> and <em>+</em> operators do a first string substitution pass to
+  expand variables. This strsubst is done in input order.
+  String substitution macros may leverage this for additional state and may generate
+  extra content like indices and append that to the respective sections.
 </p>
 </dd>
 <dt class="hdlist1">
@@ -983,8 +1047,7 @@ Output Ordering
 </dt>
 <dd>
 <p>
-  The paste and sorting operators on the toplevel and included sections define the
-  order of the document.
+  The paste and sorting operators there define the section order of the document.
 </p>
 </dd>
 <dt class="hdlist1">
@@ -993,7 +1056,8 @@ Postprocessing
 <dd>
 <p>
   For each output context the postprocessors run in output order.
-  A final string substitution pass is applied in <em>output</em> order then.
+  Finally a last string substitution pass is applied in output order.
+  This pass can generate markup specific changes.
 </p>
 </dd>
 <dt class="hdlist1">
@@ -1016,63 +1080,9 @@ Report empty sections, Orphans and Doubletes
 </dd>
 </dl></div>
 <div class="paragraph"><p>It is important to know that reading happens only line by line, operations can not span
-lines. The processing steps may be stateful and thus preserve information for further
+lines. While Processing steps can be stateful and thus preserve information for further
 processing.</p></div>
 </div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_sections_and_keys">Sections and Keys</h2>
-<div class="sectionbody">
-<div class="paragraph"><p>Text in pipadoc is appended to named <em>sections</em>. Text can be associated with some
-alphanumeric key under that section. This enables later sorting for indices and glossaries.</p></div>
-<div class="paragraph"><p>Sections can be one line or span a block of lines.</p></div>
-<div class="paragraph"><p>One-line sections are defined when a section and maybe a key is followed by documentation
-text. Block sections start with the section definition but no documentation text on the same
-line. A block stays active until the next block section definition. One-line doctext can be
-interleaved into Blocks.</p></div>
-<div class="paragraph"><p>The default block section name is the files name up, but excluding to the first dot.</p></div>
-<div class="paragraph"><p>Sections are later brought into the desired order by pasting them into a <em>toplevel</em> section.
-just <em>MAIN</em>.</p></div>
-<div class="listingblock">
-<div class="title">An example document (example.sh)</div>
-<div class="content">
-<pre><code>#!/bin/sh
-#: here the default section is 'example', derived from 'example.sh'
-#oneline:o this is appended to the section 'oneline' under key 'o'
-#: back to the 'example' section
-#newname:
-#: this starts a new section block named 'newname'
-#oneline:a this is appended to the section 'oneline' under key 'a'
-#MAIN:
-#: Assemble the document
-#: first the 'newname'
-#=newname
-#: then 'example'
-#=example
-#: and finally 'oneline' alphabetically sorted by keys
-#@oneline</code></pre>
-</div></div>
-<div class="paragraph"><p>processed by pipadoc</p></div>
-<div class="literalblock">
-<div class="content">
-<pre><code>lua pipadoc.lua example.sh</code></pre>
-</div></div>
-<div class="paragraph"><p>Will result in</p></div>
-<div class="listingblock">
-<div class="content">
-<pre><code>Assemble the document
-first the 'newname'
-this starts a new section block named 'newname'
-then 'example'
-here the default section is 'example', derived from 'example.sh'
-back to the 'example' section
-and finally 'oneline' alphabetically sorted by keys
-this is appended to the section 'oneline' under key 'a'
-this is appended to the section 'oneline' under key 'o'</code></pre>
-</div></div>
-<div class="paragraph"><p>The pipadoc documentation you are just reading here is made and embedded in <em>pipadoc.lua</em>
-itself using <em>asciidoc</em> as markup. Refer to the source itself to see how it is done.</p></div>
 </div>
 </div>
 <div class="sect1">
@@ -1081,10 +1091,10 @@ itself using <em>asciidoc</em> as markup. Refer to the source itself to see how 
 <div class="paragraph"><p>Pipadoc needs to know about the syntax of line comments of the files it is reading.
 For this patterns are registered to be matched against the file name together with a
 list of line comment characters.</p></div>
-<div class="paragraph"><p>Definitions for a lot common programming languages are already included. For languages
+<div class="paragraph"><p>Definitions for a common programming languages are already included. For languages
 that support block comments the opening (but not the closing) commenting characters are
 registered as well. This allows one to define section blocks right away. But using the
-comment closing sequence right on the line will clobber the output, don&#8217;t do that!</p></div>
+comment closing sequence right on the line would clobber the output.</p></div>
 <div class="listingblock">
 <div class="title">Example in C</div>
 <div class="content">
@@ -1101,9 +1111,9 @@ comment closing sequence right on the line will clobber the output, don&#8217;t 
 </div></div>
 <div class="paragraph"><p>A special case is that when a line comment is defined as an empty string ("") then every
 line of a file is considered as documentation but no special operations apply. This is used
-for plain text documentation files. Which also uses the "PIPADOC:" keyword to enable special
+for plain text documentation files. These use the "PIPADOC:" keyword to enable special
 operations within text files.</p></div>
-<div class="paragraph"><p>New uncommon filetypes can be added from a config file with <em>filetype_register()</em>  or with
+<div class="paragraph"><p>New filetypes can be added from a config file with <em>filetype_register()</em>  or with
 the <em>--register</em> command-line option.</p></div>
 <div class="sect2">
 <h3 id="_programming_languages_supported_by_pipadoc">Programming languages supported by pipadoc</h3>
@@ -1146,6 +1156,15 @@ Textfiles, Pipadoc (<code>.pdoc</code>),
 
 Visual Basic,</p></div>
 </div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_markup_languages">Markup Languages</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>The core of pipadoc is completely agnostic about the markup used within the documentation strings.
+The <em>--markup</em> option only sets the <em>MARKUP</em> variable and output generation tries include the
+markup in the toplevel. Any further markup specific things are defined on postprocessors only.</p></div>
+<div class="paragraph"><p>The shipped configuration file comes with postprocessors for <em>asciidoc</em> and <em>text</em> markups.</p></div>
 </div>
 </div>
 <div class="sect1">
@@ -1203,7 +1222,7 @@ Visual Basic,</p></div>
 </dt>
 <dd>
 <p>
-  Generic Sorting operator. Takes a section name as argument and will paste section text
+  Generic sorting operator. Takes a section name as argument and will paste section text
   sorted by its keys.
 </p>
 </dd>
@@ -1224,24 +1243,29 @@ Visual Basic,</p></div>
 <div class="sect1">
 <h2 id="_configuration_file">Configuration File</h2>
 <div class="sectionbody">
-<div class="paragraph"><p>Pipadoc tries to load a configuration file on startup. By default it&#8217;s named
-<code>pipadoc_config.lua</code> in the current directory. This name can be changed by the <em>--config</em>
-option.</p></div>
+<div class="paragraph"><p>Pipadocs main objective is to scrape documentation comments from a project and generate
+output in desired order. Such an basic approach would be insufficient for many common cases.
+Thus pipadoc has pre and postprocessors and the strsubst engine to generate and modify
+documentation in an extensible way.</p></div>
+<div class="paragraph"><p>Pipadoc tries to load a configuration file on startup. By default it is named
+<code>pipadoc_config.lua</code> in the current directory. This name can be changed with the
+<em>--config</em> option.</p></div>
 <div class="paragraph"><p>The configuration file is used to define pre- and post- processors, define states
 for those, define custom operators and string substitution macros. It is loaded and
-executed as it own chunk and may only access the global variables (GLOBAL, CONTEXT) and
+executed as it own chunk and may only access the global variables and
 API functions described below.</p></div>
+<div class="paragraph"><p>Without a confuguration file none of these processors are defined any only few
+variables for the strsubst engine are set.</p></div>
 <div class="sect2">
 <h3 id="_preprocessors">Preprocessors</h3>
-<div class="paragraph"><p>One can register multiple preprocessors for filetypes. A preprocessor can modify any
-line prior it is parsed and further processed. By default pipadoc has no preprocessors
-defined. The user may define these in a config file.</p></div>
+<div class="paragraph"><p>One can register preprocessors for filetypes. A preprocessor can modify any line prior
+it is parsed and further processed.</p></div>
 <div class="paragraph"><p>Preprocessors are used to autogenerate documentation comments from code. Lifting
 parts of the code to the documentation side.</p></div>
 </div>
 <div class="sect2">
 <h3 id="_postprocessors">Postprocessors</h3>
-<div class="paragraph"><p>Postprocessors run at output generation time. They are registered per markup types.
+<div class="paragraph"><p>Postprocessors run at output generation time. They are registered per markup type.
 Processors are called in order of their definition.</p></div>
 <div class="paragraph"><p>They are used to augment the generated output with markup specific things.</p></div>
 </div>
@@ -1261,12 +1285,9 @@ characters can be escaped by them self.</p></div>
 </div>
 <div class="sect2">
 <h3 id="_example_configuration_file">Example Configuration File</h3>
-<div class="paragraph"><p>Pipadocs main objective is to scrape documentation comments from a project and generate
-output in desired order. Such an basic approach would be insufficient for many common cases.
-Thus pipadoc has facilities to generate and modify documentation in an extensible way.</p></div>
-<div class="paragraph"><p>Pipadoc itself comes with a configuration file for generating it&#8217;s own documentation and
+<div class="paragraph"><p>Pipadoc comes with a configuration file for generating it&#8217;s own documentation and
 assist the test suite. This is a good starting point for writing your own configuration.</p></div>
-<div class="paragraph"><p>This configfile supports <em>text</em> and <em>asciidoc</em> back ends.</p></div>
+<div class="paragraph"><p>This configuration file implements the features explained next.</p></div>
 <div class="sect3">
 <h4 id="_preprocessors_2">Preprocessors</h4>
 <div class="ulist"><ul>
@@ -1342,14 +1363,13 @@ Keep track of original file:line as asciidoc comments in the output.
 </div>
 </div>
 <div class="sect2">
-<h3 id="_dependencies">Dependencies</h3>
+<h3 id="_external_libraries">External Libraries</h3>
 <div class="paragraph"><p><em>pipadoc</em> does not depend on any external Lua libraries. Nevertheless modules can be loaded
 optionally to augment the behavior and provide extra features. Plugin-writers should
 use the <em>request()</em> function instead the Lua <em>require()</em>, falling back to simpler but usable
 functionality when some library is not available or call <em>die()</em> when a reasonable fallback
 won&#8217;t do it.</p></div>
-<div class="paragraph"><p>Pipadoc calls <em>request "luarocks.loader"</em> to make rocks modules available when
-installed.</p></div>
+<div class="paragraph"><p>Pipadoc already calls <em>request "luarocks.loader"</em> to make rocks modules available.</p></div>
 </div>
 </div>
 </div>
@@ -1359,7 +1379,7 @@ installed.</p></div>
 <div class="sect2">
 <h3 id="GLOBAL">Documentation Variables</h3>
 <div class="paragraph"><p>The <em>GLOBAL</em> and <em>GLOBAL_POST</em> Lua tables holds key/value pairs of variables
-with global definitions. These are used by the core and processors/<em>strsubst()</em>.
+with global definitions. These are used by the core, processors and string substitution.
 Simple string assignments can be set from the command line. Configuration files may define
 more complex Lua functions for string substitutions.</p></div>
 <div class="sect3">
@@ -1426,19 +1446,19 @@ more complex Lua functions for string substitutions.</p></div>
 </p>
 </dd>
 </dl></div>
-<div class="paragraph"><p>The <em>GLOBAL_POST</em> table is used for a final <em>strsubst()</em> pass after postprocessing.
-There are no values defined in <em>GLOBAL_POST</em>.</p></div>
+<div class="paragraph"><p>The <em>GLOBAL_POST</em> table is extends <em>GLOBAL</em> and is used for a final <em>strsubst()</em>
+pass after postprocessing. There are no values defined in <em>GLOBAL_POST</em> by pipadoc itself.</p></div>
 </div>
 </div>
 <div class="sect2">
 <h3 id="CONTEXT">The Context</h3>
 <div class="paragraph"><p>Processors, operators, string substitution calls and diagnostics get a context
-passed along. This context represents the state for the actual processed line plus
-everything that&#8217;s defined in GLOBAL.</p></div>
+passed along. This context represents the parsed line plus
+everything that&#8217;s defined at file level and in GLOBAL (or GLOBAL_POST).</p></div>
 <div class="paragraph"><p>In a few cases a fake-context in angle brackets is passed around for diagnostic functions.</p></div>
 <div class="sect3">
 <h4 id="_context_members">Context Members</h4>
-<div class="paragraph"><p>The following members are used/defined in <em>contexts</em>.</p></div>
+<div class="paragraph"><p>The following members are defined in <em>contexts</em>.</p></div>
 <div class="dlist"><dl>
 <dt class="hdlist1">
 <a id="index_ARG"></a><code>ARG</code>
@@ -1472,7 +1492,7 @@ everything that&#8217;s defined in GLOBAL.</p></div>
 <dd>
 <p>
   A Lua table with the all possible line comment character sequences
-  for this filetype. Already available at preprocessing time.
+  for this filetype. Available at preprocessing time.
 </p>
 </dd>
 <dt class="hdlist1">
@@ -1546,7 +1566,7 @@ everything that&#8217;s defined in GLOBAL.</p></div>
 </div>
 <div class="sect2">
 <h3 id="_exported_functions">Exported Functions</h3>
-<div class="paragraph"><p>pipadoc exports some functions for the use in pre/post processors from config files.</p></div>
+<div class="paragraph"><p>pipadoc exports global functions for the use in pre/post processors from config files.</p></div>
 <div class="sect3">
 <h4 id="_library_loading">Library Loading</h4>
 <div class="dlist"><dl>
@@ -1816,9 +1836,9 @@ linecommentseqs
 </div>
 <div class="sect3">
 <h4 id="_operators_2">Operators</h4>
-<div class="paragraph"><p>Operators have 2 functions associated. The first one is the processing function which
+<div class="paragraph"><p>Operators have 2 functions associated. The first one is the processing function that
 defines how a documentation comment gets stored. The second one is the generator function
-which will emits the documentation.</p></div>
+which will emits the documentation at output time.</p></div>
 <div class="dlist"><dl>
 <dt class="hdlist1">
 <a id="index_operator_register"></a> <code><strong>operator_register(char, procfunc, genfunc)</strong></code>
@@ -1842,7 +1862,7 @@ procfunc <code>function (context)</code>
 <dd>
 <p>
     a function which receives a CONTEXT table of the current line.
-    The procfunc processes and store the context in appropriate
+    The procfunc processes and stores the context in appropriate
     fashion.
 </p>
 </dd>
@@ -2094,7 +2114,7 @@ context
 </dt>
 <dd>
 <p>
- Register a new alias
+ Register a new filetype alias
 </p>
 </dd>
 <dt class="hdlist1">
@@ -2217,19 +2237,11 @@ postprocessor returned wrong type:
 </p>
 </dd>
 <dt class="hdlist1">
-ARG and KEY defined in operator <em>:</em>, using KEY only 
+ARG and KEY defined in store operator 
 </dt>
 <dd>
 <p>
- Operator <em>:</em> must either be <em>section:key</em> or <em>section.key:</em> but not <em>section.key:key</em>.
-</p>
-</dd>
-<dt class="hdlist1">
-ARG and KEY defined in operator <em>+</em>, using KEY only 
-</dt>
-<dd>
-<p>
- Operator <em>+</em> must either be <em>section+key</em> or <em>section.key\+</em> but not <em>section.key+key</em>.
+ The store operators <em>:</em> and <em>+</em> must either be <em>section&lt;op&gt;key</em> or <em>section.key&lt;op&gt;</em> but not <em>section.key&lt;op&gt;key</em>.
 </p>
 </dd>
 <dt class="hdlist1">
@@ -2335,7 +2347,7 @@ section multiple times used:
 </dt>
 <dd>
 <p>
- Section was pasted multiple times in the output.
+ Section was used multiple times in the output.
 </p>
 </dd>
 <dt class="hdlist1">
@@ -2383,7 +2395,7 @@ asciidoc -a toc pipadoc.txt
 # generate PDF
 a2x -L -k -v --dblatex-opts "-P latex.output.revhistory=0" pipadoc.txt</code></pre>
 </div></div>
-<div class="paragraph"><p>There is a <em>--make-doc</em> option which calls the above commands. For convenience</p></div>
+<div class="paragraph"><p>For convenience there is a <em>--make-doc</em> option which calls the above commands.</p></div>
 </div>
 </div>
 <div class="sect1">
@@ -2724,7 +2736,7 @@ Christian Thäter &lt;<a href="mailto:ct@pipapo.org">ct@pipapo.org</a>&gt; for i
 <div id="footer">
 <div id="footer-text">
 Last updated
- 2020-08-18 18:45:13 CEST
+ 2020-08-18 21:36:07 CEST
 </div>
 </div>
 </body>
