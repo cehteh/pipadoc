@@ -445,13 +445,14 @@ local options = {
     os.execute [[
         lua pipadoc.lua -m text pipadoc.lua pipadoc_config.lua -o README
         lua pipadoc.lua -m asciidoc pipadoc.lua pipadoc_config.lua -o pipadoc.txt
-        if test ! -e  pipadoc.html -o pipadoc.txt -nt pipadoc.html; then
-          asciidoc -a toc pipadoc.txt
-        fi
-        if test ! -e  pipadoc.pdf -o pipadoc.txt -nt pipadoc.pdf; then
-          a2x -L -k -v --dblatex-opts "-P latex.output.revhistory=0" pipadoc.txt
-        fi
+        asciidoc -a toc pipadoc.txt
     ]]
+
+    if GLOBAL.PDF then
+      os.execute [[
+        a2x -L -k -v --dblatex-opts "-P latex.output.revhistory=0" pipadoc.txt
+      ]]
+    end
   end,
 
   ["--issues"] = function (arg, i)
