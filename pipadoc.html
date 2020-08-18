@@ -737,7 +737,7 @@ asciidoc.install(2);
 <h1>pipadoc - Documentation extractor</h1>
 <span id="author">Christian Thaeter</span><br />
 <span id="email"><code>&lt;<a href="mailto:ct@pipapo.org">ct@pipapo.org</a>&gt;</code></span><br />
-<span id="revdate">17. August 2020</span>
+<span id="revdate">18. August 2020</span>
 <div id="toc">
   <div id="toctitle">Table of Contents</div>
   <noscript><p><b>JavaScript must be enabled in your browser to display the table of contents.</b></p></noscript>
@@ -903,7 +903,7 @@ argument. Only lines qualify this syntax are processed as pipadoc documentation.
 
 &lt;section&gt; ::= &lt;alphanumeric text including underscore&gt;
 
-&lt;operator&gt; ::= ":" | "=" | "@" | "$" | "#" | &lt;user defined operators&gt;
+&lt;operator&gt; ::= ":" | "+" | "=" | "@" | "$" | "#" | &lt;user defined operators&gt;
 
 &lt;key&gt; ::= &lt;alphanumeric text including underscore&gt;
 
@@ -1166,6 +1166,17 @@ Visual Basic,</p></div>
 </dl></div>
 <div class="dlist"><dl>
 <dt class="hdlist1">
+<code>+</code> 
+</dt>
+<dd>
+<p>
+  Concat operator. Like <em>:</em> but appends text at the last line instead creating a new line.
+  Note that some context information (file/line) gets lost as only the text will be appended.
+</p>
+</dd>
+</dl></div>
+<div class="dlist"><dl>
+<dt class="hdlist1">
 <code>=</code> 
 </dt>
 <dd>
@@ -1205,17 +1216,6 @@ Visual Basic,</p></div>
 <p>
   Numerical sorting operator. Takes a section name as argument and will paste section text
   numerically sorted by its keys.
-</p>
-</dd>
-</dl></div>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-<code>+</code> 
-</dt>
-<dd>
-<p>
-  Concat operator. Like <em>:</em> but appends text to the last line instead creating a new line.
-  Note that some context information (file/line) gets lost as only the text will be appended.
 </p>
 </dd>
 </dl></div>
@@ -1973,7 +1973,7 @@ context
 </dt>
 <dd>
 <p>
- Append data to the given section/key
+ Concat data to the given section/key
   to be called from preprocessors or macros which generate new content.
 </p>
 <div class="dlist"><dl>
@@ -2161,6 +2161,14 @@ ARG and KEY defined in operator <em>:</em>, using KEY only
 </p>
 </dd>
 <dt class="hdlist1">
+ARG and KEY defined in operator <em>+</em>, using KEY only 
+</dt>
+<dd>
+<p>
+ Operator <em>+</em> must either be <em>section+key</em> or <em>section.key\+</em> but not <em>section.key+key</em>.
+</p>
+</dd>
+<dt class="hdlist1">
 paste argument missing 
 </dt>
 <dd>
@@ -2190,14 +2198,6 @@ no such section with keys
 <dd>
 <p>
  The given section has no key entries.
-</p>
-</dd>
-<dt class="hdlist1">
-ARG and KEY defined in operator <em>+</em>, using KEY only 
-</dt>
-<dd>
-<p>
- Operator <em>+</em> must either be <em>section+key</em> or <em>section.key\+</em> but not <em>section.key+key</em>.
 </p>
 </dd>
 <dt class="hdlist1">
@@ -2660,7 +2660,7 @@ Christian Thäter &lt;<a href="mailto:ct@pipapo.org">ct@pipapo.org</a>&gt; for i
 <div id="footer">
 <div id="footer-text">
 Last updated
- 2020-08-17 22:16:19 CEST
+ 2020-08-18 02:57:08 CEST
 </div>
 </div>
 </body>

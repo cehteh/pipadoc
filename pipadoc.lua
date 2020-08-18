@@ -806,7 +806,7 @@ function section_append(section, key, context) --: Append data to the given sect
   end
 end
 
-function section_concat(section, key, context) --: Append data to the given section/key
+function section_concat(section, key, context) --: Concat data to the given section/key
   --:   to be called from preprocessors or macros which generate new content.
   --:
   --:   section:::
@@ -1359,6 +1359,48 @@ local function setup()
     end
   )
 
+  --op_builtin:
+  --: `+` ::
+  --:   Concat operator. Like ':' but appends text at the last line instead creating a new line.
+  --:   Note that some context information (file/line) gets lost as only the text will be appended.
+  --:
+  operator_register(
+    "+",
+    function (context)
+      if context.KEY and context.ARG then
+        warn(context, "ARG and KEY defined in operator '+', using KEY only") --cwarn: <STRING> ::
+        --cwarn:  Operator '\+' must either be 'section+key' or 'section.key\+' but not 'section.key+key'.
+        context.ARG = nil
+      end
+
+      if context.ARG then
+        context.KEY = context.ARG
+        context.ARG = nil
+      end
+
+      if context.TEXT ~= "" and (context.SECTION or context.KEY) then
+        --oneline
+        context.SECTION = context.SECTION or block_section
+        context.TEXT = strsubst(context, context.TEXT, 'escape')
+        section_concat(context.SECTION, context.KEY, context)
+      elseif context.TEXT == "" and (context.SECTION or context.KEY) then
+        --block head
+        block_section = context.SECTION or block_section
+        block_key = context.KEY
+        trace(context, "block: ", block_section.."."..(block_key or '-'))
+      else
+        --block cont
+        context.SECTION = context.SECTION or block_section
+        context.KEY = context.KEY or block_key
+        context.TEXT = strsubst(context, context.TEXT, 'escape')
+        section_concat(context.SECTION, context.KEY, context)
+      end
+    end,
+
+    function (context, output)
+      table.insert(output, context)
+    end
+  )
 
   --op_builtin:
   --: `=` ::
@@ -1452,49 +1494,6 @@ local function setup()
     "#",
     sortprocess,
     sortgenerate
-  )
-
-  --op_builtin:
-  --: `+` ::
-  --:   Concat operator. Like ':' but appends text to the last line instead creating a new line.
-  --:   Note that some context information (file/line) gets lost as only the text will be appended.
-  --:
-  operator_register(
-    "+",
-    function (context)
-      if context.KEY and context.ARG then
-        warn(context, "ARG and KEY defined in operator '+', using KEY only") --cwarn: <STRING> ::
-        --cwarn:  Operator '\+' must either be 'section+key' or 'section.key\+' but not 'section.key+key'.
-        context.ARG = nil
-      end
-
-      if context.ARG then
-        context.KEY = context.ARG
-        context.ARG = nil
-      end
-
-      if context.TEXT ~= "" and (context.SECTION or context.KEY) then
-        --oneline
-        context.SECTION = context.SECTION or block_section
-        context.TEXT = strsubst(context, context.TEXT, 'escape')
-        section_concat(context.SECTION, context.KEY, context)
-      elseif context.TEXT == "" and (context.SECTION or context.KEY) then
-        --block head
-        block_section = context.SECTION or block_section
-        block_key = context.KEY
-        trace(context, "block: ", block_section.."."..(block_key or '-'))
-      else
-        --block cont
-        context.SECTION = context.SECTION or block_section
-        context.KEY = context.KEY or block_key
-        context.TEXT = strsubst(context, context.TEXT, 'escape')
-        section_concat(context.SECTION, context.KEY, context)
-      end
-    end,
-
-    function (context, output)
-      table.insert(output, context)
-    end
   )
 
 
@@ -1861,6 +1860,7 @@ do
 
   gcontext_set "<postprocessing>"
   section_append = function () die(nil, "section_append() not available when postprocessing") end
+  section_concat = function () die(nil, "section_concat() not available when postprocessing") end
 
   --activate GLOBAL_POST for postprocessing
   setmetatable(GLOBAL, {__index = GLOBAL_POST})
@@ -2006,7 +2006,7 @@ end
 --:
 --: <section> ::= <alphanumeric text including underscore>
 --:
---: <operator> ::= ":" | "=" | "@" | "$" | "#" | <user defined operators>
+--: <operator> ::= ":" | "+" | "=" | "@" | "$" | "#" | <user defined operators>
 --:
 --: <key> ::= <alphanumeric text including underscore>
 --:

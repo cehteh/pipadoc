@@ -2,7 +2,7 @@ pipadoc - Documentation extractor
 =================================
 :author:   Christian Thaeter
 :email:    ct@pipapo.org
-:date:     17. August 2020
+:date:     18. August 2020
 
 
 [preface]
@@ -159,7 +159,7 @@ argument. Only lines qualify this syntax are processed as pipadoc documentation.
 
 <section> ::= <alphanumeric text including underscore>
 
-<operator> ::= ":" | "=" | "@" | "$" | "#" | <user defined operators>
+<operator> ::= ":" | "+" | "=" | "@" | "$" | "#" | <user defined operators>
 
 <key> ::= <alphanumeric text including underscore>
 
@@ -361,6 +361,10 @@ Operators define what is considered as pipadoc comment and how to assemble the r
   the `:` operator is processed as documentation. Later when generating the toplevel
   Section is used to paste all other documentation in proper order together.
 
+`+` ::
+  Concat operator. Like ':' but appends text at the last line instead creating a new line.
+  Note that some context information (file/line) gets lost as only the text will be appended.
+
 `=` ::
   Section paste operator. Takes a section name as argument and will paste that section in
   place.
@@ -376,10 +380,6 @@ Operators define what is considered as pipadoc comment and how to assemble the r
 `#` ::
   Numerical sorting operator. Takes a section name as argument and will paste section text
   numerically sorted by its keys.
-
-`+` ::
-  Concat operator. Like ':' but appends text to the last line instead creating a new line.
-  Note that some context information (file/line) gets lost as only the text will be appended.
 
 
 
@@ -753,7 +753,7 @@ anchor:index_section_append[] +*section_append(section, key, context)*+::
     The source line broken down into its components and additional pipadoc metadata
 
 anchor:index_section_concat[] +*section_concat(section, key, context)*+::
- Append data to the given section/key
+ Concat data to the given section/key
   to be called from preprocessors or macros which generate new content.
 
   section:::
@@ -813,6 +813,8 @@ postprocessor returned wrong type: ::
  postprocessor returned unsupported type (or nil).
 ARG and KEY defined in operator ':', using KEY only ::
  Operator ':' must either be 'section:key' or 'section.key:' but not 'section.key:key'.
+ARG and KEY defined in operator '+', using KEY only ::
+ Operator '\+' must either be 'section+key' or 'section.key\+' but not 'section.key+key'.
 paste argument missing ::
  Using the '=' operator without an argument.
 no such section ::
@@ -821,8 +823,6 @@ sort argument missing ::
  Using the '@', '$' or '#' operator without an argument.
 no such section with keys ::
  The given section has no key entries.
-ARG and KEY defined in operator '+', using KEY only ::
- Operator '\+' must either be 'section+key' or 'section.key\+' but not 'section.key+key'.
 can't load config file: ::
  The config file ('--config' option) could not be loaded.
 operator processing failed: ::
