@@ -2424,5 +2424,5 @@ end
 
 --- Local Variables:
 --- mode: lua
---- compile-command: "lua pipadoc.lua --issues --make-doc"
+--- compile-command: "lua pipadoc.lua --issues"
 --- End:
