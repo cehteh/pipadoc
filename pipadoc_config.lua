@@ -14,6 +14,7 @@ preprocessor_register (nil,
 --shipped_config_pre:
 --: *  Replace '<STRING>' in pipadoc comments with the first literal doublequoted string from the code.
 --:    Lifts string literals from sourcecode to documentation. The doublequotes are removed.
+--TODO: use COMMENTS_TABLE
 preprocessor_register (nil,
                        {
                          '^([^"]*"([^"]*)".*%p+%w*:%w*)(.*)<STRING>(.*)',
@@ -32,6 +33,7 @@ local hexstring
 
 preprocessor_register (nil,
                        function (context)
+                         --TODO: use COMMENTS_TABLE
                          local literal_string = context.SOURCE:match('^[^"]*"([^"]*)".*%p*[%w][%w_]*%.<HEXSTRING>%p')
 
                          if literal_string then

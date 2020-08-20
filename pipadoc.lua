@@ -97,7 +97,7 @@ local function assertx(flag, message)
   end
 end
 
-
+--PLANNED: make expected a list (to_table)
 function assert_type(var, expected) --: checks that the 'var' is of type 'expected'
   assertx(type(var) == expected, "type error: "..expected.." expected, got "..type(var))
   return var
@@ -926,7 +926,6 @@ local preprocessors = {}
 --: Preprocessors
 --: ^^^^^^^^^^^^^
 --:
---TODO: add a mnemonic name preprocessor_register(name, langpat, preprocess)
 function preprocessor_register(langpat, preprocess) --: register a preprocessor
   --:   langpat:::
   --:     Register preprocessor to all filetypes whose mnemonic matches 'langpat'.
@@ -1031,7 +1030,6 @@ local postprocessors = {}
 --: Postprocessors
 --: ^^^^^^^^^^^^^^
 --:
---TODO: add a mnemonic name postprocessor_register(name, markuppat, preprocess)
 function postprocessor_register(markuppat, postprocess) --: register a postprocessor
   --:   markuppat:::
   --:     Register postprocessor to all markups whose name matches 'markuppat'.
