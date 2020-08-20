@@ -2115,8 +2115,7 @@ end
 --:
 --=filetypes
 --:
---: Programming languages supported by pipadoc
---: ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+--: .Predefined Filetypes
 --:
 --@filetypes_builtin
 --:
@@ -2135,6 +2134,7 @@ end
 --: ---------
 --:
 --: Operators define what is considered as pipadoc comment and how to assemble the resulting document.
+--: The default operators either store text or paste (possibly sorted) text.
 --:
 --=op_builtin
 --:
@@ -2299,11 +2299,11 @@ end
 --:
 --:
 --: [appendix]
---: Common Warnings
---: ---------------
+--: Common Errors and Warnings
+--: --------------------------
 --:
---: Pipadoc emits warnings on problems. Even with warnings processing will go on but the output
---: may need some attention.
+--: Pipadoc emits warnings on problems. Even with warnings processing will usually go on but
+--: the output may need some attention.
 --: Warnings are suppressed with the '--quiet' option.
 --:
 --$cwarn

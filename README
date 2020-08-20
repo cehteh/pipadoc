@@ -338,8 +338,7 @@ New filetypes can be added from a config file with 'filetype_register()'  or wit
 the '--register' command-line option.
 
 
-Programming languages supported by pipadoc
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.Predefined Filetypes
 
 Autoconf, Automake,
 AWK,
@@ -377,6 +376,7 @@ Operators
 ---------
 
 Operators define what is considered as pipadoc comment and how to assemble the resulting document.
+The default operators either store text or paste (possibly sorted) text.
 
 `:` ::
   The documentation operator. Defines normal documentation text. Each pipadoc comment using
@@ -841,11 +841,11 @@ Used whenever preprocessors/macros need to generate new content.
 
 
 [appendix]
-Common Warnings
----------------
+Common Errors and Warnings
+--------------------------
 
-Pipadoc emits warnings on problems. Even with warnings processing will go on but the output
-may need some attention.
+Pipadoc emits warnings on problems. Even with warnings processing will usually go on but
+the output may need some attention.
 Warnings are suppressed with the '--quiet' option.
 
 alias pattern error ::
