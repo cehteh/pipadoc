@@ -168,6 +168,14 @@ function pattern_escape(s)  --: Escape all characters in string 's' so that it c
 end
 
 
+function string_tohex(s) --: Encode a string as sequence of 2-byte hex chars (useable as sorting key)
+  local ret = ""
+  for _, v in ipairs({string.byte(s, 1, #s)}) do
+    ret = ret..string.format ("%02x", v)
+  end
+  return ret
+end
+
 
 
 

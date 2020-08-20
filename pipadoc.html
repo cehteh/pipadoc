@@ -737,7 +737,7 @@ asciidoc.install(2);
 <h1>pipadoc - Documentation extractor</h1>
 <span id="author">Christian Thaeter</span><br />
 <span id="email"><code>&lt;<a href="mailto:ct@pipapo.org">ct@pipapo.org</a>&gt;</code></span><br />
-<span id="revdate">18. August 2020</span>
+<span id="revdate">20. August 2020</span>
 <div id="toc">
   <div id="toctitle">Table of Contents</div>
   <noscript><p><b>JavaScript must be enabled in your browser to display the table of contents.</b></p></noscript>
@@ -1895,6 +1895,7 @@ langpat
 <dd>
 <p>
     Register preprocessor to all filetypes whose mnemonic matches <em>langpat</em>.
+    Matches all languages when <em>nil</em>.
 </p>
 </dd>
 <dt class="hdlist1">
@@ -1962,6 +1963,7 @@ markuppat
 <dd>
 <p>
     Register postprocessor to all markups whose name matches <em>markuppat</em>.
+    Matches all markups when <em>nil</em>.
 </p>
 </dd>
 <dt class="hdlist1">
@@ -2099,6 +2101,14 @@ context
 <dd>
 <p>
  Escape all characters in string <em>s</em> so that it cane be used as verbatim pattern.
+</p>
+</dd>
+<dt class="hdlist1">
+<a id="index_string_tohex"></a> <code><strong>string_tohex(s)</strong></code>
+</dt>
+<dd>
+<p>
+ Encode a string as sequence of 2-byte hex chars (useable as sorting key)
 </p>
 </dd>
 <dt class="hdlist1">
@@ -2685,6 +2695,10 @@ Christian Thäter &lt;<a href="mailto:ct@pipapo.org">ct@pipapo.org</a>&gt; for i
 </div></div>
 <div class="literalblock">
 <div class="content">
+<pre><code>&lt;&lt;index_string_tohex,string_tohex&gt;&gt; +</code></pre>
+</div></div>
+<div class="literalblock">
+<div class="content">
 <pre><code>&lt;&lt;index_strsubst,strsubst&gt;&gt; +</code></pre>
 </div></div>
 <div class="dlist"><dl>
@@ -2736,7 +2750,7 @@ Christian Thäter &lt;<a href="mailto:ct@pipapo.org">ct@pipapo.org</a>&gt; for i
 <div id="footer">
 <div id="footer-text">
 Last updated
- 2020-08-18 21:36:07 CEST
+ 2020-08-20 04:23:14 CEST
 </div>
 </div>
 </body>

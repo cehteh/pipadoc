@@ -2,7 +2,7 @@ pipadoc - Documentation extractor
 =================================
 :author:   Christian Thaeter
 :email:    ct@pipapo.org
-:date:     18. August 2020
+:date:     20. August 2020
 
 
 [preface]
@@ -756,6 +756,7 @@ preprocessor_register(langpat, preprocess):
  register a preprocessor
   langpat:::
     Register preprocessor to all filetypes whose mnemonic matches 'langpat'.
+    Matches all languages when 'nil'.
   preprocess:::
     The preprocessor to register. Can be one of:
     `function (context) ... end` ::::
@@ -775,6 +776,7 @@ postprocessor_register(markuppat, postprocess):
  register a postprocessor
   markuppat:::
     Register postprocessor to all markups whose name matches 'markuppat'.
+    Matches all markups when 'nil'.
   postprocess:::
     The postprocessor to register. Can be one of:
     `function (context) ... end` ::::
@@ -818,6 +820,8 @@ Other functions
 
 pattern_escape(s):
  Escape all characters in string 's' so that it cane be used as verbatim pattern.
+string_tohex(s):
+ Encode a string as sequence of 2-byte hex chars (useable as sorting key)
 inputfile_add(filename):
  Add a 'filename' to the list of files to process
 alias_register(from, to):
