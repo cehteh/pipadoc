@@ -246,7 +246,7 @@ end
 -- debugging only
 function table_dump(context, p, t)
   for k,v in pairs(t) do
-    dbg(context, p,k,v)
+    dbg(context, p, k,v)
     if type(v) == 'table' then
       dump_table(context, p.."/"..k, v)
     end
@@ -1415,7 +1415,7 @@ local function setup()
     dbg(context, "sort:", context.OP)
     local section = sections[context.ARG]
 
-    if section and section.keys then
+    if section and #section.keys == 0 then
       output_sort(section, context.OP, output)
     else
       warn(context, "no keys in section", context.ARG) --cwarn.<HEXSTRING>: <STRING> ::
