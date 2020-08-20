@@ -63,7 +63,7 @@ preprocessor_register ("^lua$",
                          if fn then
                            dbg(context, "lua function", fn)
                            section_append("INDEX", fn:lower(),
-                                          context_make( context, {TEXT="{INDEX_ENTRY "..fn.."}"})
+                                          context_new( context, {TEXT="{INDEX_ENTRY "..fn.."}"})
                            )
                            context.FUNCTION = fn
                            context.FUNCTION_PROTO = proto
@@ -105,7 +105,7 @@ GLOBAL.VARDEF_text = function (context, arg)
   for ix in arg:gmatch("([^%s%p]*)[%p%s]*") do
     if #ix > 0 then
       section_append("INDEX", ix:lower(),
-                     context_make (context,{TEXT="{INDEX_ENTRY "..ix.."}"})
+                     context_new (context,{TEXT="{INDEX_ENTRY "..ix.."}"})
       )
     end
   end
@@ -118,7 +118,7 @@ GLOBAL.VARDEF_asciidoc = function (context, arg)
   for ix in arg:gmatch("([^%s%p]*)[%p%s]*") do
     if #ix > 0 then
       section_append("INDEX", ix:lower(),
-                     context_make (context,{TEXT="{INDEX_ENTRY "..ix.."}"})
+                     context_new (context,{TEXT="{INDEX_ENTRY "..ix.."}"})
       )
 
       anchors=anchors.."anchor:index_"..ix.."[]"
@@ -134,7 +134,7 @@ GLOBAL.VARDEF_orgmode = function (context, arg)
   for ix in arg:gmatch("([^%s%p]*)[%p%s]*") do
     if #ix > 0 then
       section_append("INDEX", ix:lower(),
-                     context_make (context,{TEXT="{INDEX_ENTRY "..ix.."}"})
+                     context_new (context,{TEXT="{INDEX_ENTRY "..ix.."}"})
       )
 
       anchors=anchors.."<<index_"..ix..">>"

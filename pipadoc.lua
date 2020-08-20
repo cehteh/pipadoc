@@ -1565,7 +1565,7 @@ local function file_alias(filename)
 end
 
 --api_various:
-function context_make(parent, new) --: Create a new context.
+function context_new(parent, new) --: Create a new context.
   --: Used whenever preprocessors/macros need to generate new content.
   --:   parent:::
   --:     The parent context to extend from.
@@ -1581,7 +1581,7 @@ local function file_process(file)
   -- filecontext is a partial context storing data
   -- of the current file processed
 
-  local filecontext = context_make(GLOBAL, {
+  local filecontext = context_new(GLOBAL, {
                                      FILE="<file_process>",
   })
 
@@ -1632,9 +1632,9 @@ local function file_process(file)
     --:source {VARDEF SOURCE}
     --:source   The line read from the input file, used for preprocessing and will be erased
     --:source   afterward preprocessing is done.
-    local context = context_make(filecontext, {
-                                   LINE = lineno,
-                                   SOURCE = line,
+    local context = context_new(filecontext, {
+                                  LINE = lineno,
+                                  SOURCE = line,
     })
 
 
