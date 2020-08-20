@@ -1304,6 +1304,14 @@ Replace <em>&lt;STRING&gt;</em> in pipadoc comments with the first literal doubl
 </li>
 <li>
 <p>
+Replaces <em>&lt;HEXSTRING&gt;</em> in a opspec key with the first literal doublequoted string from the code
+   converted to lowercase hexadecimal (useable for sorting including whitespace and punctuation).
+   When no literal doublequoted string exists in the code, then the last used hexadecimal
+   string is used. Used for sorting documentation by the lifted string literal.
+</p>
+</li>
+<li>
+<p>
 Automatic generation of documentation for Lua functions.
   Generates an index entry and a prototype header from an one line function definition
 </p>
@@ -2167,83 +2175,11 @@ may need some attention.
 Warnings are suppressed with the <em>--quiet</em> option.</p></div>
 <div class="dlist"><dl>
 <dt class="hdlist1">
-can&#8217;t load module: 
+alias pattern error 
 </dt>
 <dd>
 <p>
- <em>request()</em> failed to load a module.
-</p>
-</dd>
-<dt class="hdlist1">
-strsubst function failed: 
-</dt>
-<dd>
-<p>
- strsubst tried to call a custom function which failed.
-</p>
-</dd>
-<dt class="hdlist1">
-strsubst recursive expansion: 
-</dt>
-<dd>
-<p>
- cyclic substitution.
-</p>
-</dd>
-<dt class="hdlist1">
-strsubst no expansion: 
-</dt>
-<dd>
-<p>
- no substitution defined.
-</p>
-</dd>
-<dt class="hdlist1">
-unsupported preprocessor type 
-</dt>
-<dd>
-<p>
- Tried to <em>preprocessor_register()</em> something that is not a function or table.
-</p>
-</dd>
-<dt class="hdlist1">
-preprocessor failed: 
-</dt>
-<dd>
-<p>
- preprocessor function error.
-</p>
-</dd>
-<dt class="hdlist1">
-preprocessor returned wrong type: 
-</dt>
-<dd>
-<p>
- preprocessor returned unsupported type (or nil).
-</p>
-</dd>
-<dt class="hdlist1">
-unsupported postprocessor type 
-</dt>
-<dd>
-<p>
- Tried to <em>postprocessor_register()</em> something that is not a function or table.
-</p>
-</dd>
-<dt class="hdlist1">
-postprocessor failed: 
-</dt>
-<dd>
-<p>
- postprocessor function error.
-</p>
-</dd>
-<dt class="hdlist1">
-postprocessor returned wrong type: 
-</dt>
-<dd>
-<p>
- postprocessor returned unsupported type (or nil).
+ The pattern for a file alias is invalid.
 </p>
 </dd>
 <dt class="hdlist1">
@@ -2255,11 +2191,59 @@ ARG and KEY defined in store operator
 </p>
 </dd>
 <dt class="hdlist1">
-paste argument missing 
+can&#8217;t load config file 
 </dt>
 <dd>
 <p>
- Using the <em>=</em> operator without an argument.
+ The config file (<em>--config</em> option) could not be loaded.
+</p>
+</dd>
+<dt class="hdlist1">
+can&#8217;t load module 
+</dt>
+<dd>
+<p>
+ <em>request()</em> failed to load a module.
+</p>
+</dd>
+<dt class="hdlist1">
+failed to open 
+</dt>
+<dd>
+<p>
+ Output file could not be opened.
+</p>
+</dd>
+<dt class="hdlist1">
+file not found 
+</dt>
+<dd>
+<p>
+ A given file can not be opened (wrong path or typo?).
+</p>
+</dd>
+<dt class="hdlist1">
+generator failed 
+</dt>
+<dd>
+<p>
+ error in operators generator function.
+</p>
+</dd>
+<dt class="hdlist1">
+input file given twice 
+</dt>
+<dd>
+<p>
+ Ignored a file given multiple times for input.
+</p>
+</dd>
+<dt class="hdlist1">
+no keys in section 
+</dt>
+<dd>
+<p>
+ The given section has no key entries but should be sorted.
 </p>
 </dd>
 <dt class="hdlist1">
@@ -2271,55 +2255,55 @@ no such section
 </p>
 </dd>
 <dt class="hdlist1">
-sort argument missing 
+operator processing failed 
 </dt>
 <dd>
 <p>
- Using the <em>@</em>, <em>$</em> or <em>#</em> operator without an argument.
+ Error executing a operators processor.
 </p>
 </dd>
 <dt class="hdlist1">
-no such section with keys 
+paste argument missing 
 </dt>
 <dd>
 <p>
- The given section has no key entries.
+ Using the <em>=</em> operator without an argument.
 </p>
 </dd>
 <dt class="hdlist1">
-can&#8217;t load config file: 
+postprocessor failed 
 </dt>
 <dd>
 <p>
- The config file (<em>--config</em> option) could not be loaded.
+ Postprocessor function error.
 </p>
 </dd>
 <dt class="hdlist1">
-operator processing failed: 
+postprocessor returned wrong type 
 </dt>
 <dd>
 <p>
- error executing a operators processor.
+ Postprocessor returned unsupported type (or nil).
 </p>
 </dd>
 <dt class="hdlist1">
-file not found: 
+preprocessor failed 
 </dt>
 <dd>
 <p>
- A given File can not be opened (wrong path or typo?).
+ Preprocessor function error.
 </p>
 </dd>
 <dt class="hdlist1">
-unknown file type: 
+preprocessor returned wrong type 
 </dt>
 <dd>
 <p>
- The type of the given file was not recognized (see <a href="#_usage"><em>--register</em></a> option).
+ Preprocessor returned unsupported type (or nil).
 </p>
 </dd>
 <dt class="hdlist1">
-recursive paste: 
+recursive paste 
 </dt>
 <dd>
 <p>
@@ -2328,23 +2312,47 @@ recursive paste:
 </p>
 </dd>
 <dt class="hdlist1">
-generator failed: 
+section is empty 
 </dt>
 <dd>
 <p>
- error in operators generator function.
+ Tried to paste (<em>=</em>) an empty section.
 </p>
 </dd>
 <dt class="hdlist1">
-section is empty: 
+section is empty 
 </dt>
 <dd>
 <p>
- Using <em>=</em>, <em>@</em> or <em>#</em> on a section which has no data (under respective keys).
+ Trying to sort a section by keys yield zero results.
 </p>
 </dd>
 <dt class="hdlist1">
-section unused: 
+section key multiple times used 
+</dt>
+<dd>
+<p>
+ Section was used multiple times in the output (sorting operators).
+</p>
+</dd>
+<dt class="hdlist1">
+section key unused 
+</dt>
+<dd>
+<p>
+ Section with keys (numeric or alphabetic) was not used.
+</p>
+</dd>
+<dt class="hdlist1">
+section multiple times used 
+</dt>
+<dd>
+<p>
+ Section was used multiple times in the output.
+</p>
+</dd>
+<dt class="hdlist1">
+section unused 
 </dt>
 <dd>
 <p>
@@ -2353,35 +2361,67 @@ section unused:
 </p>
 </dd>
 <dt class="hdlist1">
-section multiple times used: 
+sort argument missing 
 </dt>
 <dd>
 <p>
- Section was used multiple times in the output.
+ Using the <em>@</em>, <em>$</em> or <em>#</em> operator without an argument.
 </p>
 </dd>
 <dt class="hdlist1">
-section key unused: 
+strsubst function failed 
 </dt>
 <dd>
 <p>
- Section with keys (numeric or alphabetic) was not used.
+ Tried to call a custom function from <em>strsubst()</em> which failed.
 </p>
 </dd>
 <dt class="hdlist1">
-section key multiple times used: 
+strsubst no expansion 
 </dt>
 <dd>
 <p>
- Section was used multiple times in the output (<em>@</em>, <em>$</em> or <em>#</em> operator).
+ No substitution defined. Braced expression left verbatim.
 </p>
 </dd>
 <dt class="hdlist1">
-Toplevel section undefined: 
+strsubst recursive expansion 
+</dt>
+<dd>
+<p>
+ Cyclic substitution is not allowed.  Braced expression left verbatim.
+</p>
+</dd>
+<dt class="hdlist1">
+toplevel section undefined 
 </dt>
 <dd>
 <p>
  The section used as root for the output generation is not defined.
+</p>
+</dd>
+<dt class="hdlist1">
+unknown file type 
+</dt>
+<dd>
+<p>
+ The type of the given file was not recognized (see <a href="#_usage"><em>--register</em></a> option).
+</p>
+</dd>
+<dt class="hdlist1">
+unsupported postprocessor type 
+</dt>
+<dd>
+<p>
+ Tried to <em>postprocessor_register()</em> something that is not a function or table.
+</p>
+</dd>
+<dt class="hdlist1">
+unsupported preprocessor type 
+</dt>
+<dd>
+<p>
+ Tried to <em>preprocessor_register()</em> something that is not a function or table.
 </p>
 </dd>
 </dl></div>
@@ -2750,7 +2790,7 @@ Christian Thäter &lt;<a href="mailto:ct@pipapo.org">ct@pipapo.org</a>&gt; for i
 <div id="footer">
 <div id="footer-text">
 Last updated
- 2020-08-20 04:23:14 CEST
+ 2020-08-20 14:11:11 CEST
 </div>
 </div>
 </body>

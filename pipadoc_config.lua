@@ -24,6 +24,33 @@ preprocessor_register (nil,
 
 
 --shipped_config_pre:
+--: *  Replaces '<HEXSTRING>' in a opspec key with the first literal doublequoted string from the code
+--:    converted to lowercase hexadecimal (useable for sorting including whitespace and punctuation).
+--:    When no literal doublequoted string exists in the code, then the last used hexadecimal
+--:    string is used. Used for sorting documentation by the lifted string literal.
+local hexstring
+
+preprocessor_register (nil,
+                       function (context)
+                         local literal_string = context.SOURCE:match('^[^"]*"([^"]*)".*%p*[%w][%w_]*%.<HEXSTRING>%p')
+
+                         if literal_string then
+                           hexstring = string_tohex(literal_string:lower())
+                         end
+
+                         if context.SOURCE:match('^.*%p*[%w][%w_]*%.<HEXSTRING>%p') then
+                           return context.SOURCE:gsub('^(.*%p*[%w][%w_]*%.)<HEXSTRING>(%p)',
+                                                      "%1"..hexstring.."%2",
+                                                      1
+                           )
+                         end
+
+                         return true
+                         end
+)
+
+
+--shipped_config_pre:
 --: * Automatic generation of documentation for Lua functions.
 --:   Generates an index entry and a prototype header from an one line function definition
 preprocessor_register ("^lua$",

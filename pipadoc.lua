@@ -548,8 +548,8 @@ function request(name) --: try to load optional modules
     dbg(nil, "loaded:", name, handle._VERSION)
     return handle
   else
-    warn(nil, "can't load module:", name) --cwarn: <STRING> ::
-    --cwarn:  'request()' failed to load a module.
+    warn(nil, "can't load module"..":", name) --cwarn.<HEXSTRING>: <STRING> ::
+    --cwarn.<HEXSTRING>:  'request()' failed to load a module.
     return nil
   end
 end
@@ -680,8 +680,8 @@ function strsubst(context, str, escape) --: substitute text
                             if ok then
                               ret = tostring(result)
                             else
-                              warn(context, "strsubst function failed:", var, result) --cwarn: <STRING> ::
-                              --cwarn:  strsubst tried to call a custom function which failed.
+                              warn(context, "strsubst function failed"..":", var, result) --cwarn.<HEXSTRING>: <STRING> ::
+                              --cwarn.<HEXSTRING>:  Tried to call a custom function from 'strsubst()' which failed.
                             end
                           else
                             ret = tostring(var)..arg
@@ -689,13 +689,13 @@ function strsubst(context, str, escape) --: substitute text
                           ret = strsubst_intern(ret)
                           sofar[var] = nil
                         else
-                          warn(context, "strsubst recursive expansion:", var)  --cwarn: <STRING> ::
-                          --cwarn:  cyclic substitution.
+                          warn(context, "strsubst recursive expansion"..":", var)  --cwarn.<HEXSTRING>: <STRING> ::
+                          --cwarn.<HEXSTRING>:  Cyclic substitution is not allowed.  Braced expression left verbatim.
                         end
                       else
                         if escape == 'unescape' and not ret:match "^{__.*__}$" then
-                          warn(context, "strsubst no expansion:", capture)  --cwarn: <STRING> ::
-                          --cwarn:  no substitution defined.
+                          warn(context, "strsubst no expansion"..":", capture)  --cwarn.<HEXSTRING>: <STRING> ::
+                          --cwarn.<HEXSTRING>:  No substitution defined. Braced expression left verbatim.
                         end
                       end
 
@@ -961,8 +961,8 @@ function preprocessor_register(langpat, preprocess) --: register a preprocessor
   if type(preprocess) == "function" then
     table.insert(preprocessors, {pattern=langpat, preprocessor=preprocess})
   else
-    warn(nil, "unsupported preprocessor type") --cwarn: <STRING> ::
-    --cwarn:  Tried to 'preprocessor_register()' something that is not a function or table.
+    warn(nil, "unsupported preprocessor type") --cwarn.<HEXSTRING>: <STRING> ::
+    --cwarn.<HEXSTRING>:  Tried to 'preprocessor_register()' something that is not a function or table.
   end
 end
 
@@ -996,8 +996,8 @@ local function preprocessors_run(preprocessors, context)
     for i=1,#preprocessors do
       local ok,result = pcall(preprocessors[i], context)
       if not ok then
-        warn(context, "preprocessor failed:", result) --cwarn: <STRING> ::
-        --cwarn:  preprocessor function error.
+        warn(context, "preprocessor failed"..":", result) --cwarn.<HEXSTRING>: <STRING> ::
+        --cwarn.<HEXSTRING>:  Preprocessor function error.
         --PLANNED: preprocessors may expand to multiple lines? return table
       elseif type(result) == 'string' then
         trace(context, "preprocessed:", context.SOURCE, "->", result)
@@ -1009,8 +1009,8 @@ local function preprocessors_run(preprocessors, context)
       elseif result == true then
         -- NOP
       else
-        warn(context, "preprocessor returned wrong type:", preprocessors[i], type(result)) --cwarn: <STRING> ::
-        --cwarn:  preprocessor returned unsupported type (or nil).
+        warn(context, "preprocessor returned wrong type"..":", preprocessors[i], type(result)) --cwarn.<HEXSTRING>: <STRING> ::
+        --cwarn.<HEXSTRING>:  Preprocessor returned unsupported type (or nil).
       end
     end
   end
@@ -1066,8 +1066,8 @@ function postprocessor_register(markuppat, postprocess) --: register a postproce
   if type(postprocess) == "function" then
     table.insert(postprocessors, {pattern=markuppat, postprocessor=postprocess})
   else
-    warn(nil, "unsupported postprocessor type") --cwarn: <STRING> ::
-    --cwarn:  Tried to 'postprocessor_register()' something that is not a function or table.
+    warn(nil, "unsupported postprocessor type") --cwarn.<HEXSTRING>: <STRING> ::
+    --cwarn.<HEXSTRING>:  Tried to 'postprocessor_register()' something that is not a function or table.
   end
 end
 
@@ -1089,8 +1089,8 @@ local function postprocessors_run(context)
   for i=1,#active_postprocessors do
     local ok, result = pcall(active_postprocessors[i], context)
     if not ok then
-      warn(context, "postprocessor failed:", result) --cwarn: <STRING> ::
-      --cwarn:  postprocessor function error.
+      warn(context, "postprocessor failed"..":", result) --cwarn.<HEXSTRING>: <STRING> ::
+      --cwarn.<HEXSTRING>:  Postprocessor function error.
       --PLANNED: postprocessors may expand to multiple lines? return table
     elseif type(result) == 'string' then
       trace(context, "postprocessed:", context.TEXT, "->", result)
@@ -1102,8 +1102,8 @@ local function postprocessors_run(context)
     elseif result == true then
       -- NOP
     else
-      warn(context, "postprocessor returned wrong type:", active_postprocessors[i], type(result)) --cwarn: <STRING> ::
-      --cwarn:  postprocessor returned unsupported type (or nil).
+      warn(context, "postprocessor returned wrong type"..":", active_postprocessors[i], type(result)) --cwarn.<HEXSTRING>: <STRING> ::
+      --cwarn.<HEXSTRING>:  Postprocessor returned unsupported type (or nil).
     end
   end
 
@@ -1295,8 +1295,8 @@ local function setup()
     ":",
     function (context)
       if context.KEY and context.ARG then
-        warn(context, "ARG and KEY defined in store operator") --cwarn: <STRING> ::
-        --cwarn:  The store operators ':' and '+' must either be 'section<op>key' or 'section.key<op>' but not 'section.key<op>key'.
+        warn(context, "ARG and KEY defined in store operator") --cwarn.<HEXSTRING>: <STRING> ::
+        --cwarn.<HEXSTRING>:  The store operators ':' and '+' must either be 'section<op>key' or 'section.key<op>' but not 'section.key<op>key'.
         context.ARG = nil
       end
 
@@ -1384,8 +1384,8 @@ local function setup()
       if context.ARG then
         section_append(context.SECTION, context.KEY or block_key, context)
       else
-        warn(context, "paste argument missing")  --cwarn: <STRING> ::
-        --cwarn:  Using the '=' operator without an argument.
+        warn(context, "paste argument missing")  --cwarn.<HEXSTRING>: <STRING> ::
+        --cwarn.<HEXSTRING>:  Using the '=' operator without an argument.
       end
     end,
 
@@ -1395,8 +1395,8 @@ local function setup()
       if sections[context.ARG] then
         output_paste(sections[context.ARG], output)
       else
-        warn(context, "no such section", context.ARG) --cwarn: <STRING> ::
-        ---cwarn:  The given section is not defined.
+        warn(context, "no such section", context.ARG) --cwarn.<HEXSTRING>: <STRING> ::
+        ---cwarn.<HEXSTRING>:  The given section is not defined.
       end
     end
   )
@@ -1408,8 +1408,8 @@ local function setup()
     if context.ARG then
       section_append(context.SECTION, context.KEY, context)
     else
-      warn(context, "sort argument missing") --cwarn: <STRING> ::
-      ---cwarn:  Using the '@', '$' or '#' operator without an argument.
+      warn(context, "sort argument missing") --cwarn.<HEXSTRING>: <STRING> ::
+      ---cwarn.<HEXSTRING>:  Using the '@', '$' or '#' operator without an argument.
     end
   end
 
@@ -1420,8 +1420,8 @@ local function setup()
     if section and section.keys then
       output_sort(section, context.OP, output)
     else
-      warn(context, "no such section with keys", context.ARG) --cwarn: <STRING> ::
-      ---cwarn:  The given section has no key entries.
+      warn(context, "no keys in section", context.ARG) --cwarn.<HEXSTRING>: <STRING> ::
+      ---cwarn.<HEXSTRING>:  The given section has no key entries but should be sorted.
     end
   end
 
@@ -1480,8 +1480,8 @@ local function setup()
       if opt_config_set then
         fn = die
       end
-      fn(nil, "can't load config file:", opt_config) --cwarn: <STRING> ::
-      --cwarn:  The config file ('--config' option) could not be loaded.
+      fn(nil, "can't load config file"..":", opt_config) --cwarn.<HEXSTRING>: <STRING> ::
+      --cwarn.<HEXSTRING>:  The config file ('--config' option) could not be loaded.
     end
   end
 
@@ -1542,8 +1542,8 @@ local function line_process(context, comment)
 
     local ok,err = pcall(procfuncs[op], context)
     if not ok then
-      warn(context, "operator processing failed:", op, err) --cwarn: <STRING> ::
-      --cwarn:  error executing a operators processor.
+      warn(context, "operator processing failed"..":", op, err) --cwarn.<HEXSTRING>: <STRING> ::
+      --cwarn.<HEXSTRING>:  Error executing a operators processor.
     end
 
     trace(context,
@@ -1559,7 +1559,8 @@ local function file_alias(filename)
       dbg(nil, "alias:", filename, alias)
       return alias
     elseif not ok then
-      warn(nil, "alias pattern error:", alias, opt_aliases[i][1], opt_aliases[i][2])
+      warn(nil, "alias pattern error"..":", alias, opt_aliases[i][1], opt_aliases[i][2])  --cwarn.<HEXSTRING>: <STRING> ::
+      --cwarn.<HEXSTRING>:  The pattern for a file alias is invalid.
     end
   end
   return filename
@@ -1594,8 +1595,8 @@ local function file_process(file)
     fh = io.open(file)
 
     if not fh then
-      warn(filecontext, "file not found:", file) --cwarn: <STRING> ::
-      --cwarn:  A given File can not be opened (wrong path or typo?).
+      warn(filecontext, "file not found"..":", file) --cwarn.<HEXSTRING>: <STRING> ::
+      --cwarn.<HEXSTRING>:  A given file can not be opened (wrong path or typo?).
       return
     end
     filecontext.FILE = file
@@ -1604,8 +1605,8 @@ local function file_process(file)
   local filetype = filetype_get(file_alias(file))
 
   if not filetype then
-    warn(filecontext, "unknown file type:", file) --cwarn: <STRING> ::
-    --cwarn:  The type of the given file was not recognized (see <<_usage,'--register'>> option).
+    warn(filecontext, "unknown file type"..":", file) --cwarn.<HEXSTRING>: <STRING> ::
+    --cwarn.<HEXSTRING>:  The type of the given file was not recognized (see <<_usage,'--register'>> option).
     return
   end
 
@@ -1658,7 +1659,8 @@ local function inputs_process()
   local processed_files = {}
   for _, filename in ipairs(opt_inputs) do
     if processed_files[filename] then
-      warn(nil, "input file given twice:", filename)
+      warn(nil, "input file given twice"..":", filename) --cwarn.<HEXSTRING>: <STRING> ::
+      --cwarn.<HEXSTRING>:  Ignored a file given multiple times for input.
     else
       file_process(filename)
       processed_files[filename] = true
@@ -1681,14 +1683,15 @@ function output_paste(section, output)
 
 
   if sofar_rec[section] then
-    warn(nil, "recursive paste:", which) --cwarn: <STRING> ::
-    --cwarn:  Pasted sections (see <<_built_in_operators,paste operator>>) can not recursively
-    --cwarn:  include themself.
+    warn(nil, "recursive paste"..":", which) --cwarn.<HEXSTRING>: <STRING> ::
+    --cwarn.<HEXSTRING>:  Pasted sections (see <<_built_in_operators,paste operator>>) can not recursively
+    --cwarn.<HEXSTRING>:  include themself.
     return
   end
 
   if #section == 0 then
-    warn(nil, "section is empty:", which)
+    warn(nil, "section is empty"..":", which) --cwarn.<HEXSTRING>: <STRING> ::
+    --cwarn.<HEXSTRING>:  Tried to paste ('=') an empty section.
     return
   end
 
@@ -1701,8 +1704,8 @@ function output_paste(section, output)
     if genfunc then
       local ok, err = pcall(genfunc, section[i], output)
       if not ok then
-        warn(section[i], "generator failed:", err) --cwarn: <STRING> ::
-        --cwarn:  error in operators generator function.
+        warn(section[i], "generator failed"..":", err) --cwarn.<HEXSTRING>: <STRING> ::
+        --cwarn.<HEXSTRING>:  error in operators generator function.
       end
     else
       warn(nil, "no generator function for:", section[i].OP)
@@ -1740,8 +1743,8 @@ function output_sort(section, op, output)
     end
 
     if #sorted == 0 then
-      warn(context, "section is empty:",which) --cwarn: <STRING> ::
-      --cwarn:  Using '=', '@' or '#' on a section which has no data (under respective keys).
+      warn(context, "section is empty"..":",which) --cwarn.<HEXSTRING>: <STRING> ::
+      --cwarn.<HEXSTRING>:  Trying to sort a section by keys yield zero results.
       return
     end
 
@@ -1765,22 +1768,22 @@ function orphan_doublet_report()
   for name, section in pairs(sections) do
     if #section > 0 then
       if not section.usecnt then
-        warn(orphan, "section unused:", name) --cwarn: <STRING> ::
-        --cwarn:  The printed section was not used. This might be intentional when generating
-        --cwarn:  only partial outputs.
+        warn(orphan, "section unused"..":", name) --cwarn.<HEXSTRING>: <STRING> ::
+        --cwarn.<HEXSTRING>:  The printed section was not used. This might be intentional when generating
+        --cwarn.<HEXSTRING>:  only partial outputs.
       elseif section.usecnt > 1 then
-        warn(doublete, "section multiple times used:", name, section.usecnt) --cwarn: <STRING> ::
-        --cwarn:  Section was used multiple times in the output.
+        warn(doublete, "section multiple times used"..":", name, section.usecnt) --cwarn.<HEXSTRING>: <STRING> ::
+        --cwarn.<HEXSTRING>:  Section was used multiple times in the output.
       end
     end
 
     for kname, key in pairs(section.keys) do
       if not key.usecnt then
-        warn(orphan, "section key unused:", name.."."..kname) --cwarn: <STRING> ::
-        --cwarn:  Section with keys (numeric or alphabetic) was not used.
+        warn(orphan, "section key unused"..":", name.."."..kname) --cwarn.<HEXSTRING>: <STRING> ::
+        --cwarn.<HEXSTRING>:  Section with keys (numeric or alphabetic) was not used.
       elseif key.usecnt > 1 then
-        warn(doublete, "section key multiple times used:", name.."."..kname, key.usecnt) --cwarn: <STRING> ::
-        --cwarn:  Section was used multiple times in the output ('@', '$' or '#' operator).
+        warn(doublete, "section key multiple times used"..":", name.."."..kname, key.usecnt) --cwarn.<HEXSTRING>: <STRING> ::
+        --cwarn.<HEXSTRING>:  Section was used multiple times in the output (sorting operators).
       end
     end
   end
@@ -1812,8 +1815,8 @@ do
   if topsection then
     output_paste(topsection, output)
   else
-    die (nil, "Toplevel section undefined:", opt_toplevel) --cwarn: <STRING> ::
-    --cwarn:  The section used as root for the output generation is not defined.
+    die (nil, "toplevel section undefined"..":", opt_toplevel) --cwarn.<HEXSTRING>: <STRING> ::
+    --cwarn.<HEXSTRING>:  The section used as root for the output generation is not defined.
   end
 
   local outfd, err = io.stdout
@@ -1822,7 +1825,8 @@ do
     outfd, err = io.open(opt_output, "w+")
 
     if not outfd then
-      die(nil, "failed to open:", opt_output, err)
+      die(nil, "failed to open"..":", opt_output, err) --cwarn.<HEXSTRING>: <STRING> ::
+      --cwarn.<HEXSTRING>:  Output file could not be opened.
     end
   end
 
@@ -2302,8 +2306,7 @@ end
 --: may need some attention.
 --: Warnings are suppressed with the '--quiet' option.
 --:
---TODO: sort warnings
---=cwarn
+--$cwarn
 --:
 --: [appendix]
 --: Generate the Pipadoc Documentation
