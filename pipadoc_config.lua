@@ -165,9 +165,9 @@ GLOBAL.INDEX_ENTRY_asciidoc = function (context, arg)
 
   if lastfirstchar ~= firstchar then
     lastfirstchar = firstchar
-    return "{NL}[big]#"..firstchar:upper().."# :: {NL}   <<index_"..arg..","..arg..">> +{NL}"
+    return "{NL}[big]#"..firstchar:upper().."# :: {NL}   <<index_"..arg..","..arg..">> :::{NL}"
   else
-    return "  <<index_"..arg:gsub("%W","_")..","..arg..">> +{NL}"
+    return "  <<index_"..arg:gsub("%W","_")..","..arg..">> :::{NL}"
   end
 end
 
