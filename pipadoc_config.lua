@@ -13,7 +13,7 @@ preprocessor_register (nil,
 
 --shipped_config_pre:
 --: *  Replace '<STRING>' in pipadoc comments with the first literal doublequoted string from the code.
---:    Lifts string literals from sourcecode to documentation. The doublequotes are removed.
+--:    This lifts string literals from sourcecode to documentation. The doublequotes are removed.
 --TODO: use COMMENTS_TABLE
 preprocessor_register (nil,
                        {

@@ -85,7 +85,7 @@ local opt_dryrun = false
 --: Type Checks
 --: ^^^^^^^^^^^
 --:
---: Wrappers around 'assert' to check externally supplied data. On success 'var' will be returned
+--: Assertions to check externally supplied data. On success 'var' will be returned
 --: otherwise an assertion error is raised.
 --:
 
@@ -162,7 +162,7 @@ local function gcontext_set(file, line)
 end
 
 --api_various:
-function pattern_escape(s)  --: Escape all characters in string 's' so that it cane be used as verbatim pattern.
+function pattern_escape(s)  --: Escape all characters in string 's' so that it can be used as verbatim pattern.
   return (s:gsub("%W", "%%%1"))
 end
 
@@ -174,6 +174,7 @@ function string_tohex(s) --: Encode a string as sequence of 2-byte hex chars (us
   end
   return ret
 end
+
 
 
 
@@ -268,7 +269,13 @@ function inputfile_add(filename) --: Add a 'filename' to the list of files to pr
   opt_inputs[#opt_inputs+1] = filename
 end
 
-function alias_register(from, to) --: Register a new filetype alias
+function alias_register(from, to) --: Register a new filetype alias.
+  --:   See '--alias' for an example.
+  --:   from:::
+  --:     A pattern (possibly with a capture) matching unknown input filenames.
+  --:   to:::
+  --:     The replacement (possibly expanding the capture) to a known aliased filetype.
+  --:
   assert_type(from, "string")
   assert_type(to, "string")
   dbg(nil, "register alias:", from, "->", to)
@@ -635,13 +642,13 @@ function strsubst(context, str, escape) --: substitute text
   --:     The current context which defines all variables and
   --:     macros for the substitution.
   --:   str:::
-  --:     The string to operate on
+  --:     The string to operate on.
   --:   escape:::
-  --:     Rule for special character escaping
-  --:     true:::: handle escaping in one pass
-  --:     'escape':::: 1st pass
-  --:     'unescape':::: 2nd pass
-  --:     nil:::: no special escaping
+  --:     Rule for special character escaping.
+  --:     true:::: handle escaping in one pass.
+  --:     'escape':::: 1st pass, replaces escaped characters with a reserved internal representation.
+  --:     'unescape':::: 2nd pass, turns the reserved internal representation of escaped characters back into the native form.
+  --:     nil:::: no special escaping.
   trace(context, "strsubst:", str)
   maybe_type(context, "table")
   assert_type(str, "string")
@@ -950,11 +957,11 @@ function preprocessor_register(langpat, preprocess) --: register a preprocessor
   --:   preprocess:::
   --:     The preprocessor to register. Can be one of:
   --:     `function (context) ... end` ::::
-  --:       Takes the context of the current source line and shall return:
-  --:       *  the preprocessed line
-  --:       *  false to drop the line
-  --:       *  true to keep the line unaltered
   --:       Preprocessors may store state or have other side effect using API functions.
+  --:       Takes the context of the current source line and shall return:
+  --:       * the preprocessed line
+  --:       * false to drop the line
+  --:       * true to keep the line unaltered
   --:     +\{pattern, repl [, n]\}+ ::::
   --:       Generates a function calling 'context.SOURCE:gsub(pattern, repl [, n])' for preprocessing.
   --:
@@ -1054,11 +1061,11 @@ function postprocessor_register(markuppat, postprocess) --: register a postproce
   --:   postprocess:::
   --:     The postprocessor to register. Can be one of:
   --:     `function (context) ... end` ::::
-  --:       Takes the context of the current source line and shall return:
-  --:       *  the postprocessed line (context.TEXT)
-  --:       *  false to drop the line
-  --:       *  true to keep the line unaltered
   --:       Postprocessors may store state or have other side effect using API functions.
+  --:       Takes the context of the current source line and shall return:
+  --:       * the postprocessed line (context.TEXT)
+  --:       * false to drop the line
+  --:       * true to keep the line unaltered
   --:     +\{pattern, repl [, n]\}+ ::::
   --:       Generates a function calling 'context.TEXT:gsub(pattern, repl [, n])' for postprocessing.
   --:
@@ -1159,9 +1166,10 @@ function operator_register(char, procfunc, genfunc) --: Register a new operator
   --:   procfunc +function (context)+:::
   --:     a function which receives a CONTEXT table of the current line.
   --:     The procfunc processes and stores the context in appropriate
-  --:     fashion.
-  --:   genfunc +function (context)+:::
-  --:     a function generating the (sequential) output from given context.
+  --:     fashion (see <<index_section_append,section_append()>>).
+  --:   genfunc +function (context, output)+:::
+  --:     a function generating the output from given context, appending
+  --:     it to the supplied 'output' table.
   --:
   assert(string.match(char, "^%p$") == char)
   assert(char ~= '.')
@@ -1628,7 +1636,7 @@ local function file_process(file)
   --context:
   --:file {VARDEF COMMENTS_TABLE}
   --:file   A Lua table with the all possible line comment character sequences
-  --:file   for this filetype. Available at preprocessing time.
+  --:file   for this filetype. Available at preprocessing time before parsing.
   filecontext.COMMENTS_TABLE = filetype.comments
 
   block_section = filecontext.FILE:match("[^./]+%f[.%z]")
@@ -1647,8 +1655,7 @@ local function file_process(file)
 
     --context:
     --:source {VARDEF SOURCE}
-    --:source   The line read from the input file, used for preprocessing and will be erased
-    --:source   afterward preprocessing is done.
+    --:source   The line as read from the input file.
     local context = context_new(filecontext, {
                                   LINE = lineno,
                                   SOURCE = line,
@@ -2098,7 +2105,7 @@ end
 --: Parsing ::
 --:   The line is broken down into its components and the operators processing function
 --:   will be called. The ':' and '+' operators do a first string substitution pass to
---:   expand variables. This strsubst is done in input order.
+--:   expand variables. This string substitution is done in input order.
 --:   String substitution macros may leverage this for additional state and may generate
 --:   extra content like indices and append that to the respective sections.
 --:
@@ -2140,7 +2147,8 @@ end
 --:
 --: The core of pipadoc is completely agnostic about the markup used within the documentation strings.
 --: The '--markup' option only sets the 'MARKUP' variable and output generation tries include the
---: markup in the toplevel. Any further markup specific things are defined on postprocessors only.
+--: markup in the toplevel. Usually only string substitution and postprocessors shoould handle markup
+--: related things.
 --:
 --: The shipped configuration file comes with postprocessors for 'asciidoc' and 'text' markups.
 --:
@@ -2159,8 +2167,8 @@ end
 --:
 --: Pipadocs main objective is to scrape documentation comments from a project and generate
 --: output in desired order. Such an basic approach would be insufficient for many common cases.
---: Thus pipadoc has pre and postprocessors and the strsubst engine to generate and modify
---: documentation in an extensible way.
+--: Thus pipadoc has pre and postprocessors and the string substitution engine to generate and
+--: modify documentation in an extensible way.
 --:
 --: Pipadoc tries to load a configuration file on startup. By default it is named
 --: +pipadoc_config.lua+ in the current directory. This name can be changed with the
@@ -2171,15 +2179,15 @@ end
 --: executed as it own chunk and may only access the global variables and
 --: API functions described below.
 --:
---: Without a confuguration file none of these processors are defined any only few
---: variables for the strsubst engine are set.
+--: Without a configuration file none of these processors are defined any only few
+--: variables for string substitution engine are set.
 --:
 --:
 --: Preprocessors
 --: ~~~~~~~~~~~~~
 --:
---: One can register preprocessors for filetypes. A preprocessor can modify any line prior
---: it is parsed and further processed.
+--: One can register preprocessors per filetypes. A preprocessor can modify any line
+--: prior it gets parsed and further processed.
 --:
 --: Preprocessors are used to autogenerate documentation comments from code. Lifting
 --: parts of the code to the documentation side.
@@ -2198,19 +2206,18 @@ end
 --: ~~~~~~~~~~~~~~~~~~~~
 --:
 --: Documentation text is be passed to the string substitution engine which recursively
---: substitutes expressions within curly braces. The substitutions are taken from the passed
---: context (and GLOBAL's). Strings are replaced, functions become evaluated, everything else is
---: translated with Luas 'tostring()' function.
+--: substitutes macros within curly braces. The substitutions are taken from the passed
+--: context (and GLOBAL's). Strings are replaced, functions become evaluated.
 --:
---: The names for substitutions must start with an alphabetic character or underline and can
---: be followed by alphanumeric characters or underlines. It may be followed with a delimiting
---: character (space) and an optional argument string which gets passed to functions or
---: retained verbatim on everything else. Names starting and ending with 2 underscores are
---: reserved to the implementation. These names themself can be composed from string substitutions.
+--: String substitutions names consist alphanumeric characters or underlines.
+--: The names themself can be composed from string substitutions.
+--: It may be followed with a delimiting character (space) and an optional argument string
+--: which gets passed to functions or recursive string substitution. Names starting and ending
+--: with 2 underscores are reserved to the implementation.
 --:
---: When the substitution is defined as string (and not as function) then the resulting string itself
---: is subject of further string substitution. For this substitutions the '+++__ARG__+++' variable
---: is set to the supplied arguments in the current context.
+--: The resulting string if a string substitution is subject of further recursive string
+--: substitution. For this substitutions the '+++__ARG__+++' variable is set to the supplied
+--: arguments from the calling context.
 --:
 --: When the substitution is a function it takes the arguments as parameter.
 --:
@@ -2219,12 +2226,14 @@ end
 --:
 --: .Example
 --: -----
+--: GLOBAL.SIMPLE = "a simple example"
 --: GLOBAL.BRACED = "\{BRACED_\{MARKUP\} \{__ARG__\}\}"
 --: GLOBAL.BRACED_text = "``{{__ARG__}``}"
 --: GLOBAL.BRACED_asciidoc = "\\\\``{{__ARG__}\\\\``}"
 --: -----
 --:
 --: .Explanation:
+--: . '{BRACED SIMPLE}' would expand to 'a simple example'
 --: . 'BRACED_{BRACED MARKUP}' gets expanded to 'BRACED_<markup>', where '<markup>' is the
 --:   defined markup language to use.
 --: . The argument get passed along with '{BRACED +++__ARG__+++}'.
@@ -2296,7 +2305,7 @@ end
 --:
 --@GLOBAL
 --:
---: The 'GLOBAL_POST' table is extends 'GLOBAL' and is used for a final 'strsubst()'
+--: The 'GLOBAL_POST' table is extends 'GLOBAL' and is used for a final string substitution
 --: pass after postprocessing. There are no values defined in 'GLOBAL_POST' by pipadoc itself.
 --:
 --: [[CONTEXT]]
@@ -2307,7 +2316,8 @@ end
 --: passed along. This context represents the parsed line plus
 --: everything that's defined at file level and in GLOBAL (or GLOBAL_POST).
 --:
---: In a few cases a fake-context in angle brackets is passed around for diagnostic functions.
+--: In a few cases a fake-context with FILE name in angle brackets is passed around for
+--: diagnostic functions.
 --:
 --: Context Members
 --: ^^^^^^^^^^^^^^^

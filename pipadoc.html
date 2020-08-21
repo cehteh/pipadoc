@@ -737,7 +737,7 @@ asciidoc.install(2);
 <h1>pipadoc - Documentation extractor</h1>
 <span id="author">Christian Thaeter</span><br />
 <span id="email"><code>&lt;<a href="mailto:ct@pipapo.org">ct@pipapo.org</a>&gt;</code></span><br />
-<span id="revdate">21. August 2020</span>
+<span id="revdate">22. August 2020</span>
 <div id="toc">
   <div id="toctitle">Table of Contents</div>
   <noscript><p><b>JavaScript must be enabled in your browser to display the table of contents.</b></p></noscript>
@@ -1037,7 +1037,7 @@ Parsing
 <p>
   The line is broken down into its components and the operators processing function
   will be called. The <em>:</em> and <em>+</em> operators do a first string substitution pass to
-  expand variables. This strsubst is done in input order.
+  expand variables. This string substitution is done in input order.
   String substitution macros may leverage this for additional state and may generate
   extra content like indices and append that to the respective sections.
 </p>
@@ -1162,7 +1162,8 @@ Visual Basic,</p></div>
 <div class="sectionbody">
 <div class="paragraph"><p>The core of pipadoc is completely agnostic about the markup used within the documentation strings.
 The <em>--markup</em> option only sets the <em>MARKUP</em> variable and output generation tries include the
-markup in the toplevel. Any further markup specific things are defined on postprocessors only.</p></div>
+markup in the toplevel. Usually only string substitution and postprocessors shoould handle markup
+related things.</p></div>
 <div class="paragraph"><p>The shipped configuration file comes with postprocessors for <em>asciidoc</em> and <em>text</em> markups.</p></div>
 </div>
 </div>
@@ -1245,8 +1246,8 @@ The default operators either store text or paste (possibly sorted) text.</p></di
 <div class="sectionbody">
 <div class="paragraph"><p>Pipadocs main objective is to scrape documentation comments from a project and generate
 output in desired order. Such an basic approach would be insufficient for many common cases.
-Thus pipadoc has pre and postprocessors and the strsubst engine to generate and modify
-documentation in an extensible way.</p></div>
+Thus pipadoc has pre and postprocessors and the string substitution engine to generate and
+modify documentation in an extensible way.</p></div>
 <div class="paragraph"><p>Pipadoc tries to load a configuration file on startup. By default it is named
 <code>pipadoc_config.lua</code> in the current directory. This name can be changed with the
 <em>--config</em> option.</p></div>
@@ -1254,12 +1255,12 @@ documentation in an extensible way.</p></div>
 for those, define custom operators and string substitution macros. It is loaded and
 executed as it own chunk and may only access the global variables and
 API functions described below.</p></div>
-<div class="paragraph"><p>Without a confuguration file none of these processors are defined any only few
-variables for the strsubst engine are set.</p></div>
+<div class="paragraph"><p>Without a configuration file none of these processors are defined any only few
+variables for string substitution engine are set.</p></div>
 <div class="sect2">
 <h3 id="_preprocessors">Preprocessors</h3>
-<div class="paragraph"><p>One can register preprocessors for filetypes. A preprocessor can modify any line prior
-it is parsed and further processed.</p></div>
+<div class="paragraph"><p>One can register preprocessors per filetypes. A preprocessor can modify any line
+prior it gets parsed and further processed.</p></div>
 <div class="paragraph"><p>Preprocessors are used to autogenerate documentation comments from code. Lifting
 parts of the code to the documentation side.</p></div>
 </div>
@@ -1272,28 +1273,33 @@ Processors are called in order of their definition.</p></div>
 <div class="sect2">
 <h3 id="_string_substitutions">String Substitutions</h3>
 <div class="paragraph"><p>Documentation text is be passed to the string substitution engine which recursively
-substitutes expressions within curly braces. The substitutions are taken from the passed
-context (and GLOBAL&#8217;s). Strings are replaced, functions become evaluated, everything else is
-translated with Luas <em>tostring()</em> function.</p></div>
-<div class="paragraph"><p>The names for substitutions must start with an alphabetic character or underline and can
-be followed by alphanumeric characters or underlines. It may be followed with a delimiting
-character (space) and an optional argument string which gets passed to functions or
-retained verbatim on everything else. Names starting and ending with 2 underscores are
-reserved to the implementation. These names themself can be composed from string substitutions.</p></div>
-<div class="paragraph"><p>When the substitution is defined as string (and not as function) then the resulting string itself
-is subject of further string substitution. For this substitutions the <em>__ARG__</em> variable
-is set to the supplied arguments in the current context.</p></div>
+substitutes macros within curly braces. The substitutions are taken from the passed
+context (and GLOBAL&#8217;s). Strings are replaced, functions become evaluated.</p></div>
+<div class="paragraph"><p>String substitutions names consist alphanumeric characters or underlines.
+The names themself can be composed from string substitutions.
+It may be followed with a delimiting character (space) and an optional argument string
+which gets passed to functions or recursive string substitution. Names starting and ending
+with 2 underscores are reserved to the implementation.</p></div>
+<div class="paragraph"><p>The resulting string if a string substitution is subject of further recursive string
+substitution. For this substitutions the <em>__ARG__</em> variable is set to the supplied
+arguments from the calling context.</p></div>
 <div class="paragraph"><p>When the substitution is a function it takes the arguments as parameter.</p></div>
 <div class="paragraph"><p>Curly braces, can be escaped with backslashes or backtick characters. These
 characters can be escaped by themself.</p></div>
 <div class="listingblock">
 <div class="title">Example</div>
 <div class="content">
-<pre><code>GLOBAL.BRACED = "{BRACED_{MARKUP} {__ARG__}}"
+<pre><code>GLOBAL.SIMPLE = "a simple example"
+GLOBAL.BRACED = "{BRACED_{MARKUP} {__ARG__}}"
 GLOBAL.BRACED_text = "`{{__ARG__}`}"
 GLOBAL.BRACED_asciidoc = "\\`{{__ARG__}\\`}"</code></pre>
 </div></div>
 <div class="olist arabic"><div class="title">Explanation:</div><ol class="arabic">
+<li>
+<p>
+<em>{SIMPLE}</em> would expand to <em>a simple example</em>
+</p>
+</li>
 <li>
 <p>
 <em>BRACED_{MARKUP}</em> gets expanded to <em>BRACED_&lt;markup&gt;</em>, where <em>&lt;markup&gt;</em> is the
@@ -1350,7 +1356,7 @@ Ignore any line which ends in <em>NODOC</em>.
 <li>
 <p>
 Replace <em>&lt;STRING&gt;</em> in pipadoc comments with the first literal doublequoted string from the code.
-   Lifts string literals from sourcecode to documentation. The doublequotes are removed.
+   This lifts string literals from sourcecode to documentation. The doublequotes are removed.
 </p>
 </li>
 <li>
@@ -1511,7 +1517,7 @@ more complex Lua functions for string substitutions.</p></div>
 </p>
 </dd>
 </dl></div>
-<div class="paragraph"><p>The <em>GLOBAL_POST</em> table is extends <em>GLOBAL</em> and is used for a final <em>strsubst()</em>
+<div class="paragraph"><p>The <em>GLOBAL_POST</em> table is extends <em>GLOBAL</em> and is used for a final string substitution
 pass after postprocessing. There are no values defined in <em>GLOBAL_POST</em> by pipadoc itself.</p></div>
 </div>
 </div>
@@ -1520,7 +1526,8 @@ pass after postprocessing. There are no values defined in <em>GLOBAL_POST</em> b
 <div class="paragraph"><p>Processors, operators, string substitution calls and diagnostics get a context
 passed along. This context represents the parsed line plus
 everything that&#8217;s defined at file level and in GLOBAL (or GLOBAL_POST).</p></div>
-<div class="paragraph"><p>In a few cases a fake-context in angle brackets is passed around for diagnostic functions.</p></div>
+<div class="paragraph"><p>In a few cases a fake-context with FILE name in angle brackets is passed around for
+diagnostic functions.</p></div>
 <div class="sect3">
 <h4 id="_context_members">Context Members</h4>
 <div class="paragraph"><p>The following members are defined in <em>contexts</em>.</p></div>
@@ -1557,7 +1564,7 @@ everything that&#8217;s defined at file level and in GLOBAL (or GLOBAL_POST).</p
 <dd>
 <p>
   A Lua table with the all possible line comment character sequences
-  for this filetype. Available at preprocessing time.
+  for this filetype. Available at preprocessing time before parsing.
 </p>
 </dd>
 <dt class="hdlist1">
@@ -1614,8 +1621,7 @@ everything that&#8217;s defined at file level and in GLOBAL (or GLOBAL_POST).</p
 </dt>
 <dd>
 <p>
-  The line read from the input file, used for preprocessing and will be erased
-  afterward preprocessing is done.
+  The line as read from the input file.
 </p>
 </dd>
 <dt class="hdlist1">
@@ -1689,7 +1695,7 @@ the verbosity level is high enough.</p></div>
 </div>
 <div class="sect3">
 <h4 id="_type_checks">Type Checks</h4>
-<div class="paragraph"><p>Wrappers around <em>assert</em> to check externally supplied data. On success <em>var</em> will be returned
+<div class="paragraph"><p>Assertions to check externally supplied data. On success <em>var</em> will be returned
 otherwise an assertion error is raised.</p></div>
 <div class="dlist"><dl>
 <dt class="hdlist1">
@@ -1773,7 +1779,7 @@ str
 </dt>
 <dd>
 <p>
-    The string to operate on
+    The string to operate on.
 </p>
 </dd>
 <dt class="hdlist1">
@@ -1781,7 +1787,7 @@ escape
 </dt>
 <dd>
 <p>
-    Rule for special character escaping
+    Rule for special character escaping.
 </p>
 <div class="dlist"><dl>
 <dt class="hdlist1">
@@ -1789,7 +1795,7 @@ true
 </dt>
 <dd>
 <p>
-handle escaping in one pass
+handle escaping in one pass.
 </p>
 </dd>
 <dt class="hdlist1">
@@ -1797,7 +1803,7 @@ handle escaping in one pass
 </dt>
 <dd>
 <p>
-1st pass
+1st pass, replaces escaped characters with a reserved internal representation.
 </p>
 </dd>
 <dt class="hdlist1">
@@ -1805,7 +1811,7 @@ handle escaping in one pass
 </dt>
 <dd>
 <p>
-2nd pass
+2nd pass, turns the reserved internal representation of escaped characters back into the native form.
 </p>
 </dd>
 <dt class="hdlist1">
@@ -1813,7 +1819,7 @@ nil
 </dt>
 <dd>
 <p>
-no special escaping
+no special escaping.
 </p>
 </dd>
 </dl></div>
@@ -1930,15 +1936,16 @@ procfunc <code>function (context)</code>
 <p>
     a function which receives a CONTEXT table of the current line.
     The procfunc processes and stores the context in appropriate
-    fashion.
+    fashion (see <a href="#index_section_append">section_append()</a>).
 </p>
 </dd>
 <dt class="hdlist1">
-genfunc <code>function (context)</code>
+genfunc <code>function (context, output)</code>
 </dt>
 <dd>
 <p>
-    a function generating the (sequential) output from given context.
+    a function generating the output from given context, appending
+    it to the supplied <em>output</em> table.
 </p>
 </dd>
 </dl></div>
@@ -1978,6 +1985,7 @@ preprocess
 </dt>
 <dd>
 <p>
+      Preprocessors may store state or have other side effect using API functions.
       Takes the context of the current source line and shall return:
 </p>
 <div class="ulist"><ul>
@@ -1994,7 +2002,6 @@ false to drop the line
 <li>
 <p>
 true to keep the line unaltered
-      Preprocessors may store state or have other side effect using API functions.
 </p>
 </li>
 </ul></div>
@@ -2046,6 +2053,7 @@ postprocess
 </dt>
 <dd>
 <p>
+      Postprocessors may store state or have other side effect using API functions.
       Takes the context of the current source line and shall return:
 </p>
 <div class="ulist"><ul>
@@ -2062,7 +2070,6 @@ false to drop the line
 <li>
 <p>
 true to keep the line unaltered
-      Postprocessors may store state or have other side effect using API functions.
 </p>
 </li>
 </ul></div>
@@ -2167,7 +2174,7 @@ context
 </dt>
 <dd>
 <p>
- Escape all characters in string <em>s</em> so that it cane be used as verbatim pattern.
+ Escape all characters in string <em>s</em> so that it can be used as verbatim pattern.
 </p>
 </dd>
 <dt class="hdlist1">
@@ -2191,9 +2198,30 @@ context
 </dt>
 <dd>
 <p>
- Register a new filetype alias
+ Register a new filetype alias.
+  See <em>--alias</em> for an example.
+</p>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+from
+</dt>
+<dd>
+<p>
+    A pattern (possibly with a capture) matching unknown input filenames.
 </p>
 </dd>
+<dt class="hdlist1">
+to
+</dt>
+<dd>
+<p>
+    The replacement (possibly expanding the capture) to a known aliased filetype.
+</p>
+</dd>
+</dl></div>
+</dd>
+</dl></div>
+<div class="dlist"><dl>
 <dt class="hdlist1">
 <a id="index_context_new"></a> <code><strong>context_new(parent, new)</strong></code>
 </dt>
@@ -3006,7 +3034,7 @@ Christian Thäter &lt;<a href="mailto:ct@pipapo.org">ct@pipapo.org</a>&gt; for i
 <div id="footer">
 <div id="footer-text">
 Last updated
- 2020-08-21 22:17:56 CEST
+ 2020-08-22 01:57:14 CEST
 </div>
 </div>
 </body>
