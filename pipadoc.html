@@ -1335,7 +1335,7 @@ The resulting string from 1. dispatches on the markup language to one of the fol
 </div>
 </div>
 <div class="sect2">
-<h3 id="_example_configuration_file">Example Configuration File</h3>
+<h3 id="_shipped_configuration_file">Shipped Configuration File</h3>
 <div class="paragraph"><p>Pipadoc comes with a configuration file for generating it&#8217;s own documentation and
 assist the test suite. This is a good starting point for writing your own configuration.</p></div>
 <div class="paragraph"><p>This configuration file implements the features explained next.</p></div>
@@ -1392,7 +1392,7 @@ Keep track of original file:line as asciidoc comments in the output.
 </ul></div>
 </div>
 <div class="sect3">
-<h4 id="_substitutions_macros">Substitutions Macros</h4>
+<h4 id="_string_substitutions_macros">String Substitutions Macros</h4>
 <div class="ulist"><ul>
 <li>
 <p>
@@ -1896,7 +1896,9 @@ linecommentseqs
 <div class="paragraph"><p>For example, C and C++ Filetypes are registered like:</p></div>
 <div class="listingblock">
 <div class="content">
-<pre><code>filetype_register("C", {"%.c$","%.cpp$","%.C$", "%.cxx$", "%.h$"}, {"//", "/*"})</code></pre>
+<pre><code>filetype_register("C",
+                  {"%.c$","%.cpp$","%.C$", "%.cxx$", "%.h$"},
+                  { "//", "/*"})</code></pre>
 </div></div>
 </div>
 <div class="sect3">
@@ -2490,7 +2492,7 @@ unsupported preprocessor type
 <div class="paragraph"><p><em>pipadoc</em> documents itself with embedded asciidoc text. This can be extracted with</p></div>
 <div class="listingblock">
 <div class="content">
-<pre><code>lua pipadoc.lua -m asciidoc pipadoc.lua &gt;pipadoc.txt</code></pre>
+<pre><code>lua pipadoc.lua -m asciidoc pipadoc.lua pipadoc_config.lua -o pipadoc.txt</code></pre>
 </div></div>
 <div class="paragraph"><p>The resulting <code>pipadoc.txt</code> can then be processed with the asciidoc tool chain to produce
 distribution formats:</p></div>
@@ -2529,12 +2531,10 @@ along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.</cod
 </div></div>
 <div class="sect2">
 <h3 id="_license_explanation">License Explanation</h3>
-<div class="paragraph"><p>The License (GPL) only applies to pipadoc and any derivative work. The purpose of pipadoc
+<div class="paragraph"><p>The License (GPLv3) only applies to pipadoc and any derivative work. The purpose of pipadoc
 is to extract documentation from other files, this does not imply that these source files
 from which the documentation is extracted need to be licensed under the GPL, neither does
-this imply that the extracted documentation need to be licensed under the GPL.
-Using pipadoc for non-free software poses no problems about the Licensing terms of
-this software.</p></div>
+this imply that the extracted documentation need to be licensed under the GPL.</p></div>
 <div class="paragraph"><p>The GPL applies when you distribute pipadoc itself, in original or modified form. Since
 pipadoc is written in the Lua scripting language, you already distribute its source as well,
 which naturally makes this distribution conform with the GPL.</p></div>
@@ -3006,7 +3006,7 @@ Christian Thäter &lt;<a href="mailto:ct@pipapo.org">ct@pipapo.org</a>&gt; for i
 <div id="footer">
 <div id="footer-text">
 Last updated
- 2020-08-21 22:14:22 CEST
+ 2020-08-21 22:17:56 CEST
 </div>
 </div>
 </body>

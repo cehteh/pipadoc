@@ -879,7 +879,9 @@ function filetype_register(name, filep, linecommentseqs) --: Register a new file
   --: For example, C and C++ Filetypes are registered like:
   --:
   --: ----
-  --: filetype_register("C", \{"%.c$","%.cpp$","%.C$", "%.cxx$", "%.h$"\}, \{"//", "/*"\})
+  --: filetype_register("C",
+  --:                   \{"%.c$","%.cpp$","%.C$", "%.cxx$", "%.h$"\},
+  --:                   \{ "//", "/*"\})
   --: ----
   --:
   assert_type(name, "string")
@@ -2231,7 +2233,8 @@ end
 --:       backslashes and backticks). And finally the escaping rules of the targeted markup
 --:       language.
 --:
---: Example Configuration File
+--:
+--: Shipped Configuration File
 --: ~~~~~~~~~~~~~~~~~~~~~~~~~~
 --:
 --: Pipadoc comes with a configuration file for generating it's own documentation and
@@ -2249,8 +2252,8 @@ end
 --:
 --=shipped_config_post
 --:
---: Substitutions Macros
---: ^^^^^^^^^^^^^^^^^^^^
+--: String Substitutions Macros
+--: ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 --:
 --=shipped_config_subst
 --:
@@ -2349,7 +2352,7 @@ end
 --: 'pipadoc' documents itself with embedded asciidoc text. This can be extracted with
 --:
 --: ----
---: lua pipadoc.lua -m asciidoc pipadoc.lua >pipadoc.txt
+--: lua pipadoc.lua -m asciidoc pipadoc.lua pipadoc_config.lua -o pipadoc.txt
 --: ----
 --:
 --: The resulting `pipadoc.txt` can then be processed with the asciidoc tool chain to produce
@@ -2380,12 +2383,10 @@ end
 --: License Explanation
 --: ~~~~~~~~~~~~~~~~~~~
 --:
---: The License (GPL) only applies to pipadoc and any derivative work. The purpose of pipadoc
+--: The License (GPLv3) only applies to pipadoc and any derivative work. The purpose of pipadoc
 --: is to extract documentation from other files, this does not imply that these source files
 --: from which the documentation is extracted need to be licensed under the GPL, neither does
 --: this imply that the extracted documentation need to be licensed under the GPL.
---: Using pipadoc for non-free software poses no problems about the Licensing terms of
---: this software.
 --:
 --: The GPL applies when you distribute pipadoc itself, in original or modified form. Since
 --: pipadoc is written in the Lua scripting language, you already distribute its source as well,

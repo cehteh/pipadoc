@@ -489,7 +489,8 @@ NOTE: The escaping rules become a bit complicated because one has to consider th
       backslashes and backticks). And finally the escaping rules of the targeted markup
       language.
 
-Example Configuration File
+
+Shipped Configuration File
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Pipadoc comes with a configuration file for generating it's own documentation and
@@ -523,8 +524,8 @@ Postprocessors
   Disable this tracking when a doc comment starts with 'NOORIGIN' and
   re-enable it with a doc comment starting with 'ORGIN'.
 
-Substitutions Macros
-^^^^^^^^^^^^^^^^^^^^
+String Substitutions Macros
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 * '{BRACED argument}' puts 'argument' in curly braces. Escapes this curly braces
   depending on the markup engine selected.
@@ -758,7 +759,9 @@ filetype_register(name, filep, linecommentseqs):
 For example, C and C++ Filetypes are registered like:
 
 ----
-filetype_register("C", {"%.c$","%.cpp$","%.C$", "%.cxx$", "%.h$"}, {"//", "/*"})
+filetype_register("C",
+                  {"%.c$","%.cpp$","%.C$", "%.cxx$", "%.h$"},
+                  { "//", "/*"})
 ----
 
 
@@ -948,7 +951,7 @@ Generate the Pipadoc Documentation
 'pipadoc' documents itself with embedded asciidoc text. This can be extracted with
 
 ----
-lua pipadoc.lua -m asciidoc pipadoc.lua >pipadoc.txt
+lua pipadoc.lua -m asciidoc pipadoc.lua pipadoc_config.lua -o pipadoc.txt
 ----
 
 The resulting `pipadoc.txt` can then be processed with the asciidoc tool chain to produce
@@ -991,12 +994,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 License Explanation
 ~~~~~~~~~~~~~~~~~~~
 
-The License (GPL) only applies to pipadoc and any derivative work. The purpose of pipadoc
+The License (GPLv3) only applies to pipadoc and any derivative work. The purpose of pipadoc
 is to extract documentation from other files, this does not imply that these source files
 from which the documentation is extracted need to be licensed under the GPL, neither does
 this imply that the extracted documentation need to be licensed under the GPL.
-Using pipadoc for non-free software poses no problems about the Licensing terms of
-this software.
 
 The GPL applies when you distribute pipadoc itself, in original or modified form. Since
 pipadoc is written in the Lua scripting language, you already distribute its source as well,
