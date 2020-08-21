@@ -29,6 +29,7 @@ preprocessor_register (nil,
 --:    converted to lowercase hexadecimal (useable for sorting including whitespace and punctuation).
 --:    When no literal doublequoted string exists in the code, then the last used hexadecimal
 --:    string is used. Used for sorting documentation by the lifted string literal.
+--TODO: remove the opspec requirement, just replace it always
 local hexstring
 
 preprocessor_register (nil,

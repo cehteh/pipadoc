@@ -19,10 +19,9 @@
 -------------------------------------------------------------------------------------------------
 
 --PLANNED: include operator, add a file to the processing list
---PLANNED: Version check for documents \{VERSION 2\} ...
+--PLANNED: Version check for documents {BRACED VERSION 2} ...
 --PLANNED: --disable-strsubst option .. NOSTRSUBST STRSUBST macros
 --PLANNED: merge sections for sorting --#foo+bar+baz or something like this
---PLANNED: make strsubst a full fledged DSL
 
 
 
@@ -185,6 +184,7 @@ end
 --------------------------------
 
 --PLANNED: log to PIPADOC_LOG section, later hooked in here
+--PLANNED: use stdout when opt_output is set AND debugging is selected
 local printerr_hook
 
 local function printerr(...)
@@ -553,7 +553,6 @@ function request(name) --: try to load optional modules
     return nil
   end
 end
---:
 
 
 
@@ -605,6 +604,12 @@ end
 --: assert(strsubst(context, "\{undefined\}") == "\{undefined\}")
 --: ----
 --:
+--PLANNED: make strsubst a full fledged DSL
+--PLANNED+ general syntax {<NAME><opchar><args>}
+--PLANNED: strsubst DSL op= -> set local (parent)
+--PLANNED: strsubst DSL op: -> set global
+--PLANNED: strsubst DSL op' -> literal
+--FIXME: op+ on issue keywords does not work yet
 
 local function table_inverse(t)
   local ret = {}
