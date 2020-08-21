@@ -642,64 +642,69 @@ function strsubst(context, str, escape) --: substitute text
   assert_type(str, "string")
 
   context = context or gcontext
-  local sofar = {}
 
-  local function strsubst_intern(str)
+  local function strsubst_intern(context, str)
     trace(context, "strsubst_intern:", str)
+    context = context_new (context)
 
     return str:gsub("%b{}",
                     function (capture)
-                      local ret = capture
                       local subst = false
 
-                      local var,arg = capture:match("^{(%a[%w_{}]*).?(.*)}$")
-                      if not var then return capture end
-                      var = strsubst_intern(var)
+                      local var, arg = capture:match("^{([%w_{}]*).?(.*)}$")
+                      if var then
 
-                      -- recursively dereference names when braced
-                      do
-                        local sofar = {}
-                        while not sofar[var] and type(context[var]) == "string" and context[var]:match("^(%b{})$") do
-                          subst = true
-                          sofar[var] = true
-                          var = strsubst_intern(context[var]:sub(2,-2))
+                        if var:match("%b{}") then
+                          trace(context, "strsubst_intern expand var:", var)
+                          var = strsubst_intern(context, var)
                         end
-                      end
-                      if context[var] then
-                        subst = true
-                        var = context[var]
-                      end
 
-                      arg = strsubst_intern(arg)
+                        -- var must be fully resolved
+                        if not var:match("%b{}") then
 
-                      if subst then
-                        if not sofar[var] then
-                          sofar[var] = true
-                          if type(var) == 'function' then
-                            local ok, result = pcall(var, context, arg)
+                          if arg:match("%b{}") then
+                            trace(context, "strsubst_intern expand arg:", arg)
+                            arg = strsubst_intern(context, arg)
+                          end
+
+                          if type(context[var]) == 'string' then
+
+                            if context[var]:match("%b{}") then
+                              context.__ARG__ = arg
+                              return strsubst(context, context[var], escape)
+                            end
+
+                            return context[var]..arg
+
+                          elseif type(context[var]) == 'number' then
+                            return tostring(context[var])
+
+                          elseif type(context[var]) == 'function' then
+                            trace(context, "strsubst_intern expand function:", var, arg)
+                            local ok, result = pcall(context[var], context, arg)
                             if ok then
-                              ret = tostring(result)
+                              return strsubst(context, result, escape)
                             else
                               warn(context, "strsubst function failed"..":", var, result) --cwarn.<HEXSTRING>: <STRING> ::
                               --cwarn.<HEXSTRING>:  Tried to call a custom function from 'strsubst()' which failed.
                             end
+
+                          elseif var:match("^__[%w_]*__$") then
+                            -- fallthrough __RESERVED__ name
+
+                          elseif context[var] == nil then
+                            warn(context, "strsubst no expansion"..":", var)  --cwarn.<HEXSTRING>: <STRING> ::
+                            --cwarn.<HEXSTRING>:  No substitution defined. Braced expression left verbatim.
+
                           else
-                            ret = tostring(var)..arg
+                            warn(context, "strsubst type error"..":", var, type(context[var]))  --cwarn.<HEXSTRING>: <STRING> ::
+                            --cwarn.<HEXSTRING>:  strsubst() expects a string or a function for expansion.
                           end
-                          ret = strsubst_intern(ret)
-                          sofar[var] = nil
-                        else
-                          warn(context, "strsubst recursive expansion"..":", var)  --cwarn.<HEXSTRING>: <STRING> ::
-                          --cwarn.<HEXSTRING>:  Cyclic substitution is not allowed.  Braced expression left verbatim.
-                        end
-                      else
-                        if escape == 'unescape' and not ret:match "^{__.*__}$" then
-                          warn(context, "strsubst no expansion"..":", capture)  --cwarn.<HEXSTRING>: <STRING> ::
-                          --cwarn.<HEXSTRING>:  No substitution defined. Braced expression left verbatim.
                         end
                       end
 
-                      return ret
+                      -- fallthrough return unaltered capture
+                      return capture
                     end
     )
   end
@@ -708,7 +713,13 @@ function strsubst(context, str, escape) --: substitute text
     str =  str:gsub("[`\\]([{}\\])", strsubst_escapes)
   end
 
-  str = strsubst_intern(str)
+  local ok, rstr = pcall(strsubst_intern, context, str)
+
+  if not ok then
+    warn(context, "strsubst recursion limit reached")
+  else
+    str = rstr
+  end
 
   if escape == true or escape == 'unescape'then
     str = str:gsub("%b{}", strsubst_escapes_back)
@@ -739,8 +750,7 @@ end
 --: The default block section name is the files name up, but excluding to the first dot.
 --:
 --: Sections are later brought into the desired order by pasting them into a 'toplevel' section.
---TODO: {BRACED ...} macro -> {BRACED_MARKUP ...} for escaping asciidoc
---: This default name for the 'toplevel' section is 'MAIN_\\\{markup\\\}' or if that does not exist
+--: This default name for the 'toplevel' section is 'MAIN_{BRACED markup}' or if that does not exist
 --: just 'MAIN'.
 --:
 
@@ -2086,8 +2096,8 @@ end
 --:   extra content like indices and append that to the respective sections.
 --:
 --: Output Ordering ::
---:   The output order is generated by assembling the '\{toplevel\}_\{markup\}' or if that does
---:   not exist the '\{toplevel\}' section.
+--:   The output order is generated by assembling the '{BRACED toplevel}_{BRACED markup}' or if that does
+--:   not exist the '{BRACED toplevel}' section.
 --:   The paste and sorting operators there define the section order of the document.
 --:
 --: Postprocessing ::
@@ -2189,11 +2199,37 @@ end
 --: be followed by alphanumeric characters or underlines. It may be followed with a delimiting
 --: character (space) and an optional argument string which gets passed to functions or
 --: retained verbatim on everything else. Names starting and ending with 2 underscores are
---: reserved to the implementation.
+--: reserved to the implementation. These names themself can be composed from string substitutions.
+--:
+--: When the substitution is defined as string (and not as function) then the resulting string itself
+--: is subject of further string substitution. For this substitutions the '+++__ARG__+++' variable
+--: is set to the supplied arguments in the current context.
+--:
+--: When the substitution is a function it takes the arguments as parameter.
 --:
 --: Curly braces, can be escaped with backslashes or backtick characters. These
---: characters can be escaped by them self.
+--: characters can be escaped by themself.
 --:
+--: .Example
+--: -----
+--: GLOBAL.BRACED = "\{BRACED_\{MARKUP\} \{__ARG__\}\}"
+--: GLOBAL.BRACED_text = "``{{__ARG__}``}"
+--: GLOBAL.BRACED_asciidoc = "\\\\``{{__ARG__}\\\\``}"
+--: -----
+--:
+--: .Explanation:
+--: . 'BRACED_{BRACED MARKUP}' gets expanded to 'BRACED_<markup>', where '<markup>' is the
+--:   defined markup language to use.
+--: . The argument get passed along with '{BRACED +++__ARG__+++}'.
+--: . The resulting string from 1. dispatches on the markup language to one of the following.
+--: . 'BRACED_text' defines how the braces are rendered around '+++__ARG__+++' in text markup.
+--: . 'BRACED_asciidoc' does the same for asciidoc output.
+--:
+--: NOTE: The escaping rules become a bit complicated because one has to consider the escaping
+--:       rules of all components involved. This is first Lua when assigned in literal strings.
+--:       Second the escaping rules of the string substitution engine itself (curly braces,
+--:       backslashes and backticks). And finally the escaping rules of the targeted markup
+--:       language.
 --:
 --: Example Configuration File
 --: ~~~~~~~~~~~~~~~~~~~~~~~~~~

@@ -186,8 +186,7 @@ echo TESTPP becomes a docline
 #: {STR{ING}}
 #: {UPPER arg}
 #: {UPPER {STR}}
-#: {UPR {STR}}
-#: {PING PONG}
+#: {{UPR} {STR}}
 #: {undefined}
 #: {undefined arg}
 #: { STRING}
@@ -197,7 +196,8 @@ echo TESTPP becomes a docline
 #: \{STRING example\}
 #: \{STR\}
 #: \{STR{ING}\}
-
+#: {ARGTEST argument}
+#: {BRACED braced argument}
 
 # expected results
 #> Pipadoc Testsuite
@@ -267,7 +267,6 @@ echo TESTPP becomes a docline
 #> ARG
 #> EXAMPLE STRING
 #> EXAMPLE STRING
-#> {PING}PONG
 #> {undefined}
 #> {undefined arg}
 #> { STRING}
@@ -277,6 +276,8 @@ echo TESTPP becomes a docline
 #> {STRING example}
 #> {STR}
 #> {STRING}
+#> before argument after
+#> {braced argument}
 #>
 #> Empty and non-existing parameters
 #>

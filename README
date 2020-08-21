@@ -2,7 +2,7 @@ pipadoc - Documentation extractor
 =================================
 :author:   Christian Thaeter
 :email:    ct@pipapo.org
-:date:     20. August 2020
+:date:     21. August 2020
 
 
 [preface]
@@ -258,7 +258,7 @@ interleaved into Blocks.
 The default block section name is the files name up, but excluding to the first dot.
 
 Sections are later brought into the desired order by pasting them into a 'toplevel' section.
-This default name for the 'toplevel' section is 'MAIN_\{markup\}' or if that does not exist
+This default name for the 'toplevel' section is 'MAIN_{markup}' or if that does not exist
 just 'MAIN'.
 
 
@@ -457,11 +457,37 @@ The names for substitutions must start with an alphabetic character or underline
 be followed by alphanumeric characters or underlines. It may be followed with a delimiting
 character (space) and an optional argument string which gets passed to functions or
 retained verbatim on everything else. Names starting and ending with 2 underscores are
-reserved to the implementation.
+reserved to the implementation. These names themself can be composed from string substitutions.
+
+When the substitution is defined as string (and not as function) then the resulting string itself
+is subject of further string substitution. For this substitutions the '+++__ARG__+++' variable
+is set to the supplied arguments in the current context.
+
+When the substitution is a function it takes the arguments as parameter.
 
 Curly braces, can be escaped with backslashes or backtick characters. These
-characters can be escaped by them self.
+characters can be escaped by themself.
 
+.Example
+-----
+GLOBAL.BRACED = "{BRACED_{MARKUP} {__ARG__}}"
+GLOBAL.BRACED_text = "`{{__ARG__}`}"
+GLOBAL.BRACED_asciidoc = "\\`{{__ARG__}\\`}"
+-----
+
+.Explanation:
+. 'BRACED_{MARKUP}' gets expanded to 'BRACED_<markup>', where '<markup>' is the
+  defined markup language to use.
+. The argument get passed along with '{+++__ARG__+++}'.
+. The resulting string from 1. dispatches on the markup language to one of the following.
+. 'BRACED_text' defines how the braces are rendered around '+++__ARG__+++' in text markup.
+. 'BRACED_asciidoc' does the same for asciidoc output.
+
+NOTE: The escaping rules become a bit complicated because one has to consider the escaping
+      rules of all components involved. This is first Lua when assigned in literal strings.
+      Second the escaping rules of the string substitution engine itself (curly braces,
+      backslashes and backticks). And finally the escaping rules of the targeted markup
+      language.
 
 Example Configuration File
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -500,7 +526,9 @@ Postprocessors
 Substitutions Macros
 ^^^^^^^^^^^^^^^^^^^^
 
-* '\{LUA_FNDEF}' Lifts a Lua function definition to the documentation text.
+* '{BRACED argument}' puts 'argument' in curly braces. Escapes this curly braces
+  depending on the markup engine selected.
+* '{LUA_FNDEF}' Lifts a Lua function definition to the documentation text.
   Used by the Lua documentation preprocessor.
 * '{VARDEF name}' generates a header and index entry for 'name'.
   Used for documentaton of GLOBAL and CONTEXT variables (pipadoc's own documentation).
@@ -830,7 +858,7 @@ inputfile_add(filename):
  Add a 'filename' to the list of files to process
 alias_register(from, to):
  Register a new filetype alias
-context_make(parent, new):
+context_new(parent, new):
  Create a new context.
 Used whenever preprocessors/macros need to generate new content.
   parent:::
@@ -902,8 +930,8 @@ strsubst function failed ::
  Tried to call a custom function from 'strsubst()' which failed.
 strsubst no expansion ::
  No substitution defined. Braced expression left verbatim.
-strsubst recursive expansion ::
- Cyclic substitution is not allowed.  Braced expression left verbatim.
+strsubst type error ::
+ strsubst() expects a string or a function for expansion.
 toplevel section undefined ::
  The section used as root for the output generation is not defined.
 unknown file type ::

@@ -76,8 +76,19 @@ preprocessor_register ("^lua$",
 )
 
 
+
 --shipped_config_subst:
---: * '\\{LUA_FNDEF\}' Lifts a Lua function definition to the documentation text.
+--: * '{BRACED BRACED argument}' puts 'argument' in curly braces. Escapes this curly braces
+--:   depending on the markup engine selected.
+GLOBAL.BRACED = "{BRACED_{MARKUP} {__ARG__}}"
+GLOBAL.BRACED_text = "`{{__ARG__}`}"
+GLOBAL.BRACED_asciidoc = "\\`{{__ARG__}\\`}"
+
+
+--TODO: ESCAPED function which escapes all strsubst 
+
+--shipped_config_subst:
+--: * '{BRACED LUA_FNDEF}' Lifts a Lua function definition to the documentation text.
 --:   Used by the Lua documentation preprocessor.
 GLOBAL.LUA_FNDEF = "{LUA_FNDEF_{MARKUP}}"
 
@@ -95,11 +106,12 @@ end
 
 
 
+
 --shipped_config_subst:
 --: * '\{VARDEF name\}' generates a header and index entry for 'name'.
 --:   Used for documentaton of GLOBAL and CONTEXT variables (pipadoc's own documentation).
 --:   Defined for asciidoc and text backends.
-GLOBAL.VARDEF = "{VARDEF_{MARKUP}}"
+GLOBAL.VARDEF = "{VARDEF_{MARKUP} {__ARG__}}"
 
 GLOBAL.VARDEF_text = function (context, arg)
   for ix in arg:gmatch("([^%s%p]*)[%p%s]*") do
@@ -149,7 +161,7 @@ end
 --: * '\{INDEX_ENTRY name\}' Entry in the index that refers back to 'name'.
 local lastfirstchar= nil
 
-GLOBAL.INDEX_ENTRY = "{INDEX_ENTRY_{MARKUP}}"
+GLOBAL.INDEX_ENTRY = "{INDEX_ENTRY_{MARKUP} {__ARG__}}"
 
 GLOBAL.INDEX_ENTRY_text = function (context, arg)
   local firstchar=arg:sub(1,1):lower()
@@ -167,9 +179,9 @@ GLOBAL.INDEX_ENTRY_asciidoc = function (context, arg)
 
   if lastfirstchar ~= firstchar then
     lastfirstchar = firstchar
-    return "{NL}[big]#"..firstchar:upper().."# :: {NL}   <<index_"..arg..","..arg..">> :::{NL}"
+    return "{NL}[big]#"..firstchar:upper().."# :: {NL}   <<index_"..arg..","..arg..">> :::"
   else
-    return "  <<index_"..arg:gsub("%W","_")..","..arg..">> :::{NL}"
+    return "  <<index_"..arg:gsub("%W","_")..","..arg..">> :::"
   end
 end
 
@@ -324,9 +336,8 @@ if GLOBAL.TESTSUITE then
   GLOBAL.STRING = "example string"
   GLOBAL.STR = "{STRING}"
   GLOBAL.ING = "ING"
-  GLOBAL.UPR = "{UPPER}"
-  GLOBAL.PING = "{PONG}"
-  GLOBAL.PONG = "{PING}"
+  GLOBAL.UPR = "UPPER"
+  GLOBAL.ARGTEST = "before {__ARG__} after"
   GLOBAL.UPPER = function(context, arg)
     return arg:upper()
   end
