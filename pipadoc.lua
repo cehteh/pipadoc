@@ -2433,33 +2433,28 @@ end
 --: ISSUES
 --: ------
 --:
---: WIP
---: ~~~
+--: .WIP
 --:
 --$WIP
 --PLANNED: only generate ISSUE Section when there are any items
 --PLANNED: TEXT on special ops become parameters  --$WIP optional, reverse ....
 --:
---: FIXME
---: ~~~~~
+--: .FIXME
 --:
 --$FIXME
 --:
 --:
---: TODO
---: ~~~~
+--: .TODO
 --:
 --$TODO
 --:
 --:
---: PLANNED
---: ~~~~~~~
+--: .PLANNED
 --:
 --$PLANNED
 --:
 --:
---: DONE
---: ~~~~
+--: .DONE
 --:
 --$DONE
 --:

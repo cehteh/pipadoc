@@ -324,8 +324,23 @@ if GLOBAL.ISSUES then
                            for _,word in ipairs(issues_keywords) do
                              for _,comment in ipairs(context.COMMENTS_TABLE) do
                                local ret, matches = context.SOURCE:gsub(
-                                 "("..pattern_escape (comment)..word.."):([^%s]*)%s?(.*)",
-                                 '%1:0%2 {FILE}:{LINE}::{NL}  %3{GIT_BLAME}{NL}', 1)
+                                 "("..pattern_escape (comment)..word..")(:%S*)%s?(.*)",
+                                 '%1%2_ISSUE {FILE}:{LINE}::{NL}  %3{GIT_BLAME}', 1)
+                               if matches > 0 then
+                                 return ret
+                               end
+                             end
+                           end
+                           return true
+                         end
+  )
+  preprocessor_register (nil,
+                         function (context)
+                           for _,word in ipairs(issues_keywords) do
+                             for _,comment in ipairs(context.COMMENTS_TABLE) do
+                               local ret, matches = context.SOURCE:gsub(
+                                 "("..pattern_escape (comment)..word..")(%+%S*)%s?(.*)",
+                                 '%1%2_ISSUE {LINEBREAK}  %3', 1)
                                if matches > 0 then
                                  return ret
                                end
