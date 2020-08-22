@@ -1496,6 +1496,27 @@ local function setup()
   )
 
 
+  --op_builtin:
+  --: `!` ::
+  --:   Section drop operator. Deletes the section given as argument at output time.
+  --:   Used to clean up orphan warnings for unused sections for certain toplevels.
+  --:
+  --PLANNED: iterate over TEXT for section names
+  operator_register(
+    "!",
+    function (context)
+      context.SECTION = context.SECTION or block_section
+      context.KEY = context.KEY or block_key
+      section_append(context.SECTION, context.KEY, context)
+    end,
+
+    function (context, output)
+      dbg(context, "section_drop: ", context.ARG)
+      sections[context.ARG] = nil
+    end
+  )
+
+
   -- load config files
   if opt_config_set or not opt_nodefaults then
     gcontext_set "<loadconfig>"

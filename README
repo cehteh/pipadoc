@@ -404,6 +404,10 @@ The default operators either store text or paste (possibly sorted) text.
   Numerical sorting operator. Takes a section name as argument and will paste section text
   numerically sorted by its keys.
 
+`!` ::
+  Section drop operator. Deletes the section given as argument at output time.
+  Used to clean up orphan warnings for unused sections for certain toplevels.
+
 
 
 Configuration File
@@ -531,6 +535,7 @@ String Substitutions Macros
 
 * '{BRACED argument}' puts 'argument' in curly braces. Escapes this curly braces
   depending on the markup engine selected.
+* '{NL}' puts a forced linebreak into the markup
 * '{LUA_FNDEF}' Lifts a Lua function definition to the documentation text.
   Used by the Lua documentation preprocessor.
 * '{VARDEF name}' generates a header and index entry for 'name'.

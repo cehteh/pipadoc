@@ -1239,6 +1239,17 @@ The default operators either store text or paste (possibly sorted) text.</p></di
 </p>
 </dd>
 </dl></div>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+<code>!</code> 
+</dt>
+<dd>
+<p>
+  Section drop operator. Deletes the section given as argument at output time.
+  Used to clean up orphan warnings for unused sections for certain toplevels.
+</p>
+</dd>
+</dl></div>
 </div>
 </div>
 <div class="sect1">
@@ -1404,6 +1415,12 @@ Keep track of original file:line as asciidoc comments in the output.
 <p>
 <em>{BRACED argument}</em> puts <em>argument</em> in curly braces. Escapes this curly braces
   depending on the markup engine selected.
+</p>
+</li>
+<li>
+<p>
+'<br />
+' puts a forced linebreak into the markup
 </p>
 </li>
 <li>
@@ -3034,7 +3051,7 @@ Christian Thäter &lt;<a href="mailto:ct@pipapo.org">ct@pipapo.org</a>&gt; for i
 <div id="footer">
 <div id="footer-text">
 Last updated
- 2020-08-22 02:29:28 CEST
+ 2020-08-22 14:51:32 CEST
 </div>
 </div>
 </body>
