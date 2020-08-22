@@ -470,8 +470,15 @@ local options = {
     end
   end,
 
-  ["--issues"] = function (arg, i)
+  ["--eissues"] = function (arg, i)
     --PLANNED: run universally
+    opt_dryrun = true
+    os.execute [[
+        lua pipadoc.lua -m asciidoc -D ISSUES -t ISSUES pipadoc.lua pipadoc_config.lua
+    ]]
+  end,
+
+  ["--issues"] = function (arg, i)
     opt_dryrun = true
     os.execute [[
         lua pipadoc.lua -m asciidoc -D GIT -D ISSUES -t ISSUES pipadoc.lua pipadoc_config.lua
@@ -2476,5 +2483,5 @@ end
 
 --- Local Variables:
 --- mode: lua
---- compile-command: "lua pipadoc.lua --issues"
+--- compile-command: "lua pipadoc.lua --eissues"
 --- End:
