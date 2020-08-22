@@ -619,7 +619,7 @@ end
 --: ----
 --:
 --PLANNED: make strsubst a full fledged DSL
---PLANNED+ general syntax {<NAME><opchar><args>}
+--PLANNED+ general syntax <NAME><opchar><args>
 --PLANNED: strsubst DSL op= -> set local (parent)
 --PLANNED: strsubst DSL op: -> set global
 --PLANNED: strsubst DSL op' -> literal
@@ -714,6 +714,7 @@ function strsubst(context, str, escape) --: substitute text
                           elseif context[var] == nil then
                             warn(context, "strsubst no expansion"..":", var)  --cwarn.<HEXSTRING>: <STRING> ::
                             --cwarn.<HEXSTRING>:  No substitution defined. Braced expression left verbatim.
+                            --cwarn.<HEXSTRING>:  Possibly forgotten to escape the curly braces.
 
                           else
                             warn(context, "strsubst type error"..":", var, type(context[var]))  --cwarn.<HEXSTRING>: <STRING> ::
@@ -1483,6 +1484,7 @@ local function setup()
     sortgenerate
   )
 
+
   --op_builtin:
   --: `#` ::
   --:   Numerical sorting operator. Takes a section name as argument and will paste section text
@@ -1772,7 +1774,7 @@ function output_sort(section, op, output)
   assert_type(output, 'table')
   dbg(nil, "output_sort:", section.name)
 
-  --PLANNED: rule based / table for sort operators, opchar = {filter, compare}
+  --PLANNED: rule based / table for sort operators, opchar = \{filter, compare\}
 
   section.sorted = section.sorted or {}
   local sorted = section.sorted[op]
@@ -1916,10 +1918,30 @@ end
 -------------------
 
 
---MAIN_asciidoc=MAIN
---MAIN_asciidoc=INDEX
+--MAIN_asciidoc:
+--=MAIN
+--=INDEX
+--!ISSUES
+--!MAIN_text
+--!PLANNED
+--!TODO
+--!WIP
+--!FIXME
+--!DONE
 
---MAIN_text=MAIN
+--MAIN_text:
+--=MAIN
+--!INDEX
+--!ISSUES
+--!MAIN_asciidoc
+--!PLANNED
+--!TODO
+--!WIP
+--!FIXME
+--!DONE
+
+
+
 
 --MAIN:
 --: pipadoc - Documentation extractor
@@ -2480,14 +2502,42 @@ end
 --$DONE
 --:
 --:
-
+--!GLOBAL
+--!INDEX
+--!MAIN
+--!MAIN_asciidoc
+--!MAIN_text
+--!api_filetypes
+--!api_load
+--!api_logging
+--!api_op
+--!api_postproc
+--!api_preproc
+--!api_sections
+--!api_strsubst
+--!api_strsubst_example
+--!api_typecheck
+--!api_typeconv
+--!api_various
+--!context
+--!cwarn
+--!filetypes
+--!filetypes_builtin
+--!license
+--!op
+--!op_builtin
+--!sections
+--!shipped_config_post
+--!shipped_config_pre
+--!shipped_config_subst
+--!usage
 
 --PLANNED: named processors, define processing chains or sort by priority
 --PLANNED: control language/conditionals?  //section?key \{condition\}  else becomes DROPPED:section_key
 --PLANNED: not only pipadoc.conf but also pipadoc.sty templates, conf are local only configurations, .sty are global styles
 --PLANNED: how to join (and then wordwrap) lines?
 --PLANNED: insert empty lines on dedent
---PLANNED: bash like parameter expansion, how to apply that to sections/keys too --%{section}:%{key} .. how about strsubst on SECTION and ARG //{SECTION}:{ARG}
+--PLANNED: bash like parameter expansion, how to apply that to sections/keys too --%\{section\}:%\{key\} .. how about strsubst on SECTION and ARG //\{SECTION\}:\{ARG\}
 --PLANNED: INIT section for configuration
 --PLANNED: test expected stderr in test suite
 --PLANNED: DOCME documentation is usually only for one markup designed, dispatch on strsubst make only maintaining easier
