@@ -623,7 +623,6 @@ end
 --PLANNED: strsubst DSL op= -> set local (parent)
 --PLANNED: strsubst DSL op: -> set global
 --PLANNED: strsubst DSL op' -> literal
---FIXME: op+ on issue keywords does not work yet
 
 local function table_inverse(t)
   local ret = {}
@@ -1578,6 +1577,7 @@ local function line_process(context, comment)
     context.SECTION = maybe_text(context.SECTION)
     context.KEY = maybe_text(context.KEY)
     context.ARG = maybe_text(context.ARG)
+--TODO:    context.TEXT = maybe_text(context.TEXT)
   end
 
   local op = context.OP
@@ -2206,8 +2206,7 @@ end
 --: Operators
 --: ---------
 --:
---: Operators define what is considered as pipadoc comment and how to assemble the resulting document.
---: The default operators either store text or paste (possibly sorted) text.
+--=op
 --:
 --=op_builtin
 --:
@@ -2405,7 +2404,8 @@ end
 --: --------------------------
 --:
 --: Pipadoc emits warnings on problems. Even with warnings processing will usually go on but
---: the output may need some attention.
+--: the output may need some attention. This section explains these warnings and errors and shows
+--: possible ways to fix them.
 --: Warnings are suppressed with the '--quiet' option.
 --:
 --$cwarn

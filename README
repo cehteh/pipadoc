@@ -376,8 +376,10 @@ The shipped configuration file comes with postprocessors for 'asciidoc' and 'tex
 Operators
 ---------
 
-Operators define what is considered as pipadoc comment and how to assemble the resulting document.
-The default operators either store text or paste (possibly sorted) text.
+Operators define how documentation comments are evaluated, they are the core functionality
+of pipadoc and mandatory in the pipadoc syntax to define a pipadoc comment line. It is
+possible to (re-)define operators. Operators must be a single punctuation character.
+
 
 `:` ::
   The documentation operator. Defines normal documentation text. Each pipadoc comment using
@@ -508,7 +510,7 @@ Preprocessors
 ^^^^^^^^^^^^^
 
 * Ignore any line which ends in 'NODOC'.
-*  Replace '<STRING>' in pipadoc comments with the first literal doublequoted string from the code.
+*  Replace '<STRING>' with the first literal doublequoted string from the code.
    This lifts string literals from sourcecode to documentation. The doublequotes are removed.
 *  Replaces '6661696c656420746f206f70656e' with the first literal doublequoted string from the code
    converted to lowercase hexadecimal (useable for sorting including whitespace and punctuation).
@@ -889,7 +891,8 @@ Common Errors and Warnings
 --------------------------
 
 Pipadoc emits warnings on problems. Even with warnings processing will usually go on but
-the output may need some attention.
+the output may need some attention. This section explains these warnings and errors and shows
+possible ways to fix them.
 Warnings are suppressed with the '--quiet' option.
 
 alias pattern error ::
@@ -946,6 +949,7 @@ strsubst function failed ::
  Tried to call a custom function from 'strsubst()' which failed.
 strsubst no expansion ::
  No substitution defined. Braced expression left verbatim.
+ Possibly forgotten to escape the curly braces.
 strsubst type error ::
  strsubst() expects a string or a function for expansion.
 toplevel section undefined ::

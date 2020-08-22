@@ -1170,8 +1170,9 @@ related things.</p></div>
 <div class="sect1">
 <h2 id="_operators">Operators</h2>
 <div class="sectionbody">
-<div class="paragraph"><p>Operators define what is considered as pipadoc comment and how to assemble the resulting document.
-The default operators either store text or paste (possibly sorted) text.</p></div>
+<div class="paragraph"><p>Operators define how documentation comments are evaluated, they are the core functionality
+of pipadoc and mandatory in the pipadoc syntax to define a pipadoc comment line. It is
+possible to (re-)define operators. Operators must be a single punctuation character.</p></div>
 <div class="dlist"><dl>
 <dt class="hdlist1">
 <code>:</code> 
@@ -1366,7 +1367,7 @@ Ignore any line which ends in <em>NODOC</em>.
 </li>
 <li>
 <p>
-Replace <em>&lt;STRING&gt;</em> in pipadoc comments with the first literal doublequoted string from the code.
+Replace <em>&lt;STRING&gt;</em> with the first literal doublequoted string from the code.
    This lifts string literals from sourcecode to documentation. The doublequotes are removed.
 </p>
 </li>
@@ -2275,7 +2276,8 @@ new
 <h2 id="_common_errors_and_warnings">Appendix A: Common Errors and Warnings</h2>
 <div class="sectionbody">
 <div class="paragraph"><p>Pipadoc emits warnings on problems. Even with warnings processing will usually go on but
-the output may need some attention.
+the output may need some attention. This section explains these warnings and errors and shows
+possible ways to fix them.
 Warnings are suppressed with the <em>--quiet</em> option.</p></div>
 <div class="dlist"><dl>
 <dt class="hdlist1">
@@ -2486,6 +2488,7 @@ strsubst no expansion
 <dd>
 <p>
  No substitution defined. Braced expression left verbatim.
+ Possibly forgotten to escape the curly braces.
 </p>
 </dd>
 <dt class="hdlist1">
@@ -3051,7 +3054,7 @@ Christian Thäter &lt;<a href="mailto:ct@pipapo.org">ct@pipapo.org</a>&gt; for i
 <div id="footer">
 <div id="footer-text">
 Last updated
- 2020-08-22 14:51:32 CEST
+ 2020-08-22 15:09:02 CEST
 </div>
 </div>
 </body>

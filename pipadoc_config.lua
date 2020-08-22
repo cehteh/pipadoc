@@ -12,9 +12,8 @@ preprocessor_register (nil,
 
 
 --shipped_config_pre:
---: *  Replace '<STRING>' in pipadoc comments with the first literal doublequoted string from the code.
+--: *  Replace '<STRING>' with the first literal doublequoted string from the code.
 --:    This lifts string literals from sourcecode to documentation. The doublequotes are removed.
---TODO: use COMMENTS_TABLE
 preprocessor_register (nil,
                        {
                          '^([^"]*"([^"]*)".*%p+%w*:%w*)(.*)<STRING>(.*)',
@@ -90,7 +89,7 @@ GLOBAL.LINEBREAK_text = "`{NL}"
 GLOBAL.LINEBREAK_asciidoc = " +{NL}"
 
 
---TODO: ESCAPED function which escapes all strsubst 
+--PLANNED: ESCAPE function which escapes all strsubst
 
 --shipped_config_subst:
 --: * '{BRACED LUA_FNDEF}' Lifts a Lua function definition to the documentation text.
