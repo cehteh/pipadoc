@@ -83,6 +83,12 @@ GLOBAL.BRACED = "{BRACED_{MARKUP} {__ARG__}}"
 GLOBAL.BRACED_text = "`{{__ARG__}`}"
 GLOBAL.BRACED_asciidoc = "\\`{{__ARG__}\\`}"
 
+--shipped_config_subst:
+--: * '{LINEBREAK}' puts a forced linebreak into the markup
+GLOBAL.LINEBREAK = "{LINEBREAK_{MARKUP}}"
+GLOBAL.LINEBREAK_text = "`{NL}"
+GLOBAL.LINEBREAK_asciidoc = " +{NL}"
+
 
 --TODO: ESCAPED function which escapes all strsubst 
 
@@ -189,9 +195,9 @@ GLOBAL.INDEX_ENTRY_orgmode = function (context, arg)
 
   if lastfirstchar ~= firstchar then
     lastfirstchar = firstchar
-    return "{NL} - *"..firstchar:upper().."* ::{NL}   <<index_"..arg..">> +{NL}"
+    return "{NL} - *"..firstchar:upper().."* ::{NL}   <<index_"..arg..">>{LINEBREAK}"
   else
-    return "  <<index_"..arg:gsub("%W","_")..">> +{NL}"
+    return "  <<index_"..arg:gsub("%W","_")..">>{LINEBREAK}"
   end
 end
 
