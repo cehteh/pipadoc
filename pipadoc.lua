@@ -749,6 +749,20 @@ function strsubst(context, str, escape) --: substitute text
 end
 
 
+local function strsubst_run(context, escape)
+  if context.TEXT then
+    local subst = strsubst(context, context.TEXT, escape)
+
+    -- drop lines
+    if context.TEXT:match("^%b{}$") and subst == "" then
+      context.TEXT = nil
+    else
+      context.TEXT = subst
+    end
+  end
+end
+
+
 
 
 
@@ -1136,9 +1150,7 @@ local function postprocessors_run(context)
     end
   end
 
-  if context.TEXT then
-    context.TEXT = strsubst(context, context.TEXT, 'unescape')
-  end
+  strsubst_run(context, 'unescape')
 
 end
 
@@ -1338,7 +1350,7 @@ local function setup()
       if context.TEXT ~= "" and (context.SECTION or context.KEY) then
         --oneline
         context.SECTION = context.SECTION or block_section
-        context.TEXT = strsubst(context, context.TEXT, 'escape')
+        strsubst_run(context, 'escape')
         section_append(context.SECTION, context.KEY, context)
       elseif context.TEXT == "" and (context.SECTION or context.KEY) then
         --block head
@@ -1349,7 +1361,7 @@ local function setup()
         --block cont
         context.SECTION = context.SECTION or block_section
         context.KEY = context.KEY or block_key
-        context.TEXT = strsubst(context, context.TEXT, 'escape')
+        strsubst_run(context, 'escape')
         section_append(context.SECTION, context.KEY, context)
       end
     end,
@@ -1380,7 +1392,7 @@ local function setup()
       if context.TEXT ~= "" and (context.SECTION or context.KEY) then
         --oneline
         context.SECTION = context.SECTION or block_section
-        context.TEXT = strsubst(context, context.TEXT, 'escape')
+        strsubst_run(context, 'escape')
         section_concat(context.SECTION, context.KEY, context)
       elseif context.TEXT == "" and (context.SECTION or context.KEY) then
         --block head
@@ -1391,7 +1403,7 @@ local function setup()
         --block cont
         context.SECTION = context.SECTION or block_section
         context.KEY = context.KEY or block_key
-        context.TEXT = strsubst(context, context.TEXT, 'escape')
+        strsubst_run(context, 'escape')
         section_concat(context.SECTION, context.KEY, context)
       end
     end,
@@ -2257,6 +2269,11 @@ end
 --: Documentation text is be passed to the string substitution engine which recursively
 --: substitutes macros within curly braces. The substitutions are taken from the passed
 --: context (and GLOBAL's). Strings are replaced, functions become evaluated.
+--:
+--: When a docline is entirely a single string substitution (starting and ending with a
+--: curly brace) and the string substitution resulting in an empty string, then the
+--: whole line becomes dopped. If this is not intended one could add a second empty '{BRACED NIL}'
+--: string substitution to the line.
 --:
 --: String substitutions names consist alphanumeric characters or underlines.
 --: The names themself can be composed from string substitutions.

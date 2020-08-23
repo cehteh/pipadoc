@@ -198,6 +198,11 @@ echo TESTPP becomes a docline
 #: \{STR{ING}\}
 #: {ARGTEST argument}
 #: {BRACED braced argument}
+#: {NIL}still there
+#: {NIL}
+#: line dropped
+#: {NIL}{NIL}
+#: not dropped
 
 # expected results
 #> Pipadoc Testsuite
@@ -278,6 +283,10 @@ echo TESTPP becomes a docline
 #> {STRING}
 #> before argument after
 #> {braced argument}
+#> still there
+#> line dropped
+#>
+#> not dropped
 #>
 #> Empty and non-existing parameters
 #>

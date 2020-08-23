@@ -2,7 +2,7 @@ pipadoc - Documentation extractor
 =================================
 :author:   Christian Thaeter
 :email:    ct@pipapo.org
-:date:     22. August 2020
+:date:     24. August 2020
 
 
 [preface]
@@ -458,6 +458,11 @@ String Substitutions
 Documentation text is be passed to the string substitution engine which recursively
 substitutes macros within curly braces. The substitutions are taken from the passed
 context (and GLOBAL's). Strings are replaced, functions become evaluated.
+
+When a docline is entirely a single string substitution (starting and ending with a
+curly brace) and the string substitution resulting in an empty string, then the
+whole line becomes dopped. If this is not intended one could add a second empty '{NIL}'
+string substitution to the line.
 
 String substitutions names consist alphanumeric characters or underlines.
 The names themself can be composed from string substitutions.

@@ -737,7 +737,7 @@ asciidoc.install(2);
 <h1>pipadoc - Documentation extractor</h1>
 <span id="author">Christian Thaeter</span><br />
 <span id="email"><code>&lt;<a href="mailto:ct@pipapo.org">ct@pipapo.org</a>&gt;</code></span><br />
-<span id="revdate">22. August 2020</span>
+<span id="revdate">24. August 2020</span>
 <div id="toc">
   <div id="toctitle">Table of Contents</div>
   <noscript><p><b>JavaScript must be enabled in your browser to display the table of contents.</b></p></noscript>
@@ -1287,6 +1287,10 @@ Processors are called in order of their definition.</p></div>
 <div class="paragraph"><p>Documentation text is be passed to the string substitution engine which recursively
 substitutes macros within curly braces. The substitutions are taken from the passed
 context (and GLOBAL&#8217;s). Strings are replaced, functions become evaluated.</p></div>
+<div class="paragraph"><p>When a docline is entirely a single string substitution (starting and ending with a
+curly brace) and the string substitution resulting in an empty string, then the
+whole line becomes dopped. If this is not intended one could add a second empty <em>{NIL}</em>
+string substitution to the line.</p></div>
 <div class="paragraph"><p>String substitutions names consist alphanumeric characters or underlines.
 The names themself can be composed from string substitutions.
 It may be followed with a delimiting character (space) and an optional argument string
@@ -3054,7 +3058,7 @@ Christian Thäter &lt;<a href="mailto:ct@pipapo.org">ct@pipapo.org</a>&gt; for i
 <div id="footer">
 <div id="footer-text">
 Last updated
- 2020-08-22 15:09:02 CEST
+ 2020-08-24 00:20:13 CEST
 </div>
 </div>
 </body>
