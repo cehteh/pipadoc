@@ -2,7 +2,7 @@ pipadoc - Documentation extractor
 =================================
 :author:   Christian Thaeter
 :email:    ct@pipapo.org
-:date:     24. August 2020
+:date:     27. August 2020
 
 
 [preface]
@@ -950,6 +950,8 @@ section unused ::
  only partial outputs.
 sort argument missing ::
  Using the '@', '$' or '#' operator without an argument.
+strsubst error ::
+ strsubst() failed, possibly because of recursion limit.
 strsubst function failed ::
  Tried to call a custom function from 'strsubst()' which failed.
 strsubst no expansion ::

@@ -735,7 +735,8 @@ function strsubst(context, str, escape) --: substitute text
   local ok, rstr = pcall(strsubst_intern, context, str)
 
   if not ok then
-    warn(context, "strsubst recursion limit reached")
+    warn(context, "strsubst error"..":", rstr) --cwarn.<HEXSTRING>: <STRING> ::
+    --cwarn.<HEXSTRING>:  strsubst() failed, possibly because of recursion limit.
   else
     str = rstr
   end
