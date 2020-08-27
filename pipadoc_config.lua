@@ -97,15 +97,15 @@ GLOBAL.LINEBREAK_asciidoc = " +{NL}"
 GLOBAL.LUA_FNDEF = "{LUA_FNDEF_{MARKUP}}"
 
 GLOBAL.LUA_FNDEF_text = function (context)
-  return context.FUNCTION_PROTO..":{NL}"
+  return strsubst(context, context.FUNCTION_PROTO..":{NL}")
 end
 
 GLOBAL.LUA_FNDEF_asciidoc = function (context, arg)
-  return "anchor:index_"..context.FUNCTION.."[] +*"..context.FUNCTION_PROTO.."*+::{NL}"
+  return strsubst(context, "anchor:index_"..context.FUNCTION.."[] +*"..context.FUNCTION_PROTO.."*+::{NL}")
 end
 
 GLOBAL.LUA_FNDEF_orgmode = function (context, arg)
-  return "<<index_"..context.FUNCTION..">> - -"..context.FUNCTION_PROTO.."- ::{NL}"
+  return strsubst(context, "<<index_"..context.FUNCTION..">> - -"..context.FUNCTION_PROTO.."- ::{NL}")
 end
 
 
@@ -118,6 +118,7 @@ end
 GLOBAL.VARDEF = "{VARDEF_{MARKUP} {__ARG__}}"
 
 GLOBAL.VARDEF_text = function (context, arg)
+  arg = strsubst(context, arg)
   for ix in arg:gmatch("([^%s%p]*)[%p%s]*") do
     if #ix > 0 then
       section_append("INDEX", ix:lower(),
@@ -126,11 +127,12 @@ GLOBAL.VARDEF_text = function (context, arg)
     end
   end
 
-  return arg..":"
+  return strsubst(context, arg..":")
 end
 
 GLOBAL.VARDEF_asciidoc = function (context, arg)
   local anchors = ""
+  arg = strsubst(context, arg)
   for ix in arg:gmatch("([^%s%p]*)[%p%s]*") do
     if #ix > 0 then
       section_append("INDEX", ix:lower(),
@@ -141,12 +143,13 @@ GLOBAL.VARDEF_asciidoc = function (context, arg)
     end
   end
 
-  return anchors.."`"..arg.."`::"
+  return strsubst(context, anchors.."`"..arg.."`::")
 end
 
 
 GLOBAL.VARDEF_orgmode = function (context, arg)
   local anchors = ""
+  arg = strsubst(context, arg)
   for ix in arg:gmatch("([^%s%p]*)[%p%s]*") do
     if #ix > 0 then
       section_append("INDEX", ix:lower(),
@@ -157,7 +160,7 @@ GLOBAL.VARDEF_orgmode = function (context, arg)
     end
   end
 
-  return anchors.."- -"..arg.."- ::"
+  return strsubst(context, anchors.."- -"..arg.."- ::")
 end
 
 
@@ -168,35 +171,38 @@ local lastfirstchar= nil
 GLOBAL.INDEX_ENTRY = "{INDEX_ENTRY_{MARKUP} {__ARG__}}"
 
 GLOBAL.INDEX_ENTRY_text = function (context, arg)
+  arg = strsubst(context, arg)
   local firstchar=arg:sub(1,1):lower()
 
   if lastfirstchar ~= firstchar then
     lastfirstchar = firstchar
-    return firstchar:upper()..":{NL}  "..arg.."{NL}"
+    return strsubst(context, firstchar:upper()..":{NL}  "..arg.."{NL}")
   else
-    return "  "..arg.."{NL}"
+    return strsubst(context, "  "..arg.."{NL}")
   end
 end
 
 GLOBAL.INDEX_ENTRY_asciidoc = function (context, arg)
+  arg = strsubst(context, arg)
   local firstchar = arg:sub(1,1):lower()
 
   if lastfirstchar ~= firstchar then
     lastfirstchar = firstchar
-    return "{NL}[big]#"..firstchar:upper().."# :: {NL}   <<index_"..arg..","..arg..">> :::"
+    return strsubst(context, "{NL}[big]#"..firstchar:upper().."# :: {NL}   <<index_"..arg..","..arg..">> :::")
   else
-    return "  <<index_"..arg:gsub("%W","_")..","..arg..">> :::"
+    return strsubst(context, "  <<index_"..arg:gsub("%W","_")..","..arg..">> :::")
   end
 end
 
 GLOBAL.INDEX_ENTRY_orgmode = function (context, arg)
+  arg = strsubst(context, arg)
   local firstchar = arg:sub(1,1):lower()
 
   if lastfirstchar ~= firstchar then
     lastfirstchar = firstchar
-    return "{NL} - *"..firstchar:upper().."* ::{NL}   <<index_"..arg..">>{LINEBREAK}"
+    return strsubst(context, "{NL} - *"..firstchar:upper().."* ::{NL}   <<index_"..arg..">>{LINEBREAK}")
   else
-    return "  <<index_"..arg:gsub("%W","_")..">>{LINEBREAK}"
+    return strsubst(context, "  <<index_"..arg:gsub("%W","_")..">>{LINEBREAK}")
   end
 end
 
@@ -292,7 +298,7 @@ if GLOBAL.GIT then
     context.GIT_BLAME_DATE = blame_date
     context.GIT_BLAME_REVISION = blame.revision
 
-    return "{GIT_BLAME_{MARKUP}}"
+    return strsubst(context, "{GIT_BLAME_{MARKUP}}")
   end
 
   GLOBAL.GIT_BLAME_asciidoc = " +{NL}  _{GIT_BLAME_SUMMARY}_ +{NL}  {GIT_BLAME_AUTHOR}, {GIT_BLAME_DATE} +{NL}  +{GIT_BLAME_REVISION}+"
@@ -358,6 +364,7 @@ if GLOBAL.TESTSUITE then
   GLOBAL.UPR = "UPPER"
   GLOBAL.ARGTEST = "before {__ARG__} after"
   GLOBAL.UPPER = function(context, arg)
+    arg = strsubst(context, arg)
     return arg:upper()
   end
 

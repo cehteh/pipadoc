@@ -1275,20 +1275,32 @@ Processors are called in order of their definition.</p></div>
 <div class="sectionbody">
 <div class="paragraph"><p>Documentation text is be passed to the string substitution engine which recursively
 substitutes macros within curly braces. The substitutions are taken from the passed
-context (and GLOBAL&#8217;s). Strings are replaced, functions become evaluated.</p></div>
+context (and GLOBAL&#8217;s).</p></div>
 <div class="paragraph"><p>When a docline is entirely a single string substitution (starting and ending with a
 curly brace) and the string substitution resulting in an empty string, then the
 whole line becomes dopped. If this is not intended one could add a second empty <em>{NIL}</em>
 string substitution to the line.</p></div>
-<div class="paragraph"><p>String substitutions names consist alphanumeric characters or underlines.
-The names themself can be composed from string substitutions.
-It may be followed with a delimiting character (space) and an optional argument string
-which gets passed to functions or recursive string substitution. Names starting and ending
-with 2 underscores are reserved to the implementation.</p></div>
-<div class="paragraph"><p>The resulting string if a string substitution is subject of further recursive string
-substitution. For this substitutions the <em>__ARG__</em> variable is set to the supplied
-arguments from the calling context.</p></div>
-<div class="paragraph"><p>When the substitution is a function it takes the arguments as parameter.</p></div>
+<div class="paragraph"><p>String substitutions names consist of alphanumeric characters or underlines.
+These names themself can be composed from string substitutions (see example below).
+It may be followed with a delimiting character (space) and an optional argument string.
+This argument string gets passed to functions or recursive string substitutions. Names starting
+and ending with 2 underscores are reserved to the implementation.</p></div>
+<div class="paragraph"><p>A string substitution can be either a string or a Lua function which shall return
+the substituted text.</p></div>
+<div class="ulist"><ul>
+<li>
+<p>
+When the susbtitution is defined as string, then the argument passed as <code><em>ARG</em></code> and the
+  resulting string will become recursively evaluated by the engine.
+</p>
+</li>
+<li>
+<p>
+When it is a function, then this function is responsible for calling recursive evaluation
+  on its arguments and results.
+</p>
+</li>
+</ul></div>
 <div class="paragraph"><p>Curly braces, can be escaped with backslashes or backtick characters. These
 characters can be escaped by themself.</p></div>
 <div class="listingblock">
@@ -3072,7 +3084,7 @@ Christian Thäter &lt;<a href="mailto:ct@pipapo.org">ct@pipapo.org</a>&gt; for i
 <div id="footer">
 <div id="footer-text">
 Last updated
- 2020-08-27 03:49:07 CEST
+ 2020-08-27 03:53:21 CEST
 </div>
 </div>
 </body>

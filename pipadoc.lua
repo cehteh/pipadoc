@@ -680,12 +680,12 @@ function strsubst(context, str, escape) --: substitute text
                         -- var must be fully resolved
                         if not var:match("%b{}") then
 
-                          if arg:match("%b{}") then
-                            trace(context, "strsubst_intern expand arg:", arg)
-                            arg = strsubst_intern(context, arg)
-                          end
-
                           if type(context[var]) == 'string' then
+
+                            if arg:match("%b{}") then
+                              trace(context, "strsubst_intern expand arg:", arg)
+                              arg = strsubst_intern(context, arg)
+                            end
 
                             if context[var]:match("%b{}") then
                               context.__ARG__ = arg
@@ -701,7 +701,7 @@ function strsubst(context, str, escape) --: substitute text
                             trace(context, "strsubst_intern expand function:", var, arg)
                             local ok, result = pcall(context[var], context, arg)
                             if ok then
-                              return strsubst(context, result, escape)
+                              return result or ""
                             else
                               warn(context, "strsubst function failed"..":", var, result) --cwarn.<HEXSTRING>: <STRING> ::
                               --cwarn.<HEXSTRING>:  Tried to call a custom function from 'strsubst()' which failed.
@@ -2249,24 +2249,26 @@ end
 --:
 --: Documentation text is be passed to the string substitution engine which recursively
 --: substitutes macros within curly braces. The substitutions are taken from the passed
---: context (and GLOBAL's). Strings are replaced, functions become evaluated.
+--: context (and GLOBAL's).
 --:
 --: When a docline is entirely a single string substitution (starting and ending with a
 --: curly brace) and the string substitution resulting in an empty string, then the
 --: whole line becomes dopped. If this is not intended one could add a second empty '{BRACED NIL}'
 --: string substitution to the line.
 --:
---: String substitutions names consist alphanumeric characters or underlines.
---: The names themself can be composed from string substitutions.
---: It may be followed with a delimiting character (space) and an optional argument string
---: which gets passed to functions or recursive string substitution. Names starting and ending
---: with 2 underscores are reserved to the implementation.
+--: String substitutions names consist of alphanumeric characters or underlines.
+--: These names themself can be composed from string substitutions (see example below).
+--: It may be followed with a delimiting character (space) and an optional argument string.
+--: This argument string gets passed to functions or recursive string substitutions. Names starting
+--: and ending with 2 underscores are reserved to the implementation.
 --:
---: The resulting string if a string substitution is subject of further recursive string
---: substitution. For this substitutions the '+++__ARG__+++' variable is set to the supplied
---: arguments from the calling context.
+--: A string substitution can be either a string or a Lua function which shall return
+--: the substituted text.
 --:
---: When the substitution is a function it takes the arguments as parameter.
+--: * When the susbtitution is defined as string, then the argument passed as +__ARG__+ and the
+--:   resulting string will become recursively evaluated by the engine.
+--: * When it is a function, then this function is responsible for calling recursive evaluation
+--:   on its arguments and results.
 --:
 --: Curly braces, can be escaped with backslashes or backtick characters. These
 --: characters can be escaped by themself.
