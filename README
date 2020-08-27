@@ -412,29 +412,8 @@ possible to (re-)define operators. Operators must be a single punctuation charac
 
 
 
-Configuration File
-------------------
-
-Pipadocs main objective is to scrape documentation comments from a project and generate
-output in desired order. Such an basic approach would be insufficient for many common cases.
-Thus pipadoc has pre and postprocessors and the string substitution engine to generate and
-modify documentation in an extensible way.
-
-Pipadoc tries to load a configuration file on startup. By default it is named
-+pipadoc_config.lua+ in the current directory. This name can be changed with the
-'--config' option.
-
-The configuration file is used to define pre- and post- processors, define states
-for those, define custom operators and string substitution macros. It is loaded and
-executed as it own chunk and may only access the global variables and
-API functions described below.
-
-Without a configuration file none of these processors are defined any only few
-variables for string substitution engine are set.
-
-
 Preprocessors
-~~~~~~~~~~~~~
+-------------
 
 One can register preprocessors per filetypes. A preprocessor can modify any line
 prior it gets parsed and further processed.
@@ -444,7 +423,7 @@ parts of the code to the documentation side.
 
 
 Postprocessors
-~~~~~~~~~~~~~~
+--------------
 
 Postprocessors run at output generation time. They are registered per markup type.
 Processors are called in order of their definition.
@@ -452,8 +431,8 @@ Processors are called in order of their definition.
 They are used to augment the generated output with markup specific things.
 
 
-String Substitutions
-~~~~~~~~~~~~~~~~~~~~
+String Substitution Engine
+--------------------------
 
 Documentation text is be passed to the string substitution engine which recursively
 substitutes macros within curly braces. The substitutions are taken from the passed
@@ -501,6 +480,32 @@ NOTE: The escaping rules become a bit complicated because one has to consider th
       Second the escaping rules of the string substitution engine itself (curly braces,
       backslashes and backticks). And finally the escaping rules of the targeted markup
       language.
+
+
+
+Configuration File
+------------------
+
+Pipadocs main objective is to scrape documentation comments from a project and generate
+output in desired order. Such an basic approach would be insufficient for many common cases.
+Thus pipadoc has pre and postprocessors and the string substitution engine to generate and
+modify documentation in an extensible way.
+
+Pipadoc tries to load a configuration file on startup. By default it is named
++pipadoc_config.lua+ in the current directory. This name can be changed with the
+'--config' option.
+
+The configuration file is used to define pre- and post- processors, define states
+for those, define custom operators and string substitution macros. It is loaded and
+executed as it own chunk and may only access the global variables and
+API functions described below.
+
+Without a configuration file none of these processors are defined any only few
+variables for string substitution engine are set.
+
+
+
+
 
 
 Shipped Configuration File
