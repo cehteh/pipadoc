@@ -65,6 +65,7 @@ local opt_nodefaults = false
 local opt_toplevel = "MAIN"
 local opt_aliases = {}
 local opt_inputs = {}
+local opt_list_sections = nil
 local opt_output = nil
 --PLANNED: make opt_config a list
 local opt_config = "pipadoc_config.lua"
@@ -367,7 +368,19 @@ local options = {
   "                        disables default filetypes and configfile loading", --:  <STRING>
   ["--no-defaults"] = function ()
     opt_nodefaults = true
-    dbg("nodefaults")
+    dbg(nil, "nodefaults")
+  end,
+  "", --:  <STRING>
+
+
+  "    --list-sections", --:  <STRING>
+  "                        Parses input and lists all sections on stdout", --:  <STRING>
+  "                        appended with '[section]', '[keys]' or [section keys]'", --:  <STRING>
+  "                        depending on the contents, includes '--dry-run'", --:  <STRING>
+  ["--list-sections"] = function ()
+    dbg(nil, "list-sections")
+    opt_dryrun = true
+    opt_list_sections = true
   end,
   "", --:  <STRING>
 
@@ -491,7 +504,6 @@ local options = {
   ["--"] = function () args_done=true end,
 
   --PLANNED: --list-filetypes
-  --PLANNED: --list-sections
   --PLANNED: eat (double, triple, ..) empty lines (do this in a postprocessor)
   --PLANNED: add debug report (warnings/errors) to generated document PIPADOC_LOG section
   --PLANNED: wrap at blank/intelligent -> postprocessor
@@ -851,6 +863,32 @@ function section_concat(section, key, context) --: Concat data to the given sect
     else
       table.insert(sections[section], context)
     end
+  end
+end
+
+function section_list(outfd) --: lists all sections
+  local sections_sorted = {}
+
+  for k in pairs(sections) do
+    table.insert(sections_sorted, k)
+  end
+
+  table.sort(sections_sorted, function(a,b) return tostring(a):lower() < tostring(b):lower() end)
+
+  for i=1,#sections_sorted do
+    outfd:write(sections_sorted[i])
+
+    local has_section = #sections[sections_sorted[i]] > 0
+    local has_keys = pairs(sections[sections_sorted[i]].keys)(sections[sections_sorted[i]].keys) and true
+
+    if has_section and has_keys then
+      outfd:write(" [section keys]")
+    elseif has_section then
+      outfd:write(" [section]")
+    elseif has_keys then
+      outfd:write(" [keys]")
+    end
+    outfd:write("\n")
   end
 end
 
@@ -1866,6 +1904,10 @@ do
   args_parse(arg)
   setup()
   inputs_process()
+
+  if opt_list_sections then
+    section_list(io.stdout)
+  end
 
   if opt_dryrun then
     os.exit(0)

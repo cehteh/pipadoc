@@ -2,7 +2,7 @@ pipadoc - Documentation extractor
 =================================
 :author:   Christian Thaeter
 :email:    ct@pipapo.org
-:date:     27. August 2020
+:date:     28. August 2020
 
 
 [preface]
@@ -95,6 +95,11 @@ generating output it is either send to _stdout_ or saved as a given output file.
  
      --no-defaults
                          disables default filetypes and configfile loading
+ 
+     --list-sections
+                         Parses input and lists all sections on stdout
+                         appended with '[section]', '[keys]' or [section keys]'
+                         depending on the contents, includes '--dry-run'
  
      -m, --markup <name>
                          selects the markup engine for the output [text]
@@ -870,6 +875,8 @@ section_concat(section, key, context):
   context:::
     The source line broken down into its components and additional pipadoc metadata
 
+section_list(outfd):
+ lists all sections
 
 Other functions
 ~~~~~~~~~~~~~~~
