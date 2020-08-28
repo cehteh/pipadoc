@@ -675,18 +675,15 @@ function strsubst(context, str, escape) --: substitute text
 
   local function strsubst_intern(context, str)
     trace(context, "strsubst_intern:", str)
-    context = context_new (context)
 
     return str:gsub("%b{}",
                     function (capture)
-                      local subst = false
-
                       local var, arg = capture:match("^{([%w_{}]*).?(.*)}$")
                       if var then
 
                         if var:match("%b{}") then
                           trace(context, "strsubst_intern expand var:", var)
-                          var = strsubst_intern(context, var)
+                          var = strsubst_intern(context_new(context), var)
                         end
 
                         -- var must be fully resolved
@@ -696,12 +693,12 @@ function strsubst(context, str, escape) --: substitute text
 
                             if arg:match("%b{}") then
                               trace(context, "strsubst_intern expand arg:", arg)
-                              arg = strsubst_intern(context, arg)
+                              arg = strsubst_intern(context_new(context), arg)
                             end
 
                             if context[var]:match("%b{}") then
                               context.__ARG__ = arg
-                              return strsubst(context, context[var], escape)
+                              return strsubst(context_new(context), context[var], escape)
                             end
 
                             return context[var]..arg
