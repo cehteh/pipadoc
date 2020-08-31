@@ -678,55 +678,58 @@ function strsubst(context, str, escape) --: substitute text
 
     return str:gsub("%b{}",
                     function (capture)
-                      local var, arg = capture:match("^{([%w_{}]*).?(.*)}$")
-                      if var then
+                      local macro, arg = capture:match("^{([%w_{}]*).?(.*)}$")
+                      if macro then
 
-                        if var:match("%b{}") then
-                          trace(context, "strsubst_intern expand var:", var)
-                          var = strsubst_intern(context_new(context), var)
+                        if macro:match("%b{}") then
+                          trace(context, "strsubst_intern expand macro:", macro)
+                          macro = strsubst_intern(context_new(context), macro)
                         end
 
-                        -- var must be fully resolved
-                        if not var:match("%b{}") then
+                        -- macro must be fully resolved
+                        if not macro:match("%b{}") then
 
-                          if type(context[var]) == 'string' then
+                          local expansion = context[macro]
+
+                          if type(expansion) == 'string' then
 
                             if arg:match("%b{}") then
                               trace(context, "strsubst_intern expand arg:", arg)
                               arg = strsubst_intern(context_new(context), arg)
                             end
 
-                            if context[var]:match("%b{}") then
-                              context.__ARG__ = arg
-                              return strsubst(context_new(context), context[var], escape)
+                            if expansion:match("%b{}") then
+                              trace(context, "strsubst_intern expand macro:", macro)
+                              return strsubst(context_new(context, {__ARG__ = arg}),
+                                              expansion)
                             end
 
-                            return context[var]..arg
+                            return expansion..arg
 
-                          elseif type(context[var]) == 'number' then
-                            return tostring(context[var])
+                          elseif type(expansion) == 'number' then
+                            return tostring(expansion)
 
-                          elseif type(context[var]) == 'function' then
-                            trace(context, "strsubst_intern expand function:", var, arg)
-                            local ok, result = pcall(context[var], context, arg)
+                          elseif type(expansion) == 'function' then
+                            trace(context, "strsubst_intern expand function:", macro, arg)
+                            local ok, result = pcall(expansion, context, arg)
                             if ok then
                               return result or ""
                             else
-                              warn(context, "strsubst function failed"..":", var, result) --cwarn.<HEXSTRING>: <STRING> ::
+                              warn(context, "strsubst function failed"..":", macro, result) --cwarn.<HEXSTRING>: <STRING> ::
                               --cwarn.<HEXSTRING>:  Tried to call a custom function from 'strsubst()' which failed.
                             end
 
-                          elseif var:match("^__[%w_]*__$") then
+                          elseif macro:match("^__[%w_]*__$") then
                             -- fallthrough __RESERVED__ name
 
-                          elseif context[var] == nil then
-                            warn(context, "strsubst no expansion"..":", var)  --cwarn.<HEXSTRING>: <STRING> ::
+                          elseif expansion == nil then
+                            warn(context, "strsubst no expansion"..":", macro)  --cwarn.<HEXSTRING>: <STRING> ::
                             --cwarn.<HEXSTRING>:  No substitution defined. Braced expression left verbatim.
                             --cwarn.<HEXSTRING>:  Possibly forgotten to escape the curly braces.
 
                           else
-                            warn(context, "strsubst type error"..":", var, type(context[var]))  --cwarn.<HEXSTRING>: <STRING> ::
-                            --cwarn.<HEXSTRING>:  strsubst() expects a string or a function for expansion.
+                            warn(context, "strsubst type error"..":", macro, type(expansion))  --cwarn.<HEXSTRING>: <STRING> ::
+                            --cwarn.<HEXSTRING>:  strsubst() expects a string, number or a function for expansion.
                           end
                         end
                       end
