@@ -1387,7 +1387,9 @@ local function setup()
         --oneline
         context.SECTION = context.SECTION or block_section
         strsubst_run(context, 'escape')
-        section_append(context.SECTION, context.KEY, context)
+        if context.TEXT then
+          section_append(context.SECTION, context.KEY, context)
+        end
       elseif context.TEXT == "" and (context.SECTION or context.KEY) then
         --block head
         block_section = context.SECTION or block_section
@@ -1398,7 +1400,9 @@ local function setup()
         context.SECTION = context.SECTION or block_section
         context.KEY = context.KEY or block_key
         strsubst_run(context, 'escape')
-        section_append(context.SECTION, context.KEY, context)
+        if context.TEXT then
+          section_append(context.SECTION, context.KEY, context)
+        end
       end
     end,
 
@@ -1429,7 +1433,9 @@ local function setup()
         --oneline
         context.SECTION = context.SECTION or block_section
         strsubst_run(context, 'escape')
-        section_concat(context.SECTION, context.KEY, context)
+        if context.TEXT then
+          section_concat(context.SECTION, context.KEY, context)
+        end
       elseif context.TEXT == "" and (context.SECTION or context.KEY) then
         --block head
         block_section = context.SECTION or block_section
@@ -1440,7 +1446,9 @@ local function setup()
         context.SECTION = context.SECTION or block_section
         context.KEY = context.KEY or block_key
         strsubst_run(context, 'escape')
-        section_concat(context.SECTION, context.KEY, context)
+        if context.TEXT then
+          section_concat(context.SECTION, context.KEY, context)
+        end
       end
     end,
 
