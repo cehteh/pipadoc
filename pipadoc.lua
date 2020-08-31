@@ -738,7 +738,7 @@ function strsubst(context, str, escape) --: substitute text
   end
 
   if escape == true or escape == 'escape' then
-    str =  str:gsub("[`\\]([{}\\])", strsubst_escapes)
+    str = strsubst_escape(str)
   end
 
   local ok, rstr = pcall(strsubst_intern, context, str)
@@ -751,11 +751,19 @@ function strsubst(context, str, escape) --: substitute text
   end
 
   if escape == true or escape == 'unescape'then
-    str = str:gsub("%b{}", strsubst_escapes_back)
+    str = strsubst_unescape(str)
   end
 
   trace(context, "strsubst done:", str)
   return str
+end
+
+function strsubst_escape(str) --: Turn escaped characters (backslash, backtick, curly braces) into an internal form.
+  return str:gsub("[`\\]([{}\\])", strsubst_escapes)
+end
+
+function strsubst_unescape(str) --: Turn the internal escaped charaters into their literals.
+  return str:gsub("%b{}", strsubst_escapes_back)
 end
 
 

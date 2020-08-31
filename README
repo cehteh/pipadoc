@@ -2,7 +2,7 @@ pipadoc - Documentation extractor
 =================================
 :author:   Christian Thaeter
 :email:    ct@pipapo.org
-:date:     28. August 2020
+:date:     31. August 2020
 
 
 [preface]
@@ -734,6 +734,10 @@ strsubst(context, str, escape):
     'escape':::: 1st pass, replaces escaped characters with a reserved internal representation.
     'unescape':::: 2nd pass, turns the reserved internal representation of escaped characters back into the native form.
     nil:::: no special escaping.
+strsubst_escape(str):
+ Turn escaped characters (backslash, backtick, curly braces) into an internal form.
+strsubst_unescape(str):
+ Turn the internal escaped charaters into their literals.
 
 .Examples
 ----
