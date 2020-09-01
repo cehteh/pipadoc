@@ -1399,6 +1399,113 @@ The resulting string from 2. dispatches on the markup language to one of the fol
       language.</td>
 </tr></table>
 </div>
+<div class="sect2">
+<h3 id="_string_substitution_language">String Substitution Language</h3>
+<div class="paragraph"><p>The string substitution engine comes with some macros predefined which implement a simple
+lisp-like programming language to allow conditional evaluation and (in future) other useful
+features.</p></div>
+<div class="sect3">
+<h4 id="_syntax_2">Syntax</h4>
+<div class="paragraph"><p>The string substitution engine supports only a simple syntax with a macro name and one
+single argument. The string substitution language extends that by parsing the argument in
+following ways:</p></div>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+Special Form
+</dt>
+<dd>
+<p>
+Use the argument as is, this may become recursively evaluated or not, depending on the
+actual macro implementation.
+</p>
+</dd>
+<dt class="hdlist1">
+Normal Form
+</dt>
+<dd>
+<p>
+Elements are single words separated by spaces and/or arbitary text (including spaces)
+written  within curly braces.
+</p>
+<div class="ulist"><ul>
+<li>
+<p>
+Single words are left unchaged as given
+</p>
+</li>
+<li>
+<p>
+Separating spaces are removed
+</p>
+</li>
+<li>
+<p>
+Text within curly braces becomes recursively evaluted with <em>strsubst()</em>
+</p>
+</li>
+<li>
+<p>
+When this evaluation result is completely within curly braces (no substitution done)
+  these braces are removed
+</p>
+</li>
+</ul></div>
+</dd>
+<dt class="hdlist1">
+Special Form
+</dt>
+<dd>
+<p>
+Use the argument as is, this may become recursively evaluated or not, depending on the
+actual macro implementation.
+</p>
+</dd>
+</dl></div>
+</div>
+<div class="sect3">
+<h4 id="_macros">Macros</h4>
+<div class="sect4">
+<h5 id="_special_forms">Special Forms</h5>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+<a id="index_LITERAL"></a><code>{LITERAL text&#8230;}</code> 
+</dt>
+<dd>
+<p>
+Returns <em>text</em> in literal, non evaluated form. Used to suppress
+recursive evaluation by other macros.
+</p>
+</dd>
+</dl></div>
+</div>
+<div class="sect4">
+<h5 id="_macro_definitions">Macro Definitions</h5>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+<a id="index_GLOBAL"></a><code>{GLOBAL &lt;name&gt; value&#8230;}</code> 
+</dt>
+<dd>
+<p>
+Defines a global macro <em>name</em> to <em>value</em>.
+<em>name</em> must be new and comply to the strsusbt naming rules. Redefining existing names
+yields an error. Results in an empty string.
+</p>
+</dd>
+</dl></div>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+<a id="index_DEFINE"></a><code>{DEFINE &lt;name&gt; value&#8230;}</code> 
+</dt>
+<dd>
+<p>
+Defines a local macro <em>name</em> to <em>value</em>.
+<em>name</em> must be new, redefining existing names yields an error.
+</p>
+</dd>
+</dl></div>
+</div>
+</div>
+</div>
 </div>
 </div>
 <div class="sect1">
@@ -1995,6 +2102,45 @@ assert(strsubst(context, "{UPPER {STR}}") == "EXAMPLE STRING")
 -- undefined names are kept verbatim
 assert(strsubst(context, "{undefined}") == "{undefined}")</code></pre>
 </div></div>
+<div class="sect4">
+<h5 id="_string_substitution_language_2">String Substitution Language</h5>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+<a id="index_strsubst_language_parse"></a> <code><strong>strsubst_language_parse(context, source)</strong></code>
+</dt>
+<dd>
+<p>
+ parses <em>source</em> into a list of arguments. Evaluates arguments within curly braces.
+</p>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+context
+</dt>
+<dd>
+<p>
+    The current context which defines all variables and macros.
+</p>
+</dd>
+<dt class="hdlist1">
+source
+</dt>
+<dd>
+<p>
+    The string to parse.
+</p>
+</dd>
+<dt class="hdlist1">
+<code>return</code>
+</dt>
+<dd>
+<p>
+    A list of parsed values
+</p>
+</dd>
+</dl></div>
+</dd>
+</dl></div>
+</div>
 </div>
 <div class="sect3">
 <h4 id="_filetypes_2">Filetypes</h4>
@@ -2472,6 +2618,14 @@ input file given twice
 </p>
 </dd>
 <dt class="hdlist1">
+macro already defined 
+</dt>
+<dd>
+<p>
+ Redefining an already existing macro is not allowed.
+</p>
+</dd>
+<dt class="hdlist1">
 no keys in section 
 </dt>
 <dd>
@@ -2485,6 +2639,14 @@ no such section
 <dd>
 <p>
  The given section is not defined.
+</p>
+</dd>
+<dt class="hdlist1">
+no valid name 
+</dt>
+<dd>
+<p>
+ {SET &lt;name&gt; &#8230;} called with non alphanumeric name
 </p>
 </dd>
 <dt class="hdlist1">
@@ -2872,6 +3034,13 @@ Christian Thäter &lt;<a href="mailto:ct@pipapo.org">ct@pipapo.org</a>&gt; for i
 </p>
 </dd>
 <dt class="hdlist1">
+<a href="#index_DEFINE">DEFINE</a> 
+</dt>
+<dd>
+<p>
+</p>
+</dd>
+<dt class="hdlist1">
 <a href="#index_die">die</a> 
 </dt>
 <dd>
@@ -2908,6 +3077,13 @@ Christian Thäter &lt;<a href="mailto:ct@pipapo.org">ct@pipapo.org</a>&gt; for i
 <div class="dlist"><dl>
 <dt class="hdlist1">
 <a href="#index_GIT_BLAME">GIT_BLAME</a> 
+</dt>
+<dd>
+<p>
+</p>
+</dd>
+<dt class="hdlist1">
+<a href="#index_GLOBAL">GLOBAL</a> 
 </dt>
 <dd>
 <p>
@@ -2985,6 +3161,13 @@ Christian Thäter &lt;<a href="mailto:ct@pipapo.org">ct@pipapo.org</a>&gt; for i
 </dd>
 <dt class="hdlist1">
 <a href="#index_LINEBREAK">LINEBREAK</a> 
+</dt>
+<dd>
+<p>
+</p>
+</dd>
+<dt class="hdlist1">
+<a href="#index_LITERAL">LITERAL</a> 
 </dt>
 <dd>
 <p>
@@ -3206,6 +3389,17 @@ Christian Thäter &lt;<a href="mailto:ct@pipapo.org">ct@pipapo.org</a>&gt; for i
 <dt class="hdlist1">
 <a href="#index_strsubst_escape">strsubst_escape</a> 
 </dt>
+<dd>
+<p>
+</p>
+</dd>
+<dt class="hdlist1">
+<a href="#index_strsubst_language_parse">strsubst_language_parse</a> 
+</dt>
+<dd>
+<p>
+</p>
+</dd>
 <dt class="hdlist1">
 <a href="#index_strsubst_unescape">strsubst_unescape</a> 
 </dt>
@@ -3300,7 +3494,7 @@ Christian Thäter &lt;<a href="mailto:ct@pipapo.org">ct@pipapo.org</a>&gt; for i
 <div id="footer">
 <div id="footer-text">
 Last updated
- 2020-09-01 17:31:29 CEST
+ 2020-09-01 21:32:08 CEST
 </div>
 </div>
 </body>

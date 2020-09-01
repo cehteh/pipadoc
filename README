@@ -506,6 +506,63 @@ NOTE: The escaping rules become a bit complicated because one has to consider th
       language.
 
 
+String Substitution Language
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The string substitution engine comes with some macros predefined which implement a simple
+lisp-like programming language to allow conditional evaluation and (in future) other useful
+features.
+
+Syntax
+^^^^^^
+
+The string substitution engine supports only a simple syntax with a macro name and one
+single argument. The string substitution language extends that by parsing the argument in
+following ways:
+
+Special Form::
+Use the argument as is, this may become recursively evaluated or not, depending on the
+actual macro implementation.
+
+Normal Form::
+Elements are single words separated by spaces and/or arbitary text (including spaces)
+written  within curly braces.
+* Single words are left unchaged as given
+* Separating spaces are removed
+* Text within curly braces becomes recursively evaluted with 'strsubst()'
+* When this evaluation result is completely within curly braces (no substitution done)
+  these braces are removed
+
+Special Form::
+Use the argument as is, this may become recursively evaluated or not, depending on the
+actual macro implementation.
+
+
+Macros
+^^^^^^
+
+
+Special Forms
++++++++++++++
+
+LITERAL text...:
+Returns 'text' in literal, non evaluated form. Used to suppress
+recursive evaluation by other macros.
+
+Macro Definitions
++++++++++++++++++
+
+GLOBAL <name> value...:
+Defines a global macro 'name' to 'value'.
+'name' must be new and comply to the strsusbt naming rules. Redefining existing names
+yields an error. Results in an empty string.
+
+
+DEFINE <name> value...:
+Defines a local macro 'name' to 'value'.
+'name' must be new, redefining existing names yields an error.
+
+
 
 Configuration File
 ------------------
@@ -803,6 +860,18 @@ assert(strsubst(context, "{undefined}") == "{undefined}")
 ----
 
 
+String Substitution Language
+++++++++++++++++++++++++++++
+
+strsubst_language_parse(context, source):
+ parses 'source' into a list of arguments. Evaluates arguments within curly braces.
+  context:::
+    The current context which defines all variables and macros.
+  source:::
+    The string to parse.
+  +return+:::
+    A list of parsed values
+
 Filetypes
 ^^^^^^^^^
 
@@ -964,10 +1033,14 @@ generator failed ::
  error in operators generator function.
 input file given twice ::
  Ignored a file given multiple times for input.
+macro already defined ::
+ Redefining an already existing macro is not allowed.
 no keys in section ::
  The given section has no key entries but should be sorted.
 no such section ::
  The given section is not defined.
+no valid name ::
+ {SET <name> ...} called with non alphanumeric name
 operator processing failed ::
  Error executing a operators processor.
 paste argument missing ::

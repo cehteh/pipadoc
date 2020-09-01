@@ -94,6 +94,8 @@ echo TESTPP becomes a docline
 #:
 #=strsubst
 #:
+#=strsubst_lang
+#:
 #: Empty and non-existing parameters
 #.:
 #=
@@ -207,6 +209,18 @@ echo TESTPP becomes a docline
 #: {NIL}{NIL}
 #: not dropped
 
+
+#strsubst_lang:
+#: LITERAL:
+#: {LITERAL foo {LITERAL bar} baz}
+#: GLOBAL:
+#: {GLOBAL global {global is set \{in braces\}}}{global}
+#: {global} again
+#: {GLOBAL global2}{global2}nop
+#: {GLOBAL global3 3}{global3}three
+#: DEFINE:
+#: {DEFINE test defined1}{test}
+#: {DEFINE test {defined 2}}{test}
 # expected results
 #> Pipadoc Testsuite
 #>
@@ -290,6 +304,17 @@ echo TESTPP becomes a docline
 #> line dropped
 #>
 #> not dropped
+#>
+#> LITERAL:
+#> foo {LITERAL bar} baz
+#> GLOBAL:
+#> global is set {in braces}
+#> global is set {in braces} again
+#> nop
+#> 3three
+#> DEFINE:
+#> defined1
+#> defined 2
 #>
 #> Empty and non-existing parameters
 #>

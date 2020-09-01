@@ -786,6 +786,139 @@ end
 
 
 
+--api_strsubst_lang:
+--:
+--: String Substitution Language
+--: ++++++++++++++++++++++++++++
+--:
+function strsubst_language_parse(context, source) --: parses 'source' into a list of
+  --+  arguments. Evaluates arguments within curly braces.
+  --:   context:::
+  --:     The current context which defines all variables and macros.
+  --:   source:::
+  --:     The string to parse.
+  --:   +return+:::
+  --:     A list of parsed values
+  assert_type(context, "table")
+  assert_type(source, "string")
+  trace(context, "strsubst_language_parse:", source)
+
+  local function pmatch(context, source)
+    local pos = 1
+
+    return function ()
+      local match, npos
+
+      match, npos = source:match("^%s*(%b{})()", pos)
+      if match then
+        pos = npos
+        match = strsubst(context, match)
+        match = match:match("^%b{}$") and match:match("^{(.*)}$") or match
+      else
+        match, npos = source:match("^%s*([^%s{}]+)()", pos)
+        pos = npos
+      end
+      return match
+    end
+  end
+
+  local result = {}
+
+  for value in pmatch(context, source) do
+    table.insert(result, value)
+  end
+
+  -- lua 5.1 and luajit provide global unpack() not table.unpack()
+  trace(context, "strsubst_language_parse result:", table.unpack and table.unpack(result) or unpack(result))
+  return result
+end
+
+
+
+
+
+function strsubst_language_init(context) -- initialize the string substitution language
+
+  --TODO: DOC strsusbt lang is activated at post
+  --PLANNED: option for disabling strsubst language
+
+  --strsubst_lang:
+  --:
+  --: Special Forms
+  --: +++++++++++++
+  --:
+  --: {MACRODEF LITERAL text...}
+  --: Returns 'text' in literal, non evaluated form. Used to suppress
+  --: recursive evaluation by other macros.
+  --:
+  context.LITERAL = function (context, arg)
+    return arg
+  end
+
+
+  --: Macro Definitions
+  --: +++++++++++++++++
+  --:
+  --: {MACRODEF GLOBAL <name> value...}
+  --: Defines a global macro 'name' to 'value'.
+  --: 'name' must be new and comply to the strsusbt naming rules. Redefining existing names
+  --: yields an error. Results in an empty string.
+  --:
+  context.GLOBAL = function (context, arg)
+    local args = strsubst_language_parse(context, arg)
+
+    local name = args[1]
+
+    if name and name:match("^%a[%w_]*$") then
+      local value = args[2] or ""
+
+      if context[name] == nil then
+        GLOBAL[name] = value
+      else
+        warn(nil, "macro already defined"..":", name) --cwarn.<HEXSTRING>: <STRING> ::
+        --cwarn.<HEXSTRING>:  Redefining an already existing macro is not allowed.
+      end
+    else
+      warn(nil, "no valid name"..":", name) --cwarn.<HEXSTRING>: <STRING> ::
+      --cwarn.<HEXSTRING>:  {BRACED SET <name> ...} called with non alphanumeric name
+    end
+  end
+
+
+
+  --:
+  --: {MACRODEF DEFINE <name> value...}
+  --: Defines a local macro 'name' to 'value'.
+  --: 'name' must be new, redefining existing names yields an error.
+  --:
+  context.DEFINE = function (context, arg)
+    local args = strsubst_language_parse(context, arg)
+
+    local name = args[1]
+
+    if name and name:match("^%a[%w_]*$") then
+      local value = args[2] or ""
+
+      if context[name] == nil then
+        context[name] = value
+      else
+        warn(nil, "macro already defined"..":", name)
+      end
+    else
+      warn(nil, "no valid name"..":", name)
+    end
+  end
+
+
+
+
+
+
+end
+
+
+
+
 
 
 ----------------------
@@ -1961,6 +2094,8 @@ do
   --activate GLOBAL_POST for postprocessing
   setmetatable(GLOBAL, {__index = GLOBAL_POST})
 
+  strsubst_language_init (GLOBAL_POST)
+
   for i=1,#output do
     postprocessors_run(output[i])
     if output[i].TEXT then
@@ -2372,6 +2507,43 @@ end
 --:       language.
 --:
 --:
+--: String Substitution Language
+--: ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+--:
+--: The string substitution engine comes with some macros predefined which implement a simple
+--: lisp-like programming language to allow conditional evaluation and (in future) other useful
+--: features.
+--:
+--: Syntax
+--: ^^^^^^
+--:
+--: The string substitution engine supports only a simple syntax with a macro name and one
+--: single argument. The string substitution language extends that by parsing the argument in
+--: following ways:
+--:
+--: Special Form::
+--: Use the argument as is, this may become recursively evaluated or not, depending on the
+--: actual macro implementation.
+--:
+--: Normal Form::
+--: Elements are single words separated by spaces and/or arbitary text (including spaces)
+--: written  within curly braces.
+--: * Single words are left unchaged as given
+--: * Separating spaces are removed
+--: * Text within curly braces becomes recursively evaluted with 'strsubst()'
+--: * When this evaluation result is completely within curly braces (no substitution done)
+--:   these braces are removed
+--:
+--: Special Form::
+--: Use the argument as is, this may become recursively evaluated or not, depending on the
+--: actual macro implementation.
+--:
+--:
+--: Macros
+--: ^^^^^^
+--:
+--=strsubst_lang
+--:
 --:
 --: Configuration File
 --: ------------------
@@ -2488,6 +2660,7 @@ end
 --=api_typeconv
 --=api_strsubst
 --=api_strsubst_example
+--=api_strsubst_lang
 --=api_filetypes
 --=api_op
 --=api_preproc
