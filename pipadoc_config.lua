@@ -76,14 +76,18 @@ preprocessor_register ("^lua$",
 
 
 --shipped_config_subst:
---: * '{BRACED BRACED argument}' puts 'argument' in curly braces. Escapes this curly braces
---:   depending on the markup engine selected.
+--: {MACRODEF BRACED argument}
+--: Puts 'argument' in curly braces. Escapes this curly braces
+--: depending on the markup engine selected that they appear in the output.
+--:
 GLOBAL.BRACED = "{BRACED_{MARKUP} {__ARG__}}"
-GLOBAL.BRACED_text = "`{{__ARG__}`}"
-GLOBAL.BRACED_asciidoc = "\\`{{__ARG__}\\`}"
+GLOBAL.BRACED_text = "{__BRACEOPEN__}{__ARG__}{__BRACECLOSE__}"
+GLOBAL.BRACED_asciidoc = "{__BACKSLASH__}{__BRACEOPEN__}{__ARG__}{__BRACECLOSE__}"
 
 --shipped_config_subst:
---: * '{LINEBREAK}' puts a forced linebreak into the markup
+--: {MACRODEF LINEBREAK}
+--: Emit a forced linebreak into the markup.
+--:
 GLOBAL.LINEBREAK = "{LINEBREAK_{MARKUP}}"
 GLOBAL.LINEBREAK_text = "`{NL}"
 GLOBAL.LINEBREAK_asciidoc = " +{NL}"
@@ -92,8 +96,10 @@ GLOBAL.LINEBREAK_asciidoc = " +{NL}"
 --PLANNED: ESCAPE function which escapes all strsubst
 
 --shipped_config_subst:
---: * '{BRACED LUA_FNDEF}' Lifts a Lua function definition to the documentation text.
---:   Used by the Lua documentation preprocessor.
+--: {MACRODEF LUA_FNDEF}
+--: Lift a Lua function definition to the documentation text.
+--: Used by the Lua documentation preprocessor.
+--:
 GLOBAL.LUA_FNDEF = "{LUA_FNDEF_{MARKUP}}"
 
 GLOBAL.LUA_FNDEF_text = function (context)
@@ -112,9 +118,10 @@ end
 
 
 --shipped_config_subst:
---: * '\{VARDEF name\}' generates a header and index entry for 'name'.
---:   Used for documentaton of GLOBAL and CONTEXT variables (pipadoc's own documentation).
---:   Defined for asciidoc and text backends.
+--: {MACRODEF VARDEF name}
+--: Generate a header and index entry for 'name'. Used for documentaton of GLOBAL and CONTEXT variables
+--: (pipadoc's own documentation).
+--:
 GLOBAL.VARDEF = "{VARDEF_{MARKUP} {__ARG__}}"
 
 GLOBAL.VARDEF_text = function (context, arg)
@@ -165,7 +172,51 @@ end
 
 
 --shipped_config_subst:
---: * '\{INDEX_ENTRY name\}' Entry in the index that refers back to 'name'.
+--: {MACRODEF MACRODEF example}
+--: generates a header and index entry for a macro. Used for documentaton of the string substitution language.
+--:
+GLOBAL.MACRODEF = "{MACRODEF_{MARKUP} {__ARG__}}"
+
+GLOBAL.MACRODEF_text = function (context, arg)
+  arg = strsubst(context, arg)
+  ix = arg:match("%S*")
+
+  section_append("INDEX", ix:lower(),
+                 context_new (context,{TEXT="{INDEX_ENTRY "..ix.."}"})
+  )
+
+  return strsubst(context, ""..arg..":")
+end
+
+GLOBAL.MACRODEF_asciidoc = function (context, arg)
+  arg = strsubst(context, arg)
+  ix = arg:match("%S*")
+
+  section_append("INDEX", ix:lower(),
+                 context_new (context,{TEXT="{INDEX_ENTRY "..ix.."}"})
+  )
+
+  return strsubst(context, "anchor:index_"..ix.."[]+\\\\{"..arg.."\\}+ ::", 'escape')
+end
+
+
+GLOBAL.MACRODEF_orgmode = function (context, arg)
+  arg = strsubst(context, arg)
+  ix = arg:match("%S*")
+
+  section_append("INDEX", ix:lower(),
+                 context_new (context,{TEXT="{INDEX_ENTRY "..ix.."}"})
+  )
+
+  --TODO: anchor not implemented yet
+  return strsubst(context, "- -"..arg.."- ::")
+end
+
+
+--shipped_config_subst:
+--: {MACRODEF INDEX_ENTRY name}
+--: Create an entry in the index that refers back to 'name'.
+--:
 local lastfirstchar= nil
 
 GLOBAL.INDEX_ENTRY = "{INDEX_ENTRY_{MARKUP} {__ARG__}}"
@@ -262,8 +313,9 @@ postprocessor_register ("^asciidoc$",
 if GLOBAL.GIT then
 
   --shipped_config_subst:
-  --: * '\\{GIT_BLAME\}' Insert a 'git blame' report about the current line.
-  --:   Refer to the source for details.
+  --: {MACRODEF GIT_BLAME}
+  --: Inserts a 'git blame' report about the current line.
+  --: Refer to the source for details.
   GLOBAL.GIT_BLAME = function (context)
     local git = io.popen("git blame '"..context.FILE.."' -L "..tostring(context.LINE)..",+1 -p 2>/dev/null")
 

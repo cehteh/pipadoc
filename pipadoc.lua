@@ -2311,8 +2311,8 @@ end
 --:
 --: When a docline is entirely a single string substitution (starting and ending with a
 --: curly brace) and the string substitution resulting in an empty string, then the
---: whole line becomes dopped. If this is not intended one could add a second empty '{BRACED NIL}'
---: string substitution to the line.
+--: whole line becomes dopped. If this is not intended one could add a second empty
+--: '{BRACED NIL}' FOO string substitution to the line.
 --:
 --: String substitutions names consist of alphanumeric characters or underlines.
 --: These names themself can be composed from string substitutions (see example below).
@@ -2328,30 +2328,47 @@ end
 --: * When it is a function, then this function is responsible for calling recursive evaluation
 --:   on its arguments and results.
 --:
---: Curly braces, can be escaped with backslashes or backtick characters. These
---: characters can be escaped by themself.
+--: Curly braces, can be escaped with backslashes or backtick characters. These characters can
+--: be escaped by themself. This escaping works by replacing the respective characters with
+--: reserved macros first and finally after all other processing is done move these back to
+--: their literal characters. This macros can be used when defining macros that contain some
+--: of this special characters.
 --:
---: .Example
+--: .The reserved macros are:
+--: {VARDEF __BACKSLASH__}
+--:   The backslash character: +{__BACKSLASH__}+
+--:
+--: {VARDEF __BACKTICK__}
+--:   The backtick character: +{__BACKTICK__}+
+--:
+--: {VARDEF __BRACEOPEN__}
+--:   The opening curly brace: +{__BRACEOPEN__}+
+--:
+--: {VARDEF __BRACECLOSE__}
+--:   The closing curly brace: +{__BRACECLOSE__}+
+--:
+--: .String Substitution Example
 --: -----
 --: GLOBAL.SIMPLE = "a simple example"
 --: GLOBAL.BRACED = "\{BRACED_\{MARKUP\} \{__ARG__\}\}"
---: GLOBAL.BRACED_text = "``{{__ARG__}``}"
---: GLOBAL.BRACED_asciidoc = "\\\\``{{__ARG__}\\\\``}"
+--: GLOBAL.BRACED_text = "\{__BRACEOPEN__\}\{__ARG__\}\{__BRACECLOSE__\}"
+--: GLOBAL.BRACED_asciidoc = "\{__BACKSLASH__\}\{__BRACEOPEN__\}\{__ARG__\}\{__BRACECLOSE__\}"
 --: -----
 --:
 --: .Explanation:
---: . '{BRACED SIMPLE}' would expand to 'a simple example'
---: . 'BRACED_{BRACED MARKUP}' gets expanded to 'BRACED_<markup>', where '<markup>' is the
---:   defined markup language to use.
+--: . '{BRACED SIMPLE}' will expand to 'a simple example'
+--: . In 'BRACED_{BRACED MARKUP}', '{BRACED MARKUP}' becomes replaced with the defined markup
+--:   language to use.
 --: . The argument get passed along with '{BRACED +++__ARG__+++}'.
---: . The resulting string from 1. dispatches on the markup language to one of the following.
+--: . The resulting string from 2. dispatches on the markup language to one of the following.
 --: . 'BRACED_text' defines how the braces are rendered around '+++__ARG__+++' in text markup.
 --: . 'BRACED_asciidoc' does the same for asciidoc output.
 --:
 --: NOTE: The escaping rules become a bit complicated because one has to consider the escaping
 --:       rules of all components involved. This is first Lua when assigned in literal strings.
 --:       Second the escaping rules of the string substitution engine itself (curly braces,
---:       backslashes and backticks). And finally the escaping rules of the targeted markup
+--:       backslashes and backticks). Possibly the escaping rules of the source language wher
+--:       the documentation is hosted and finally the escaping rules of the targeted markup
 --:       language.
 --:
 --:
