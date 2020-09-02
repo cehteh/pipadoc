@@ -563,8 +563,8 @@ Predicates
 ++++++++++
 
 Predicates take a list of arguments and evaluate to a truth value. In strsubst *true* is
-any non-empty text and *false* is an empty string. *false* in the descriptions below
-always means an empty string. Whereas *true* becomes a literal "true".
+any non-empty text and *false* is an empty string. The string substitution engine will
+convert bool types and nil into respective strings.
 
 BOOL ... <special>:
   Translates a text (which may include spaces) into the logic value *true* or an empty string.

@@ -713,6 +713,11 @@ function strsubst(context, str, escape) --: substitute text
                             trace(context, "strsubst_intern expand function:", macro, arg)
                             local ok, result = pcall(expansion, context, arg)
                             if ok then
+                              if result == true then
+                                result = "true"
+                              elseif type(result) == 'number' then
+                                result = tostring(result)
+                              end
                               return result or ""
                             else
                               warn(context, "strsubst function failed"..":", macro, result) --cwarn.<HEXSTRING>: <STRING> ::
@@ -915,17 +920,15 @@ function strsubst_language_init(context) -- initialize the string substitution l
   --: ++++++++++
   --:
   --: Predicates take a list of arguments and evaluate to a truth value. In strsubst *true* is
-  --: any non-empty text and *false* is an empty string. *false* in the descriptions below
-  --: always means an empty string. Whereas *true* becomes a literal "true".
-  --
-  -- API NOTE: returning nothing will be susbtituted by an empty string
+  --: any non-empty text and *false* is an empty string. The string substitution engine will
+  --: convert bool types and nil into respective strings.
   --:
   --: {MACRODEFSP BOOL ...}
   --:   Translates a text (which may include spaces) into the logic value *true* or an empty string.
   --:
   context.BOOL = function (context, arg)
     if #arg > 0 then
-      return "true"
+      return true
     end
   end
 
@@ -936,7 +939,7 @@ function strsubst_language_init(context) -- initialize the string substitution l
   --:
   context.NOT = function (context, arg)
     if #arg == 0 then
-      return "true"
+      return true
     end
   end
 
@@ -948,7 +951,7 @@ function strsubst_language_init(context) -- initialize the string substitution l
     local args = strsubst_language_parse(context, arg)
     for i=1,#args do
       if #args[i] > 0 then
-        return "true"
+        return true
       end
     end
   end
@@ -964,7 +967,7 @@ function strsubst_language_init(context) -- initialize the string substitution l
         return
       end
     end
-    return "true"
+    return true
   end
 
 
