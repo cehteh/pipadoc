@@ -2030,7 +2030,7 @@ function output_sort(section, op, output)
   assert_type(section.keys, 'table')
   assert_char(op)
   assert(string.find("@#$", op, 1, true), "No such sort operator")
-  assert_type(output, 'table')
+  maybe_type(output, 'table')
   dbg(nil, "output_sort:", section.name)
 
   --PLANNED: rule based / table for sort operators, opchar = \{filter, compare\}
@@ -2067,9 +2067,13 @@ function output_sort(section, op, output)
     end
   end
 
-  for i=1,#sorted do
-    output_paste(section.keys[sorted[i]], output)
+  if output then
+    for i=1,#sorted do
+      output_paste(section.keys[sorted[i]], output)
+    end
   end
+
+  return #sorted
 end
 
 function orphan_doublet_report()
