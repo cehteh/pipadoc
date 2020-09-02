@@ -230,6 +230,20 @@ echo TESTPP becomes a docline
 #: {OR {} {} {yes}}.
 #: {AND {yes} {yes} {yes}}.
 #: {AND {no} {no} {}}false.
+#: HAVE
+#: {HAVE oneline}.
+#: {HAVE $oneline}.
+#: {HAVE oneline $oneline}.
+#: {HAVE doesnotexist}false.
+#: {HAVE @doesnotexist}false.
+#: {HAVE oneline $oneline @doesnotexist}false.
+#: {HAVENOT oneline}false.
+#: {HAVENOT $oneline}false.
+#: {HAVENOT oneline $oneline}false.
+#: {HAVENOT doesnotexist}.
+#: {HAVENOT @doesnotexist}.
+#: {HAVENOT oneline $oneline @doesnotexist}false.
+#: {HAVENOT doesnotexist @doesnotexist}.
 # expected results
 #> Pipadoc Testsuite
 #>
@@ -333,6 +347,20 @@ echo TESTPP becomes a docline
 #> true.
 #> true.
 #> false.
+#> HAVE
+#> true.
+#> true.
+#> true.
+#> false.
+#> false.
+#> false.
+#> false.
+#> false.
+#> false.
+#> true.
+#> true.
+#> false.
+#> true.
 #>
 #> Empty and non-existing parameters
 #>

@@ -48,6 +48,8 @@ GLOBAL = {
 
 GLOBAL_POST = {}
 
+local sections = {}
+
 local gcontext = setmetatable(
   {
     --context:file {VARDEF FILE}
@@ -971,6 +973,57 @@ function strsubst_language_init(context) -- initialize the string substitution l
   end
 
 
+  --: {MACRODEF HAVE sectiondescs...}
+  --:   Results in 'true' when all sections described by 'sectiondescs' contains text.
+  --:   'sectiondesc' is an optional sorting or pasting operator followed by a section name.
+  --:
+  context.HAVE = function (context, arg)
+    local args = strsubst_language_parse(context, arg)
+    for i=1,#args do
+      local op, section = args[i]:match("(%p?)(.*)")
+      if not sections[section] then
+        return
+      end
+      if op == "" or op == "=" then
+        -- plain/past section
+        if #sections[section] == 0 then
+          return
+        end
+      else
+        -- op sorted
+        if output_sort(sections[section], op) == 0 then
+          return
+        end
+      end
+    end
+    return true
+  end
+
+
+  --: {MACRODEF HAVENOT sectiondescs...}
+  --:   Results in 'true' when all sections described by 'sectiondescs' are empty.
+  --:   'sectiondesc' is an optional sorting or pasting operator followed by a section name.
+  --:
+  context.HAVENOT = function (context, arg)
+    local args = strsubst_language_parse(context, arg)
+    for i=1,#args do
+      local op, section = args[i]:match("(%p?)(.*)")
+      if sections[section] then
+        if op == "" or op == "=" then
+          -- plain/past section
+          if #sections[section] > 0 then
+            return
+          end
+        else
+          -- op sorted
+          if output_sort(sections[section], op) > 0 then
+            return
+          end
+        end
+      end
+    end
+    return true
+  end
 
 
 end
@@ -999,8 +1052,6 @@ end
 --: This default name for the 'toplevel' section is 'MAIN_{BRACED markup}' or if that does not exist
 --: just 'MAIN'.
 --:
-
-local sections = {}
 
 --api_sections:
 --:

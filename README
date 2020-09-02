@@ -579,6 +579,14 @@ OR arguments...:
 AND arguments...:
   Results in 'false' when one of the arguments is *false*.
 
+HAVE sectiondescs...:
+  Results in 'true' when all sections described by 'sectiondescs' contains text.
+  'sectiondesc' is an optional sorting or pasting operator followed by a section name.
+
+HAVENOT sectiondescs...:
+  Results in 'true' when all sections described by 'sectiondescs' are empty.
+  'sectiondesc' is an optional sorting or pasting operator followed by a section name.
+
 
 
 Configuration File
