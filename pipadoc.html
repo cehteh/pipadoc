@@ -737,7 +737,7 @@ asciidoc.install(2);
 <h1>pipadoc - Documentation extractor</h1>
 <span id="author">Christian Thaeter</span><br />
 <span id="email"><code>&lt;<a href="mailto:ct@pipapo.org">ct@pipapo.org</a>&gt;</code></span><br />
-<span id="revdate">1. September 2020</span>
+<span id="revdate">2. September 2020</span>
 <div id="toc">
   <div id="toctitle">Table of Contents</div>
   <noscript><p><b>JavaScript must be enabled in your browser to display the table of contents.</b></p></noscript>
@@ -1411,15 +1411,6 @@ single argument. The string substitution language extends that by parsing the ar
 following ways:</p></div>
 <div class="dlist"><dl>
 <dt class="hdlist1">
-Special Form
-</dt>
-<dd>
-<p>
-Use the argument as is, this may become recursively evaluated or not, depending on the
-actual macro implementation.
-</p>
-</dd>
-<dt class="hdlist1">
 Normal Form
 </dt>
 <dd>
@@ -1456,8 +1447,8 @@ Special Form
 </dt>
 <dd>
 <p>
-Use the argument as is, this may become recursively evaluated or not, depending on the
-actual macro implementation.
+Use argument as single text not parsed into multiple arguments. It may become recursively
+evaluated or not, depending on the actual macro implementation.
 </p>
 </dd>
 </dl></div>
@@ -1465,10 +1456,10 @@ actual macro implementation.
 <div class="sect3">
 <h4 id="_macros">Macros</h4>
 <div class="sect4">
-<h5 id="_special_forms">Special Forms</h5>
+<h5 id="_metasyntactic">Metasyntactic</h5>
 <div class="dlist"><dl>
 <dt class="hdlist1">
-<a id="index_LITERAL"></a><code>{LITERAL text&#8230;}</code> 
+<a id="index_LITERAL"></a><code>{LITERAL text&#8230;}</code> <em><sup>special</sup></em> 
 </dt>
 <dd>
 <p>
@@ -3494,7 +3485,7 @@ Christian Thäter &lt;<a href="mailto:ct@pipapo.org">ct@pipapo.org</a>&gt; for i
 <div id="footer">
 <div id="footer-text">
 Last updated
- 2020-09-01 21:32:08 CEST
+ 2020-09-02 02:18:26 CEST
 </div>
 </div>
 </body>

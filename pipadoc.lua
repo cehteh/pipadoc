@@ -844,10 +844,10 @@ function strsubst_language_init(context) -- initialize the string substitution l
 
   --strsubst_lang:
   --:
-  --: Special Forms
+  --: Metasyntactic
   --: +++++++++++++
   --:
-  --: {MACRODEF LITERAL text...}
+  --: {MACRODEFSP LITERAL text...}
   --: Returns 'text' in literal, non evaluated form. Used to suppress
   --: recursive evaluation by other macros.
   --:
@@ -2521,10 +2521,6 @@ end
 --: single argument. The string substitution language extends that by parsing the argument in
 --: following ways:
 --:
---: Special Form::
---: Use the argument as is, this may become recursively evaluated or not, depending on the
---: actual macro implementation.
---:
 --: Normal Form::
 --: Elements are single words separated by spaces and/or arbitary text (including spaces)
 --: written  within curly braces.
@@ -2535,8 +2531,8 @@ end
 --:   these braces are removed
 --:
 --: Special Form::
---: Use the argument as is, this may become recursively evaluated or not, depending on the
---: actual macro implementation.
+--: Use argument as single text not parsed into multiple arguments. It may become recursively
+--: evaluated or not, depending on the actual macro implementation.
 --:
 --:
 --: Macros

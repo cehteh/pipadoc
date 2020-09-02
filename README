@@ -2,7 +2,7 @@ pipadoc - Documentation extractor
 =================================
 :author:   Christian Thaeter
 :email:    ct@pipapo.org
-:date:     1. September 2020
+:date:     2. September 2020
 
 
 [preface]
@@ -520,10 +520,6 @@ The string substitution engine supports only a simple syntax with a macro name a
 single argument. The string substitution language extends that by parsing the argument in
 following ways:
 
-Special Form::
-Use the argument as is, this may become recursively evaluated or not, depending on the
-actual macro implementation.
-
 Normal Form::
 Elements are single words separated by spaces and/or arbitary text (including spaces)
 written  within curly braces.
@@ -534,18 +530,18 @@ written  within curly braces.
   these braces are removed
 
 Special Form::
-Use the argument as is, this may become recursively evaluated or not, depending on the
-actual macro implementation.
+Use argument as single text not parsed into multiple arguments. It may become recursively
+evaluated or not, depending on the actual macro implementation.
 
 
 Macros
 ^^^^^^
 
 
-Special Forms
+Metasyntactic
 +++++++++++++
 
-LITERAL text...:
+LITERAL text... <special>:
 Returns 'text' in literal, non evaluated form. Used to suppress
 recursive evaluation by other macros.
 

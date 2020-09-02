@@ -212,6 +212,43 @@ GLOBAL.MACRODEF_orgmode = function (context, arg)
   return strsubst(context, "- -"..arg.."- ::")
 end
 
+GLOBAL.MACRODEFSP = "{MACRODEFSP_{MARKUP} {__ARG__}}"
+
+GLOBAL.MACRODEFSP_text = function (context, arg)
+  arg = strsubst(context, arg)
+  ix = arg:match("%S*")
+
+  section_append("INDEX", ix:lower(),
+                 context_new (context,{TEXT="{INDEX_ENTRY "..ix.."}"})
+  )
+
+  return strsubst(context, ""..arg.." <special>:")
+end
+
+GLOBAL.MACRODEFSP_asciidoc = function (context, arg)
+  arg = strsubst(context, arg)
+  ix = arg:match("%S*")
+
+  section_append("INDEX", ix:lower(),
+                 context_new (context,{TEXT="{INDEX_ENTRY "..ix.."}"})
+  )
+
+  return strsubst(context, "anchor:index_"..ix.."[]+\\\\{"..arg.."\\}+ _^special^_ ::", 'escape')
+end
+
+
+GLOBAL.MACRODEFSP_orgmode = function (context, arg)
+  arg = strsubst(context, arg)
+  ix = arg:match("%S*")
+
+  section_append("INDEX", ix:lower(),
+                 context_new (context,{TEXT="{INDEX_ENTRY "..ix.."}"})
+  )
+
+  --PLANNED:A anchor not implemented yet
+  return strsubst(context, "- -"..arg.."- <special> ::")
+end
+
 
 --shipped_config_subst:
 --: {MACRODEF INDEX_ENTRY name}
