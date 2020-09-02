@@ -221,6 +221,15 @@ echo TESTPP becomes a docline
 #: DEFINE:
 #: {DEFINE test defined1}{test}
 #: {DEFINE test {defined 2}}{test}
+#: PREDICATES:
+#: {BOOL yes yes yes}.
+#: {BOOL }false.
+#: {NOT no no no}false.
+#: {NOT }.
+#: {OR {} {} {}}false.
+#: {OR {} {} {yes}}.
+#: {AND {yes} {yes} {yes}}.
+#: {AND {no} {no} {}}false.
 # expected results
 #> Pipadoc Testsuite
 #>
@@ -315,6 +324,15 @@ echo TESTPP becomes a docline
 #> DEFINE:
 #> defined1
 #> defined 2
+#> PREDICATES:
+#> true.
+#> false.
+#> false.
+#> true.
+#> false.
+#> true.
+#> true.
+#> false.
 #>
 #> Empty and non-existing parameters
 #>

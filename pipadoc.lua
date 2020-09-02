@@ -910,6 +910,62 @@ function strsubst_language_init(context) -- initialize the string substitution l
   end
 
 
+  --:
+  --: Predicates
+  --: ++++++++++
+  --:
+  --: Predicates take a list of arguments and evaluate to a truth value. In strsubst *true* is
+  --: any non-empty text and *false* is an empty string. *false* in the descriptions below
+  --: always means an empty string. Whereas *true* becomes a literal "true".
+  --
+  -- API NOTE: returning nothing will be susbtituted by an empty string
+  --:
+  --: {MACRODEFSP BOOL ...}
+  --:   Translates a text (which may include spaces) into the logic value *true* or an empty string.
+  --:
+  context.BOOL = function (context, arg)
+    if #arg > 0 then
+      return "true"
+    end
+  end
+
+
+  --: {MACRODEFSP NOT ...}
+  --:   Negates the truth of the argument. An empty string will substitute with *true*
+  --:   and any non-empty string will result in *false*.
+  --:
+  context.NOT = function (context, arg)
+    if #arg == 0 then
+      return "true"
+    end
+  end
+
+
+  --: {MACRODEF OR arguments...}
+  --:   Results in 'true' when one of the arguments is *true*.
+  --:
+  context.OR = function (context, arg)
+    local args = strsubst_language_parse(context, arg)
+    for i=1,#args do
+      if #args[i] > 0 then
+        return "true"
+      end
+    end
+  end
+
+
+  --: {MACRODEF AND arguments...}
+  --:   Results in 'false' when one of the arguments is *false*.
+  --:
+  context.AND = function (context, arg)
+    local args = strsubst_language_parse(context, arg)
+    for i=1,#args do
+      if #args[i] == 0 then
+        return
+      end
+    end
+    return "true"
+  end
 
 
 

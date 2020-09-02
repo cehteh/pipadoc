@@ -559,6 +559,27 @@ Defines a local macro 'name' to 'value'.
 'name' must be new, redefining existing names yields an error.
 
 
+Predicates
+++++++++++
+
+Predicates take a list of arguments and evaluate to a truth value. In strsubst *true* is
+any non-empty text and *false* is an empty string. *false* in the descriptions below
+always means an empty string. Whereas *true* becomes a literal "true".
+
+BOOL ... <special>:
+  Translates a text (which may include spaces) into the logic value *true* or an empty string.
+
+NOT ... <special>:
+  Negates the truth of the argument. An empty string will substitute with *true*
+  and any non-empty string will result in *false*.
+
+OR arguments...:
+  Results in 'true' when one of the arguments is *true*.
+
+AND arguments...:
+  Results in 'false' when one of the arguments is *false*.
+
+
 
 Configuration File
 ------------------

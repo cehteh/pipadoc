@@ -1495,6 +1495,53 @@ Defines a local macro <em>name</em> to <em>value</em>.
 </dd>
 </dl></div>
 </div>
+<div class="sect4">
+<h5 id="_predicates">Predicates</h5>
+<div class="paragraph"><p>Predicates take a list of arguments and evaluate to a truth value. In strsubst <strong>true</strong> is
+any non-empty text and <strong>false</strong> is an empty string. <strong>false</strong> in the descriptions below
+always means an empty string. Whereas <strong>true</strong> becomes a literal "true".</p></div>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+<a id="index_BOOL"></a><code>{BOOL &#8230;}</code> <em><sup>special</sup></em> 
+</dt>
+<dd>
+<p>
+  Translates a text (which may include spaces) into the logic value <strong>true</strong> or an empty string.
+</p>
+</dd>
+</dl></div>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+<a id="index_NOT"></a><code>{NOT &#8230;}</code> <em><sup>special</sup></em> 
+</dt>
+<dd>
+<p>
+  Negates the truth of the argument. An empty string will substitute with <strong>true</strong>
+  and any non-empty string will result in <strong>false</strong>.
+</p>
+</dd>
+</dl></div>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+<a id="index_OR"></a><code>{OR arguments&#8230;}</code> 
+</dt>
+<dd>
+<p>
+  Results in <em>true</em> when one of the arguments is <strong>true</strong>.
+</p>
+</dd>
+</dl></div>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+<a id="index_AND"></a><code>{AND arguments&#8230;}</code> 
+</dt>
+<dd>
+<p>
+  Results in <em>false</em> when one of the arguments is <strong>false</strong>.
+</p>
+</dd>
+</dl></div>
+</div>
 </div>
 </div>
 </div>
@@ -2896,6 +2943,13 @@ Christian Thäter &lt;<a href="mailto:ct@pipapo.org">ct@pipapo.org</a>&gt; for i
 </p>
 </dd>
 <dt class="hdlist1">
+<a href="#index_AND">AND</a> 
+</dt>
+<dd>
+<p>
+</p>
+</dd>
+<dt class="hdlist1">
 <a href="#index_ARG">ARG</a> 
 </dt>
 <dd>
@@ -2935,6 +2989,13 @@ Christian Thäter &lt;<a href="mailto:ct@pipapo.org">ct@pipapo.org</a>&gt; for i
 </dt>
 <dt class="hdlist1">
 <a href="#index_BACKTICK">BACKTICK</a> 
+</dt>
+<dd>
+<p>
+</p>
+</dd>
+<dt class="hdlist1">
+<a href="#index_BOOL">BOOL</a> 
 </dt>
 <dd>
 <p>
@@ -3251,6 +3312,13 @@ Christian Thäter &lt;<a href="mailto:ct@pipapo.org">ct@pipapo.org</a>&gt; for i
 <p>
 </p>
 </dd>
+<dt class="hdlist1">
+<a href="#index_NOT">NOT</a> 
+</dt>
+<dd>
+<p>
+</p>
+</dd>
 </dl></div>
 </dd>
 <dt class="hdlist1">
@@ -3267,6 +3335,13 @@ Christian Thäter &lt;<a href="mailto:ct@pipapo.org">ct@pipapo.org</a>&gt; for i
 </dd>
 <dt class="hdlist1">
 <a href="#index_operator_register">operator_register</a> 
+</dt>
+<dd>
+<p>
+</p>
+</dd>
+<dt class="hdlist1">
+<a href="#index_OR">OR</a> 
 </dt>
 <dd>
 <p>
@@ -3485,7 +3560,7 @@ Christian Thäter &lt;<a href="mailto:ct@pipapo.org">ct@pipapo.org</a>&gt; for i
 <div id="footer">
 <div id="footer-text">
 Last updated
- 2020-09-02 02:18:26 CEST
+ 2020-09-02 02:20:55 CEST
 </div>
 </div>
 </body>
