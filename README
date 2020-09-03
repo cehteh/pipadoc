@@ -579,6 +579,9 @@ OR arguments...:
 AND arguments...:
   Results in 'false' when one of the arguments is *false*.
 
+DEFINED macronames...:
+  Results in 'true' when all 'macronames' are defined.
+
 HAVE sectiondescs...:
   Results in 'true' when all sections described by 'sectiondescs' contains text.
   'sectiondesc' is an optional sorting or pasting operator followed by a section name.

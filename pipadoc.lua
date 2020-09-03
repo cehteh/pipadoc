@@ -978,6 +978,20 @@ function strsubst_language_init(context) -- initialize the string substitution l
   end
 
 
+  --: {MACRODEF DEFINED macronames...}
+  --:   Results in 'true' when all 'macronames' are defined.
+  --:
+  context.DEFINED = function (context, arg)
+    local args = strsubst_language_parse(context, arg)
+    for i=1,#args do
+      if context[args[i]] == nil then
+        return
+      end
+    end
+    return true
+  end
+
+
   --: {MACRODEF HAVE sectiondescs...}
   --:   Results in 'true' when all sections described by 'sectiondescs' contains text.
   --:   'sectiondesc' is an optional sorting or pasting operator followed by a section name.
