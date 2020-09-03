@@ -1214,6 +1214,43 @@ possible to (re-)define operators. Operators must be a single punctuation charac
 </dl></div>
 <div class="dlist"><dl>
 <dt class="hdlist1">
+<code>{</code> 
+</dt>
+<dd>
+<p>
+  Conditional block start. Needs a string substitution predicate as ARG and its
+  arguments (without closing curly brace). Evaluated at <em>&lt;output&gt;</em> times. When this
+  predicate evaluates to <strong>true</strong> then the following documentation is included in the
+  output, when <strong>false</strong> then the following output within this block is supressed. A
+  conditional block must end with the matching closing curly brace operator. Conditional
+  blocks can be nested. For possible predicates see <a href="#Predicates">Predicates</a> below.
+</p>
+</dd>
+</dl></div>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+<code>}</code> 
+</dt>
+<dd>
+<p>
+  Conditional output block end. Must match a preceeding block start.
+</p>
+<div class="listingblock">
+<div class="title">Example (shell syntax):</div>
+<div class="content">
+<pre><code>#MAIN:
+#{HAVE something
+#: something is defined to:
+#{NOT {DEFINED HIDE_SOMETHING}
+#=something
+#}
+#}
+#something: define something here.</code></pre>
+</div></div>
+</dd>
+</dl></div>
+<div class="dlist"><dl>
+<dt class="hdlist1">
 <code>@</code> 
 </dt>
 <dd>
@@ -1496,7 +1533,7 @@ Defines a local macro <em>name</em> to <em>value</em>.
 </dl></div>
 </div>
 <div class="sect4">
-<h5 id="_predicates">Predicates</h5>
+<h5 id="Predicates">Predicates</h5>
 <div class="paragraph"><p>Predicates take a list of arguments and evaluate to a truth value. In strsubst <strong>true</strong> is
 any non-empty text and <strong>false</strong> is an empty string. The string substitution engine will
 convert bool types and nil into respective strings.</p></div>
@@ -2714,6 +2751,22 @@ macro already defined
 </p>
 </dd>
 <dt class="hdlist1">
+mismatched condblock end 
+</dt>
+<dd>
+<p>
+ Conditional block end without a begin before.
+</p>
+</dd>
+<dt class="hdlist1">
+missing predicate 
+</dt>
+<dd>
+<p>
+ Conditional block begin needs a predicate.
+</p>
+</dd>
+<dt class="hdlist1">
 no keys in section 
 </dt>
 <dd>
@@ -3638,7 +3691,7 @@ Christian Thäter &lt;<a href="mailto:ct@pipapo.org">ct@pipapo.org</a>&gt; for i
 <div id="footer">
 <div id="footer-text">
 Last updated
- 2020-09-04 01:11:24 CEST
+ 2020-09-04 01:57:39 CEST
 </div>
 </div>
 </body>

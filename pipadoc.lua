@@ -50,6 +50,9 @@ GLOBAL_POST = {}
 
 local sections = {}
 
+-- at what level it got turned off (off when not nil)
+local condblock_disabled
+
 local gcontext = setmetatable(
   {
     --context:file {VARDEF FILE}
@@ -921,7 +924,7 @@ function strsubst_language_init(context) -- initialize the string substitution l
   end
 
 
-  --:
+  --: [[Predicates]]
   --: Predicates
   --: ++++++++++
   --:
@@ -1599,6 +1602,9 @@ local function filetypes_builtin()
 end
 
 
+-- nesting level for conditional blocks
+local condblock_level = 0
+
 local function setup()
   --PLANNED: os.setlocale by option
   gcontext_set "<setup>"
@@ -1680,7 +1686,9 @@ local function setup()
     end,
 
     function (context, output)
-      table.insert(output, context)
+      if not condblock_disabled then
+        table.insert(output, context)
+      end
     end
   )
 
@@ -1726,9 +1734,12 @@ local function setup()
     end,
 
     function (context, output)
-      table.insert(output, context)
+      if not condblock_disabled then
+        table.insert(output, context)
+      end
     end
   )
+
 
   --op_builtin:
   --: `=` ::
@@ -1760,6 +1771,75 @@ local function setup()
     end
   )
 
+
+  --op_builtin:
+  --: ``{` ::
+  --:   Conditional block start. Needs a string substitution predicate as ARG and its
+  --:   arguments (without closing curly brace). Evaluated at '<output>' times. When this
+  --:   predicate evaluates to *true* then the following documentation is included in the
+  --:   output, when *false* then the following output within this block is supressed. A
+  --:   conditional block must end with the matching closing curly brace operator. Conditional
+  --:   blocks can be nested. For possible predicates see <<Predicates, Predicates>> below.
+  --:
+  operator_register(
+    "{",
+    function (context)
+      context.SECTION = context.SECTION or block_section
+      if not context.ARG then
+        warn(context, "missing predicate") --cwarn.<HEXSTRING>: <STRING> ::
+        ---cwarn.<HEXSTRING>:  Conditional block begin needs a predicate.
+      end
+      section_append(context.SECTION, context.KEY or block_key, context)
+    end,
+
+    function (context)
+      condblock_level = condblock_level + 1
+      if not condblock_disabled and strsubst(context, "{"..context.ARG.." "..context.TEXT.."}") == "" then
+        condblock_disabled = condblock_level
+      end
+      trace(context, "block begin: ", condblock_level, condblock_disabled and "disabled" or "enabled")
+    end
+  )
+
+
+  --op_builtin:
+  --: ``}` ::
+  --:   Conditional output block end. Must match a preceeding block start.
+  --: +
+  --: .Example (shell syntax):
+  --: ----
+  --: #MAIN:
+  --: #\{HAVE something
+  --: #: something is defined to:
+  --: #\{NOT \{DEFINED HIDE_SOMETHING\}
+  --: #=something
+  --: #\}
+  --: #\}
+  --: #something: define something here.
+  --: ----
+  --:
+  operator_register(
+    "}",
+    function (context)
+      context.SECTION = context.SECTION or block_section
+      section_append(context.SECTION, context.KEY or block_key, context)
+    end,
+
+    function (context, output)
+      if condblock_level == 0 then
+        warn(context, "mismatched condblock end") --cwarn.<HEXSTRING>: <STRING> ::
+        ---cwarn.<HEXSTRING>:  Conditional block end without a begin before.
+      else
+        trace(context, "block end: ", condblock_level)
+        if condblock_disabled and condblock_disabled == condblock_level then
+          condblock_disabled = nil
+        end
+        condblock_level = condblock_level - 1
+      end
+    end
+  )
+
+
   local function sortprocess(context)
     context.SECTION = context.SECTION or block_section
     context.KEY = context.KEY or block_key
@@ -1778,7 +1858,7 @@ local function setup()
 
     if section and #section.keys == 0 then
       output_sort(section, context.OP, output)
-    else
+    elseif not condblock_disabled then
       warn(context, "no keys in section", context.ARG) --cwarn.<HEXSTRING>: <STRING> ::
       ---cwarn.<HEXSTRING>:  The given section has no key entries but should be sorted.
     end
@@ -2200,6 +2280,8 @@ do
   local output = {}
 
   gcontext_set "<output>"
+  strsubst_language_init (GLOBAL)
+
   local topsection = sections[opt_toplevel.."_"..GLOBAL.MARKUP] or sections[opt_toplevel]
   if topsection then
     output_paste(topsection, output)
@@ -2227,7 +2309,6 @@ do
   --activate GLOBAL_POST for postprocessing
   setmetatable(GLOBAL, {__index = GLOBAL_POST})
 
-  strsubst_language_init (GLOBAL_POST)
 
   for i=1,#output do
     postprocessors_run(output[i])
@@ -2875,36 +2956,47 @@ end
 --PLANNED: DOCME, example section about one source can be used to generate different docs
 
 --ISSUES:
---:
 --: ISSUES
 --: ------
 --:
+--{HAVENOT $WIP $FIXME $TODO $PLANNED $DONE
+--: No open issues.
+--}
+--{HAVE $WIP
 --: .WIP
 --:
 --$WIP
---PLANNED: only generate ISSUE Section when there are any items
---PLANNED: TEXT on special ops become parameters  --$WIP optional, reverse ....
 --:
+--:
+--}
+--{HAVE $FIXME
 --: .FIXME
 --:
 --$FIXME
 --:
 --:
+--}
+--{HAVE $TODO
 --: .TODO
 --:
 --$TODO
 --:
 --:
+--}
+--{HAVE $PLANNED
 --: .PLANNED
 --:
 --$PLANNED
 --:
 --:
+--}
+--{HAVE $DONE
 --: .DONE
 --:
 --$DONE
 --:
 --:
+--}
 --!GLOBAL
 --!INDEX
 --!MAIN
@@ -2919,6 +3011,7 @@ end
 --!api_sections
 --!api_strsubst
 --!api_strsubst_example
+--!api_strsubst_lang
 --!api_typecheck
 --!api_typeconv
 --!api_various
@@ -2930,6 +3023,7 @@ end
 --!op
 --!op_builtin
 --!sections
+--!strsubst_lang
 --!shipped_config_post
 --!shipped_config_pre
 --!shipped_config_subst

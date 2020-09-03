@@ -96,6 +96,8 @@ echo TESTPP becomes a docline
 #:
 #=strsubst_lang
 #:
+#=condblocks
+#:
 #: Empty and non-existing parameters
 #.:
 #=
@@ -244,6 +246,27 @@ echo TESTPP becomes a docline
 #: {HAVENOT @doesnotexist}.
 #: {HAVENOT oneline $oneline @doesnotexist}false.
 #: {HAVENOT doesnotexist @doesnotexist}.
+#condblocks:
+#{BOOL true
+#: shown
+#}
+#{NOT true
+#: not shown
+#}
+#{BOOL
+#: not shown
+#}
+#{NOT
+#: shown
+#}
+#{BOOL true
+#{BOOL true
+#: shown
+#{NOT true
+#: not shown
+#}
+#}
+#}
 # expected results
 #> Pipadoc Testsuite
 #>
@@ -361,6 +384,10 @@ echo TESTPP becomes a docline
 #> true.
 #> false.
 #> true.
+#>
+#> shown
+#> shown
+#> shown
 #>
 #> Empty and non-existing parameters
 #>

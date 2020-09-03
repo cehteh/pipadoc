@@ -399,6 +399,29 @@ possible to (re-)define operators. Operators must be a single punctuation charac
   Section paste operator. Takes a section name as argument and will paste that section in
   place.
 
+`{` ::
+  Conditional block start. Needs a string substitution predicate as ARG and its
+  arguments (without closing curly brace). Evaluated at '<output>' times. When this
+  predicate evaluates to *true* then the following documentation is included in the
+  output, when *false* then the following output within this block is supressed. A
+  conditional block must end with the matching closing curly brace operator. Conditional
+  blocks can be nested. For possible predicates see <<Predicates, Predicates>> below.
+
+`}` ::
+  Conditional output block end. Must match a preceeding block start.
++
+.Example (shell syntax):
+----
+#MAIN:
+#{HAVE something
+#: something is defined to:
+#{NOT {DEFINED HIDE_SOMETHING}
+#=something
+#}
+#}
+#something: define something here.
+----
+
 `@` ::
   Alphabetic sorting operator. Takes a section name as argument and will paste section
   text alphabetically sorted by its keys.
@@ -558,7 +581,7 @@ DEFINE <name> value...:
 Defines a local macro 'name' to 'value'.
 'name' must be new, redefining existing names yields an error.
 
-
+[[Predicates]]
 Predicates
 ++++++++++
 
@@ -1067,6 +1090,10 @@ input file given twice ::
  Ignored a file given multiple times for input.
 macro already defined ::
  Redefining an already existing macro is not allowed.
+mismatched condblock end ::
+ Conditional block end without a begin before.
+missing predicate ::
+ Conditional block begin needs a predicate.
 no keys in section ::
  The given section has no key entries but should be sorted.
 no such section ::
