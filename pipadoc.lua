@@ -790,7 +790,12 @@ local function strsubst_run(context, escape)
   end
 end
 
-
+function strsubst_strip_braces(str) --: removes the curly braces around an strsusbt result.
+  --:   str:::
+  --:     String to strip
+  assert_type(str, 'string')
+  return str:match("^%b{}$") and str:match("^{(.*)}$") or str
+end
 
 
 --api_strsubst_lang:
@@ -819,8 +824,7 @@ function strsubst_language_parse(context, source) --: parses 'source' into a lis
       match, npos = source:match("^%s*(%b{})()", pos)
       if match then
         pos = npos
-        match = strsubst(context, match)
-        match = match:match("^%b{}$") and match:match("^{(.*)}$") or match
+        match = strsubst_strip_braces(strsubst(context, match))
       else
         match, npos = source:match("^%s*([^%s{}]+)()", pos)
         pos = npos
@@ -935,11 +939,12 @@ function strsubst_language_init(context) -- initialize the string substitution l
   end
 
 
-  --: {MACRODEFSP NOT ...}
-  --:   Negates the truth of the argument. An empty string will substitute with *true*
-  --:   and any non-empty string will result in *false*.
+  --: {MACRODEFSP NOT arg}
+  --:   Evaluates 'arg' and then returns *false* when the resulting string would contain any text
+  --:   or *true* in case of an empty string.
   --:
   context.NOT = function (context, arg)
+    arg = strsubst_strip_braces(strsubst(context, arg))
     if #arg == 0 then
       return true
     end

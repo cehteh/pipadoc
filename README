@@ -2,7 +2,7 @@ pipadoc - Documentation extractor
 =================================
 :author:   Christian Thaeter
 :email:    ct@pipapo.org
-:date:     2. September 2020
+:date:     4. September 2020
 
 
 [preface]
@@ -569,9 +569,9 @@ convert bool types and nil into respective strings.
 BOOL ... <special>:
   Translates a text (which may include spaces) into the logic value *true* or an empty string.
 
-NOT ... <special>:
-  Negates the truth of the argument. An empty string will substitute with *true*
-  and any non-empty string will result in *false*.
+NOT arg <special>:
+  Evaluates 'arg' and then returns *false* when the resulting string would contain any text
+  or *true* in case of an empty string.
 
 OR arguments...:
   Results in 'true' when one of the arguments is *true*.
@@ -850,6 +850,10 @@ strsubst_escape(str):
  Turn escaped characters (backslash, backtick, curly braces) into an internal form.
 strsubst_unescape(str):
  Turn the internal escaped charaters into their literals.
+strsubst_strip_braces(str):
+ removes the curly braces around an strsusbt result.
+  str:::
+    String to strip
 
 .Examples
 ----
