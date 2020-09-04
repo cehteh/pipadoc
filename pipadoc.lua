@@ -22,6 +22,12 @@
 --PLANNED: Version check for documents {BRACED VERSION 2} ...
 --PLANNED: --disable-strsubst option .. NOSTRSUBST STRSUBST macros
 --PLANNED: merge sections for sorting --#foo+bar+baz or something like this
+--PLANNED: better/more diagnostic levels (s. syslog)
+--PLANNED+ base os.exit() on errors 0 if everything is fine (only notice displayed)
+--PLANNED+ 1 when output might be incorrect because of failures
+--PLANNED+ 2 when output could not be generated correctly
+--PLANNED: use lua debug library for logging and reporting (current function etc)
+--PLANNED: make README smaller -D README leave out example and verbose parts
 
 
 
@@ -2183,6 +2189,7 @@ function output_sort(section, op, output)
   maybe_type(output, 'table')
   dbg(nil, "output_sort:", section.name)
 
+  --PLANNED:A refuse to sort on input phase
   --PLANNED: rule based / table for sort operators, opchar = \{filter, compare\}
 
   section.sorted = section.sorted or {}
@@ -2954,6 +2961,8 @@ end
 --:
 
 --PLANNED: DOCME, example section about one source can be used to generate different docs
+--PLANNED: TEXT on special ops become parameters  --$WIP optional, reverse ....
+
 
 --ISSUES:
 --: ISSUES
@@ -3030,11 +3039,11 @@ end
 --!usage
 
 --PLANNED: named processors, define processing chains or sort by priority
---PLANNED: control language/conditionals?  //section?key \{condition\}  else becomes DROPPED:section_key
 --PLANNED: not only pipadoc.conf but also pipadoc.sty templates, conf are local only configurations, .sty are global styles
 --PLANNED: how to join (and then wordwrap) lines?
 --PLANNED: insert empty lines on dedent
---PLANNED: bash like parameter expansion, how to apply that to sections/keys too --%\{section\}:%\{key\} .. how about strsubst on SECTION and ARG //\{SECTION\}:\{ARG\}
+--PLANNED: bash like parameter expansion, how to apply that to sections/keys too --%{BRACED section\}:%{BRACED key\}
+--PLANNED+  how about strsubst on SECTION and ARG //{BRACED SECTION\}:{BRACED ARG\}
 --PLANNED: INIT section for configuration
 --PLANNED: test expected stderr in test suite
 --PLANNED: DOCME documentation is usually only for one markup designed, dispatch on strsubst make only maintaining easier

@@ -209,7 +209,7 @@ GLOBAL.MACRODEF_orgmode = function (context, arg)
                  context_new (context,{TEXT="{INDEX_ENTRY "..ix.."}"})
   )
 
-  --TODO: anchor not implemented yet
+  --PLANNED:A anchor not implemented yet
   return strsubst(context, "- -"..arg.."- ::")
 end
 
