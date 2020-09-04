@@ -637,11 +637,6 @@ end
 --: assert(strsubst(context, "\{undefined\}") == "\{undefined\}")
 --: ----
 --:
---PLANNED: make strsubst a full fledged DSL
---PLANNED+ general syntax <NAME><opchar><args>
---PLANNED: strsubst DSL op= -> set local (parent)
---PLANNED: strsubst DSL op: -> set global
---PLANNED: strsubst DSL op' -> literal
 
 local function table_inverse(t)
   local ret = {}
@@ -855,7 +850,6 @@ end
 
 function strsubst_language_init(context) -- initialize the string substitution language
 
-  --TODO: DOC strsusbt lang is activated at post
   --PLANNED: option for disabling strsubst language
 
   --strsubst_lang:
@@ -1987,7 +1981,6 @@ local function line_process(context, comment)
     context.SECTION = maybe_text(context.SECTION)
     context.KEY = maybe_text(context.KEY)
     context.ARG = maybe_text(context.ARG)
---TODO:    context.TEXT = maybe_text(context.TEXT)
   end
 
   local op = context.OP
@@ -3031,14 +3024,11 @@ end
 
 --PLANNED: named processors, define processing chains or sort by priority
 --PLANNED: not only pipadoc.conf but also pipadoc.sty templates, conf are local only configurations, .sty are global styles
---PLANNED: how to join (and then wordwrap) lines?
---PLANNED: insert empty lines on dedent
 --PLANNED: bash like parameter expansion, how to apply that to sections/keys too --%{BRACED section\}:%{BRACED key\}
 --PLANNED+  how about strsubst on SECTION and ARG //{BRACED SECTION\}:{BRACED ARG\}
 --PLANNED: INIT section for configuration
 --PLANNED: test expected stderr in test suite
 --PLANNED: DOCME documentation is usually only for one markup designed, dispatch on strsubst make only maintaining easier
---PLANNED: special sections
 --PLANNED: CONFIG:PRE
 --PLANNED: CONFIG:POST
 --PLANNED: CONFIG:GENERATE
