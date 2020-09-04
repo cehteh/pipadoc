@@ -2721,7 +2721,8 @@ end
 --:
 --: The string substitution engine comes with some macros predefined which implement a simple
 --: lisp-like programming language to allow conditional evaluation and (in future) other useful
---: features.
+--: features. This language is enabled after assembling the output in order and evaluated in
+--: the last step of the postprocessor.
 --:
 --: Syntax
 --: ^^^^^^
