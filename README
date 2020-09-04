@@ -692,8 +692,13 @@ VARDEF name:
 Generate a header and index entry for 'name'. Used for documentaton of GLOBAL and CONTEXT variables
 (pipadoc's own documentation).
 
-MACRODEF example:
-generates a header and index entry for a macro. Used for documentaton of the string substitution language.
+MACRODEF arguments...:
+generates a header and index entry for a macro.
+Used for documentaton of the string substitution language.
+
+MACRODEFSP argument:
+generates a header and index entry for a macro using the 'special form'.
+Used for documentaton of the string substitution language.
 
 INDEX_ENTRY name:
 Create an entry in the index that refers back to 'name'.

@@ -172,8 +172,9 @@ end
 
 
 --shipped_config_subst:
---: {MACRODEF MACRODEF example}
---: generates a header and index entry for a macro. Used for documentaton of the string substitution language.
+--: {MACRODEF MACRODEF arguments...}
+--: generates a header and index entry for a macro.
+--: Used for documentaton of the string substitution language.
 --:
 GLOBAL.MACRODEF = "{MACRODEF_{MARKUP} {__ARG__}}"
 
@@ -212,6 +213,12 @@ GLOBAL.MACRODEF_orgmode = function (context, arg)
   return strsubst(context, "- -"..arg.."- ::")
 end
 
+
+--shipped_config_subst:
+--: {MACRODEF MACRODEFSP argument}
+--: generates a header and index entry for a macro using the 'special form'.
+--: Used for documentaton of the string substitution language.
+--:
 GLOBAL.MACRODEFSP = "{MACRODEFSP_{MARKUP} {__ARG__}}"
 
 GLOBAL.MACRODEFSP_text = function (context, arg)
