@@ -636,10 +636,6 @@ Without a configuration file none of these processors are defined any only few
 variables for string substitution engine are set.
 
 
-
-
-
-
 Shipped Configuration File
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 

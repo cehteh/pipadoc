@@ -350,7 +350,6 @@ local options = {
   end,
   "", --:  <STRING>
 
-
   "    -t, --toplevel <name>", --:  <STRING>
   "                        sets 'name' as toplevel node [MAIN]", --:  <STRING>
   ["-t"] = "--toplevel",
@@ -374,7 +373,6 @@ local options = {
   end,
   "", --:  <STRING>
 
-
   "    --no-defaults", --:  <STRING>
   "                        disables default filetypes and configfile loading", --:  <STRING>
   ["--no-defaults"] = function ()
@@ -382,7 +380,6 @@ local options = {
     dbg(nil, "nodefaults")
   end,
   "", --:  <STRING>
-
 
   "    --list-sections", --:  <STRING>
   "                        Parses input and lists all sections on stdout", --:  <STRING>
@@ -394,7 +391,6 @@ local options = {
     opt_list_sections = true
   end,
   "", --:  <STRING>
-
 
   "    -m, --markup <name>", --:  <STRING>
   "                        selects the markup engine for the output [text]", --:  <STRING>
@@ -903,7 +899,6 @@ function strsubst_language_init(context) -- initialize the string substitution l
       --cwarn.<HEXSTRING>:  {BRACED SET <name> ...} called with non alphanumeric name
     end
   end
-
 
 
   --:
@@ -2781,10 +2776,6 @@ end
 --:
 --: Without a configuration file none of these processors are defined any only few
 --: variables for string substitution engine are set.
---:
---:
---:
---:
 --:
 --:
 --: Shipped Configuration File
