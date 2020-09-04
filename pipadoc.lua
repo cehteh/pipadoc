@@ -492,7 +492,7 @@ local options = {
     --PLANNED: run universally
     opt_dryrun = true
     os.execute [[
-        lua pipadoc.lua -m asciidoc -D ISSUES -t ISSUES pipadoc.lua pipadoc_config.lua
+        lua pipadoc.lua -m text -D ISSUES -t ISSUES pipadoc.lua pipadoc_config.lua
     ]]
   end,
 
