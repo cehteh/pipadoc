@@ -1043,6 +1043,77 @@ function strsubst_language_init(context) -- initialize the string substitution l
   end
 
 
+  -- :
+  -- : .Control Structures
+  -- :
+  -- : {MACRODEF DO ...}
+  -- :   Creates a local context, any variables defined within '...' are contained within this context.
+  -- :
+  --PLANNED:  context.DO = function (context, arg)
+  --   return strsubst(context_new(context), arg)
+  -- end
+
+  -- : {MACRODEF IF <condition> ...}
+  -- :   'condition' must result in a boolean (single word for *true* or empty for *false*).
+  -- :   When 'condition' is true then '...' gets substituted.
+  -- :
+  --PLANNED: context.IF = function (context, arg)
+  -- end
+
+  -- : {MACRODEF THEN ...when false...}
+  -- :   Defines the alternative to substitute inside an IF block when the 'condition' was
+  -- :   true.
+  -- :
+  --PLANNED: context.THEN = function (context, arg)
+  -- end
+
+  -- : {MACRODEF ELSE ...when false...}
+  -- :   Defines the alternative to substitute inside an IF block when the 'condition' was not true. +
+  -- :   +
+  -- :   _Example:_ +\{IF <condition> \{THEN ...truepart...\}\{ELSE ...falsepart...\}\}+
+  -- :
+  --PLANNED: context.ELSE = function (context, arg)
+  -- end
+
+  -- : .Numeric Comparsion Operators
+  -- :
+  -- : Trying to convert the operands to a number, if that fails 0 is used.
+  -- : Resulting in the truth value of the comparsion.
+  -- :
+  -- : {MACRODEF EQ numbers...}
+  -- :   Compare for numeric equality.
+  -- :
+  --PLANNED: context.EQ = function (context, arg)
+  -- end
+
+  -- : {MACRODEF GT numbers...}
+  -- :   Compare for greater than .
+  -- :
+  --PLANNED: context.GT = function (context, arg)
+  -- end
+
+  -- : {MACRODEF LE numbers...}
+  -- :   Compare numerically less or equal.
+  -- :
+  --PLANNED: context.LE = function (context, arg)
+  -- end
+
+  -- :
+  -- : .String Functions
+  -- :
+  -- : {MACRODEFSP LENGTH ...}
+  -- :   Results in the length of the argument string in bytes as decimal number.
+  -- :
+  --PLANNED: context.LENGTH = function (context, arg)
+  --   return tostring(#arg)
+  -- end
+
+  -- : .Section Metadata
+  --PLANNED: context.NUM_ENTRIES = function (context, arg)
+  -- end
+
+  --PLANNED: sort order string compare SAME BEFORE AFTER
+  --PLANNED: UPPER LOWER
 end
 
 
