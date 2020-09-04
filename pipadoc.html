@@ -783,9 +783,9 @@ syntax should be straightforward and is suggested for any projects using pipadoc
 <h2 id="_installation">Installation</h2>
 <div class="sectionbody">
 <div class="paragraph"><p>Pipadoc is single Lua source file <code>pipadoc.lua</code> which is portable among most Lua versions
-(PUC Lua 5.1, 5.2, 5.3, Luajit, Ravi). It ships with a <code>pipadoc.install</code> shell script which
-figures a suitable Lua version out and installs <code>pipadoc.lua</code> as <code>pipadoc</code> in a given
-directory (the current directory by default).</p></div>
+(PUC Lua 5.1, 5.2, 5.3, 5.4, Luajit, Ravi). It ships with a <code>pipadoc.install</code> shell script
+which figures a suitable Lua version out and installs <code>pipadoc.lua</code> as <code>pipadoc</code> in a
+given directory (the current directory by default).</p></div>
 <div class="paragraph"><p>There are different ways how this can be used in a project:</p></div>
 <div class="ulist"><ul>
 <li>
@@ -884,10 +884,11 @@ generating output it is either send to <em>stdout</em> or saved as a given outpu
 <h2 id="_basic_concepts">Basic concepts</h2>
 <div class="sectionbody">
 <div class="paragraph"><p>Pipadoc is controlled by special line comments. This is chosen because it is the most common
-denominator between almost all programming languages.</p></div>
-<div class="paragraph"><p>To make a line comment recognized as pipadoc comment it needs to be followed immediately
-by a operator sequence. Which in the simplest case is just a single punctuation character.
-These operator sequences can define the section to which this comment belongs to.</p></div>
+denominator between almost all programming languages. To make a line comment recognized as
+pipadoc comment it needs to be followed immediately by a operator sequence. Which in the
+simplest case is just a single punctuation character.</p></div>
+<div class="paragraph"><p>These comments are stored to named documentation sections. One of the main concepts of pipadoc
+is that one can define which and in what order these sections appear in the final output.</p></div>
 <div class="paragraph"><p>To add special functionality and extend the semantics one can define pre and post processors.
 Preprocessors are defined per input programming language and process all source lines. They can
 modify the source arbitrary before pipadoc does the parsing. This allows to generate completely
@@ -895,12 +896,14 @@ new content. Lift parts on the source code side over to the documentation and ge
 additional information such as indices and glossaries.
 Postprocessors are defined for output markup and process every line in output order. The allow
 to augment output in a markup specific way.</p></div>
-<div class="paragraph"><p>There is a string substitution/template engine which can processes text.</p></div>
+<div class="paragraph"><p>There is a string substitution/template engine which can processes text. The string
+substitution engine also implements a small lisp-like programming language which can be used
+to generate content programmatically.</p></div>
 <div class="sect2">
 <h3 id="_example">Example</h3>
-<div class="paragraph"><p>Without further ado, here is a slightly terse example showing pipadoc documentation on a
-shell script. For a more complex example one could look at <em>pipadoc.lua</em> itself. The exact
-pipadoc syntax is described in the next section.</p></div>
+<div class="paragraph"><p>Without further ado, here is an example showing pipadoc documentation on a shell script.
+For a more complex example one could look at <em>pipadoc.lua</em> itself. The exact pipadoc
+syntax is described in the next section.</p></div>
 <div class="listingblock">
 <div class="title">An example document (example.sh)</div>
 <div class="content">
@@ -939,13 +942,16 @@ this is appended to the section 'oneline' under key 'a'
 this is appended to the section 'oneline' under key 'o'</code></pre>
 </div></div>
 </div>
-<div class="sect2">
-<h3 id="_syntax">Syntax</h3>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_syntax">Syntax</h2>
+<div class="sectionbody">
 <div class="paragraph"><div class="title">In short:</div><p>A pipadoc comment is any <em>line-comment</em> of the programming language directly (without spaces)
 followed by a optional alphanumeric section name which may have a sorting key appended by
-a dot, followed by an operator, followed by an optional argument. Possibyl followed by the
+a dot, followed by an operator, followed by an optional argument. Possibly followed by the
 documentation text itself.</p></div>
-<div class="paragraph"><p>Only lines qualify this syntax are processed as pipadoc documentation. But preprocessors run
+<div class="paragraph"><p>Only lines qualify this syntax are processed as pipadoc documentation. Preprocessors run
 before the parsing is done and may translate otherwise non pipadoc sourcecode into documentation.</p></div>
 <div class="literalblock">
 <div class="title">The formal syntax looks like:</div>
@@ -960,7 +966,8 @@ before the parsing is done and may translate otherwise non pipadoc sourcecode in
 
 &lt;section&gt; ::= &lt;alphanumeric text including underscore&gt;
 
-&lt;operator&gt; ::= ":" | "+" | "=" | "@" | "$" | "#" | &lt;user defined operators&gt;
+&lt;operator&gt; ::= ":" | "+" | "=" | "{" | "}" | "@" | "$" | "#" | "!"
+               | &lt;user defined operators&gt;
 
 &lt;key&gt; ::= &lt;alphanumeric text including underscore&gt;
 
@@ -1007,17 +1014,15 @@ One Line
 </dl></div>
 </div>
 </div>
-</div>
 <div class="sect1">
 <h2 id="_sections_and_keys">Sections and Keys</h2>
 <div class="sectionbody">
-<div class="paragraph"><p>Text in pipadoc is stored in named <em>sections</em>. Text can be associated with some
+<div class="paragraph"><p>Text in pipadoc is stored in named <em>sections</em> and can be associated with some additional
 alphanumeric key under that section. This enables later sorting for indices and glossaries.</p></div>
 <div class="paragraph"><p>One-line sections are defined when a section and maybe a key is followed by documentation
-text. Block sections start with the section definition but no documentation text on the same
-line. A block stays active until the next block section definition. One-line doctext can be
-interleaved into Blocks.</p></div>
-<div class="paragraph"><p>The default block section name is the files name up, but excluding to the first dot.</p></div>
+text. One-line doctext can be interleaved into Blocks.</p></div>
+<div class="paragraph"><p>At the start if a input file the default block section name is made from the files name
+up to the first dot.</p></div>
 <div class="paragraph"><p>Sections are later brought into the desired order by pasting them into a <em>toplevel</em> section.
 This default name for the <em>toplevel</em> section is <em>MAIN_{markup}</em> or if that does not exist
 just <em>MAIN</em>.</p></div>
@@ -1052,9 +1057,11 @@ Output Ordering
 </dt>
 <dd>
 <p>
-  The output order is generated by assembling the <em>{toplevel}_{markup}</em> or if that does
-  not exist the <em>{toplevel}</em> section.
+  The output order is generated by assembling the <em>{toplevel}_{markup}</em> or
+  if that does not exist the <em>{toplevel}</em> section.
   The paste and sorting operators there define the section order of the document.
+  The conditional operators <em>{</em> and <em>}</em> are also evaluated at this stage and may omit some
+  blocks depending on selection predicates.
 </p>
 </dd>
 <dt class="hdlist1">
@@ -1082,7 +1089,8 @@ Report empty sections, Orphans and Doubletes
 <p>
   Pipadoc keeps stats on how each section was used. Finally it gives a report (as warning)
   on sections which appear to be unused or used more than once. These warnings may be ok, but
-  sometimes they give useful hints about typing errors.
+  sometimes they give useful hints about typing errors. To suppress such reports of
+  intentional left out sections one can use the <em>!</em> operator.
 </p>
 </dd>
 </dl></div>
@@ -1100,8 +1108,7 @@ For this patterns are registered to be matched against the file name together wi
 list of line comment characters.</p></div>
 <div class="paragraph"><p>Definitions for a common programming languages are already included. For languages
 that support block comments the opening (but not the closing) commenting characters are
-registered as well. This allows one to define section blocks right away. But using the
-comment closing sequence right on the line would clobber the output.</p></div>
+registered as well. This allows one to define section blocks right away. Note that using</p></div>
 <div class="listingblock">
 <div class="title">Example in C</div>
 <div class="content">
@@ -1122,7 +1129,7 @@ for plain text documentation files. These use the "PIPADOC:" keyword to enable s
 operations within text files.</p></div>
 <div class="paragraph"><p>New filetypes can be added from a config file with <em>filetype_register()</em>  or with
 the <em>--register</em> command-line option.</p></div>
-<div class="paragraph"><div class="title">Predefined Filetypes</div><p>Autoconf, Automake,
+<div class="paragraph"><div class="title">Predefined Filetypes:</div><p>Autoconf, Automake,
 
 AWK,
 
@@ -1165,11 +1172,12 @@ Visual Basic,</p></div>
 <div class="sect1">
 <h2 id="_markup_languages">Markup Languages</h2>
 <div class="sectionbody">
-<div class="paragraph"><p>The core of pipadoc is completely agnostic about the markup used within the documentation strings.
-The <em>--markup</em> option only sets the <em>MARKUP</em> variable and output generation tries include the
-markup in the toplevel. Usually only string substitution and postprocessors shoould handle markup
-related things.</p></div>
-<div class="paragraph"><p>The shipped configuration file comes with postprocessors for <em>asciidoc</em> and <em>text</em> markups.</p></div>
+<div class="paragraph"><p>The core of pipadoc is completely agnostic about the markup used within the documentation
+strings. The <em>--markup</em> option only sets the <em>MARKUP</em> variable and output generation tries
+include the markup in the toplevel. Usually only string substitution and postprocessors
+should handle markup related things.</p></div>
+<div class="paragraph"><p>The shipped configuration file comes with postprocessors for <em>asciidoc</em> and <em>text</em>
+markups. More will will be added in future (org-mode, markdown).</p></div>
 </div>
 </div>
 <div class="sect1">
@@ -1197,7 +1205,7 @@ possible to (re-)define operators. Operators must be a single punctuation charac
 <dd>
 <p>
   Concat operator. Like <em>:</em> but appends text at the last line instead creating a new line.
-  Note that some context information (file/line) gets lost as only the text will be appended.
+  Note that only the <em>TEXT</em> is appended all other context information gets lost.
 </p>
 </dd>
 </dl></div>
@@ -1219,11 +1227,11 @@ possible to (re-)define operators. Operators must be a single punctuation charac
 <dd>
 <p>
   Conditional block start. Needs a string substitution predicate as ARG and its
-  arguments (without closing curly brace). Evaluated at <em>&lt;output&gt;</em> times. When this
+  arguments (without the closing curly brace). Evaluated at <em>output</em> times. When this
   predicate evaluates to <strong>true</strong> then the following documentation is included in the
   output, when <strong>false</strong> then the following output within this block is supressed. A
   conditional block must end with the matching closing curly brace operator. Conditional
-  blocks can be nested. For possible predicates see <a href="#Predicates">Predicates</a> below.
+  blocks can be nested. For possible predicates see <a href="#Predicates">below</a>.
 </p>
 </dd>
 </dl></div>
@@ -1296,20 +1304,28 @@ possible to (re-)define operators. Operators must be a single punctuation charac
 </div>
 </div>
 <div class="sect1">
-<h2 id="_preprocessors">Preprocessors</h2>
+<h2 id="_processors">Processors</h2>
 <div class="sectionbody">
-<div class="paragraph"><p>One can register preprocessors per filetypes. A preprocessor can modify any line
-prior it gets parsed and further processed.</p></div>
-<div class="paragraph"><p>Preprocessors are used to autogenerate documentation comments from code. Lifting
-parts of the code to the documentation side.</p></div>
+<div class="paragraph"><p>Pre- and Post- processors are lua functions that allow to manipulate text
+programmatically. They get the full context of the current processed line as input and can
+return the modified line or choose to drop or keep the line. They are can freely store
+some state elsewhere and thus allow some processing that spans lines which is normally not
+available in pipadoc.</p></div>
+<div class="sect2">
+<h3 id="_preprocessors">Preprocessors</h3>
+<div class="paragraph"><p>Preprocessors are per filetypes. A preprocessor can modify any input line
+prior it gets parsed and further processed. Preprocessors are used to autogenerate
+extra documentation comments from code. Lifting parts of the code to the documentation
+side. They operate on the whole source line, not only the pipadoc comment.</p></div>
+<div class="paragraph"><p>This is the place to generate data for new sections (Gloassaries, Indices).</p></div>
 </div>
-</div>
-<div class="sect1">
-<h2 id="_postprocessors">Postprocessors</h2>
-<div class="sectionbody">
+<div class="sect2">
+<h3 id="_postprocessors">Postprocessors</h3>
 <div class="paragraph"><p>Postprocessors run at output generation time. They are registered per markup type.
-Processors are called in order of their definition.</p></div>
-<div class="paragraph"><p>They are used to augment the generated output with markup specific things.</p></div>
+They are used to augment the generated output with markup specific things. They operate
+only on parsed documentation comments and only those should be modified. All other data is
+already available and stored, thus they may not generate new sections.</p></div>
+</div>
 </div>
 </div>
 <div class="sect1">
@@ -1322,6 +1338,36 @@ context (and GLOBAL&#8217;s).</p></div>
 curly brace) and the string substitution resulting in an empty string, then the
 whole line becomes dopped. If this is not intended one could add a second empty
 <em>{NIL}</em> FOO string substitution to the line.</p></div>
+<div class="listingblock">
+<div class="title">Simple String Substitution Example:</div>
+<div class="content">
+<pre><code>The date is {DATE}
+{Undefined}
+{NIL}
+{NIL}{NIL}</code></pre>
+</div></div>
+<div class="olist arabic"><ol class="arabic">
+<li>
+<p>
+<code>{DATE}</code> gets replaced with the current date.
+</p>
+</li>
+<li>
+<p>
+<code>{Undefined}</code> will stay literally.
+</p>
+</li>
+<li>
+<p>
+<code>{NIL}</code> will be removed.
+</p>
+</li>
+<li>
+<p>
+<code>{NIL}{NIL}</code> will result in an empty line.
+</p>
+</li>
+</ol></div>
 <div class="paragraph"><p>String substitutions names consist of alphanumeric characters or underlines.
 These names themself can be composed from string substitutions (see example below).
 It may be followed with a delimiting character (space) and an optional argument string.
@@ -1350,7 +1396,7 @@ their literal characters. This macros can be used when defining macros that cont
 of this special characters.</p></div>
 <div class="dlist"><div class="title">The reserved macros are:</div><dl>
 <dt class="hdlist1">
-<a id="index_BACKSLASH"></a><code>__BACKSLASH__</code>
+<code>{__BACKSLASH__}</code> 
 </dt>
 <dd>
 <p>
@@ -1358,7 +1404,7 @@ of this special characters.</p></div>
 </p>
 </dd>
 <dt class="hdlist1">
-<a id="index_BACKTICK"></a><code>__BACKTICK__</code>
+<code>{__BACKTICK__}</code> 
 </dt>
 <dd>
 <p>
@@ -1366,7 +1412,7 @@ of this special characters.</p></div>
 </p>
 </dd>
 <dt class="hdlist1">
-<a id="index_BRACEOPEN"></a><code>__BRACEOPEN__</code>
+<code>{__BRACEOPEN__}</code> 
 </dt>
 <dd>
 <p>
@@ -1374,7 +1420,7 @@ of this special characters.</p></div>
 </p>
 </dd>
 <dt class="hdlist1">
-<a id="index_BRACECLOSE"></a><code>__BRACECLOSE__</code>
+<code>{__BRACECLOSE__}</code> 
 </dt>
 <dd>
 <p>
@@ -1383,7 +1429,7 @@ of this special characters.</p></div>
 </dd>
 </dl></div>
 <div class="listingblock">
-<div class="title">String Substitution Example</div>
+<div class="title">More elaborate String Substitution Example</div>
 <div class="content">
 <pre><code>GLOBAL.SIMPLE = "a simple example"
 GLOBAL.BRACED = "{BRACED_{MARKUP} {__ARG__}}"
@@ -1440,7 +1486,7 @@ The resulting string from 2. dispatches on the markup language to one of the fol
 <h3 id="_string_substitution_language">String Substitution Language</h3>
 <div class="paragraph"><p>The string substitution engine comes with some macros predefined which implement a simple
 lisp-like programming language to allow conditional evaluation and (in future) other useful
-features. This language is enabled after assembling the output in order and evaluated in
+features. This language is enabled when assembling the output in order and evaluated in
 the last step of the postprocessor.</p></div>
 <div class="sect3">
 <h4 id="_syntax_2">Syntax</h4>
@@ -1490,6 +1536,19 @@ evaluated or not, depending on the actual macro implementation.
 </p>
 </dd>
 </dl></div>
+<div class="listingblock">
+<div class="title">Example</div>
+<div class="content">
+<pre><code>{AND {DEFINE SOMETHING} {NOT {DEFINED SOMETHING_ELSE} {BOOL {ANOTHERTHING}}}}</code></pre>
+</div></div>
+<div class="ulist"><ul>
+<li>
+<p>
+Results in <strong>true</strong> when <em>SOMETHING</em> is defined and <em>SOMETHING_ELSE</em> is not defined and
+  <em>ANOTHERTHING</em> is not an empty string.
+</p>
+</li>
+</ul></div>
 </div>
 <div class="sect3">
 <h4 id="_macros">Macros</h4>
@@ -1537,7 +1596,7 @@ Defines a local macro <em>name</em> to <em>value</em>.
 <h5 id="Predicates">Predicates</h5>
 <div class="paragraph"><p>Predicates take a list of arguments and evaluate to a truth value. In strsubst <strong>true</strong> is
 any non-empty text and <strong>false</strong> is an empty string. The string substitution engine will
-convert bool types and nil into respective strings.</p></div>
+convert bool types and nil' into respective strings.</p></div>
 <div class="dlist"><dl>
 <dt class="hdlist1">
 <a id="index_BOOL"></a><code>{BOOL &#8230;}</code> <em><sup>special</sup></em> 
@@ -1622,13 +1681,14 @@ convert bool types and nil into respective strings.</p></div>
 <div class="paragraph"><p>Pipadocs main objective is to scrape documentation comments from a project and generate
 output in desired order. Such an basic approach would be insufficient for many common cases.
 Thus pipadoc has pre and postprocessors and the string substitution engine to generate and
-modify documentation in an extensible way.</p></div>
-<div class="paragraph"><p>Pipadoc tries to load a configuration file on startup. By default it is named
+modify documentation in an extensible way. These are defined in an user supplied
+configuration file.</p></div>
+<div class="paragraph"><p>Pipadoc tries to load the configuration file on startup. By default it is named
 <code>pipadoc_config.lua</code> in the current directory. This name can be changed with the
 <em>--config</em> option.</p></div>
 <div class="paragraph"><p>The configuration file is used to define pre- and post- processors, define states
 for those, define custom operators and string substitution macros. It is loaded and
-executed as it own chunk and may only access the global variables and
+executed as it own chunk and may only access the global variables and call the
 API functions described below.</p></div>
 <div class="paragraph"><p>Without a configuration file none of these processors are defined any only few
 variables for string substitution engine are set.</p></div>
@@ -1653,7 +1713,7 @@ Replace <em>&lt;STRING&gt;</em> with the first literal doublequoted string from 
 </li>
 <li>
 <p>
-Replaces <em>6661696c656420746f206f70656e</em> with the first literal doublequoted string from the code
+Replaces <em>&lt;HEXSTRING&gt;</em> with the first literal doublequoted string from the code
    converted to lowercase hexadecimal (useable for sorting including whitespace and punctuation).
    When no literal doublequoted string exists in the code, then the last used hexadecimal
    string found is used. Used for sorting documentation by the lifted string literal.
@@ -1667,12 +1727,12 @@ Automatic generation of documentation for Lua functions.
 </li>
 <li>
 <p>
-When GLOBAL.ISSUES is defined, generate formatted lists for doc comments in
+When <em>ISSUES</em> is defined (<code>-D ISSUES</code>), generate formatted lists for doc comments in
   WIP/FIXME/TODO/PLANNED/DONE sections.
-  When GLOBAL.GIT is defined (<em>-D GIT</em>) then each such item includes information gathered
+  When <em>GIT</em> is defined (<code>-D GIT</code>) then each such item includes information gathered
   from the git commit which touched that line the last.
-  When GLOBAL.NOBUG is defined it reaps <a href="http://nobug.pipapo.org">NoBug</a> annotations from
-  C source files as well.
+  When <em>NOBUG</em> is defined (<code>-D NOBUG</code>) it reaps <a href="http://nobug.pipapo.org">NoBug</a> annotations from
+  C source files as well. The <em>ISSUES</em> list is then available under toplevel <em>ISSUES</em> (<code>-t ISSUES</code>).
 </p>
 </li>
 </ul></div>
@@ -1799,10 +1859,19 @@ won&#8217;t do it.</p></div>
 with global definitions. These are used by the core, processors and string substitution.
 Simple string assignments can be set from the command line. Configuration files may define
 more complex Lua functions for string substitutions.</p></div>
+<div class="paragraph"><p>The <em>GLOBAL_POST</em> table is extends <em>GLOBAL</em> and is used for a final string substitution
+pass after postprocessing. There are no values defined in <em>GLOBAL_POST</em> by pipadoc itself.</p></div>
+</div>
+<div class="sect2">
+<h3 id="CONTEXT">The Context</h3>
+<div class="paragraph"><p>Processors, operators, string substitution calls and diagnostics get a context
+passed along. This context represents the parsed line plus
+everything that&#8217;s defined at file level and in GLOBAL (or GLOBAL_POST).</p></div>
+<div class="paragraph"><p>In a few cases a fake-context with FILE name in angle brackets is passed around for
+diagnostic functions.</p></div>
 <div class="sect3">
-<h4 id="_predefined_variables">Predefined Variables</h4>
-<div class="paragraph"><p>The <em>GLOBAL</em> table is initialized with:</p></div>
-<div class="dlist"><dl>
+<h4 id="_predefined_variables_and_context_members">Predefined Variables and Context Members</h4>
+<div class="dlist"><div class="title">The <em>GLOBAL</em> context contains:</div><dl>
 <dt class="hdlist1">
 <a id="index_YEAR"></a><a id="index_MONTH"></a><a id="index_DAY"></a><a id="index_HOUR"></a><a id="index_MINUTE"></a><code>YEAR, MONTH, DAY, HOUR, MINUTE</code>
 </dt>
@@ -1863,38 +1932,7 @@ more complex Lua functions for string substitutions.</p></div>
 </p>
 </dd>
 </dl></div>
-<div class="paragraph"><p>The <em>GLOBAL_POST</em> table is extends <em>GLOBAL</em> and is used for a final string substitution
-pass after postprocessing. There are no values defined in <em>GLOBAL_POST</em> by pipadoc itself.</p></div>
-</div>
-</div>
-<div class="sect2">
-<h3 id="CONTEXT">The Context</h3>
-<div class="paragraph"><p>Processors, operators, string substitution calls and diagnostics get a context
-passed along. This context represents the parsed line plus
-everything that&#8217;s defined at file level and in GLOBAL (or GLOBAL_POST).</p></div>
-<div class="paragraph"><p>In a few cases a fake-context with FILE name in angle brackets is passed around for
-diagnostic functions.</p></div>
-<div class="sect3">
-<h4 id="_context_members">Context Members</h4>
-<div class="paragraph"><p>The following members are defined in <em>contexts</em>.</p></div>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-<a id="index_ARG"></a><code>ARG</code>
-</dt>
-<dd>
-<p>
-  Optional argument to the operator. This can be the sort key
-  (alphabetic or numeric) or another section name for pasting.
-</p>
-</dd>
-<dt class="hdlist1">
-<a id="index_COMMENT"></a><code>COMMENT</code>
-</dt>
-<dd>
-<p>
-  Character sequence which is used as line comment.
-</p>
-</dd>
+<div class="dlist"><div class="title">A file level context contains:</div><dl>
 <dt class="hdlist1">
 <a id="index_FILE"></a><code>FILE</code>
 </dt>
@@ -1914,14 +1952,6 @@ diagnostic functions.</p></div>
 </p>
 </dd>
 <dt class="hdlist1">
-<a id="index_KEY"></a><code>KEY</code>
-</dt>
-<dd>
-<p>
-  Sort key
-</p>
-</dd>
-<dt class="hdlist1">
 <a id="index_LANGUAGE"></a><code>LANGUAGE</code>
 </dt>
 <dd>
@@ -1929,6 +1959,8 @@ diagnostic functions.</p></div>
   The language name of this file.
 </p>
 </dd>
+</dl></div>
+<div class="dlist"><div class="title">At preprocessing time the context contains:</div><dl>
 <dt class="hdlist1">
 <a id="index_LINE"></a><code>LINE</code>
 </dt>
@@ -1936,6 +1968,41 @@ diagnostic functions.</p></div>
 <p>
   Current line number of input or section, or indexing key
   Lines start at 1
+</p>
+</dd>
+<dt class="hdlist1">
+<a id="index_SOURCE"></a><code>SOURCE</code>
+</dt>
+<dd>
+<p>
+  The line as read from the input file.
+</p>
+</dd>
+</dl></div>
+<div class="dlist"><div class="title">After lines are parsed each line context contains:</div><dl>
+<dt class="hdlist1">
+<a id="index_ARG"></a><code>ARG</code>
+</dt>
+<dd>
+<p>
+  Optional argument to the operator. This can be the sort key
+  (alphabetic or numeric) or another section name for pasting.
+</p>
+</dd>
+<dt class="hdlist1">
+<a id="index_COMMENT"></a><code>COMMENT</code>
+</dt>
+<dd>
+<p>
+  Character sequence which is used as line comment.
+</p>
+</dd>
+<dt class="hdlist1">
+<a id="index_KEY"></a><code>KEY</code>
+</dt>
+<dd>
+<p>
+  Sort key
 </p>
 </dd>
 <dt class="hdlist1">
@@ -1963,14 +2030,6 @@ diagnostic functions.</p></div>
 </p>
 </dd>
 <dt class="hdlist1">
-<a id="index_SOURCE"></a><code>SOURCE</code>
-</dt>
-<dd>
-<p>
-  The line as read from the input file.
-</p>
-</dd>
-<dt class="hdlist1">
 <a id="index_TEXT"></a><code>TEXT</code>
 </dt>
 <dd>
@@ -1979,6 +2038,10 @@ diagnostic functions.</p></div>
 </p>
 </dd>
 </dl></div>
+<div class="paragraph"><p>Additional global members may be defined by command line options or the string
+substitution language.</p></div>
+<div class="paragraph"><p>String substitution creates local contexts for each level of evaluation which may define
+local members.</p></div>
 </div>
 </div>
 <div class="sect2">
@@ -2101,7 +2164,7 @@ otherwise an assertion error is raised.</p></div>
 </dl></div>
 </div>
 <div class="sect3">
-<h4 id="_string_substitution">String Substitution</h4>
+<h4 id="_string_substitution_engine_2">String Substitution Engine</h4>
 <div class="dlist"><dl>
 <dt class="hdlist1">
 <a id="index_strsubst"></a> <code><strong>strsubst(context, str, escape)</strong></code>
@@ -2172,6 +2235,41 @@ no special escaping.
 </dd>
 </dl></div>
 </dd>
+</dl></div>
+<div class="listingblock">
+<div class="title">Examples</div>
+<div class="content">
+<pre><code>context = {
+  STRING = "example string",
+  STR = "{STRING}",
+  ING = "ING",
+  UPPER = function(context, arg)
+            return arg:upper()
+          end
+ }
+
+-- simple substitution
+assert(strsubst(context, "{STRING}") == "example string")
+
+-- arguments on stringish substitutions are retained
+assert(strsubst(context, "{STRING example}") == "example stringexample")
+
+-- substitution is recursively applied
+assert(strsubst(context, "{STR}") == "example string")
+
+-- that can be used to create names dynamically
+assert(strsubst(context, "{STR{ING}}") == "example string")
+
+-- functions are called with the argument and their return is substituted
+assert(strsubst(context, "{UPPER arg}") == "ARG")
+
+-- now together
+assert(strsubst(context, "{UPPER {STR}}") == "EXAMPLE STRING")
+
+-- undefined names are kept verbatim
+assert(strsubst(context, "{undefined}") == "{undefined}")</code></pre>
+</div></div>
+<div class="dlist"><dl>
 <dt class="hdlist1">
 <a id="index_strsubst_escape"></a> <code><strong>strsubst_escape(str)</strong></code>
 </dt>
@@ -2207,39 +2305,6 @@ str
 </dl></div>
 </dd>
 </dl></div>
-<div class="listingblock">
-<div class="title">Examples</div>
-<div class="content">
-<pre><code>context = {
-  STRING = "example string",
-  STR = "{STRING}",
-  ING = "ING",
-  UPPER = function(context, arg)
-            return arg:upper()
-          end
- }
-
--- simple substitution
-assert(strsubst(context, "{STRING}") == "example string")
-
--- arguments on stringish substitutions are retained
-assert(strsubst(context, "{STRING example}") == "example stringexample")
-
--- substitution is recursively applied
-assert(strsubst(context, "{STR}") == "example string")
-
--- that can be used to create names dynamically
-assert(strsubst(context, "{STR{ING}}") == "example string")
-
--- functions are called with the argument and their return is substituted
-assert(strsubst(context, "{UPPER arg}") == "ARG")
-
--- now together
-assert(strsubst(context, "{UPPER {STR}}") == "EXAMPLE STRING")
-
--- undefined names are kept verbatim
-assert(strsubst(context, "{undefined}") == "{undefined}")</code></pre>
-</div></div>
 <div class="sect4">
 <h5 id="_string_substitution_language_2">String Substitution Language</h5>
 <div class="dlist"><dl>
@@ -2410,7 +2475,7 @@ preprocess
 <div class="ulist"><ul>
 <li>
 <p>
-the preprocessed line
+the preprocessed line (complete <em>SOURCE</em> line)
 </p>
 </li>
 <li>
@@ -2478,7 +2543,7 @@ postprocess
 <div class="ulist"><ul>
 <li>
 <p>
-the postprocessed line (context.TEXT)
+the postprocessed line (the documentation comment part <em>TEXT</em>)
 </p>
 </li>
 <li>
@@ -2552,8 +2617,8 @@ context
 </dt>
 <dd>
 <p>
- Concat data to the given section/key
-  to be called from preprocessors or macros which generate new content.
+ Concat <em>context.TEXT</em> to the given
+  last entrys context already stored under section/key.
 </p>
 <div class="dlist"><dl>
 <dt class="hdlist1">
@@ -2603,7 +2668,7 @@ context
 </dt>
 <dd>
 <p>
- Escape all characters in string <em>s</em> so that it can be used as verbatim pattern.
+ Escape all on alphanumeric characters in string <em>s</em> so that it can be used as verbatim pattern.
 </p>
 </dd>
 <dt class="hdlist1">
@@ -2657,7 +2722,7 @@ to
 <dd>
 <p>
  Create a new context.
-Used whenever preprocessors/macros need to generate new content.
+Used whenever preprocessors/macros need to generate new local scope.
 </p>
 <div class="dlist"><dl>
 <dt class="hdlist1">
@@ -2744,7 +2809,7 @@ generator failed
 </dt>
 <dd>
 <p>
- error in operators generator function.
+ Error in operators generator function.
 </p>
 </dd>
 <dt class="hdlist1">
@@ -2800,7 +2865,7 @@ no valid name
 </dt>
 <dd>
 <p>
- {SET &lt;name&gt; &#8230;} called with non alphanumeric name
+ GLOBAL or DEFINE called with non alphanumeric name
 </p>
 </dd>
 <dt class="hdlist1">
@@ -2869,14 +2934,6 @@ section is empty
 </p>
 </dd>
 <dt class="hdlist1">
-section is empty 
-</dt>
-<dd>
-<p>
- Trying to sort a section by keys yield zero results.
-</p>
-</dd>
-<dt class="hdlist1">
 section key multiple times used 
 </dt>
 <dd>
@@ -2905,8 +2962,9 @@ section unused
 </dt>
 <dd>
 <p>
- The printed section was not used. This might be intentional when generating
- only partial outputs.
+ The printed section was not used. When this is intentional this
+ messages can be supressed by dropping the unused section with
+ the <em>!</em> operator.
 </p>
 </dd>
 <dt class="hdlist1">
@@ -2918,11 +2976,19 @@ sort argument missing
 </p>
 </dd>
 <dt class="hdlist1">
+sorted section is empty 
+</dt>
+<dd>
+<p>
+ Trying to sort a section by keys yield zero results.
+</p>
+</dd>
+<dt class="hdlist1">
 strsubst error 
 </dt>
 <dd>
 <p>
- strsubst() failed, possibly because of recursion limit.
+ string substitution failed, possibly because of recursion limit.
 </p>
 </dd>
 <dt class="hdlist1">
@@ -2947,7 +3013,7 @@ strsubst type error
 </dt>
 <dd>
 <p>
- strsubst() expects a string, number or a function for expansion.
+ string substitution expects a string, number or a function for expansion.
 </p>
 </dd>
 <dt class="hdlist1">
@@ -3101,16 +3167,6 @@ Christian Thäter &lt;<a href="mailto:ct@pipapo.org">ct@pipapo.org</a>&gt; for i
 <dd>
 <div class="dlist"><dl>
 <dt class="hdlist1">
-<a href="#index_BACKSLASH">BACKSLASH</a> 
-</dt>
-<dt class="hdlist1">
-<a href="#index_BACKTICK">BACKTICK</a> 
-</dt>
-<dd>
-<p>
-</p>
-</dd>
-<dt class="hdlist1">
 <a href="#index_BOOL">BOOL</a> 
 </dt>
 <dd>
@@ -3118,21 +3174,7 @@ Christian Thäter &lt;<a href="mailto:ct@pipapo.org">ct@pipapo.org</a>&gt; for i
 </p>
 </dd>
 <dt class="hdlist1">
-<a href="#index_BRACECLOSE">BRACECLOSE</a> 
-</dt>
-<dd>
-<p>
-</p>
-</dd>
-<dt class="hdlist1">
 <a href="#index_BRACED">BRACED</a> 
-</dt>
-<dd>
-<p>
-</p>
-</dd>
-<dt class="hdlist1">
-<a href="#index_BRACEOPEN">BRACEOPEN</a> 
 </dt>
 <dd>
 <p>
@@ -3711,7 +3753,7 @@ Christian Thäter &lt;<a href="mailto:ct@pipapo.org">ct@pipapo.org</a>&gt; for i
 <div id="footer">
 <div id="footer-text">
 Last updated
- 2020-09-04 02:56:43 CEST
+ 2020-09-04 22:38:05 CEST
 </div>
 </div>
 </body>

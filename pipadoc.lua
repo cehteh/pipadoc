@@ -61,12 +61,12 @@ local condblock_disabled
 
 local gcontext = setmetatable(
   {
-    --context:file {VARDEF FILE}
-    --context:file   The file or section name currently processed or some special annotation
-    --context:file   in angle brackets (eg '<startup>') on other processing phases
-    --context:line {VARDEF LINE}
-    --context:line   Current line number of input or section, or indexing key
-    --context:line   Lines start at 1
+    --context_file:file {VARDEF FILE}
+    --context_file:file   The file or section name currently processed or some special annotation
+    --context_file:file   in angle brackets (eg '<startup>') on other processing phases
+    --context_preprocess:line {VARDEF LINE}
+    --context_preprocess:line   Current line number of input or section, or indexing key
+    --context_preprocess:line   Lines start at 1
     FILE = "<startup>"
   }, {__index = GLOBAL})
 
@@ -174,7 +174,7 @@ local function gcontext_set(file, line)
 end
 
 --api_various:
-function pattern_escape(s)  --: Escape all characters in string 's' so that it can be used as verbatim pattern.
+function pattern_escape(s)  --: Escape all on alphanumeric characters in string 's' so that it can be used as verbatim pattern.
   return (s:gsub("%W", "%%%1"))
 end
 
@@ -598,8 +598,8 @@ end
 
 --api_strsubst:
 --:
---: String Substitution
---: ^^^^^^^^^^^^^^^^^^^
+--: String Substitution Engine
+--: ^^^^^^^^^^^^^^^^^^^^^^^^^^
 --:
 --api_strsubst_example:
 --:
@@ -669,6 +669,7 @@ function strsubst(context, str, escape) --: substitute text
   --:     'escape':::: 1st pass, replaces escaped characters with a reserved internal representation.
   --:     'unescape':::: 2nd pass, turns the reserved internal representation of escaped characters back into the native form.
   --:     nil:::: no special escaping.
+  --=api_strsubst_example
   trace(context, "strsubst:", str)
   maybe_type(context, "table")
   assert_type(str, "string")
@@ -736,7 +737,7 @@ function strsubst(context, str, escape) --: substitute text
 
                           else
                             warn(context, "strsubst type error"..":", macro, type(expansion))  --cwarn.<HEXSTRING>: <STRING> ::
-                            --cwarn.<HEXSTRING>:  strsubst() expects a string, number or a function for expansion.
+                            --cwarn.<HEXSTRING>:  string substitution expects a string, number or a function for expansion.
                           end
                         end
                       end
@@ -755,7 +756,7 @@ function strsubst(context, str, escape) --: substitute text
 
   if not ok then
     warn(context, "strsubst error"..":", rstr) --cwarn.<HEXSTRING>: <STRING> ::
-    --cwarn.<HEXSTRING>:  strsubst() failed, possibly because of recursion limit.
+    --cwarn.<HEXSTRING>:  string substitution failed, possibly because of recursion limit.
   else
     str = rstr
   end
@@ -803,6 +804,7 @@ end
 --: String Substitution Language
 --: ++++++++++++++++++++++++++++
 --:
+--TODO: DOCME howto write macros
 function strsubst_language_parse(context, source) --: parses 'source' into a list of
   --+  arguments. Evaluates arguments within curly braces.
   --:   context:::
@@ -890,7 +892,7 @@ function strsubst_language_init(context) -- initialize the string substitution l
       end
     else
       warn(nil, "no valid name"..":", name) --cwarn.<HEXSTRING>: <STRING> ::
-      --cwarn.<HEXSTRING>:  {BRACED SET <name> ...} called with non alphanumeric name
+      --cwarn.<HEXSTRING>:  GLOBAL or DEFINE called with non alphanumeric name
     end
   end
 
@@ -925,7 +927,7 @@ function strsubst_language_init(context) -- initialize the string substitution l
   --:
   --: Predicates take a list of arguments and evaluate to a truth value. In strsubst *true* is
   --: any non-empty text and *false* is an empty string. The string substitution engine will
-  --: convert bool types and nil into respective strings.
+  --: convert bool types and nil' into respective strings.
   --:
   --: {MACRODEFSP BOOL ...}
   --:   Translates a text (which may include spaces) into the logic value *true* or an empty string.
@@ -1055,15 +1057,14 @@ end
 ----------------------
 
 --sections:
---: Text in pipadoc is stored in named 'sections'. Text can be associated with some
+--: Text in pipadoc is stored in named 'sections' and can be associated with some additional
 --: alphanumeric key under that section. This enables later sorting for indices and glossaries.
 --:
 --: One-line sections are defined when a section and maybe a key is followed by documentation
---: text. Block sections start with the section definition but no documentation text on the same
---: line. A block stays active until the next block section definition. One-line doctext can be
---: interleaved into Blocks.
+--: text. One-line doctext can be interleaved into Blocks.
 --:
---: The default block section name is the files name up, but excluding to the first dot.
+--: At the start if a input file the default block section name is made from the files name
+--: up to the first dot.
 --:
 --: Sections are later brought into the desired order by pasting them into a 'toplevel' section.
 --: This default name for the 'toplevel' section is 'MAIN_{BRACED markup}' or if that does not exist
@@ -1099,8 +1100,8 @@ function section_append(section, key, context) --: Append data to the given sect
   end
 end
 
-function section_concat(section, key, context) --: Concat data to the given section/key
-  --:   to be called from preprocessors or macros which generate new content.
+function section_concat(section, key, context) --: Concat 'context.TEXT' to the given
+  --:   last entrys context already stored under section/key.
   --:
   --:   section:::
   --:     name of the section to append to, must be a string
@@ -1176,8 +1177,8 @@ end
 --:
 --: Definitions for a common programming languages are already included. For languages
 --: that support block comments the opening (but not the closing) commenting characters are
---: registered as well. This allows one to define section blocks right away. But using the
---: comment closing sequence right on the line would clobber the output.
+--: registered as well. This allows one to define section blocks right away. Note that using
+--  the  comment closing sequence on a popadoc comment the line will appear on the output.
 --:
 --: .Example in C
 --: ----
@@ -1287,7 +1288,7 @@ function preprocessor_register(langpat, preprocess) --: register a preprocessor
   --:     `function (context) ... end` ::::
   --:       Preprocessors may store state or have other side effect using API functions.
   --:       Takes the context of the current source line and shall return:
-  --:       * the preprocessed line
+  --:       * the preprocessed line (complete 'SOURCE' line)
   --:       * false to drop the line
   --:       * true to keep the line unaltered
   --:     +\{pattern, repl [, n]\}+ ::::
@@ -1391,7 +1392,7 @@ function postprocessor_register(markuppat, postprocess) --: register a postproce
   --:     `function (context) ... end` ::::
   --:       Postprocessors may store state or have other side effect using API functions.
   --:       Takes the context of the current source line and shall return:
-  --:       * the postprocessed line (context.TEXT)
+  --:       * the postprocessed line (the documentation comment part 'TEXT')
   --:       * false to drop the line
   --:       * true to keep the line unaltered
   --:     +\{pattern, repl [, n]\}+ ::::
@@ -1690,7 +1691,7 @@ local function setup()
   --op_builtin:
   --: `+` ::
   --:   Concat operator. Like ':' but appends text at the last line instead creating a new line.
-  --:   Note that some context information (file/line) gets lost as only the text will be appended.
+  --:   Note that only the 'TEXT' is appended all other context information gets lost.
   --:
   operator_register(
     "+",
@@ -1770,11 +1771,11 @@ local function setup()
   --op_builtin:
   --: ``{` ::
   --:   Conditional block start. Needs a string substitution predicate as ARG and its
-  --:   arguments (without closing curly brace). Evaluated at '<output>' times. When this
+  --:   arguments (without the closing curly brace). Evaluated at 'output' times. When this
   --:   predicate evaluates to *true* then the following documentation is included in the
   --:   output, when *false* then the following output within this block is supressed. A
   --:   conditional block must end with the matching closing curly brace operator. Conditional
-  --:   blocks can be nested. For possible predicates see <<Predicates, Predicates>> below.
+  --:   blocks can be nested. For possible predicates see <<Predicates,below>>.
   --:
   operator_register(
     "{",
@@ -1953,7 +1954,7 @@ end
 ----------------------
 
 local function line_process(context, comment)
-  --context:
+  --context_parsed:
   --:pre {VARDEF PRE}
   --:pre   Contains the source code in font of the line comment.
   --:comment {VARDEF COMMENT}
@@ -2024,7 +2025,7 @@ end
 
 --api_various:
 function context_new(parent, new) --: Create a new context.
-  --: Used whenever preprocessors/macros need to generate new content.
+  --: Used whenever preprocessors/macros need to generate new local scope.
   --:   parent:::
   --:     The parent context to extend from.
   --:   new:::
@@ -2066,7 +2067,7 @@ local function file_process(file)
     return
   end
 
-  --context:
+  --context_file:
   --:file {VARDEF COMMENTS_TABLE}
   --:file   A Lua table with the all possible line comment character sequences
   --:file   for this filetype. Available at preprocessing time before parsing.
@@ -2075,7 +2076,7 @@ local function file_process(file)
   block_section = filecontext.FILE:match("[^./]+%f[.%z]")
   dbg(filecontext, "section:", block_section)
 
-  --context:
+  --context_file:
   --:language {VARDEF LANGUAGE}
   --:language   The language name of this file.
   filecontext.LANGUAGE = filetype.language
@@ -2086,7 +2087,7 @@ local function file_process(file)
   for line in fh:lines() do
     lineno = lineno + 1
 
-    --context:
+    --context_preprocess:
     --:source {VARDEF SOURCE}
     --:source   The line as read from the input file.
     local context = context_new(filecontext, {
@@ -2160,7 +2161,7 @@ function output_paste(section, output)
       local ok, err = pcall(genfunc, section[i], output)
       if not ok then
         warn(section[i], "generator failed"..":", err) --cwarn.<HEXSTRING>: <STRING> ::
-        --cwarn.<HEXSTRING>:  error in operators generator function.
+        --cwarn.<HEXSTRING>:  Error in operators generator function.
       end
     else
       warn(nil, "no generator function for:", section[i].OP)
@@ -2199,7 +2200,7 @@ function output_sort(section, op, output)
     end
 
     if #sorted == 0 then
-      warn(context, "section is empty"..":",which) --cwarn.<HEXSTRING>: <STRING> ::
+      warn(context, "sorted section is empty"..":",which) --cwarn.<HEXSTRING>: <STRING> ::
       --cwarn.<HEXSTRING>:  Trying to sort a section by keys yield zero results.
       return
     end
@@ -2229,8 +2230,9 @@ function orphan_doublet_report()
     if #section > 0 then
       if not section.usecnt then
         warn(orphan, "section unused"..":", name) --cwarn.<HEXSTRING>: <STRING> ::
-        --cwarn.<HEXSTRING>:  The printed section was not used. This might be intentional when generating
-        --cwarn.<HEXSTRING>:  only partial outputs.
+        --cwarn.<HEXSTRING>:  The printed section was not used. When this is intentional this
+        --cwarn.<HEXSTRING>:  messages can be supressed by dropping the unused section with
+        --cwarn.<HEXSTRING>:  the '!' operator.
       elseif section.usecnt > 1 then
         warn(doublete, "section multiple times used"..":", name, section.usecnt) --cwarn.<HEXSTRING>: <STRING> ::
         --cwarn.<HEXSTRING>:  Section was used multiple times in the output.
@@ -2263,6 +2265,7 @@ do
   inputs_process()
 
   if opt_list_sections then
+    --PLANNED: return table, print that
     section_list(io.stdout)
   end
 
@@ -2406,9 +2409,9 @@ end
 --: ------------
 --:
 --: Pipadoc is single Lua source file `pipadoc.lua` which is portable among most Lua versions
---: (PUC Lua 5.1, 5.2, 5.3, Luajit, Ravi). It ships with a `pipadoc.install` shell script which
---: figures a suitable Lua version out and installs `pipadoc.lua` as `pipadoc` in a given
---: directory (the current directory by default).
+--: (PUC Lua 5.1, 5.2, 5.3, 5.4, Luajit, Ravi). It ships with a `pipadoc.install` shell script
+--: which figures a suitable Lua version out and installs `pipadoc.lua` as `pipadoc` in a
+--: given directory (the current directory by default).
 --:
 --: There are different ways how this can be used in a project:
 --:
@@ -2436,11 +2439,12 @@ end
 --: --------------
 --:
 --: Pipadoc is controlled by special line comments. This is chosen because it is the most common
---: denominator between almost all programming languages.
+--: denominator between almost all programming languages. To make a line comment recognized as
+--: pipadoc comment it needs to be followed immediately by a operator sequence. Which in the
+--: simplest case is just a single punctuation character.
 --:
---: To make a line comment recognized as pipadoc comment it needs to be followed immediately
---: by a operator sequence. Which in the simplest case is just a single punctuation character.
---: These operator sequences can define the section to which this comment belongs to.
+--: These comments are stored to named documentation sections. One of the main concepts of pipadoc
+--: is that one can define which and in what order these sections appear in the final output.
 --:
 --: To add special functionality and extend the semantics one can define pre and post processors.
 --: Preprocessors are defined per input programming language and process all source lines. They can
@@ -2450,15 +2454,17 @@ end
 --: Postprocessors are defined for output markup and process every line in output order. The allow
 --: to augment output in a markup specific way.
 --:
---: There is a string substitution/template engine which can processes text.
+--: There is a string substitution/template engine which can processes text. The string
+--: substitution engine also implements a small lisp-like programming language which can be used
+--: to generate content programmatically.
 --:
 --:
 --: Example
 --: ~~~~~~~
 --:
---: Without further ado, here is a slightly terse example showing pipadoc documentation on a
---: shell script. For a more complex example one could look at 'pipadoc.lua' itself. The exact
---: pipadoc syntax is described in the next section.
+--: Without further ado, here is an example showing pipadoc documentation on a shell script.
+--: For a more complex example one could look at 'pipadoc.lua' itself. The exact pipadoc
+--: syntax is described in the next section.
 --:
 --: .An example document (example.sh)
 --: ----
@@ -2499,15 +2505,15 @@ end
 --:
 --:
 --: Syntax
---: ~~~~~~
+--: ------
 --:
 --: .In short:
 --: A pipadoc comment is any 'line-comment' of the programming language directly (without spaces)
 --: followed by a optional alphanumeric section name which may have a sorting key appended by
---: a dot, followed by an operator, followed by an optional argument. Possibyl followed by the
+--: a dot, followed by an operator, followed by an optional argument. Possibly followed by the
 --: documentation text itself.
 --:
---: Only lines qualify this syntax are processed as pipadoc documentation. But preprocessors run
+--: Only lines qualify this syntax are processed as pipadoc documentation. Preprocessors run
 --: before the parsing is done and may translate otherwise non pipadoc sourcecode into documentation.
 --:
 --: .The formal syntax looks like:
@@ -2522,7 +2528,8 @@ end
 --:
 --: <section> ::= <alphanumeric text including underscore>
 --:
---: <operator> ::= ":" | "+" | "=" | "@" | "$" | "#" | <user defined operators>
+--: <operator> ::= ":" | "+" | "=" | "\{" | "\}" | "@" | "$" | "#" | "!"
+--:                | <user defined operators>
 --:
 --: <key> ::= <alphanumeric text including underscore>
 --:
@@ -2575,9 +2582,11 @@ end
 --:   extra content like indices and append that to the respective sections.
 --:
 --: Output Ordering ::
---:   The output order is generated by assembling the '{BRACED toplevel}_{BRACED markup}' or if that does
---:   not exist the '{BRACED toplevel}' section.
+--:   The output order is generated by assembling the '{BRACED toplevel}_{BRACED markup}' or
+--:   if that does not exist the '{BRACED toplevel}' section.
 --:   The paste and sorting operators there define the section order of the document.
+--:   The conditional operators '\{' and '\}' are also evaluated at this stage and may omit some
+--:   blocks depending on selection predicates.
 --:
 --: Postprocessing ::
 --:   For each output context the postprocessors run in output order.
@@ -2590,7 +2599,8 @@ end
 --: Report empty sections, Orphans and Doubletes::
 --:   Pipadoc keeps stats on how each section was used. Finally it gives a report (as warning)
 --:   on sections which appear to be unused or used more than once. These warnings may be ok, but
---:   sometimes they give useful hints about typing errors.
+--:   sometimes they give useful hints about typing errors. To suppress such reports of
+--:   intentional left out sections one can use the '!' operator.
 --:
 --: It is important to know that reading happens only line by line, operations can not span
 --: lines. While Processing steps can be stateful and thus preserve information for further
@@ -2602,20 +2612,20 @@ end
 --:
 --=filetypes
 --:
---: .Predefined Filetypes
---:
+--: .Predefined Filetypes:
 --@filetypes_builtin
 --:
 --:
 --: Markup Languages
 --: ----------------
 --:
---: The core of pipadoc is completely agnostic about the markup used within the documentation strings.
---: The '--markup' option only sets the 'MARKUP' variable and output generation tries include the
---: markup in the toplevel. Usually only string substitution and postprocessors shoould handle markup
---: related things.
+--: The core of pipadoc is completely agnostic about the markup used within the documentation
+--: strings. The '--markup' option only sets the 'MARKUP' variable and output generation tries
+--: include the markup in the toplevel. Usually only string substitution and postprocessors
+--: should handle markup related things.
 --:
---: The shipped configuration file comes with postprocessors for 'asciidoc' and 'text' markups.
+--: The shipped configuration file comes with postprocessors for 'asciidoc' and 'text'
+--: markups. More will will be added in future (org-mode, markdown).
 --:
 --:
 --: Operators
@@ -2626,24 +2636,33 @@ end
 --=op_builtin
 --:
 --:
+--: Processors
+--: ----------
+--:
+--: Pre- and Post- processors are lua functions that allow to manipulate text
+--: programmatically. They get the full context of the current processed line as input and can
+--: return the modified line or choose to drop or keep the line. They are can freely store
+--: some state elsewhere and thus allow some processing that spans lines which is normally not
+--: available in pipadoc.
+--:
+--:
 --: Preprocessors
---: -------------
+--: ~~~~~~~~~~~~~
 --:
---TODO: doc more
---: One can register preprocessors per filetypes. A preprocessor can modify any line
---: prior it gets parsed and further processed.
+--: Preprocessors are per filetypes. A preprocessor can modify any input line
+--: prior it gets parsed and further processed. Preprocessors are used to autogenerate
+--: extra documentation comments from code. Lifting parts of the code to the documentation
+--: side. They operate on the whole source line, not only the pipadoc comment.
 --:
---: Preprocessors are used to autogenerate documentation comments from code. Lifting
---: parts of the code to the documentation side.
---:
+--: This is the place to generate data for new sections (Gloassaries, Indices).
 --:
 --: Postprocessors
---: --------------
+--: ~~~~~~~~~~~~~~
 --:
 --: Postprocessors run at output generation time. They are registered per markup type.
---: Processors are called in order of their definition.
---:
---: They are used to augment the generated output with markup specific things.
+--: They are used to augment the generated output with markup specific things. They operate
+--: only on parsed documentation comments and only those should be modified. All other data is
+--: already available and stored, thus they may not generate new sections.
 --:
 --:
 --: String Substitution Engine
@@ -2657,6 +2676,19 @@ end
 --: curly brace) and the string substitution resulting in an empty string, then the
 --: whole line becomes dopped. If this is not intended one could add a second empty
 --: '{BRACED NIL}' FOO string substitution to the line.
+--:
+--: .Simple String Substitution Example:
+--: ----
+--: The date is \{DATE\}
+--: \{Undefined\}
+--: \{NIL\}
+--: \{NIL\}\{NIL\}
+--: ----
+--:
+--: . +{BRACED DATE}+ gets replaced with the current date.
+--: . +{BRACED Undefined}+ will stay literally.
+--: . +{BRACED NIL}+ will be removed.
+--: . +{BRACED NIL}{BRACED NIL}+ will result in an empty line.
 --:
 --: String substitutions names consist of alphanumeric characters or underlines.
 --: These names themself can be composed from string substitutions (see example below).
@@ -2679,19 +2711,19 @@ end
 --: of this special characters.
 --:
 --: .The reserved macros are:
---: {VARDEF __BACKSLASH__}
+--: +\\\{\\_\\_BACKSLASH__\}+ ::
 --:   The backslash character: +{__BACKSLASH__}+
 --:
---: {VARDEF __BACKTICK__}
+--: +\\\{\\_\\_BACKTICK__\}+ ::
 --:   The backtick character: +{__BACKTICK__}+
 --:
---: {VARDEF __BRACEOPEN__}
+--: +\\\{\\_\\_BRACEOPEN__\}+ ::
 --:   The opening curly brace: +{__BRACEOPEN__}+
 --:
---: {VARDEF __BRACECLOSE__}
+--: +\\\{\\_\\_BRACECLOSE__\}+ ::
 --:   The closing curly brace: +{__BRACECLOSE__}+
 --:
---: .String Substitution Example
+--: .More elaborate String Substitution Example
 --: -----
 --: GLOBAL.SIMPLE = "a simple example"
 --: GLOBAL.BRACED = "\{BRACED_\{MARKUP\} \{__ARG__\}\}"
@@ -2721,7 +2753,7 @@ end
 --:
 --: The string substitution engine comes with some macros predefined which implement a simple
 --: lisp-like programming language to allow conditional evaluation and (in future) other useful
---: features. This language is enabled after assembling the output in order and evaluated in
+--: features. This language is enabled when assembling the output in order and evaluated in
 --: the last step of the postprocessor.
 --:
 --: Syntax
@@ -2744,6 +2776,13 @@ end
 --: Use argument as single text not parsed into multiple arguments. It may become recursively
 --: evaluated or not, depending on the actual macro implementation.
 --:
+--: .Example
+--: ----
+--: \{AND \{DEFINE SOMETHING\} \{NOT \{DEFINED SOMETHING_ELSE\} \{BOOL \{ANOTHERTHING\}\}\}\}
+--: ----
+--: * Results in *true* when 'SOMETHING' is defined and 'SOMETHING_ELSE' is not defined and
+--:   'ANOTHERTHING' is not an empty string.
+--:
 --:
 --: Macros
 --: ^^^^^^
@@ -2757,15 +2796,16 @@ end
 --: Pipadocs main objective is to scrape documentation comments from a project and generate
 --: output in desired order. Such an basic approach would be insufficient for many common cases.
 --: Thus pipadoc has pre and postprocessors and the string substitution engine to generate and
---: modify documentation in an extensible way.
+--: modify documentation in an extensible way. These are defined in an user supplied
+--: configuration file.
 --:
---: Pipadoc tries to load a configuration file on startup. By default it is named
+--: Pipadoc tries to load the configuration file on startup. By default it is named
 --: +pipadoc_config.lua+ in the current directory. This name can be changed with the
 --: '--config' option.
 --:
 --: The configuration file is used to define pre- and post- processors, define states
 --: for those, define custom operators and string substitution macros. It is loaded and
---: executed as it own chunk and may only access the global variables and
+--: executed as it own chunk and may only access the global variables and call the
 --: API functions described below.
 --:
 --: Without a configuration file none of these processors are defined any only few
@@ -2821,16 +2861,9 @@ end
 --: Simple string assignments can be set from the command line. Configuration files may define
 --: more complex Lua functions for string substitutions.
 --:
---:
---: Predefined Variables
---: ^^^^^^^^^^^^^^^^^^^^
---:
---: The 'GLOBAL' table is initialized with:
---:
---@GLOBAL
---:
 --: The 'GLOBAL_POST' table is extends 'GLOBAL' and is used for a final string substitution
 --: pass after postprocessing. There are no values defined in 'GLOBAL_POST' by pipadoc itself.
+--:
 --:
 --: [[CONTEXT]]
 --: The Context
@@ -2843,12 +2876,27 @@ end
 --: In a few cases a fake-context with FILE name in angle brackets is passed around for
 --: diagnostic functions.
 --:
---: Context Members
---: ^^^^^^^^^^^^^^^
 --:
---: The following members are defined in 'contexts'.
+--: Predefined Variables and Context Members
+--: ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 --:
---@context
+--: .The 'GLOBAL' context contains:
+--@GLOBAL
+--:
+--: .A file level context contains:
+--@context_file
+--:
+--: .At preprocessing time the context contains:
+--@context_preprocess
+--:
+--: .After lines are parsed each line context contains:
+--@context_parsed
+--:
+--: Additional global members may be defined by command line options or the string
+--: substitution language.
+--:
+--: String substitution creates local contexts for each level of evaluation which may define
+--: local members.
 --:
 --:
 --: Exported Functions
@@ -2861,7 +2909,6 @@ end
 --=api_typecheck
 --=api_typeconv
 --=api_strsubst
---=api_strsubst_example
 --=api_strsubst_lang
 --=api_filetypes
 --=api_op
@@ -2910,6 +2957,7 @@ end
 --:
 --: For convenience there is a '--make-doc' option which calls the above commands.
 --:
+--PLANNED: DOC -D PDF --issues -eissues
 --:
 --: [appendix]
 --: GNU General Public License

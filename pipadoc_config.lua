@@ -24,7 +24,7 @@ preprocessor_register (nil,
 
 
 --shipped_config_pre:
---: *  Replaces '<HEXSTRING>' with the first literal doublequoted string from the code
+--: *  Replaces '<{NIL}HEXSTRING>' with the first literal doublequoted string from the code
 --:    converted to lowercase hexadecimal (useable for sorting including whitespace and punctuation).
 --:    When no literal doublequoted string exists in the code, then the last used hexadecimal
 --:    string found is used. Used for sorting documentation by the lifted string literal.
@@ -348,12 +348,12 @@ postprocessor_register ("^asciidoc$",
 
 
 --shipped_config_pre:
---: * When GLOBAL.ISSUES is defined, generate formatted lists for doc comments in
+--: * When 'ISSUES' is defined (+-D ISSUES+), generate formatted lists for doc comments in
 --:   WIP/FIXME/TODO/PLANNED/DONE sections.
---:   When GLOBAL.GIT is defined ('-D GIT') then each such item includes information gathered
+--:   When 'GIT' is defined (+-D GIT+) then each such item includes information gathered
 --:   from the git commit which touched that line the last.
---:   When GLOBAL.NOBUG is defined it reaps http://nobug.pipapo.org[NoBug] annotations from
---:   C source files as well.
+--:   When 'NOBUG' is defined (+-D NOBUG+) it reaps http://nobug.pipapo.org[NoBug] annotations from
+--:   C source files as well. The 'ISSUES' list is then available under toplevel 'ISSUES' (+-t ISSUES+).
 if GLOBAL.GIT then
 
   --shipped_config_subst:
