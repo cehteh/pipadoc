@@ -264,7 +264,7 @@ function table_dump(context, p, t)
   for k,v in pairs(t) do
     dbg(context, p, k,v)
     if type(v) == 'table' then
-      dump_table(context, p.."/"..k, v)
+      table_dump(context, p.."/"..k, v)
     end
   end
 end
