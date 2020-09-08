@@ -239,6 +239,11 @@ echo TESTPP becomes a docline
 #: {LE 3 2 1}false.
 #: {GT 3 2 1}.
 #: {GT 2 2 2}false.
+#: {EQUAL foo foo foo}.
+#: {EQUAL foo bar baz}false.
+#: {SORTED a b c}.
+#: {SORTED a a a}.
+#: {SORTED a b a}false.
 #: HAVE:
 #: {HAVE oneline}.
 #: {HAVE $oneline}.
@@ -388,6 +393,11 @@ echo TESTPP becomes a docline
 #> true.
 #> true.
 #> false.
+#> true.
+#> false.
+#> true.
+#> false.
+#> true.
 #> true.
 #> false.
 #> HAVE:

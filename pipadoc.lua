@@ -1045,6 +1045,48 @@ function strsubst_language_init(context) -- initialize the string substitution l
   end
 
 
+  --: Compare the operands as string. At least 2 arguments must be given.
+  --: These predicates take a list of arguments and compare them left to right
+  --: Resulting in the truth value of the comparsion.
+  --:
+  --: {MACRODEF EQUAL strings...}
+  --:   Results in *true* when all strings equal.
+  --:
+  context.EQUAL = function (context, arg)
+    local args = strsubst_language_parse(context, arg)
+
+    if #args < 2 then
+      warn(nil, "missing argument"..":", name)
+    else
+      for i=2,#args do
+        if args[1] ~= args[i] then
+          return
+        end
+      end
+      return true
+    end
+  end
+
+
+  --: {MACRODEF SORTED strings...}
+  --:   Compare strings for increasing or same sorting order.
+  --:
+  context.SORTED = function (context, arg)
+    local args = strsubst_language_parse(context, arg)
+
+    if #args < 2 then
+      warn(nil, "missing argument"..":", name)
+    else
+      for i=2,#args do
+        if args[i-1] > args[i] then
+          return
+        end
+      end
+      return true
+    end
+  end
+
+
   --: {MACRODEF DEFINED macronames...}
   --:   Results in 'true' when all 'macronames' are defined.
   --:

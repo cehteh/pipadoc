@@ -653,6 +653,16 @@ LE numbers...:
 GT numbers...:
   Compare for greater than. 'numbers' must be a sequence of decreasing magnitude.
 
+Compare the operands as string. At least 2 arguments must be given.
+These predicates take a list of arguments and compare them left to right
+Resulting in the truth value of the comparsion.
+
+EQUAL strings...:
+  Results in *true* when all strings equal.
+
+SORTED strings...:
+  Compare strings for increasing or same sorting order.
+
 DEFINED macronames...:
   Results in 'true' when all 'macronames' are defined.
 
