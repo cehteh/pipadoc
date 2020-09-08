@@ -924,6 +924,32 @@ function strsubst_language_init(context) -- initialize the string substitution l
   end
 
 
+  --:
+  --: {MACRODEF SET name value}
+  --: Assigns a local macro 'name' to 'value'.
+  --: 'name' must be in the current scope. When 'name' does not exist yet it is created as
+  --: with DEFINE.
+  --:
+  context.SET = function (context, arg)
+    local args = strsubst_language_parse(context, arg)
+
+    local name = args[1]
+
+    if name and name:match("^%a[%w_]*$") then
+      local value = args[2] or ""
+
+      if context[name] == nil or rawget(context, name) then
+        warn(nil, "PING"..":", name, value)
+        context[name] = value
+      else
+        warn(nil, "macro already defined"..":", name)
+      end
+    else
+      warn(nil, "no valid name"..":", name)
+    end
+  end
+
+
   --: [[Predicates]]
   --: Predicates
   --: ++++++++++

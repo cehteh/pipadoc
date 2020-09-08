@@ -223,6 +223,8 @@ echo TESTPP becomes a docline
 #: DEFINE:
 #: {DEFINE test defined1}{test}
 #: {DEFINE test {defined 2}}{test}
+#: {SET foo bar}{foo} {SET foo again}{foo}.
+#: {SET global baz}{global}.
 #: PREDICATES:
 #: {BOOL yes yes yes}.
 #: {BOOL }false.
@@ -379,6 +381,8 @@ echo TESTPP becomes a docline
 #> DEFINE:
 #> defined1
 #> defined 2
+#> bar again.
+#> global is set {in braces}.
 #> PREDICATES:
 #> true.
 #> false.

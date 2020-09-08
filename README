@@ -617,6 +617,12 @@ DEFINE <name> value...:
 Defines a local macro 'name' to 'value'.
 'name' must be new, redefining existing names yields an error.
 
+
+SET name value:
+Assigns a local macro 'name' to 'value'.
+'name' must be in the current scope. When 'name' does not exist yet it is created as
+with DEFINE.
+
 [[Predicates]]
 Predicates
 ++++++++++
