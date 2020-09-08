@@ -2565,6 +2565,7 @@ end
 --=INDEX
 --!ISSUES
 --!MAIN_text
+--!README_text
 --!PLANNED
 --!TODO
 --!WIP
@@ -2576,7 +2577,7 @@ end
 --!INDEX
 --!ISSUES
 --!MAIN_asciidoc
---!MAIN_text
+--!README_text
 --!PLANNED
 --!TODO
 --!WIP
@@ -2588,6 +2589,7 @@ end
 --!INDEX
 --!ISSUES
 --!MAIN_asciidoc
+--!MAIN_text
 --!PLANNED
 --!TODO
 --!WIP
