@@ -656,6 +656,18 @@ Control Structures
 DO ... <special>:
   Creates a local context, any variables defined within '...' are contained within this context.
 
+IF condition {THEN ...} {ELSE ...}:
+  'condition' must be a boolean predicate.
+  When 'condition' is true then the 'THEN' part gets substituted otherwise the 'ELSE' part
+  gets substituted. The 'THEN' and 'ELSE' part are optional.
+
+THEN ...when true... <special>:
+  Defines the alternative to substitute inside an IF block when the 'condition' was
+  true.
+
+ELSE ...when false... <special>:
+  Defines the alternative to substitute inside an IF block when the 'condition' was not true.
+
 
 
 Configuration File
@@ -1137,6 +1149,8 @@ file not found ::
  A given file can not be opened (wrong path or typo?).
 generator failed ::
  Error in operators generator function.
+IF condition missing ::
+ The IF statement needs a condition to branch upon.
 input file given twice ::
  Ignored a file given multiple times for input.
 macro already defined ::

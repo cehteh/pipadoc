@@ -1683,6 +1683,39 @@ convert bool types and nil' into respective strings.</p></div>
 </p>
 </dd>
 </dl></div>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+<a id="index_IF"></a><code>{IF condition {THEN &#8230;} {ELSE &#8230;}}</code> 
+</dt>
+<dd>
+<p>
+  <em>condition</em> must be a boolean predicate.
+  When <em>condition</em> is true then the <em>THEN</em> part gets substituted otherwise the <em>ELSE</em> part
+  gets substituted. The <em>THEN</em> and <em>ELSE</em> part are optional.
+</p>
+</dd>
+</dl></div>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+<a id="index_THEN"></a><code>{THEN &#8230;when true&#8230;}</code> <em><sup>special</sup></em> 
+</dt>
+<dd>
+<p>
+  Defines the alternative to substitute inside an IF block when the <em>condition</em> was
+  true.
+</p>
+</dd>
+</dl></div>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+<a id="index_ELSE"></a><code>{ELSE &#8230;when false&#8230;}</code> <em><sup>special</sup></em> 
+</dt>
+<dd>
+<p>
+  Defines the alternative to substitute inside an IF block when the <em>condition</em> was not true.
+</p>
+</dd>
+</dl></div>
 </div>
 </div>
 </div>
@@ -2826,6 +2859,14 @@ generator failed
 </p>
 </dd>
 <dt class="hdlist1">
+IF condition missing 
+</dt>
+<dd>
+<p>
+ The IF statement needs a condition to branch upon.
+</p>
+</dd>
+<dt class="hdlist1">
 input file given twice 
 </dt>
 <dd>
@@ -3287,6 +3328,20 @@ Christian Thäter &lt;<a href="mailto:ct@pipapo.org">ct@pipapo.org</a>&gt; for i
 </dl></div>
 </dd>
 <dt class="hdlist1">
+<span class="big">E</span> 
+</dt>
+<dd>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+<a href="#index_ELSE">ELSE</a> 
+</dt>
+<dd>
+<p>
+</p>
+</dd>
+</dl></div>
+</dd>
+<dt class="hdlist1">
 <span class="big">F</span> 
 </dt>
 <dd>
@@ -3361,6 +3416,13 @@ Christian Thäter &lt;<a href="mailto:ct@pipapo.org">ct@pipapo.org</a>&gt; for i
 </dt>
 <dd>
 <div class="dlist"><dl>
+<dt class="hdlist1">
+<a href="#index_IF">IF</a> 
+</dt>
+<dd>
+<p>
+</p>
+</dd>
 <dt class="hdlist1">
 <a href="#index_INDEX_ENTRY">INDEX_ENTRY</a> 
 </dt>
@@ -3708,6 +3770,13 @@ Christian Thäter &lt;<a href="mailto:ct@pipapo.org">ct@pipapo.org</a>&gt; for i
 </p>
 </dd>
 <dt class="hdlist1">
+<a href="#index_THEN">THEN</a> 
+</dt>
+<dd>
+<p>
+</p>
+</dd>
+<dt class="hdlist1">
 <a href="#index_to_table">to_table</a> 
 </dt>
 <dd>
@@ -3773,7 +3842,7 @@ Christian Thäter &lt;<a href="mailto:ct@pipapo.org">ct@pipapo.org</a>&gt; for i
 <div id="footer">
 <div id="footer-text">
 Last updated
- 2020-09-08 13:13:46 CEST
+ 2020-09-08 15:09:14 CEST
 </div>
 </div>
 </body>

@@ -1056,27 +1056,44 @@ function strsubst_language_init(context) -- initialize the string substitution l
      return strsubst(context_new(context), arg)
   end
 
-  -- : {MACRODEF IF <condition> ...}
-  -- :   'condition' must result in a boolean (single word for *true* or empty for *false*).
-  -- :   When 'condition' is true then '...' gets substituted.
-  -- :
-  --PLANNED: context.IF = function (context, arg)
-  -- end
 
-  -- : {MACRODEF THEN ...when false...}
-  -- :   Defines the alternative to substitute inside an IF block when the 'condition' was
-  -- :   true.
-  -- :
-  --PLANNED: context.THEN = function (context, arg)
-  -- end
+  --: {MACRODEF IF condition {BRACED THEN ...} {BRACED ELSE ...}}
+  --:   'condition' must be a boolean predicate.
+  --:   When 'condition' is true then the 'THEN' part gets substituted otherwise the 'ELSE' part
+  --:   gets substituted. The 'THEN' and 'ELSE' part are optional.
+  --:
+  context.IF = function (context, arg)
+    local args = strsubst_language_parse(context, arg)
 
-  -- : {MACRODEF ELSE ...when false...}
-  -- :   Defines the alternative to substitute inside an IF block when the 'condition' was not true. +
-  -- :   +
-  -- :   _Example:_ +\{IF <condition> \{THEN ...truepart...\}\{ELSE ...falsepart...\}\}+
-  -- :
-  --PLANNED: context.ELSE = function (context, arg)
-  -- end
+    if #args < 1 then
+      warn(nil, "IF condition missing"..":", name) --cwarn.<HEXSTRING>: <STRING> ::
+      --cwarn.<HEXSTRING>:  The IF statement needs a condition to branch upon.
+    else
+      if #args[1] > 0 then
+        return strsubst(context, rawget(context, '__THEN__')) or ""
+      else
+        return strsubst(context, rawget(context, '__ELSE__')) or ""
+      end
+    end
+  end
+
+
+  --: {MACRODEFSP THEN ...when true...}
+  --:   Defines the alternative to substitute inside an IF block when the 'condition' was
+  --:   true.
+  --:
+  context.THEN = function (context, arg)
+    rawset(context, '__THEN__', arg)
+  end
+
+
+  --: {MACRODEFSP ELSE ...when false...}
+  --:   Defines the alternative to substitute inside an IF block when the 'condition' was not true.
+  --:
+  context.ELSE = function (context, arg)
+    rawset(context, '__ELSE__', arg)
+  end
+
 
   -- : .Numeric Comparsion Operators
   -- :
