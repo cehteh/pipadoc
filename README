@@ -631,8 +631,10 @@ Predicates take a list of arguments and evaluate to a truth value. In strsubst *
 any non-empty text and *false* is an empty string. The string substitution engine will
 convert bool types and nil' into respective strings.
 
-BOOL ... <special>:
-  Translates a text (which may include spaces) into the logic value *true* or an empty string.
+
+BOOL arg <special>:
+  Evaluates 'arg' and then returns *true* when the resulting string would contain any
+  text or *false* for an empty string.
 
 NOT arg <special>:
   Evaluates 'arg' and then returns *false* when the resulting string would contain any text

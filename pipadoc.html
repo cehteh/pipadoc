@@ -1611,11 +1611,12 @@ any non-empty text and <strong>false</strong> is an empty string. The string sub
 convert bool types and nil' into respective strings.</p></div>
 <div class="dlist"><dl>
 <dt class="hdlist1">
-<a id="index_BOOL"></a><code>{BOOL &#8230;}</code> <em><sup>special</sup></em> 
+<a id="index_BOOL"></a><code>{BOOL arg}</code> <em><sup>special</sup></em> 
 </dt>
 <dd>
 <p>
-  Translates a text (which may include spaces) into the logic value <strong>true</strong> or an empty string.
+  Evaluates <em>arg</em> and then returns <strong>true</strong> when the resulting string would contain any
+  text or <strong>false</strong> for an empty string.
 </p>
 </dd>
 </dl></div>
@@ -3977,7 +3978,7 @@ Christian Thäter &lt;<a href="mailto:ct@pipapo.org">ct@pipapo.org</a>&gt; for i
 <div id="footer">
 <div id="footer-text">
 Last updated
- 2020-09-08 18:56:18 CEST
+ 2020-09-08 19:21:06 CEST
 </div>
 </div>
 </body>

@@ -958,10 +958,13 @@ function strsubst_language_init(context) -- initialize the string substitution l
   --: any non-empty text and *false* is an empty string. The string substitution engine will
   --: convert bool types and nil' into respective strings.
   --:
-  --: {MACRODEFSP BOOL ...}
-  --:   Translates a text (which may include spaces) into the logic value *true* or an empty string.
+  --:
+  --: {MACRODEFSP BOOL arg}
+  --:   Evaluates 'arg' and then returns *true* when the resulting string would contain any
+  --:   text or *false* for an empty string.
   --:
   context.BOOL = function (context, arg)
+    arg = strsubst_strip_braces(strsubst(context, arg))
     if #arg > 0 then
       return true
     end
