@@ -653,8 +653,8 @@ HAVENOT sectiondescs...:
 Control Structures
 ++++++++++++++++++
 
-DO ... <special>:
-  Creates a local context, any variables defined within '...' are contained within this context.
+DO ..text.. <special>:
+  Creates a local context, any variables defined within '...text...' are contained within this context.
 
 IF condition {THEN ...} {ELSE ...}:
   'condition' must be a boolean predicate.

@@ -1044,13 +1044,14 @@ function strsubst_language_init(context) -- initialize the string substitution l
     return true
   end
 
+
   --TODO: reeorder lang doc
   --:
   --: Control Structures
   --: ++++++++++++++++++
   --:
-  --: {MACRODEFSP DO ...}
-  --:   Creates a local context, any variables defined within '...' are contained within this context.
+  --: {MACRODEFSP DO ..text..}
+  --:   Creates a local context, any variables defined within '...text...' are contained within this context.
   --:
   context.DO = function (context, arg)
      return strsubst(context_new(context), arg)

@@ -232,7 +232,7 @@ echo TESTPP becomes a docline
 #: {OR {} {} {yes}}.
 #: {AND {yes} {yes} {yes}}.
 #: {AND {no} {no} {}}false.
-#: HAVE
+#: HAVE:
 #: {HAVE oneline}.
 #: {HAVE $oneline}.
 #: {HAVE oneline $oneline}.
@@ -376,7 +376,7 @@ echo TESTPP becomes a docline
 #> true.
 #> true.
 #> false.
-#> HAVE
+#> HAVE:
 #> true.
 #> true.
 #> true.
