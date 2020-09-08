@@ -50,6 +50,10 @@ GLOBAL = {
   --GLOBAL:markup   for selecting the top level section and postprocessors. Other user
   --GLOBAL:markup   defined extensions may use it as well.
   MARKUP = "text",
+
+  --GLOBAL:toplevel {VARDEF TOPLEVEL}
+  --GLOBAL:toplevel   The toplevel section used for assembling the output.
+  TOPLEVEL = "MAIN"
 }
 
 GLOBAL_POST = {}
@@ -73,7 +77,6 @@ local gcontext = setmetatable(
 local args_done = false
 local opt_verbose = 1
 local opt_nodefaults = false
-local opt_toplevel = "MAIN"
 local opt_aliases = {}
 local opt_inputs = {}
 local opt_list_sections = nil
@@ -355,8 +358,8 @@ local options = {
   ["-t"] = "--toplevel",
   ["--toplevel"] = function (arg, i)
     args_check(arg, i+1)
-    opt_toplevel = arg[i+1]
-    dbg(nil, "toplevel:", opt_toplevel)
+    GLOBAL.TOPLEVEL = arg[i+1]
+    dbg(nil, "toplevel:", GLOBAL.TOPLEVEL)
     return 1
   end,
   "", --:  <STRING>
@@ -2370,11 +2373,11 @@ do
   gcontext_set "<output>"
   strsubst_language_init (GLOBAL)
 
-  local topsection = sections[opt_toplevel.."_"..GLOBAL.MARKUP] or sections[opt_toplevel]
+  local topsection = sections[GLOBAL.TOPLEVEL.."_"..GLOBAL.MARKUP] or sections[GLOBAL.TOPLEVEL]
   if topsection then
     output_paste(topsection, output)
   else
-    die (nil, "toplevel section undefined"..":", opt_toplevel) --cwarn.<HEXSTRING>: <STRING> ::
+    die (nil, "toplevel section undefined"..":", GLOBAL.TOPLEVEL) --cwarn.<HEXSTRING>: <STRING> ::
     --cwarn.<HEXSTRING>:  The section used as root for the output generation is not defined.
   end
 
