@@ -981,6 +981,70 @@ function strsubst_language_init(context) -- initialize the string substitution l
   end
 
 
+  --: Trying to convert the operands to a number, if that fails 0 is used.
+  --: At least 2 arguments must be given.
+  --: These predicates take a list of arguments and compare them left to right
+  --: Resulting in the truth value of the comparsion.
+  --:
+  --: {MACRODEF EQ numbers..}
+  --:   Results in *true* when all numbers are equal.
+  --:
+  context.EQ = function (context, arg)
+    local args = strsubst_language_parse(context, arg)
+
+    if #args < 2 then
+      warn(nil, "missing argument"..":", name) --cwarn.<HEXSTRING>: <STRING> ::
+      --cwarn.<HEXSTRING>:  Macro needs more arguments.
+    else
+      for i=2,#args do
+        if (tonumber(args[1]) or 0) ~= (tonumber(args[i]) or 0) then
+          return
+        end
+      end
+      return true
+    end
+  end
+
+
+  --: {MACRODEF LE numbers...}
+  --:   Compare numerically less or equal. 'numbers' must be a sequence of increasing or same
+  --:   magnitude.
+  --:
+  context.LE = function (context, arg)
+    local args = strsubst_language_parse(context, arg)
+
+    if #args < 2 then
+      warn(nil, "missing argument"..":", name)
+    else
+      for i=2,#args do
+        if (tonumber(args[i-1]) or 0) > (tonumber(args[i]) or 0) then
+          return
+        end
+      end
+      return true
+    end
+  end
+
+
+  --: {MACRODEF GT numbers...}
+  --:   Compare for greater than. 'numbers' must be a sequence of decreasing magnitude.
+  --:
+  context.GT = function (context, arg)
+    local args = strsubst_language_parse(context, arg)
+
+    if #args < 2 then
+      warn(nil, "missing argument"..":", name)
+    else
+      for i=2,#args do
+        if (tonumber(args[i-1]) or 0) <= (tonumber(args[i]) or 0) then
+          return
+        end
+      end
+      return true
+    end
+  end
+
+
   --: {MACRODEF DEFINED macronames...}
   --:   Results in 'true' when all 'macronames' are defined.
   --:
@@ -1097,30 +1161,6 @@ function strsubst_language_init(context) -- initialize the string substitution l
   context.ELSE = function (context, arg)
     rawset(context, '__ELSE__', arg)
   end
-
-
-  -- : .Numeric Comparsion Operators
-  -- :
-  -- : Trying to convert the operands to a number, if that fails 0 is used.
-  -- : Resulting in the truth value of the comparsion.
-  -- :
-  -- : {MACRODEF EQ numbers...}
-  -- :   Compare for numeric equality.
-  -- :
-  --PLANNED: context.EQ = function (context, arg)
-  -- end
-
-  -- : {MACRODEF GT numbers...}
-  -- :   Compare for greater than .
-  -- :
-  --PLANNED: context.GT = function (context, arg)
-  -- end
-
-  -- : {MACRODEF LE numbers...}
-  -- :   Compare numerically less or equal.
-  -- :
-  --PLANNED: context.LE = function (context, arg)
-  -- end
 
   -- :
   -- : .String Functions

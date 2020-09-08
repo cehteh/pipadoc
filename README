@@ -638,6 +638,21 @@ OR arguments...:
 AND arguments...:
   Results in 'false' when one of the arguments is *false*.
 
+Trying to convert the operands to a number, if that fails 0 is used.
+At least 2 arguments must be given.
+These predicates take a list of arguments and compare them left to right
+Resulting in the truth value of the comparsion.
+
+EQ numbers..:
+  Results in *true* when all numbers are equal.
+
+LE numbers...:
+  Compare numerically less or equal. 'numbers' must be a sequence of increasing or same
+  magnitude.
+
+GT numbers...:
+  Compare for greater than. 'numbers' must be a sequence of decreasing magnitude.
+
 DEFINED macronames...:
   Results in 'true' when all 'macronames' are defined.
 
@@ -822,6 +837,8 @@ NIL:
 NL:
   The line-break character sequence, defaults to '\n' and
   can be changed with the '--define' command-line option.
+TOPLEVEL:
+  The toplevel section used for assembling the output.
 
 .A file level context contains:
 FILE:
@@ -1157,6 +1174,8 @@ macro already defined ::
  Redefining an already existing macro is not allowed.
 mismatched condblock end ::
  Conditional block end without a begin before.
+missing argument ::
+ Macro needs more arguments.
 missing predicate ::
  Conditional block begin needs a predicate.
 no keys in section ::

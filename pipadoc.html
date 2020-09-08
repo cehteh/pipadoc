@@ -1638,6 +1638,41 @@ convert bool types and nil' into respective strings.</p></div>
 </p>
 </dd>
 </dl></div>
+<div class="paragraph"><p>Trying to convert the operands to a number, if that fails 0 is used.
+At least 2 arguments must be given.
+These predicates take a list of arguments and compare them left to right
+Resulting in the truth value of the comparsion.</p></div>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+<a id="index_EQ"></a><code>{EQ numbers..}</code> 
+</dt>
+<dd>
+<p>
+  Results in <strong>true</strong> when all numbers are equal.
+</p>
+</dd>
+</dl></div>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+<a id="index_LE"></a><code>{LE numbers&#8230;}</code> 
+</dt>
+<dd>
+<p>
+  Compare numerically less or equal. <em>numbers</em> must be a sequence of increasing or same
+  magnitude.
+</p>
+</dd>
+</dl></div>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+<a id="index_GT"></a><code>{GT numbers&#8230;}</code> 
+</dt>
+<dd>
+<p>
+  Compare for greater than. <em>numbers</em> must be a sequence of decreasing magnitude.
+</p>
+</dd>
+</dl></div>
 <div class="dlist"><dl>
 <dt class="hdlist1">
 <a id="index_DEFINED"></a><code>{DEFINED macronames&#8230;}</code> 
@@ -1975,6 +2010,14 @@ diagnostic functions.</p></div>
 <p>
   The line-break character sequence, defaults to <em>\n</em> and
   can be changed with the <em>--define</em> command-line option.
+</p>
+</dd>
+<dt class="hdlist1">
+<a id="index_TOPLEVEL"></a><code>TOPLEVEL</code>
+</dt>
+<dd>
+<p>
+  The toplevel section used for assembling the output.
 </p>
 </dd>
 </dl></div>
@@ -2891,6 +2934,14 @@ mismatched condblock end
 </p>
 </dd>
 <dt class="hdlist1">
+missing argument 
+</dt>
+<dd>
+<p>
+ Macro needs more arguments.
+</p>
+</dd>
+<dt class="hdlist1">
 missing predicate 
 </dt>
 <dd>
@@ -3339,6 +3390,13 @@ Christian Thäter &lt;<a href="mailto:ct@pipapo.org">ct@pipapo.org</a>&gt; for i
 <p>
 </p>
 </dd>
+<dt class="hdlist1">
+<a href="#index_EQ">EQ</a> 
+</dt>
+<dd>
+<p>
+</p>
+</dd>
 </dl></div>
 </dd>
 <dt class="hdlist1">
@@ -3376,6 +3434,13 @@ Christian Thäter &lt;<a href="mailto:ct@pipapo.org">ct@pipapo.org</a>&gt; for i
 </dd>
 <dt class="hdlist1">
 <a href="#index_GLOBAL">GLOBAL</a> 
+</dt>
+<dd>
+<p>
+</p>
+</dd>
+<dt class="hdlist1">
+<a href="#index_GT">GT</a> 
 </dt>
 <dd>
 <p>
@@ -3460,6 +3525,13 @@ Christian Thäter &lt;<a href="mailto:ct@pipapo.org">ct@pipapo.org</a>&gt; for i
 <div class="dlist"><dl>
 <dt class="hdlist1">
 <a href="#index_LANGUAGE">LANGUAGE</a> 
+</dt>
+<dd>
+<p>
+</p>
+</dd>
+<dt class="hdlist1">
+<a href="#index_LE">LE</a> 
 </dt>
 <dd>
 <p>
@@ -3784,6 +3856,13 @@ Christian Thäter &lt;<a href="mailto:ct@pipapo.org">ct@pipapo.org</a>&gt; for i
 </p>
 </dd>
 <dt class="hdlist1">
+<a href="#index_TOPLEVEL">TOPLEVEL</a> 
+</dt>
+<dd>
+<p>
+</p>
+</dd>
+<dt class="hdlist1">
 <a href="#index_trace">trace</a> 
 </dt>
 <dd>
@@ -3842,7 +3921,7 @@ Christian Thäter &lt;<a href="mailto:ct@pipapo.org">ct@pipapo.org</a>&gt; for i
 <div id="footer">
 <div id="footer-text">
 Last updated
- 2020-09-08 15:11:31 CEST
+ 2020-09-08 17:14:36 CEST
 </div>
 </div>
 </body>
