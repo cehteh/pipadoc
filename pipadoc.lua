@@ -481,7 +481,7 @@ local options = {
   ["--make-doc"] = function (arg, i)
     opt_dryrun = true
     os.execute [[
-        lua pipadoc.lua -m text pipadoc.lua pipadoc_config.lua -o README
+        lua pipadoc.lua -m text -t README pipadoc.lua pipadoc_config.lua -o README
         lua pipadoc.lua -m asciidoc pipadoc.lua pipadoc_config.lua -o pipadoc.txt
         asciidoc -a toc pipadoc.txt
     ]]
@@ -1400,6 +1400,7 @@ end
 --: registered as well. This allows one to define section blocks right away. Note that using
 --  the  comment closing sequence on a popadoc comment the line will appear on the output.
 --:
+--{NOT {EQUAL {TOPLEVEL} README}
 --: .Example in C
 --: ----
 --: /*blocksection:
@@ -1422,6 +1423,7 @@ end
 --: New filetypes can be added from a config file with 'filetype_register()'  or with
 --: the '--register' command-line option.
 --:
+--}
 local filetypes = {}
 
 --api_filetypes:
@@ -2021,6 +2023,7 @@ local function setup()
   --op_builtin:
   --: ``}` ::
   --:   Conditional output block end. Must match a preceeding block start.
+  --{NOT {EQUAL {TOPLEVEL} README}
   --: +
   --: .Example (shell syntax):
   --: ----
@@ -2033,6 +2036,7 @@ local function setup()
   --: #\}
   --: #something: define something here.
   --: ----
+  --}
   --:
   operator_register(
     "}",
@@ -2572,6 +2576,18 @@ end
 --!INDEX
 --!ISSUES
 --!MAIN_asciidoc
+--!MAIN_text
+--!PLANNED
+--!TODO
+--!WIP
+--!FIXME
+--!DONE
+
+--README_text:
+--=MAIN
+--!INDEX
+--!ISSUES
+--!MAIN_asciidoc
 --!PLANNED
 --!TODO
 --!WIP
@@ -2679,6 +2695,7 @@ end
 --: to generate content programmatically.
 --:
 --:
+--{NOT {EQUAL {TOPLEVEL} README}
 --: Example
 --: ~~~~~~~
 --:
@@ -2724,6 +2741,7 @@ end
 --: ----
 --:
 --:
+--}
 --: Syntax
 --: ------
 --:
@@ -2758,6 +2776,7 @@ end
 --: <documentationtext> ::= <rest of the line>
 --: ....
 --:
+--{NOT {EQUAL {TOPLEVEL} README}
 --: IMPORTANT: Pipadoc does not know anything except the line comment characters about the source
 --:            programming languages syntax. This includes literal strings and any other
 --:            syntactic form which may look like a line comment, but is not. Such lines need to
@@ -2777,6 +2796,7 @@ end
 --:   documentation text on the same line. They can be interleaved within blocks.
 --:   This is used to define index and glossary items right within block documentation.
 --:
+--}
 --:
 --: Sections and Keys
 --: -----------------
@@ -2832,9 +2852,11 @@ end
 --:
 --=filetypes
 --:
+--{NOT {EQUAL {TOPLEVEL} README}
 --: .Predefined Filetypes:
 --@filetypes_builtin
 --:
+--}
 --:
 --: Markup Languages
 --: ----------------
@@ -2897,6 +2919,7 @@ end
 --: whole line becomes dopped. If this is not intended one could add a second empty
 --: '{BRACED NIL}' FOO string substitution to the line.
 --:
+--{NOT {EQUAL {TOPLEVEL} README}
 --: .Simple String Substitution Example:
 --: ----
 --: The date is \{DATE\}
@@ -2916,6 +2939,7 @@ end
 --: This argument string gets passed to functions or recursive string substitutions. Names starting
 --: and ending with 2 underscores are reserved to the implementation.
 --:
+--}
 --: A string substitution can be either a string or a Lua function which shall return
 --: the substituted text.
 --:
@@ -2924,6 +2948,7 @@ end
 --: * When it is a function, then this function is responsible for calling recursive evaluation
 --:   on its arguments and results.
 --:
+--{NOT {EQUAL {TOPLEVEL} README}
 --: Curly braces, can be escaped with backslashes or backtick characters. These characters can
 --: be escaped by themself. This escaping works by replacing the respective characters with
 --: reserved macros first and finally after all other processing is done move these back to
@@ -2967,6 +2992,7 @@ end
 --:       the documentation is hosted and finally the escaping rules of the targeted markup
 --:       language.
 --:
+--}
 --:
 --: String Substitution Language
 --: ----------------------------
@@ -2976,6 +3002,8 @@ end
 --: features. This language is enabled when assembling the output in order and evaluated in
 --: the last step of the postprocessor.
 --:
+--:
+--{NOT {EQUAL {TOPLEVEL} README}
 --: Syntax
 --: ~~~~~~
 --:
@@ -3018,6 +3046,7 @@ end
 --=strsubst_lang
 --:
 --:
+--}
 --: Configuration File
 --: ------------------
 --:
@@ -3040,6 +3069,7 @@ end
 --: variables for string substitution engine are set.
 --:
 --:
+--{NOT {EQUAL {TOPLEVEL} README}
 --: Shipped Configuration File
 --: ~~~~~~~~~~~~~~~~~~~~~~~~~~
 --:
@@ -3064,6 +3094,7 @@ end
 --=shipped_config_subst
 --:
 --:
+--}
 --: External Libraries
 --: ~~~~~~~~~~~~~~~~~~
 --:
@@ -3076,6 +3107,7 @@ end
 --: Pipadoc already calls 'request "luarocks.loader"' to make rocks modules available.
 --:
 --:
+--{NOT {EQUAL {TOPLEVEL} README}
 --: Programming API for Extensions
 --: ------------------------------
 --:
@@ -3150,6 +3182,8 @@ end
 --=api_various
 --:
 --:
+--}
+--{NOT {EQUAL {TOPLEVEL} README}
 --: [appendix]
 --: Common Errors and Warnings
 --: --------------------------
@@ -3161,6 +3195,8 @@ end
 --:
 --$cwarn
 --:
+--}
+--{NOT {EQUAL {TOPLEVEL} README}
 --: [appendix]
 --: Generate the Pipadoc Documentation
 --: ----------------------------------
@@ -3187,6 +3223,7 @@ end
 --:
 --PLANNED: DOC -D PDF --issues -eissues
 --:
+--}
 --: [appendix]
 --: GNU General Public License
 --: --------------------------
@@ -3197,6 +3234,7 @@ end
 --: ----
 --: ORIGIN
 --:
+--{NOT {EQUAL {TOPLEVEL} README}
 --: License Explanation
 --: ~~~~~~~~~~~~~~~~~~~
 --:
@@ -3212,6 +3250,7 @@ end
 --: Nevertheless, when you make any improvements to pipadoc please consider to contact
 --: Christian Thäter <ct@pipapo.org> for including them into the mainline.
 --:
+--}
 --INDEX:
 --: [index]
 --: Index
