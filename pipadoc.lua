@@ -1044,16 +1044,17 @@ function strsubst_language_init(context) -- initialize the string substitution l
     return true
   end
 
-
-  -- :
-  -- : .Control Structures
-  -- :
-  -- : {MACRODEF DO ...}
-  -- :   Creates a local context, any variables defined within '...' are contained within this context.
-  -- :
-  --PLANNED:  context.DO = function (context, arg)
-  --   return strsubst(context_new(context), arg)
-  -- end
+  --TODO: reeorder lang doc
+  --:
+  --: Control Structures
+  --: ++++++++++++++++++
+  --:
+  --: {MACRODEFSP DO ...}
+  --:   Creates a local context, any variables defined within '...' are contained within this context.
+  --:
+  context.DO = function (context, arg)
+     return strsubst(context_new(context), arg)
+  end
 
   -- : {MACRODEF IF <condition> ...}
   -- :   'condition' must result in a boolean (single word for *true* or empty for *false*).

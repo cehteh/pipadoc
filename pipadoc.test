@@ -246,6 +246,8 @@ echo TESTPP becomes a docline
 #: {HAVENOT @doesnotexist}.
 #: {HAVENOT oneline $oneline @doesnotexist}false.
 #: {HAVENOT doesnotexist @doesnotexist}.
+#: CONTROL STRUCTURES:
+#: {DO {DEFINE foo {is set}}inside: {foo}} outside: {foo} end
 #condblocks:
 #{BOOL true
 #: shown
@@ -385,6 +387,8 @@ echo TESTPP becomes a docline
 #> true.
 #> false.
 #> true.
+#> CONTROL STRUCTURES:
+#> inside: is set outside: {foo} end
 #>
 #> shown
 #> shown

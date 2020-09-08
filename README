@@ -2,7 +2,7 @@ pipadoc - Documentation extractor
 =================================
 :author:   Christian Thaeter
 :email:    ct@pipapo.org
-:date:     4. September 2020
+:date:     8. September 2020
 
 
 [preface]
@@ -648,6 +648,13 @@ HAVE sectiondescs...:
 HAVENOT sectiondescs...:
   Results in 'true' when all sections described by 'sectiondescs' are empty.
   'sectiondesc' is an optional sorting or pasting operator followed by a section name.
+
+
+Control Structures
+++++++++++++++++++
+
+DO ... <special>:
+  Creates a local context, any variables defined within '...' are contained within this context.
 
 
 
