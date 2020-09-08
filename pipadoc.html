@@ -1482,14 +1482,17 @@ The resulting string from 2. dispatches on the markup language to one of the fol
       language.</td>
 </tr></table>
 </div>
-<div class="sect2">
-<h3 id="_string_substitution_language">String Substitution Language</h3>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_string_substitution_language">String Substitution Language</h2>
+<div class="sectionbody">
 <div class="paragraph"><p>The string substitution engine comes with some macros predefined which implement a simple
 lisp-like programming language to allow conditional evaluation and (in future) other useful
 features. This language is enabled when assembling the output in order and evaluated in
 the last step of the postprocessor.</p></div>
-<div class="sect3">
-<h4 id="_syntax_2">Syntax</h4>
+<div class="sect2">
+<h3 id="_syntax_2">Syntax</h3>
 <div class="paragraph"><p>The string substitution engine supports only a simple syntax with a macro name and one
 single argument. The string substitution language extends that by parsing the argument in
 following ways:</p></div>
@@ -1539,21 +1542,28 @@ evaluated or not, depending on the actual macro implementation.
 <div class="listingblock">
 <div class="title">Example</div>
 <div class="content">
-<pre><code>{AND {DEFINE SOMETHING} {NOT {DEFINED SOMETHING_ELSE} {BOOL {ANOTHERTHING}}}}</code></pre>
+<pre><code>{AND {DEFINE something} {NOT {DEFINED something_else} {BOOL {anotherthing}}}}</code></pre>
 </div></div>
 <div class="ulist"><ul>
 <li>
 <p>
-Results in <strong>true</strong> when <em>SOMETHING</em> is defined and <em>SOMETHING_ELSE</em> is not defined and
-  <em>ANOTHERTHING</em> is not an empty string.
+Results in <strong>true</strong> when <em>something</em> is defined and <em>something_else</em> is not defined and
+  <em>anotherthing</em> is not an empty string.
 </p>
 </li>
 </ul></div>
-</div>
 <div class="sect3">
-<h4 id="_macros">Macros</h4>
-<div class="sect4">
-<h5 id="_metasyntactic">Metasyntactic</h5>
+<h4 id="_conventions">Conventions</h4>
+<div class="paragraph"><p>Pipadoc defines only all-upppercase names for macros some special used names are withing
+double underscores. These should not be used in user-defined programs. Moreover the string
+substitution language will only allow to define new names that don&#8217;t shadow existing names
+and limits mutation to local scopes only.</p></div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_predefined_macros">Predefined Macros</h3>
+<div class="sect3">
+<h4 id="_metasyntactic">Metasyntactic</h4>
 <div class="dlist"><dl>
 <dt class="hdlist1">
 <a id="index_LITERAL"></a><code>{LITERAL text&#8230;}</code> <em><sup>special</sup></em> 
@@ -1566,23 +1576,24 @@ recursive evaluation by other macros.
 </dd>
 </dl></div>
 </div>
-<div class="sect4">
-<h5 id="_macro_definitions">Macro Definitions</h5>
+<div class="sect3">
+<h4 id="_macro_definitions">Macro Definitions</h4>
 <div class="dlist"><dl>
 <dt class="hdlist1">
-<a id="index_GLOBAL"></a><code>{GLOBAL &lt;name&gt; value&#8230;}</code> 
+<a id="index_GLOBAL"></a><code>{GLOBAL name value}</code> 
 </dt>
 <dd>
 <p>
 Defines a global macro <em>name</em> to <em>value</em>.
 <em>name</em> must be new and comply to the strsusbt naming rules. Redefining existing names
-yields an error. Results in an empty string.
+yields an error. Results in an empty string. Since setting globals to new values is not
+supported, this can only be used to set constants.
 </p>
 </dd>
 </dl></div>
 <div class="dlist"><dl>
 <dt class="hdlist1">
-<a id="index_DEFINE"></a><code>{DEFINE &lt;name&gt; value&#8230;}</code> 
+<a id="index_DEFINE"></a><code>{DEFINE name value}</code> 
 </dt>
 <dd>
 <p>
@@ -1604,11 +1615,59 @@ with DEFINE.
 </dd>
 </dl></div>
 </div>
-<div class="sect4">
-<h5 id="Predicates">Predicates</h5>
+<div class="sect3">
+<h4 id="_control_structures">Control Structures</h4>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+<a id="index_DO"></a><code>{DO text&#8230;}</code> <em><sup>special</sup></em> 
+</dt>
+<dd>
+<p>
+  Creates a local context, any variables defined within <em>text&#8230;</em> are contained within this context.
+</p>
+</dd>
+</dl></div>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+<a id="index_IF"></a><code>{IF condition {THEN &#8230;} {ELSE &#8230;}}</code> 
+</dt>
+<dd>
+<p>
+  <em>condition</em> must be a predicate see <a href="#Predicates">below</a>.
+  When <em>condition</em> is true then the <em>THEN</em> part gets substituted otherwise the <em>ELSE</em> part
+  gets substituted. The <em>THEN</em> and <em>ELSE</em> parts are optional.
+</p>
+</dd>
+</dl></div>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+<a id="index_THEN"></a><code>{THEN &#8230;when true&#8230;}</code> <em><sup>special</sup></em> 
+</dt>
+<dd>
+<p>
+  Defines the alternative to substitute inside an IF block when the <em>condition</em> was
+  true.
+</p>
+</dd>
+</dl></div>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+<a id="index_ELSE"></a><code>{ELSE &#8230;when false&#8230;}</code> <em><sup>special</sup></em> 
+</dt>
+<dd>
+<p>
+  Defines the alternative to substitute inside an IF block when the <em>condition</em> was not true.
+</p>
+</dd>
+</dl></div>
+</div>
+<div class="sect3">
+<h4 id="Predicates">Predicates</h4>
 <div class="paragraph"><p>Predicates take a list of arguments and evaluate to a truth value. In strsubst <strong>true</strong> is
 any non-empty text and <strong>false</strong> is an empty string. The string substitution engine will
 convert bool types and nil' into respective strings.</p></div>
+<div class="sect4">
+<h5 id="_boolean">Boolean</h5>
 <div class="dlist"><dl>
 <dt class="hdlist1">
 <a id="index_BOOL"></a><code>{BOOL arg}</code> <em><sup>special</sup></em> 
@@ -1643,7 +1702,7 @@ convert bool types and nil' into respective strings.</p></div>
 </dl></div>
 <div class="dlist"><dl>
 <dt class="hdlist1">
-<a id="index_AND"></a><code>{AND arguments&#8230;}</code> 
+<a id="index_AND"></a><code>{AND arguments}</code> 
 </dt>
 <dd>
 <p>
@@ -1651,6 +1710,9 @@ convert bool types and nil' into respective strings.</p></div>
 </p>
 </dd>
 </dl></div>
+</div>
+<div class="sect4">
+<h5 id="_numeric">Numeric</h5>
 <div class="paragraph"><p>Trying to convert the operands to a number, if that fails 0 is used.
 At least 2 arguments must be given.
 These predicates take a list of arguments and compare them left to right
@@ -1686,6 +1748,9 @@ Resulting in the truth value of the comparsion.</p></div>
 </p>
 </dd>
 </dl></div>
+</div>
+<div class="sect4">
+<h5 id="_strings">Strings</h5>
 <div class="paragraph"><p>Compare the operands as string. At least 2 arguments must be given.
 These predicates take a list of arguments and compare them left to right
 Resulting in the truth value of the comparsion.</p></div>
@@ -1709,6 +1774,9 @@ Resulting in the truth value of the comparsion.</p></div>
 </p>
 </dd>
 </dl></div>
+</div>
+<div class="sect4">
+<h5 id="_definitions">Definitions</h5>
 <div class="dlist"><dl>
 <dt class="hdlist1">
 <a id="index_DEFINED"></a><code>{DEFINED macronames&#8230;}</code> 
@@ -1738,52 +1806,6 @@ Resulting in the truth value of the comparsion.</p></div>
 <p>
   Results in <em>true</em> when all sections described by <em>sectiondescs</em> are empty.
   <em>sectiondesc</em> is an optional sorting or pasting operator followed by a section name.
-</p>
-</dd>
-</dl></div>
-</div>
-<div class="sect4">
-<h5 id="_control_structures">Control Structures</h5>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-<a id="index_DO"></a><code>{DO ..text..}</code> <em><sup>special</sup></em> 
-</dt>
-<dd>
-<p>
-  Creates a local context, any variables defined within <em>&#8230;text&#8230;</em> are contained within this context.
-</p>
-</dd>
-</dl></div>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-<a id="index_IF"></a><code>{IF condition {THEN &#8230;} {ELSE &#8230;}}</code> 
-</dt>
-<dd>
-<p>
-  <em>condition</em> must be a boolean predicate.
-  When <em>condition</em> is true then the <em>THEN</em> part gets substituted otherwise the <em>ELSE</em> part
-  gets substituted. The <em>THEN</em> and <em>ELSE</em> part are optional.
-</p>
-</dd>
-</dl></div>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-<a id="index_THEN"></a><code>{THEN &#8230;when true&#8230;}</code> <em><sup>special</sup></em> 
-</dt>
-<dd>
-<p>
-  Defines the alternative to substitute inside an IF block when the <em>condition</em> was
-  true.
-</p>
-</dd>
-</dl></div>
-<div class="dlist"><dl>
-<dt class="hdlist1">
-<a id="index_ELSE"></a><code>{ELSE &#8230;when false&#8230;}</code> <em><sup>special</sup></em> 
-</dt>
-<dd>
-<p>
-  Defines the alternative to substitute inside an IF block when the <em>condition</em> was not true.
 </p>
 </dd>
 </dl></div>
@@ -3978,7 +4000,7 @@ Christian Thäter &lt;<a href="mailto:ct@pipapo.org">ct@pipapo.org</a>&gt; for i
 <div id="footer">
 <div id="footer-text">
 Last updated
- 2020-09-08 19:21:06 CEST
+ 2020-09-08 19:42:02 CEST
 </div>
 </div>
 </body>

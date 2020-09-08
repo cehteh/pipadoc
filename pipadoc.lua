@@ -860,7 +860,7 @@ function strsubst_language_init(context) -- initialize the string substitution l
   --strsubst_lang:
   --:
   --: Metasyntactic
-  --: +++++++++++++
+  --: ^^^^^^^^^^^^^
   --:
   --: {MACRODEFSP LITERAL text...}
   --: Returns 'text' in literal, non evaluated form. Used to suppress
@@ -872,12 +872,13 @@ function strsubst_language_init(context) -- initialize the string substitution l
 
 
   --: Macro Definitions
-  --: +++++++++++++++++
+  --: ^^^^^^^^^^^^^^^^^
   --:
-  --: {MACRODEF GLOBAL <name> value...}
+  --: {MACRODEF GLOBAL name value}
   --: Defines a global macro 'name' to 'value'.
   --: 'name' must be new and comply to the strsusbt naming rules. Redefining existing names
-  --: yields an error. Results in an empty string.
+  --: yields an error. Results in an empty string. Since setting globals to new values is not
+  --: supported, this can only be used to set constants.
   --:
   context.GLOBAL = function (context, arg)
     local args = strsubst_language_parse(context, arg)
@@ -901,7 +902,7 @@ function strsubst_language_init(context) -- initialize the string substitution l
 
 
   --:
-  --: {MACRODEF DEFINE <name> value...}
+  --: {MACRODEF DEFINE name value}
   --: Defines a local macro 'name' to 'value'.
   --: 'name' must be new, redefining existing names yields an error.
   --:
@@ -950,14 +951,67 @@ function strsubst_language_init(context) -- initialize the string substitution l
   end
 
 
+  --:
+  --: Control Structures
+  --: ^^^^^^^^^^^^^^^^^^
+  --:
+  --: {MACRODEFSP DO text...}
+  --:   Creates a local context, any variables defined within 'text...' are contained within this context.
+  --:
+  context.DO = function (context, arg)
+     return strsubst(context_new(context), arg)
+  end
+
+
+  --: {MACRODEF IF condition {BRACED THEN ...} {BRACED ELSE ...}}
+  --:   'condition' must be a predicate see <<Predicates,below>>.
+  --:   When 'condition' is true then the 'THEN' part gets substituted otherwise the 'ELSE' part
+  --:   gets substituted. The 'THEN' and 'ELSE' parts are optional.
+  --:
+  context.IF = function (context, arg)
+    local args = strsubst_language_parse(context, arg)
+
+    if #args < 1 then
+      warn(nil, "IF condition missing"..":", name) --cwarn.<HEXSTRING>: <STRING> ::
+      --cwarn.<HEXSTRING>:  The IF statement needs a condition to branch upon.
+    else
+      if #args[1] > 0 then
+        return strsubst(context, rawget(context, '__THEN__')) or ""
+      else
+        return strsubst(context, rawget(context, '__ELSE__')) or ""
+      end
+    end
+  end
+
+
+  --: {MACRODEFSP THEN ...when true...}
+  --:   Defines the alternative to substitute inside an IF block when the 'condition' was
+  --:   true.
+  --:
+  context.THEN = function (context, arg)
+    rawset(context, '__THEN__', arg)
+  end
+
+
+  --: {MACRODEFSP ELSE ...when false...}
+  --:   Defines the alternative to substitute inside an IF block when the 'condition' was not true.
+  --:
+  context.ELSE = function (context, arg)
+    rawset(context, '__ELSE__', arg)
+  end
+
+
   --: [[Predicates]]
   --: Predicates
-  --: ++++++++++
+  --: ^^^^^^^^^^
   --:
   --: Predicates take a list of arguments and evaluate to a truth value. In strsubst *true* is
   --: any non-empty text and *false* is an empty string. The string substitution engine will
   --: convert bool types and nil' into respective strings.
   --:
+  --:
+  --: Boolean
+  --: +++++++
   --:
   --: {MACRODEFSP BOOL arg}
   --:   Evaluates 'arg' and then returns *true* when the resulting string would contain any
@@ -996,7 +1050,7 @@ function strsubst_language_init(context) -- initialize the string substitution l
   end
 
 
-  --: {MACRODEF AND arguments...}
+  --: {MACRODEF AND arguments}
   --:   Results in 'false' when one of the arguments is *false*.
   --:
   context.AND = function (context, arg)
@@ -1010,6 +1064,10 @@ function strsubst_language_init(context) -- initialize the string substitution l
   end
 
 
+  --:
+  --: Numeric
+  --: +++++++
+  --:
   --: Trying to convert the operands to a number, if that fails 0 is used.
   --: At least 2 arguments must be given.
   --: These predicates take a list of arguments and compare them left to right
@@ -1074,6 +1132,10 @@ function strsubst_language_init(context) -- initialize the string substitution l
   end
 
 
+  --:
+  --: Strings
+  --: +++++++
+  --:
   --: Compare the operands as string. At least 2 arguments must be given.
   --: These predicates take a list of arguments and compare them left to right
   --: Resulting in the truth value of the comparsion.
@@ -1116,6 +1178,10 @@ function strsubst_language_init(context) -- initialize the string substitution l
   end
 
 
+  --:
+  --: Definitions
+  --: +++++++++++
+  --:
   --: {MACRODEF DEFINED macronames...}
   --:   Results in 'true' when all 'macronames' are defined.
   --:
@@ -1182,56 +1248,6 @@ function strsubst_language_init(context) -- initialize the string substitution l
     return true
   end
 
-
-  --TODO: reeorder lang doc
-  --:
-  --: Control Structures
-  --: ++++++++++++++++++
-  --:
-  --: {MACRODEFSP DO ..text..}
-  --:   Creates a local context, any variables defined within '...text...' are contained within this context.
-  --:
-  context.DO = function (context, arg)
-     return strsubst(context_new(context), arg)
-  end
-
-
-  --: {MACRODEF IF condition {BRACED THEN ...} {BRACED ELSE ...}}
-  --:   'condition' must be a boolean predicate.
-  --:   When 'condition' is true then the 'THEN' part gets substituted otherwise the 'ELSE' part
-  --:   gets substituted. The 'THEN' and 'ELSE' part are optional.
-  --:
-  context.IF = function (context, arg)
-    local args = strsubst_language_parse(context, arg)
-
-    if #args < 1 then
-      warn(nil, "IF condition missing"..":", name) --cwarn.<HEXSTRING>: <STRING> ::
-      --cwarn.<HEXSTRING>:  The IF statement needs a condition to branch upon.
-    else
-      if #args[1] > 0 then
-        return strsubst(context, rawget(context, '__THEN__')) or ""
-      else
-        return strsubst(context, rawget(context, '__ELSE__')) or ""
-      end
-    end
-  end
-
-
-  --: {MACRODEFSP THEN ...when true...}
-  --:   Defines the alternative to substitute inside an IF block when the 'condition' was
-  --:   true.
-  --:
-  context.THEN = function (context, arg)
-    rawset(context, '__THEN__', arg)
-  end
-
-
-  --: {MACRODEFSP ELSE ...when false...}
-  --:   Defines the alternative to substitute inside an IF block when the 'condition' was not true.
-  --:
-  context.ELSE = function (context, arg)
-    rawset(context, '__ELSE__', arg)
-  end
 
   -- :
   -- : .String Functions
@@ -2953,7 +2969,7 @@ end
 --:
 --:
 --: String Substitution Language
---: ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+--: ----------------------------
 --:
 --: The string substitution engine comes with some macros predefined which implement a simple
 --: lisp-like programming language to allow conditional evaluation and (in future) other useful
@@ -2961,7 +2977,7 @@ end
 --: the last step of the postprocessor.
 --:
 --: Syntax
---: ^^^^^^
+--: ~~~~~~
 --:
 --: The string substitution engine supports only a simple syntax with a macro name and one
 --: single argument. The string substitution language extends that by parsing the argument in
@@ -2982,14 +2998,22 @@ end
 --:
 --: .Example
 --: ----
---: \{AND \{DEFINE SOMETHING\} \{NOT \{DEFINED SOMETHING_ELSE\} \{BOOL \{ANOTHERTHING\}\}\}\}
+--: \{AND \{DEFINE something\} \{NOT \{DEFINED something_else\} \{BOOL \{anotherthing\}\}\}\}
 --: ----
---: * Results in *true* when 'SOMETHING' is defined and 'SOMETHING_ELSE' is not defined and
---:   'ANOTHERTHING' is not an empty string.
+--: * Results in *true* when 'something' is defined and 'something_else' is not defined and
+--:   'anotherthing' is not an empty string.
+--:
+--: Conventions
+--: ^^^^^^^^^^^
+--:
+--: Pipadoc defines only all-upppercase names for macros some special used names are withing
+--: double underscores. These should not be used in user-defined programs. Moreover the string
+--: substitution language will only allow to define new names that don't shadow existing names
+--: and limits mutation to local scopes only.
 --:
 --:
---: Macros
---: ^^^^^^
+--: Predefined Macros
+--: ~~~~~~~~~~~~~~~~~
 --:
 --=strsubst_lang
 --:
