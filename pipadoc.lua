@@ -783,7 +783,7 @@ end
 
 local function strsubst_run(context, escape)
   if context.TEXT then
-    local subst = strsubst(context, context.TEXT, escape)
+    local subst = strsubst(context_new(context), context.TEXT, escape)
 
     -- drop lines
     if context.TEXT:match("^%b{}$") and subst == "" then
