@@ -504,7 +504,8 @@ local options = {
   ["--issues"] = function (arg, i)
     opt_dryrun = true
     os.execute [[
-        lua pipadoc.lua -m asciidoc -D GIT -D ISSUES -t ISSUES pipadoc.lua pipadoc_config.lua
+        lua pipadoc.lua -m asciidoc -D GIT -D ISSUES -t ISSUES pipadoc.lua pipadoc_config.lua -o pipadoc_issues.txt
+        asciidoc pipadoc_issues.txt
     ]]
   end,
 
@@ -3221,9 +3222,24 @@ end
 --: a2x -L -k -v --dblatex-opts "-P latex.output.revhistory=0" pipadoc.txt
 --: ----
 --:
---: For convenience there is a '--make-doc' option which calls the above commands.
+--: For convenience there is a +--make-doc+ option. This generates the 'README' and 'pipadoc.html'.
+--: When called with +-D PDF --make-doc+ the 'pipadoc.pdf' is generated as well.
 --:
---PLANNED: DOC -D PDF --issues -eissues
+--:
+--: [appendix]
+--: Issue Tracking
+--: --------------
+--:
+--: Issues in pipadoc are tracked in source code comments as well. The included configuration
+--: file implement some preprocessors and macros for that.
+--:
+--: The '--issues' option which generates 'pipadoc_issues.txt' and 'pipadoc_issues.html' with
+--: extensive git annotations about at what time an commit an issue was edited.
+--:
+--: There is a '-eissues' option which generates simpler text only list on stdout without the
+--: git annotations. The output can directly be used by emacs (and possible other editors) to
+--: jump to the source code in question.
+--:
 --:
 --}
 --: [appendix]
