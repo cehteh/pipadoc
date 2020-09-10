@@ -22,12 +22,10 @@
 --PLANNED: Version check for documents {BRACED VERSION 2} ...
 --PLANNED: --disable-strsubst option .. NOSTRSUBST STRSUBST macros
 --PLANNED: merge sections for sorting --#foo+bar+baz or something like this
---PLANNED: better/more diagnostic levels (s. syslog)
 --PLANNED+ base os.exit() on errors 0 if everything is fine (only notice displayed)
 --PLANNED+ 1 when output might be incorrect because of failures
 --PLANNED+ 2 when output could not be generated correctly
---PLANNED: use lua debug library for logging and reporting (current function etc)
---PLANNED: make README smaller -D README leave out example and verbose parts
+--PLANNED: how to silence strsubst-lang warnings on first pass strsubst?
 
 
 
@@ -103,6 +101,8 @@ local opt_dryrun = false
 --: Assertions to check externally supplied data. On success 'var' will be returned
 --: otherwise an assertion error is raised.
 --:
+
+--PLANNED: use lua debug library for logging and reporting (current function etc)
 
 -- assert with corrected error context
 local function assertx(flag, message)
@@ -201,6 +201,7 @@ end
 
 --PLANNED: log to PIPADOC_LOG section, later hooked in here
 --PLANNED: use stdout when opt_output is set AND debugging is selected
+--PLANNED: better/more diagnostic levels (s. syslog)
 local printerr_hook
 
 local function printerr(...)
@@ -808,7 +809,6 @@ end
 --: String Substitution Language
 --: ++++++++++++++++++++++++++++
 --:
---TODO: DOCME howto write macros
 function strsubst_language_parse(context, source) --: parses 'source' into a list of
   --+  arguments. Evaluates arguments within curly braces.
   --:   context:::
@@ -1264,7 +1264,6 @@ function strsubst_language_init(context) -- initialize the string substitution l
   --PLANNED: context.NUM_ENTRIES = function (context, arg)
   -- end
 
-  --PLANNED: sort order string compare SAME BEFORE AFTER
   --PLANNED: UPPER LOWER
 end
 
@@ -1658,7 +1657,6 @@ local function postprocessors_attach()
   end
 end
 
---PLANNED: wrap pcall for debugging purpose
 local function postprocessors_run(context)
   for i=1,#active_postprocessors do
     local ok, result = pcall(active_postprocessors[i], context)
@@ -2132,7 +2130,6 @@ local function setup()
   --:   Section drop operator. Deletes the section given as argument at output time.
   --:   Used to clean up orphan warnings for unused sections for certain toplevels.
   --:
-  --PLANNED: iterate over TEXT for section names
   operator_register(
     "!",
     function (context)
@@ -2490,7 +2487,7 @@ do
   inputs_process()
 
   if opt_list_sections then
-    --PLANNED: return table, print that
+    --WIP: return table, print that
     section_list(io.stdout)
   end
 
@@ -3213,7 +3210,7 @@ end
 --: The resulting `pipadoc.txt` can then be processed with the asciidoc tool chain to produce
 --: distribution formats:
 --:
---PLANNED: asciidoctor integration
+--TODO: asciidoctor integration
 --: ----
 --: # generate HTML
 --: asciidoc -a toc pipadoc.txt
@@ -3358,8 +3355,8 @@ end
 
 --PLANNED: named processors, define processing chains or sort by priority
 --PLANNED: not only pipadoc.conf but also pipadoc.sty templates, conf are local only configurations, .sty are global styles
---PLANNED: bash like parameter expansion, how to apply that to sections/keys too --%{BRACED section\}:%{BRACED key\}
---PLANNED+  how about strsubst on SECTION and ARG //{BRACED SECTION\}:{BRACED ARG\}
+--TODO: strsubst on SECTION, KEY and ARG //{BRACED SECTION\}.{BRACED KEY\}:{BRACED ARG\}
+--PLANNED: how to enable strsubst-lang at start w/o problems for the postprocessing evaluation?
 --PLANNED: INIT section for configuration
 --PLANNED: test expected stderr in test suite
 --PLANNED: DOCME documentation is usually only for one markup designed, dispatch on strsubst make only maintaining easier
