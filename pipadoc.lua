@@ -1057,7 +1057,7 @@ function strsubst_language_init(context) -- initialize the string substitution l
     local args = strsubst_language_parse(context, arg)
     for i=1,#args do
       if #args[i] == 0 then
-        return
+        return false
       end
     end
     return true
@@ -1085,7 +1085,7 @@ function strsubst_language_init(context) -- initialize the string substitution l
     else
       for i=2,#args do
         if (tonumber(args[1]) or 0) ~= (tonumber(args[i]) or 0) then
-          return
+          return false
         end
       end
       return true
@@ -1105,7 +1105,7 @@ function strsubst_language_init(context) -- initialize the string substitution l
     else
       for i=2,#args do
         if (tonumber(args[i-1]) or 0) > (tonumber(args[i]) or 0) then
-          return
+          return false
         end
       end
       return true
@@ -1124,7 +1124,7 @@ function strsubst_language_init(context) -- initialize the string substitution l
     else
       for i=2,#args do
         if (tonumber(args[i-1]) or 0) <= (tonumber(args[i]) or 0) then
-          return
+          return false
         end
       end
       return true
@@ -1151,7 +1151,7 @@ function strsubst_language_init(context) -- initialize the string substitution l
     else
       for i=2,#args do
         if args[1] ~= args[i] then
-          return
+          return false
         end
       end
       return true
@@ -1170,7 +1170,7 @@ function strsubst_language_init(context) -- initialize the string substitution l
     else
       for i=2,#args do
         if args[i-1] > args[i] then
-          return
+          return false
         end
       end
       return true
@@ -1189,7 +1189,7 @@ function strsubst_language_init(context) -- initialize the string substitution l
     local args = strsubst_language_parse(context, arg)
     for i=1,#args do
       if context[args[i]] == nil then
-        return
+        return false
       end
     end
     return true
@@ -1205,17 +1205,17 @@ function strsubst_language_init(context) -- initialize the string substitution l
     for i=1,#args do
       local op, section = args[i]:match("(%p?)(.*)")
       if not sections[section] then
-        return
+        return false
       end
       if op == "" or op == "=" then
         -- plain/past section
         if #sections[section] == 0 then
-          return
+          return false
         end
       else
         -- op sorted
         if output_sort(sections[section], op) == 0 then
-          return
+          return false
         end
       end
     end
@@ -1235,12 +1235,12 @@ function strsubst_language_init(context) -- initialize the string substitution l
         if op == "" or op == "=" then
           -- plain/past section
           if #sections[section] > 0 then
-            return
+            return false
           end
         else
           -- op sorted
           if output_sort(sections[section], op) > 0 then
-            return
+            return false
           end
         end
       end
