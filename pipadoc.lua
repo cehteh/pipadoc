@@ -1355,7 +1355,7 @@ function section_concat(section, key, context) --: Concat 'context.TEXT' to the 
   end
 end
 
-function section_list(outfd) --: lists all sections
+function section_list() --: lists all sections
   local sections_sorted = {}
 
   for k in pairs(sections) do
@@ -1364,21 +1364,22 @@ function section_list(outfd) --: lists all sections
 
   table.sort(sections_sorted, function(a,b) return tostring(a):lower() < tostring(b):lower() end)
 
-  for i=1,#sections_sorted do
-    outfd:write(sections_sorted[i])
+  local result = {}
 
+  for i=1,#sections_sorted do
     local has_section = #sections[sections_sorted[i]] > 0
     local has_keys = pairs(sections[sections_sorted[i]].keys)(sections[sections_sorted[i]].keys) and true
 
     if has_section and has_keys then
-      outfd:write(" [section keys]")
+      table.insert(result, sections_sorted[i] .. " [section keys]")
     elseif has_section then
-      outfd:write(" [section]")
+      table.insert(result, sections_sorted[i] .. " [section]")
     elseif has_keys then
-      outfd:write(" [keys]")
+      table.insert(result, sections_sorted[i] .. " [keys]")
     end
-    outfd:write("\n")
   end
+
+  return result
 end
 
 
@@ -2487,8 +2488,10 @@ do
   inputs_process()
 
   if opt_list_sections then
-    --WIP: return table, print that
-    section_list(io.stdout)
+    for _,s in ipairs(section_list()) do
+      io.stdout:write(s)
+      io.stdout:write('\n')
+    end
   end
 
   if opt_dryrun then
