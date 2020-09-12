@@ -2783,7 +2783,7 @@ end
 --:
 --:
 --: Order of operations
---: ~~~~~~~~~~~~~~~~~~~
+--: -------------------
 --:
 --: Pipadoc reads all files line by line. and processes them in the following order:
 --:
