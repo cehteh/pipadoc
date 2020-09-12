@@ -1320,6 +1320,8 @@ function section_concat(section, key, context) --: Concat 'context.TEXT' to the 
       sections[section].keys[key][last].TEXT = sections[section].keys[key][last].TEXT .. context.TEXT
     else
       table.insert(sections[section].keys[key], context)
+      -- tweak OP, there is no generator for '+'
+      context.OP = ':'
     end
   else
 
@@ -1328,6 +1330,7 @@ function section_concat(section, key, context) --: Concat 'context.TEXT' to the 
       sections[section][last].TEXT = sections[section][last].TEXT .. context.TEXT
     else
       table.insert(sections[section], context)
+      context.OP = ':'
     end
   end
 end
@@ -1929,9 +1932,7 @@ local function setup()
     end,
 
     function (context, output)
-      if not condblock_disabled then
-        table.insert(output, context)
-      end
+      die(nil, "not reached")
     end
   )
 
