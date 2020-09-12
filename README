@@ -2,7 +2,7 @@ pipadoc - Documentation extractor
 =================================
 :author:   Christian Thaeter
 :email:    ct@pipapo.org
-:date:     8. September 2020
+:date:     12. September 2020
 
 
 [preface]
@@ -116,11 +116,6 @@ generating output it is either send to _stdout_ or saved as a given output file.
                          define a GLOBAL variable to value or 'true'
      -D, --define -<name>
                          undefine a GLOBAL variable
- 
-     -P, --define-post <name>[=<value>]
-                         define a GLOBAL_POST variable to value or 'true'
-     -P, --define-post -<name>
-                         undefine a GLOBAL_POST variable
  
      --
                          stops parsing the options and treats each

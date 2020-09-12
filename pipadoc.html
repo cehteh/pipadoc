@@ -737,7 +737,7 @@ asciidoc.install(2);
 <h1>pipadoc - Documentation extractor</h1>
 <span id="author">Christian Thaeter</span><br />
 <span id="email"><code>&lt;<a href="mailto:ct@pipapo.org">ct@pipapo.org</a>&gt;</code></span><br />
-<span id="revdate">8. September 2020</span>
+<span id="revdate">12. September 2020</span>
 <div id="toc">
   <div id="toctitle">Table of Contents</div>
   <noscript><p><b>JavaScript must be enabled in your browser to display the table of contents.</b></p></noscript>
@@ -866,11 +866,6 @@ generating output it is either send to <em>stdout</em> or saved as a given outpu
                          define a GLOBAL variable to value or 'true'
      -D, --define -&lt;name&gt;
                          undefine a GLOBAL variable
-
-     -P, --define-post &lt;name&gt;[=&lt;value&gt;]
-                         define a GLOBAL_POST variable to value or 'true'
-     -P, --define-post -&lt;name&gt;
-                         undefine a GLOBAL_POST variable
 
      --
                          stops parsing the options and treats each
@@ -1359,7 +1354,7 @@ whole line becomes dopped. If this is not intended one could add a second empty
 </li>
 <li>
 <p>
-<code>{NIL}</code> will be removed.
+<code>{NIL}</code> will remove the entire line.
 </p>
 </li>
 <li>
@@ -1665,16 +1660,16 @@ with DEFINE.
 <h4 id="Predicates">Predicates</h4>
 <div class="paragraph"><p>Predicates take a list of arguments and evaluate to a truth value. In strsubst <strong>true</strong> is
 any non-empty text and <strong>false</strong> is an empty string. The string substitution engine will
-convert bool types and nil' into respective strings.</p></div>
+convert bool types and <em>nil</em> into respective strings.</p></div>
 <div class="sect4">
 <h5 id="_boolean">Boolean</h5>
 <div class="dlist"><dl>
 <dt class="hdlist1">
-<a id="index_BOOL"></a><code>{BOOL arg}</code> <em><sup>special</sup></em> 
+<a id="index_BOOL"></a><code>{BOOL text}</code> <em><sup>special</sup></em> 
 </dt>
 <dd>
 <p>
-  Evaluates <em>arg</em> and then returns <strong>true</strong> when the resulting string would contain any
+  Evaluates <em>text</em> and then returns <strong>true</strong> when the resulting string would contain any
   text or <strong>false</strong> for an empty string.
 </p>
 </dd>
@@ -1702,7 +1697,7 @@ convert bool types and nil' into respective strings.</p></div>
 </dl></div>
 <div class="dlist"><dl>
 <dt class="hdlist1">
-<a id="index_AND"></a><code>{AND arguments}</code> 
+<a id="index_AND"></a><code>{AND arguments&#8230;}</code> 
 </dt>
 <dd>
 <p>
@@ -1719,7 +1714,7 @@ These predicates take a list of arguments and compare them left to right
 Resulting in the truth value of the comparsion.</p></div>
 <div class="dlist"><dl>
 <dt class="hdlist1">
-<a id="index_EQ"></a><code>{EQ numbers..}</code> 
+<a id="index_EQ"></a><code>{EQ numbers&#8230;}</code> 
 </dt>
 <dd>
 <p>
@@ -1760,7 +1755,7 @@ Resulting in the truth value of the comparsion.</p></div>
 </dt>
 <dd>
 <p>
-  Results in <strong>true</strong> when all strings equal.
+  Results in <strong>true</strong> when all strings are equal.
 </p>
 </dd>
 </dl></div>
@@ -1795,6 +1790,8 @@ Resulting in the truth value of the comparsion.</p></div>
 <p>
   Results in <em>true</em> when all sections described by <em>sectiondescs</em> contains text.
   <em>sectiondesc</em> is an optional sorting or pasting operator followed by a section name.
+  For example <em>{HAVE #items}</em> would be true if <em>items</em> sorted numerically by
+  their key would result in at least one entry.
 </p>
 </dd>
 </dl></div>
@@ -1994,18 +1991,16 @@ won&#8217;t do it.</p></div>
 <div class="sectionbody">
 <div class="sect2">
 <h3 id="GLOBAL">Documentation Variables</h3>
-<div class="paragraph"><p>The <em>GLOBAL</em> and <em>GLOBAL_POST</em> Lua tables holds key/value pairs of variables
+<div class="paragraph"><p>The <em>GLOBAL</em> Lua table holds key/value pairs of variables and macros
 with global definitions. These are used by the core, processors and string substitution.
 Simple string assignments can be set from the command line. Configuration files may define
 more complex Lua functions for string substitutions.</p></div>
-<div class="paragraph"><p>The <em>GLOBAL_POST</em> table is extends <em>GLOBAL</em> and is used for a final string substitution
-pass after postprocessing. There are no values defined in <em>GLOBAL_POST</em> by pipadoc itself.</p></div>
 </div>
 <div class="sect2">
 <h3 id="CONTEXT">The Context</h3>
 <div class="paragraph"><p>Processors, operators, string substitution calls and diagnostics get a context
 passed along. This context represents the parsed line plus
-everything that&#8217;s defined at file level and in GLOBAL (or GLOBAL_POST).</p></div>
+everything that&#8217;s defined at file level and in GLOBAL.</p></div>
 <div class="paragraph"><p>In a few cases a fake-context with FILE name in angle brackets is passed around for
 diagnostic functions.</p></div>
 <div class="sect3">
@@ -2797,7 +2792,7 @@ context
 </dl></div>
 <div class="dlist"><dl>
 <dt class="hdlist1">
-<a id="index_section_list"></a> <code><strong>section_list(outfd)</strong></code>
+<a id="index_section_list"></a> <code><strong>section_list()</strong></code>
 </dt>
 <dd>
 <p>
@@ -2808,7 +2803,7 @@ context
 </div>
 </div>
 <div class="sect2">
-<h3 id="_other_functions">Other functions</h3>
+<h3 id="_other_functions">Other Functions</h3>
 <div class="dlist"><dl>
 <dt class="hdlist1">
 <a id="index_pattern_escape"></a> <code><strong>pattern_escape(s)</strong></code>
@@ -3232,11 +3227,24 @@ asciidoc -a toc pipadoc.txt
 # generate PDF
 a2x -L -k -v --dblatex-opts "-P latex.output.revhistory=0" pipadoc.txt</code></pre>
 </div></div>
-<div class="paragraph"><p>For convenience there is a <em>--make-doc</em> option which calls the above commands.</p></div>
+<div class="paragraph"><p>For convenience there is a <code>--make-doc</code> option. This generates the <em>README</em> and <em>pipadoc.html</em>.
+When called with <code>-D PDF --make-doc</code> the <em>pipadoc.pdf</em> is generated as well.</p></div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_gnu_general_public_license">Appendix C: GNU General Public License</h2>
+<h2 id="_issue_tracking">Appendix C: Issue Tracking</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>Issues in pipadoc are tracked in source code comments as well. The included configuration
+file implement some preprocessors and macros for that.</p></div>
+<div class="paragraph"><p>The <em>--issues</em> option which generates <em>pipadoc_issues.txt</em> and <em>pipadoc_issues.html</em> with
+extensive git annotations about at what time an commit an issue was edited.</p></div>
+<div class="paragraph"><p>There is a <em>-eissues</em> option which generates simpler text only list on stdout without the
+git annotations. The output can directly be used by emacs (and possible other editors) to
+jump to the source code in question.</p></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_gnu_general_public_license">Appendix D: GNU General Public License</h2>
 <div class="sectionbody">
 <div class="listingblock">
 <div class="content">
@@ -4000,7 +4008,7 @@ Christian Thäter &lt;<a href="mailto:ct@pipapo.org">ct@pipapo.org</a>&gt; for i
 <div id="footer">
 <div id="footer-text">
 Last updated
- 2020-09-08 20:09:05 CEST
+ 2020-09-12 03:48:17 CEST
 </div>
 </div>
 </body>

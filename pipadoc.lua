@@ -54,8 +54,6 @@ GLOBAL = {
   TOPLEVEL = "MAIN"
 }
 
-GLOBAL_POST = {}
-
 local sections = {}
 
 -- at what level it got turned off (off when not nil)
@@ -450,29 +448,6 @@ local options = {
       end
       dbg(nil, "define:", key, value)
       GLOBAL[key] = value
-    end
-    return 1
-  end,
-  "", --:  <STRING>
-
-  "    -P, --define-post <name>[=<value>]", --:  <STRING>
-  "                        define a GLOBAL_POST variable to value or 'true'", --:  <STRING>
-  "    -P, --define-post -<name>", --:  <STRING>
-  "                        undefine a GLOBAL_POST variable", --:  <STRING>
-  ["-P"] = "--define-post",
-  ["--define-post"] = function (arg,i)
-    args_check(arg, i+1)
-    local key,has_value,value = arg[i+1]:match("^([%w_]+)(=?)(.*)")
-    local undef = arg[i+1]:match("^[-]([%w_]+)")
-    if undef then
-      dbg(nil, "undef_post:", undef)
-      GLOBAL_POST[undef] = nil
-    elseif key then
-      if has_value == "" then
-        value = 'true'
-      end
-      dbg(nil, "define_post:", key, value)
-      GLOBAL_POST[key] = value
     end
     return 1
   end,
@@ -2531,9 +2506,6 @@ do
   section_append = function () die(nil, "section_append() not available when postprocessing") end
   section_concat = function () die(nil, "section_concat() not available when postprocessing") end
 
-  --activate GLOBAL_POST for postprocessing
-  setmetatable(GLOBAL, {__index = GLOBAL_POST})
-
 
   for i=1,#output do
     postprocessors_run(output[i])
@@ -3121,13 +3093,10 @@ end
 --: Documentation Variables
 --: ~~~~~~~~~~~~~~~~~~~~~~~
 --:
---: The 'GLOBAL' and 'GLOBAL_POST' Lua tables holds key/value pairs of variables
+--: The 'GLOBAL' Lua table holds key/value pairs of variables and macros
 --: with global definitions. These are used by the core, processors and string substitution.
 --: Simple string assignments can be set from the command line. Configuration files may define
 --: more complex Lua functions for string substitutions.
---:
---: The 'GLOBAL_POST' table is extends 'GLOBAL' and is used for a final string substitution
---: pass after postprocessing. There are no values defined in 'GLOBAL_POST' by pipadoc itself.
 --:
 --:
 --: [[CONTEXT]]
@@ -3136,7 +3105,7 @@ end
 --:
 --: Processors, operators, string substitution calls and diagnostics get a context
 --: passed along. This context represents the parsed line plus
---: everything that's defined at file level and in GLOBAL (or GLOBAL_POST).
+--: everything that's defined at file level and in GLOBAL.
 --:
 --: In a few cases a fake-context with FILE name in angle brackets is passed around for
 --: diagnostic functions.
