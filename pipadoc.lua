@@ -1008,14 +1008,14 @@ function strsubst_language_init(context) -- initialize the string substitution l
   --:
   --: Predicates take a list of arguments and evaluate to a truth value. In strsubst *true* is
   --: any non-empty text and *false* is an empty string. The string substitution engine will
-  --: convert bool types and nil' into respective strings.
+  --: convert bool types and 'nil' into respective strings.
   --:
   --:
   --: Boolean
   --: +++++++
   --:
-  --: {MACRODEFSP BOOL arg}
-  --:   Evaluates 'arg' and then returns *true* when the resulting string would contain any
+  --: {MACRODEFSP BOOL text}
+  --:   Evaluates 'text' and then returns *true* when the resulting string would contain any
   --:   text or *false* for an empty string.
   --:
   context.BOOL = function (context, arg)
@@ -1051,7 +1051,7 @@ function strsubst_language_init(context) -- initialize the string substitution l
   end
 
 
-  --: {MACRODEF AND arguments}
+  --: {MACRODEF AND arguments...}
   --:   Results in 'false' when one of the arguments is *false*.
   --:
   context.AND = function (context, arg)
@@ -1074,7 +1074,7 @@ function strsubst_language_init(context) -- initialize the string substitution l
   --: These predicates take a list of arguments and compare them left to right
   --: Resulting in the truth value of the comparsion.
   --:
-  --: {MACRODEF EQ numbers..}
+  --: {MACRODEF EQ numbers...}
   --:   Results in *true* when all numbers are equal.
   --:
   context.EQ = function (context, arg)
@@ -1142,7 +1142,7 @@ function strsubst_language_init(context) -- initialize the string substitution l
   --: Resulting in the truth value of the comparsion.
   --:
   --: {MACRODEF EQUAL strings...}
-  --:   Results in *true* when all strings equal.
+  --:   Results in *true* when all strings are equal.
   --:
   context.EQUAL = function (context, arg)
     local args = strsubst_language_parse(context, arg)
@@ -1200,6 +1200,8 @@ function strsubst_language_init(context) -- initialize the string substitution l
   --: {MACRODEF HAVE sectiondescs...}
   --:   Results in 'true' when all sections described by 'sectiondescs' contains text.
   --:   'sectiondesc' is an optional sorting or pasting operator followed by a section name.
+  --:   For example '{BRACED HAVE #items}' would be true if 'items' sorted numerically by
+  --:   their key would result in at least one entry.
   --:
   context.HAVE = function (context, arg)
     local args = strsubst_language_parse(context, arg)
@@ -2933,7 +2935,7 @@ end
 --:
 --: . +{BRACED DATE}+ gets replaced with the current date.
 --: . +{BRACED Undefined}+ will stay literally.
---: . +{BRACED NIL}+ will be removed.
+--: . +{BRACED NIL}+ will remove the entire line.
 --: . +{BRACED NIL}{BRACED NIL}+ will result in an empty line.
 --:
 --: String substitutions names consist of alphanumeric characters or underlines.
@@ -2959,16 +2961,16 @@ end
 --: of this special characters.
 --:
 --: .The reserved macros are:
---: +\\\{\\_\\_BACKSLASH__\}+ ::
+--: +\\\{\_\_BACKSLASH__}+ ::
 --:   The backslash character: +{__BACKSLASH__}+
 --:
---: +\\\{\\_\\_BACKTICK__\}+ ::
+--: +\\\{\_\_BACKTICK__}+ ::
 --:   The backtick character: +{__BACKTICK__}+
 --:
---: +\\\{\\_\\_BRACEOPEN__\}+ ::
+--: +\\\{\_\_BRACEOPEN__}+ ::
 --:   The opening curly brace: +{__BRACEOPEN__}+
 --:
---: +\\\{\\_\\_BRACECLOSE__\}+ ::
+--: +\\\{\_\_BRACECLOSE__}+ ::
 --:   The closing curly brace: +{__BRACECLOSE__}+
 --:
 --: .More elaborate String Substitution Example
@@ -3179,7 +3181,7 @@ end
 --=api_postproc
 --=api_sections
 --:
---: Other functions
+--: Other Functions
 --: ~~~~~~~~~~~~~~~
 --:
 --=api_various
