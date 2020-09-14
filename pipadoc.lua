@@ -26,6 +26,7 @@
 --PLANNED+ 1 when output might be incorrect because of failures
 --PLANNED+ 2 when output could not be generated correctly
 --PLANNED: how to silence strsubst-lang warnings on first pass strsubst?
+--FIXME: asciidoctor incompatibilities
 
 
 
@@ -296,6 +297,35 @@ function alias_register(from, to) --: Register a new filetype alias.
   opt_aliases[#opt_aliases+1] = {from, to}
 end
 
+local asciidoc_toolchain = [[
+        FLAVOR={FLAVOR}
+        PDF={PDF}
+        ASCIIDOC=$(which asciidoc)
+        A2X=$(which a2x)
+        ASCIIDOCTOR=$(which asciidoctor)
+        ASCIIDOCTOR_PDF=$(which asciidoctor-pdf)
+
+        if test "$FLAVOR" = "\{FLAVOR\}"; then
+          if test "$ASCIIDOC"; then
+            FLAVOR=asciidoc
+          elif test "$ASCIIDOCTOR"; then
+            FLAVOR=asciidoctor
+          else
+            echo "neither asciidoc nor asciidoctor found"
+            exit 1
+          fi
+          echo "autodetected $FLAVOR toolchain"
+        elif test "$FLAVOR" = "asciidoctor" -a -z "$ASCIIDOCTOR"; then
+            echo "asciidoctor not found"
+            exit 1
+        elif test "$FLAVOR" = "asciidoc" -a -z "$ASCIIDOC"; then
+            echo "asciidoc not found"
+            exit 1
+        else
+          echo "building doc using $FLAVOR toolchain"
+        fi
+]]
+
 --usage:
 local options = {
   "pipadoc [options...] [inputs..]",  --:  <STRING>
@@ -456,17 +486,33 @@ local options = {
   -- intentionally here undocumented, only works with properly set up development environment
   ["--make-doc"] = function (arg, i)
     opt_dryrun = true
-    os.execute [[
-        lua pipadoc.lua -m text -t README pipadoc.lua pipadoc_config.lua -o README
-        lua pipadoc.lua -m asciidoc pipadoc.lua pipadoc_config.lua -o pipadoc.txt
-        asciidoc -a toc pipadoc.txt
-    ]]
+    os.execute(strsubst(nil, asciidoc_toolchain .. [[
+        lua pipadoc.lua -D FLAVOR="$FLAVOR" -m asciidoc pipadoc.lua pipadoc_config.lua -o pipadoc.txt
 
-    if GLOBAL.PDF then
-      os.execute [[
-        a2x -L -k -v --dblatex-opts "-P latex.output.revhistory=0" pipadoc.txt
-      ]]
-    end
+        if test "$FLAVOR" = "asciidoctor"; then
+          "$ASCIIDOCTOR" -a toc pipadoc.txt
+          if test "$PDF" = "true"; then
+            if test "$ASCIIDOCTOR_PDF"; then
+              "$ASCIIDOCTOR_PDF" pipadoc.txt
+            else
+              echo "asciidoctor-pdf found"
+              exit 1
+            fi
+          fi
+        elif test "$FLAVOR" = "asciidoc"; then
+          asciidoc -a toc pipadoc.txt
+          if test "$PDF" = "true"; then
+            if test "$A2X"; then
+              a2x -L -k -v --dblatex-opts "-P latex.output.revhistory=0" pipadoc.txt
+            else
+              echo "a2x not found"
+              exit 1
+            fi
+          fi
+        fi
+
+        lua pipadoc.lua -m text -t README pipadoc.lua pipadoc_config.lua -o README
+    ]], true))
   end,
 
   ["--eissues"] = function (arg, i)
@@ -479,10 +525,15 @@ local options = {
 
   ["--issues"] = function (arg, i)
     opt_dryrun = true
-    os.execute [[
-        lua pipadoc.lua -m asciidoc -D GIT -D ISSUES -t ISSUES pipadoc.lua pipadoc_config.lua -o pipadoc_issues.txt
-        asciidoc pipadoc_issues.txt
-    ]]
+    os.execute(strsubst(nil, asciidoc_toolchain .. [[
+       lua pipadoc.lua -D FLAVOR="$FLAVOR" -m asciidoc -D GIT -D ISSUES -t ISSUES pipadoc.lua pipadoc_config.lua -o pipadoc_issues.txt
+
+       if test "$FLAVOR" = "asciidoctor"; then
+          "$ASCIIDOCTOR" pipadoc_issues.txt
+       elif test "$FLAVOR" = "asciidoc"; then
+          "$ASCIIDOC" pipadoc_issues.txt
+       fi
+    ]], true))
   end,
 
   "    --", --:  <STRING>

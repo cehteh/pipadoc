@@ -2,7 +2,7 @@ pipadoc - Documentation extractor
 =================================
 :author:   Christian Thaeter
 :email:    ct@pipapo.org
-:date:     12. September 2020
+:date:     14. September 2020
 
 
 [preface]
@@ -203,7 +203,7 @@ just 'MAIN'.
 
 
 Order of operations
-~~~~~~~~~~~~~~~~~~~
+-------------------
 
 Pipadoc reads all files line by line. and processes them in the following order:
 
