@@ -501,7 +501,7 @@ local options = {
         lua pipadoc.lua -D FLAVOR="$FLAVOR" -m asciidoc pipadoc.lua pipadoc_config.lua -o pipadoc.txt
 
         if test "$FLAVOR" = "asciidoctor"; then
-          "$ASCIIDOCTOR" -a toc pipadoc.txt
+          "$ASCIIDOCTOR" -a webfonts! -a toc pipadoc.txt
           if test "$PDF" = "true"; then
             if test "$ASCIIDOCTOR_PDF"; then
               "$ASCIIDOCTOR_PDF" pipadoc.txt
@@ -540,7 +540,7 @@ local options = {
        lua pipadoc.lua -D FLAVOR="$FLAVOR" -m asciidoc -D GIT -D ISSUES -t ISSUES pipadoc.lua pipadoc_config.lua -o pipadoc_issues.txt
 
        if test "$FLAVOR" = "asciidoctor"; then
-          "$ASCIIDOCTOR" pipadoc_issues.txt
+          "$ASCIIDOCTOR" -a webfonts! pipadoc_issues.txt
        elif test "$FLAVOR" = "asciidoc"; then
           "$ASCIIDOC" pipadoc_issues.txt
        fi
