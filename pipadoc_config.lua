@@ -82,7 +82,13 @@ preprocessor_register ("^lua$",
 --:
 GLOBAL.BRACED = "{BRACED_{MARKUP} {__ARG__}}"
 GLOBAL.BRACED_text = "{__BRACEOPEN__}{__ARG__}{__BRACECLOSE__}"
-GLOBAL.BRACED_asciidoc = "{__BACKSLASH__}{__BRACEOPEN__}{__ARG__}{__BRACECLOSE__}"
+
+if GLOBAL.FLAVOR == 'asciidoc' then
+  GLOBAL.BRACED_asciidoc = "{__BACKSLASH__}{__BRACEOPEN__}{__ARG__}{__BRACECLOSE__}"
+else
+  GLOBAL.BRACED_asciidoc = "{__BRACEOPEN__}{__ARG__}{__BRACECLOSE__}"
+end
+
 
 --shipped_config_subst:
 --: {MACRODEF LINEBREAK}
@@ -125,20 +131,24 @@ end
 GLOBAL.VARDEF = "{VARDEF_{MARKUP} {__ARG__}}"
 
 GLOBAL.VARDEF_text = function (context, arg)
+  local vars = ""
   arg = strsubst(context, arg)
   for ix in arg:gmatch("([^%s%p]*)[%p%s]*") do
     if #ix > 0 then
       section_append("INDEX", ix:lower(),
                      context_new (context,{TEXT="{INDEX_ENTRY "..ix.."}"})
       )
+      if vars ~= "" then vars = vars..", " end
+      vars = vars.."{BRACED "..ix.."}"
     end
   end
 
-  return strsubst(context, arg..":")
+  return strsubst(context, vars..":")
 end
 
 GLOBAL.VARDEF_asciidoc = function (context, arg)
   local anchors = ""
+  local vars = ""
   arg = strsubst(context, arg)
   for ix in arg:gmatch("([^%s%p]*)[%p%s]*") do
     if #ix > 0 then
@@ -147,15 +157,18 @@ GLOBAL.VARDEF_asciidoc = function (context, arg)
       )
 
       anchors=anchors.."anchor:index_"..ix.."[]"
+      if vars ~= "" then vars = vars..", " end
+      vars = vars.."{BRACED "..ix.."}"
     end
   end
 
-  return strsubst(context, anchors.."`"..arg.."`::")
+  return strsubst(context, anchors.."`"..vars.."`::")
 end
 
 
 GLOBAL.VARDEF_orgmode = function (context, arg)
   local anchors = ""
+  local vars = ""
   arg = strsubst(context, arg)
   for ix in arg:gmatch("([^%s%p]*)[%p%s]*") do
     if #ix > 0 then
@@ -164,10 +177,13 @@ GLOBAL.VARDEF_orgmode = function (context, arg)
       )
 
       anchors=anchors.."<<index_"..ix..">>"
+
+      if vars ~= "" then vars = vars..", " end
+      vars = vars.."{BRACED "..ix.."}"
     end
   end
 
-  return strsubst(context, anchors.."- -"..arg.."- ::")
+  return strsubst(context, anchors.."- - "..vars.."- ::")
 end
 
 
@@ -197,7 +213,7 @@ GLOBAL.MACRODEF_asciidoc = function (context, arg)
                  context_new (context,{TEXT="{INDEX_ENTRY "..ix.."}"})
   )
 
-  return strsubst(context, "anchor:index_"..ix.."[]+\\\\{"..arg.."\\}+ ::", 'escape')
+  return strsubst(context, "anchor:index_"..ix.."[]+{BRACED "..arg.."}+ ::", 'escape')
 end
 
 
@@ -240,7 +256,7 @@ GLOBAL.MACRODEFSP_asciidoc = function (context, arg)
                  context_new (context,{TEXT="{INDEX_ENTRY "..ix.."}"})
   )
 
-  return strsubst(context, "anchor:index_"..ix.."[]+\\\\{"..arg.."\\}+ _^special^_ ::", 'escape')
+  return strsubst(context, "anchor:index_"..ix.."[]+{BRACED "..arg.."}+ _^special^_ ::", 'escape')
 end
 
 

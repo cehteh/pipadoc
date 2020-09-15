@@ -309,18 +309,18 @@ function alias_register(from, to) --: Register a new filetype alias.
 end
 
 local asciidoc_toolchain = [[
-        FLAVOR={FLAVOR}
-        PDF={PDF}
+        FLAVOR="{MAYBE FLAVOR}"
+        PDF="{MAYBE PDF}"
         ASCIIDOC=$(which asciidoc)
         A2X=$(which a2x)
         ASCIIDOCTOR=$(which asciidoctor)
         ASCIIDOCTOR_PDF=$(which asciidoctor-pdf)
 
-        if test "$FLAVOR" = "\{FLAVOR\}"; then
-          if test "$ASCIIDOC"; then
-            FLAVOR=asciidoc
-          elif test "$ASCIIDOCTOR"; then
+        if test "$FLAVOR" = ""; then
+          if test "$ASCIIDOCTOR"; then
             FLAVOR=asciidoctor
+          elif test "$ASCIIDOC"; then
+            FLAVOR=asciidoc
           else
             echo "neither asciidoc nor asciidoctor found"
             exit 1
@@ -2643,6 +2643,11 @@ end
 --: :author:   Christian Thaeter
 --: :email:    ct@pipapo.org
 --: :date:     {DAY}. {MONTHNAME} {YEAR}
+--{EQUAL {MAYBE FLAVOR} asciidoctor
+-- asciidoctor needs a hacks for escaping
+--: :du: __
+--: :uDATE: DATE
+--}
 --:
 --:
 --: [preface]
@@ -2968,7 +2973,10 @@ end
 --: \{NIL\}\{NIL\}
 --: ----
 --:
---: . +{BRACED DATE}+ gets replaced with the current date.
+--: {IF {EQUAL {FLAVOR} asciidoctor}
+--+  {THEN . +{BRACED \{uDATE\}}+}
+--+  {ELSE . +{BRACED DATE}+}
+--+ } gets replaced with the current date.
 --: . +{BRACED Undefined}+ will stay literally.
 --: . +{BRACED NIL}+ will remove the entire line.
 --: . +{BRACED NIL}{BRACED NIL}+ will result in an empty line.
@@ -3001,16 +3009,21 @@ end
 --: of this special characters.
 --:
 --: .The reserved macros are:
---: +\\\{\_\_BACKSLASH__}+ ::
+-- asciidoc and asciidoctor are incompatible in escaping syntax
+--: {GLOBAL RESERVED_MACRO {IF {EQUAL {FLAVOR} asciidoctor}
+--+  {THEN +\{\{du\}{__ARG__}\{du\}\}+ ::}
+--+  {ELSE +\\\{\_\_{__ARG__}__\}+ ::}}
+--+ }
+--: {RESERVED_MACRO BACKSLASH}
 --:   The backslash character: +{__BACKSLASH__}+
 --:
---: +\\\{\_\_BACKTICK__}+ ::
+--: {RESERVED_MACRO BACKTICK}
 --:   The backtick character: +{__BACKTICK__}+
 --:
---: +\\\{\_\_BRACEOPEN__}+ ::
+--: {RESERVED_MACRO BRACEOPEN}
 --:   The opening curly brace: +{__BRACEOPEN__}+
 --:
---: +\\\{\_\_BRACECLOSE__}+ ::
+--: {RESERVED_MACRO BRACECLOSE}
 --:   The closing curly brace: +{__BRACECLOSE__}+
 --:
 --: .More elaborate String Substitution Example
@@ -3252,7 +3265,6 @@ end
 --: The resulting `pipadoc.txt` can then be processed with the asciidoc tool chain to produce
 --: distribution formats:
 --:
---TODO: asciidoctor integration
 --: ----
 --: # generate HTML
 --: asciidoc -a toc pipadoc.txt
@@ -3263,6 +3275,9 @@ end
 --:
 --: For convenience there is a +--make-doc+ option. This generates the 'README' and 'pipadoc.html'.
 --: When called with +-D PDF --make-doc+ the 'pipadoc.pdf' is generated as well.
+--: 'FLAVOR' can be set to 'asciidoc' or 'asciidoctor' to select an asciidoc variant. If not
+--: given this is autodetected and defaults to asciidoctor.
+--PLANNED: section for common control variables like PDF FLAVOR ...
 --:
 --:
 --: [appendix]
