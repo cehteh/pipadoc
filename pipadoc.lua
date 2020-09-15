@@ -762,10 +762,11 @@ function strsubst(context, str, escape) --: substitute text
                             -- fallthrough __RESERVED__ name
 
                           elseif expansion == nil then
-                            warn(context, "strsubst no expansion"..":", macro)  --cwarn.<HEXSTRING>: <STRING> ::
-                            --cwarn.<HEXSTRING>:  No substitution defined. Braced expression left verbatim.
-                            --cwarn.<HEXSTRING>:  Possibly forgotten to escape the curly braces.
-
+                            if escape ~= 'escape' then -- suppress warning on first pass
+                              warn(context, "strsubst no expansion"..":", macro, escape)  --cwarn.<HEXSTRING>: <STRING> ::
+                              --cwarn.<HEXSTRING>:  No substitution defined. Braced expression left verbatim.
+                              --cwarn.<HEXSTRING>:  Possibly forgotten to escape the curly braces.
+                            end
                           else
                             warn(context, "strsubst type error"..":", macro, type(expansion))  --cwarn.<HEXSTRING>: <STRING> ::
                             --cwarn.<HEXSTRING>:  string substitution expects a string, number or a function for expansion.
