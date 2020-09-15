@@ -52,7 +52,18 @@ GLOBAL = {
 
   --GLOBAL:toplevel {VARDEF TOPLEVEL}
   --GLOBAL:toplevel   The toplevel section used for assembling the output.
-  TOPLEVEL = "MAIN"
+  TOPLEVEL = "MAIN",
+
+  --GLOBAL:maybe {MACRODEF MAYBE name}
+  --GLOBAL:maybe   Results in 'name' when it is defined, otherwise in an empty string.
+  --GLOBAL:maybe   Used to suppress the literal form and warnings on optional macros
+  MAYBE = function(context, arg)
+    if context[arg] then
+      return strsubst(context, context[arg])
+    else
+      return false
+    end
+  end
 }
 
 local sections = {}
@@ -2965,8 +2976,13 @@ end
 --: String substitutions names consist of alphanumeric characters or underlines.
 --: These names themself can be composed from string substitutions (see example below).
 --: It may be followed with a delimiting character (space) and an optional argument string.
---: This argument string gets passed to functions or recursive string substitutions. Names starting
---: and ending with 2 underscores are reserved to the implementation.
+--: This argument string gets passed to functions or recursive string substitutions. Names
+--: starting and ending with 2 underscores are reserved to the implementation.
+--:
+--: NOTE: That undefined macros stay literal allows for partial evaluation. The string
+--:       substitution language uses this and becomes only defined/active after the
+--:       preprocessing. The +{BRACED MAYBE}+ macro can supress this and +{BRACED LITERAL}+
+--:       can be used to delay evaluation.
 --:
 --}
 --: A string substitution can be either a string or a Lua function which shall return
