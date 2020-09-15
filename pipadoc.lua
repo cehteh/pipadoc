@@ -506,7 +506,7 @@ local options = {
             if test "$ASCIIDOCTOR_PDF"; then
               "$ASCIIDOCTOR_PDF" pipadoc.txt
             else
-              echo "asciidoctor-pdf found"
+              echo "asciidoctor-pdf not found"
               exit 1
             fi
           fi
