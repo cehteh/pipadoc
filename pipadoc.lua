@@ -25,8 +25,6 @@
 --PLANNED+ base os.exit() on errors 0 if everything is fine (only notice displayed)
 --PLANNED+ 1 when output might be incorrect because of failures
 --PLANNED+ 2 when output could not be generated correctly
---PLANNED: how to silence strsubst-lang warnings on first pass strsubst?
---FIXME: asciidoctor incompatibilities
 
 
 
@@ -3412,8 +3410,6 @@ end
 
 --PLANNED: named processors, define processing chains or sort by priority
 --PLANNED: not only pipadoc.conf but also pipadoc.sty templates, conf are local only configurations, .sty are global styles
---TODO: strsubst on SECTION, KEY and ARG //{BRACED SECTION\}.{BRACED KEY\}:{BRACED ARG\}
---PLANNED: how to enable strsubst-lang at start w/o problems for the postprocessing evaluation?
 --PLANNED: INIT section for configuration
 --PLANNED: test expected stderr in test suite
 --PLANNED: DOCME documentation is usually only for one markup designed, dispatch on strsubst make only maintaining easier
