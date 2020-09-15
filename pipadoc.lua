@@ -1002,9 +1002,9 @@ function strsubst_language_init(context) -- initialize the string substitution l
       --cwarn.<HEXSTRING>:  The IF statement needs a condition to branch upon.
     else
       if #args[1] > 0 then
-        return strsubst(context, rawget(context, '__THEN__')) or ""
+        return rawget(context, '__THEN__') and strsubst(context, rawget(context, '__THEN__')) or ""
       else
-        return strsubst(context, rawget(context, '__ELSE__')) or ""
+        return rawget(context, '__ELSE__') and strsubst(context, rawget(context, '__ELSE__')) or ""
       end
     end
   end
