@@ -967,7 +967,6 @@ function strsubst_language_init(context) -- initialize the string substitution l
       local value = args[2] or ""
 
       if context[name] == nil or rawget(context, name) then
-        warn(nil, "PING"..":", name, value)
         context[name] = value
       else
         warn(nil, "macro already defined"..":", name)
