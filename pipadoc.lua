@@ -22,7 +22,7 @@
 --PLANNED: Version check for documents {BRACED VERSION 2} ...
 --PLANNED: --disable-strsubst option .. NOSTRSUBST STRSUBST macros
 --PLANNED: merge sections for sorting --#foo+bar+baz or something like this
---PLANNED+ base os.exit() on errors 0 if everything is fine (only notice displayed)
+--PLANNED: base os.exit() on errors 0 if everything is fine (only notice displayed)
 --PLANNED+ 1 when output might be incorrect because of failures
 --PLANNED+ 2 when output could not be generated correctly
 
