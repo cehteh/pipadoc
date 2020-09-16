@@ -544,7 +544,10 @@ syntax should be straightforward and is suggested for any projects using pipadoc
 </div>
 </div>
 <div class="paragraph">
-<p>The <em>master</em> branch will stay stable and development will be done on the <em>devel</em> branch.</p>
+<p>Pipadoc is developed in the <em>devel</em> and feature branches using rolling releases. Whenever
+stability is reached things get pushed to the <em>master</em> branch. In few cases this may
+include backward incompatible changes. When upgrading one should check and eventually fix
+resulting issues.</p>
 </div>
 </div>
 </div>
@@ -1796,7 +1799,7 @@ can be changed with the <em>--define</em> command-line option.</p>
 <p>The file or section name currently processed or some special annotation
 in angle brackets (eg <em>&lt;startup&gt;</em>) on other processing phases</p>
 </dd>
-<dt class="hdlist1"><a id="index_COMMENTS"></a><a id="index_TABLE"></a><code>{COMMENTS}, {TABLE}</code></dt>
+<dt class="hdlist1"><a id="index_COMMENTS_TABLE"></a><code>{COMMENTS_TABLE}</code></dt>
 <dd>
 <p>A Lua table with the all possible line comment character sequences
 for this filetype. Available at preprocessing time before parsing.</p>
@@ -2679,7 +2682,7 @@ Christian Thäter &lt;<a href="mailto:ct@pipapo.org">ct@pipapo.org</a>&gt; for i
 <div class="dlist">
 <dl>
 <dt class="hdlist1"><a href="#index_COMMENT">COMMENT</a> </dt>
-<dt class="hdlist1"><a href="#index_COMMENTS">COMMENTS</a> </dt>
+<dt class="hdlist1"><a href="#index_COMMENTS_TABLE">COMMENTS_TABLE</a> </dt>
 <dt class="hdlist1"><a href="#index_context_new">context_new</a> </dt>
 </dl>
 </div>
@@ -2849,7 +2852,6 @@ Christian Thäter &lt;<a href="mailto:ct@pipapo.org">ct@pipapo.org</a>&gt; for i
 <dd>
 <div class="dlist">
 <dl>
-<dt class="hdlist1"><a href="#index_TABLE">TABLE</a> </dt>
 <dt class="hdlist1"><a href="#index_TEXT">TEXT</a> </dt>
 <dt class="hdlist1"><a href="#index_THEN">THEN</a> </dt>
 <dt class="hdlist1"><a href="#index_to_table">to_table</a> </dt>
@@ -2889,7 +2891,7 @@ Christian Thäter &lt;<a href="mailto:ct@pipapo.org">ct@pipapo.org</a>&gt; for i
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2020-09-16 01:26:59 +0200
+Last updated 2020-09-16 15:08:50 +0200
 </div>
 </div>
 </body>

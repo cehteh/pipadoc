@@ -2666,6 +2666,7 @@ end
 --: plain text files aside from the sources.
 --:
 --:
+--{NOT {EQUAL {TOPLEVEL} README}
 --: History
 --: -------
 --:
@@ -2674,6 +2675,7 @@ end
 --: syntax should be straightforward and is suggested for any projects using pipadoc.
 --:
 --:
+--}
 --: Getting the Source
 --: ------------------
 --:
@@ -2681,7 +2683,10 @@ end
 --:
 --:  git clone --depth 1 git://git.pipapo.org/pipadoc
 --:
---: The 'master' branch will stay stable and development will be done on the 'devel' branch.
+--: Pipadoc is developed in the 'devel' and feature branches using rolling releases. Whenever
+--: stability is reached things get pushed to the 'master' branch. In few cases this may
+--: include backward incompatible changes. When upgrading one should check and eventually fix
+--: resulting issues.
 --:
 --:
 --: Installation

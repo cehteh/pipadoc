@@ -23,14 +23,6 @@ and spanning to the end of the source line. Moreover documentation parts can be 
 plain text files aside from the sources.
 
 
-History
--------
-
-This 'pipadoc' implemented in Lua follows an earlier implementation with a slightly different
-(incompatible) syntax and less features which was implemented in AWK. Updating to the new
-syntax should be straightforward and is suggested for any projects using pipadoc.
-
-
 Getting the Source
 ------------------
 
@@ -38,7 +30,10 @@ Pipadoc is managed the git revision control system. You can clone the repository
 
  git clone --depth 1 git://git.pipapo.org/pipadoc
 
-The 'master' branch will stay stable and development will be done on the 'devel' branch.
+Pipadoc is developed in the 'devel' and feature branches using rolling releases. Whenever
+stability is reached things get pushed to the 'master' branch. In few cases this may
+include backward incompatible changes. When upgrading one should check and eventually fix
+resulting issues.
 
 
 Installation
