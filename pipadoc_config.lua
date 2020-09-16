@@ -133,7 +133,7 @@ GLOBAL.VARDEF = "{VARDEF_{MARKUP} {__ARG__}}"
 GLOBAL.VARDEF_text = function (context, arg)
   local vars = ""
   arg = strsubst(context, arg)
-  for ix in arg:gmatch("([^%s%p]*)[%p%s]*") do
+  for ix in arg:gmatch("([^%s,]*)[,%s]*") do
     if #ix > 0 then
       section_append("INDEX", ix:lower(),
                      context_new (context,{TEXT="{INDEX_ENTRY "..ix.."}"})
@@ -150,7 +150,7 @@ GLOBAL.VARDEF_asciidoc = function (context, arg)
   local anchors = ""
   local vars = ""
   arg = strsubst(context, arg)
-  for ix in arg:gmatch("([^%s%p]*)[%p%s]*") do
+  for ix in arg:gmatch("([^%s,]*)[,%s]*") do
     if #ix > 0 then
       section_append("INDEX", ix:lower(),
                      context_new (context,{TEXT="{INDEX_ENTRY "..ix.."}"})
@@ -170,7 +170,7 @@ GLOBAL.VARDEF_orgmode = function (context, arg)
   local anchors = ""
   local vars = ""
   arg = strsubst(context, arg)
-  for ix in arg:gmatch("([^%s%p]*)[%p%s]*") do
+  for ix in arg:gmatch("([^%s,]*)[,%s]*") do
     if #ix > 0 then
       section_append("INDEX", ix:lower(),
                      context_new (context,{TEXT="{INDEX_ENTRY "..ix.."}"})
