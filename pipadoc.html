@@ -602,7 +602,7 @@ generating output it is either send to <em>stdout</em> or saved as a given outpu
                          one additional -v enables tracing
 
      -n, --dry-run
-                         don not generate output
+                         do not generate output
 
      -h, --help
                          show this help
@@ -1311,7 +1311,7 @@ evaluated or not, depending on the actual macro implementation.</p>
 <div class="listingblock">
 <div class="title">Example</div>
 <div class="content">
-<pre>{AND {DEFINE something} {NOT {DEFINED something_else} {BOOL {anotherthing}}}}</pre>
+<pre>{AND {DEFINED something} {NOT {DEFINED something_else}} {BOOL {anotherthing}}}</pre>
 </div>
 </div>
 <div class="ulist">
@@ -2891,7 +2891,7 @@ Christian Thäter &lt;<a href="mailto:ct@pipapo.org">ct@pipapo.org</a>&gt; for i
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2020-09-16 15:08:50 +0200
+Last updated 2020-09-16 21:16:23 +0200
 </div>
 </div>
 </body>

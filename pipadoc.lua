@@ -366,7 +366,7 @@ local options = {
   "", --:  <STRING>
 
   "    -n, --dry-run", --:  <STRING>
-  "                        don not generate output", --:  <STRING>
+  "                        do not generate output", --:  <STRING>
   ["-n"] = "--dry-run",
   ["--dry-run"] = function ()
     opt_dryrun = true
@@ -3087,7 +3087,7 @@ end
 --:
 --: .Example
 --: ----
---: \{AND \{DEFINE something\} \{NOT \{DEFINED something_else\} \{BOOL \{anotherthing\}\}\}\}
+--: \{AND \{DEFINED something\} \{NOT \{DEFINED something_else\}\} \{BOOL \{anotherthing\}\}\}
 --: ----
 --: * Results in *true* when 'something' is defined and 'something_else' is not defined and
 --:   'anotherthing' is not an empty string.

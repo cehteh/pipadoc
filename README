@@ -73,7 +73,7 @@ generating output it is either send to _stdout_ or saved as a given output file.
                          one additional -v enables tracing
  
      -n, --dry-run
-                         don not generate output
+                         do not generate output
  
      -h, --help
                          show this help
